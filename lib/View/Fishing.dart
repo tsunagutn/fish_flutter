@@ -140,13 +140,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     4: 2000,
   };
 
+  final TIMER_INTERVAL = 50; //1スキャン時間(msec)
   final TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
   final TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
   final TENSION_LINECUT = 290.0; //糸切れ判定値
   final SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
   final SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   final HOSEI_MAX = 3;
-  final TIMER_INTERVAL = 50; //1スキャン時間(msec)
   final HIT_JUST_TANA = 0.5; //HIT判定 棚
   final HIT_TANA_RANGE = 50.0; //0.1m単位 +-まではHIT圏内
   final HIT_JUST_SPEED = 150;
@@ -209,7 +209,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _now_duration_lv; //光点点滅レベル
 
   late Offset offset = Offset(0.0, 0.0);
-  late double _appBarHeight;
+  late double _appBarHeight = 0.0;
 
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
@@ -238,6 +238,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   }
 
   void dispose() {
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -571,7 +572,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //無意味な光点の表示
     if (rand > 0.98) {
-      debugPrint(size.height.toString());
+      //debugPrint(size.height.toString());
 
       //ソナー部のY位置と高さを取得
       var sonarWidget =
@@ -972,11 +973,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       ],
                     )),
                 //タップ時の光点
-
                 Stack(children: <Widget>[
-                  if (offset.dx > 0.0 && offset.dy > 0.0)
-                    Stack(children: tapPointerList),
-                  Stack(children: fishPointerList),
+                  (tapPointerList.isNotEmpty)
+                      ? Stack(children: tapPointerList)
+                      : Text(""),
+                  (fishPointerList.isNotEmpty)
+                      ? Stack(children: fishPointerList)
+                      : Text(""),
                 ]),
               ])
             ])));
@@ -1007,7 +1010,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   // アニメーションの終了を Future<void>.delayed で待ち、終わった時に removeAt(0) でリストから取り出している
   // 取り出すと そのタイミングで dispose が呼ばれる。
   Future<void> generateFishPointer(offsetY) async {
-    const duration = const Duration(milliseconds: 5000);
+    const duration = const Duration(milliseconds: 20000);
     var size = MediaQuery.of(context).size;
     final fishPointer = FishPointer(
       key: UniqueKey(), // 必ずキーを与えること。これによりそれぞれが独立した描画になります。
