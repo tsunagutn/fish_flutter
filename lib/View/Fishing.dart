@@ -1,8 +1,7 @@
 //☆基本概要
 //・モード１：ずっとモード
 //　　　　　　好きなロケ、道具等で好きにできる、状態保存して続きからできる
-//・モード２：トーナメントモード的
-//　　　　　　ローグライク、だんだん条件が厳しくなる
+//・モード２：だんだん条件が厳しくなる
 
 //☆残タス
 //済・ソナー光点をアニメーション光るにする
@@ -14,6 +13,7 @@
 //済・深さの変化に傾向をつける
 //済・テンションによってテンションバーの色可変
 //済・深さ表示をやっぱり上にする
+//済み・棚の可変化
 //・船長呼び出しの機能 深いとこ／浅いとこ行って欲しい機能
 //・船長呼び出しボタン→子メニュー（ポップアップ？横メニュー？）で選択→船長絵「わかった」
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
@@ -26,7 +26,6 @@
 //・ソナーの0m地点に水面とか船の画像。
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
-//・棚の可変化
 //・魚種毎にいい棚の設定
 //・魚種毎にいい速度の設定
 //・魚種毎にバレ条件の設定
@@ -145,8 +144,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   final SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
   final SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   final HOSEI_MAX = 3;
-  final HIT_JUST_TANA = 0.5; //HIT判定 棚
-  final HIT_TANA_RANGE = 50.0; //0.1m単位 +-まではHIT圏内
   final HIT_JUST_SPEED = 150;
   final HIT_SPEED_RANGE = 80; //+-まではHIT県内
   final BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
@@ -159,7 +156,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   final SPEED_COLOR_REELING = clsColor._getColorFromHex("0026FF");
   final TAP_POINTER_DURATION_MSEC = 500; //タップ時のエフェクト 速度
   final TAP_POINTER_MAX_RADIUS = 10.0; //タップ時のエフェクト 最大大きさ
-  final DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
+  // final DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
+  // final JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
+  final DEPTH_CHANGE_SCAN = 50; //このスキャン毎に深さの変化傾向が変わる
+  final JIAI_CHANGE_SCAN = 150; //このスキャン毎に時合度が変わる
+  final TANA_CHANGE_SCAN = 300; //このスキャン毎にタナが変わる
   final POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
   final POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
 
@@ -194,6 +195,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _pointer_y = 0.0; //ソナー部光点TOP
   var _pointer_x = 50.0; //ソナー部光点LEFT
   var _point = 0; //獲得ポイント
+  var _just_tana = 0.5; //HIT確率判定 棚
+  var _tana_range = 50.0; //0.1m単位 +-まではHIT圏内
+  var _tana_change_scan_cnt = 0; //棚変化スキャンカウント数
+  var _jiai = 0.5; //時合度 0.0～0.9999...
+  var _jiai_change_scan_cnt = 0; //時合度の変化スキャンカウント数
 
   var _cursorx = 0.0; //ドラッグ操作開始時の座標X
 
@@ -268,6 +274,22 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       _depth_change_scan_cnt = 0;
       _depth_change = 0.5 + ((0.5 - rand) / 10);
       debugPrint("深さ変化傾向" + _depth_change.toString());
+    }
+
+    //時合の変化判定
+    _jiai_change_scan_cnt++;
+    if (_jiai_change_scan_cnt > JIAI_CHANGE_SCAN) {
+      _jiai_change_scan_cnt = 0;
+      _jiai = (new math.Random()).nextDouble();
+      debugPrint("時合度" + _jiai.toString());
+    }
+
+    //タナの変化判定
+    _tana_change_scan_cnt++;
+    if (_tana_change_scan_cnt > TANA_CHANGE_SCAN) {
+      _tana_change_scan_cnt = 0;
+      _just_tana = (new math.Random()).nextDouble();
+      debugPrint("タナ" + _just_tana.toString());
     }
 
     if (_flg_hit) {
@@ -447,11 +469,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (!_flg_hit) {
       var hit_prob = 0.0;
       //HIT棚との差分
-      final just_tana = (_max_depth * HIT_JUST_TANA);
+      final just_tana = (_max_depth * _just_tana);
       var tana_diff = (_depth - just_tana).abs();
       //差分が範囲内か
-      if (tana_diff < HIT_TANA_RANGE) {
-        hit_prob = 1.0 * ((tana_diff - HIT_TANA_RANGE).abs() / HIT_TANA_RANGE);
+      if (tana_diff < _tana_range) {
+        hit_prob = 1.0 * ((tana_diff - _tana_range).abs() / _tana_range);
       }
       if (hit_prob < 0.1) {
         hit_prob = 0.1; //最低でも1割
@@ -568,18 +590,23 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     var depthrnd = (new math.Random()).nextDouble();
     _max_depth += 1 * ((_depth_change) - depthrnd);
 
-    //無意味な光点の表示
-    if (rand > 0.98) {
-      //debugPrint(size.height.toString());
-
+    //棚を示す光点の表示
+    var hannornd = (new math.Random()).nextDouble();
+    if (hannornd > 0.96 && _jiai > depthrnd) {
       //ソナー部のY位置と高さを取得
       var sonarWidget =
           globalKeySonar.currentContext?.findRenderObject() as RenderBox;
       var sonarHeight = sonarWidget.size.height;
       var sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
-
-      generateFishPointer(((size.height - _appBarHeight) * 0.50 * depthrnd) +
-          sonarTop); //仮なのでだいぶ適当
+      var fishy = (sonarTop - _appBarHeight) + (sonarHeight * _just_tana);
+      //レンジ分バラケ
+      var barake = (_tana_range * ((0.2 - depthrnd) * 1.5));
+      barake = (barake < 0) ? 0 : barake;
+      barake = (barake > (sonarTop - _appBarHeight) + sonarHeight)
+          ? (sonarTop - _appBarHeight) + sonarHeight
+          : barake;
+      fishy = fishy + (_tana_range * ((0.2 - depthrnd) * 1.5));
+      generateFishPointer(fishy, 20);
     }
 
     //debugPrint(_tension.toString());
@@ -970,11 +997,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         ),
                       ],
                     )),
-                //タップ時の光点
                 Stack(children: <Widget>[
+                  //タップ時の光点
                   (tapPointerList.isNotEmpty)
                       ? Stack(children: tapPointerList)
                       : Text(""),
+                  //反応光点
                   (fishPointerList.isNotEmpty)
                       ? Stack(children: fishPointerList)
                       : Text(""),
@@ -1007,7 +1035,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   List<FishPointer> fishPointerList = <FishPointer>[];
   // アニメーションの終了を Future<void>.delayed で待ち、終わった時に removeAt(0) でリストから取り出している
   // 取り出すと そのタイミングで dispose が呼ばれる。
-  Future<void> generateFishPointer(offsetY) async {
+  Future<void> generateFishPointer(offsetY, fishsize) async {
     const duration = const Duration(milliseconds: 20000);
     var size = MediaQuery.of(context).size;
     final fishPointer = FishPointer(
@@ -1015,6 +1043,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       dispsizeX: size.width, //画面サイズX
       offsetY: offsetY,
       duration: duration,
+      fishsize: fishsize,
     );
     setState(() {
       fishPointerList.add(fishPointer);

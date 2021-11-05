@@ -13,11 +13,13 @@ class FishPointer extends StatefulWidget {
       {Key? key,
       required this.dispsizeX,
       required this.offsetY,
-      required this.duration})
+      required this.duration,
+      required this.fishsize})
       : super(key: key);
   final double dispsizeX;
   final double offsetY;
   final Duration duration;
+  final int fishsize;
   @override
   _FishPointerState createState() => _FishPointerState();
 }
@@ -33,7 +35,10 @@ class _FishPointerState extends State<FishPointer>
         (widget.dispsizeX / 2) * (rnd * rnd); //真ん中に集約するように累乗する
     return CustomPaint(
       painter: FishPainter(
-          controller: controller, offsetX: offsetX, offsetY: widget.offsetY),
+          controller: controller,
+          offsetX: offsetX,
+          offsetY: widget.offsetY,
+          fishsize: widget.fishsize),
     );
   }
 
@@ -56,13 +61,16 @@ class _FishPointerState extends State<FishPointer>
 
 class FishPainter extends CustomPainter {
   FishPainter(
-      {required this.controller, required this.offsetX, required this.offsetY})
+      {required this.controller,
+      required this.offsetX,
+      required this.offsetY,
+      required this.fishsize})
       : super(repaint: controller); // repaint に controller を渡さないと再描画されない
   final double offsetX;
   final double offsetY;
   final Animation<double> controller;
 
-  final fishsize = 25.0; //サカナ大きさ？？？可変にするべき
+  final fishsize; //サカナ大きさ？？？可変にするべき
 
   @override
   Future<void> paint(Canvas canvas, Size size) async {
@@ -80,19 +88,20 @@ class FishPainter extends CustomPainter {
 
     //if (uiimage != null) {
     final paint = Paint()
-      ..style = PaintingStyle.stroke
+      ..style = PaintingStyle.fill
       ..strokeWidth = 2
       ..color = Colors.white.withOpacity(opacityValue);
     //canvas.drawImage(uiimage, Offset(200, offset_y), paint);
     //canvas.drawCircle(Offset(200, offset_y), 10, paint);
     canvas.drawArc(
-        Offset(offsetX, offsetY) & Size(30, fishsize),
+        Offset(offsetX, offsetY) & Size(fishsize, fishsize),
         210 * math.pi / 180, //startAngle
         140 * math.pi / 180, //sweepAngle
         false, //中心からの切り出し？trueならピザ形状
         paint);
     canvas.drawArc(
-        Offset(offsetX, offsetY - (fishsize * 0.5834)) & Size(30, fishsize),
+        Offset(offsetX, offsetY - (fishsize * 0.5834)) &
+            Size(fishsize, fishsize),
         10 * math.pi / 180, //startAngle
         140 * math.pi / 180, //sweepAngle
         false, //中心からの切り出し？trueならピザ形状
