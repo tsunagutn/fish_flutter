@@ -737,15 +737,41 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             //SpriteWidget(RootNode(size)),
             child: Column(children: <Widget>[
               new Stack(children: <Widget>[
+                //海上
                 Container(
                     decoration: BoxDecoration(
-                      color: clsColor._getColorFromHex("200070"),
-                      // // 背景画像
-                      // image: DecorationImage(
-                      //   image: AssetImage('Assets/Images/player.png'),
-                      //   fit: BoxFit.cover, //？？？全画面にするときはここ有効化
-                      //),
-                    ),
+                        //color: clsColor._getColorFromHex("200070"),
+                        gradient: LinearGradient(
+                  begin: FractionalOffset.topCenter,
+                  end: FractionalOffset.bottomCenter,
+                  colors: [Colors.red, Colors.blue],
+                  stops: const [
+                    0.0,
+                    1.0,
+                  ],
+                ))),
+                //海中
+                Container(
+                    decoration: BoxDecoration(
+                        //color: clsColor._getColorFromHex("200070"),
+                        gradient: LinearGradient(
+                      begin: FractionalOffset.topCenter,
+                      end: FractionalOffset.bottomCenter,
+                      colors: [
+                        clsColor._getColorFromHex("200070").withOpacity(0.6),
+                        clsColor._getColorFromHex("200070").withOpacity(1.0),
+                      ],
+                      stops: const [
+                        0.0,
+                        1.0,
+                      ],
+                    )
+                        // // 背景画像
+                        // image: DecorationImage(
+                        //   image: AssetImage('Assets/Images/player.png'),
+                        //   fit: BoxFit.cover, //？？？全画面にするときはここ有効化
+                        //),
+                        ),
                     // 内側の余白（パディング）
                     //padding: EdgeInsets.all(8),
                     // 外側の余白（マージン）
