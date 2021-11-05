@@ -39,13 +39,11 @@
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
 
-import 'package:fish_flutter/Sprite/RootNode.dart';
 import 'package:fish_flutter/Model/LightSpot.dart';
 import 'package:fish_flutter/Model/TapPointer.dart';
 import 'package:fish_flutter/Model/FishPointer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:spritewidget/spritewidget.dart';
 
 import 'DrawerItem.dart';
 import 'dart:async';

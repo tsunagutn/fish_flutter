@@ -23,7 +23,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  spritewidget: ^0.9.24
 
   shared_preferences:
 
