@@ -13,8 +13,10 @@
 //済・深さの変化に傾向をつける
 //済・テンションによってテンションバーの色可変
 //済・深さ表示をやっぱり上にする
-//済み・棚の可変化
-//・船長呼び出しの機能 深いとこ／浅いとこ行って欲しい機能
+//済・棚の可変化
+//済・海上の範囲を描画
+//・海面の波
+//・船押して船長呼び出しの機能 深いとこ／浅いとこ行って欲しい機能
 //・船長呼び出しボタン→子メニュー（ポップアップ？横メニュー？）で選択→船長絵「わかった」
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
 //・ドラグが出てる時はどっか揺らすみたいな
@@ -41,6 +43,7 @@
 import 'package:fish_flutter/Model/LightSpot.dart';
 import 'package:fish_flutter/Model/TapPointer.dart';
 import 'package:fish_flutter/Model/FishPointer.dart';
+import 'package:fish_flutter/Model/WaveClipper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -84,8 +87,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'weight': 2, //重さ
       'wariai': 2,
       'point': 200, //ポイントの基礎値
-      'tana_min': 0.0,
-      'tana_max': 0.5,
+      'tana_min': 0.2,
+      'tana_max': 0.6,
     },
     2: {
       'name': "鯉",
@@ -97,8 +100,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'weight': 3, //重さ
       'wariai': 2,
       'point': 200, //ポイントの基礎値
-      'tana_min': 0.3,
-      'tana_max': 0.8,
+      'tana_min': 0.0,
+      'tana_max': 0.3,
     },
     3: {
       'name': "マダイ",
@@ -166,6 +169,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
 // グローバル変数としてGlobalKey型の変数（プロパティ）を定義
   GlobalKey globalKeySonar = GlobalKey();
+  GlobalKey globalKeyShore = GlobalKey();
+
   //アニメーション関連
   late AnimationController _animationController; //光点の光アニメーション
   late Animation<double> _animationRadius;
@@ -211,9 +216,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _depth_change_scan_cnt = 0; //深さの変化傾向スキャンカウント数
 
   var _now_duration_lv; //光点点滅レベル
-
+  var _shoreHeight = 0.0;
   late Offset offset = Offset(0.0, 0.0);
   late double _appBarHeight = 0.0;
+
+  late AnimationController waveController; // AnimationControllerの宣言
+  static const darkBlue = Color(0xFF264bc5); // 波の色
 
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
@@ -231,18 +239,24 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //光点アニメーションの初期化
     _now_duration_lv = POINT_DURATION_MSEC.length - 1; //初期値は最大値
-    ligntSpotAnimation(POINT_DURATION_MSEC[_now_duration_lv]! as int);
+    ligntSpotAnimation(POINT_DURATION_MSEC[_now_duration_lv]!);
     //定周期タイマの設定
     Timer.periodic(
       Duration(milliseconds: TIMER_INTERVAL),
       _onTimer,
     );
 
+    waveController = AnimationController(
+      duration: const Duration(seconds: 3), // アニメーションの間隔を3秒に設定
+      vsync: this, // おきまり
+    )..repeat(); // リピート設定
+
     super.initState();
   }
 
   void dispose() {
     _animationController.dispose();
+    waveController.dispose(); // AnimationControllerは明示的にdisposeする。
     super.dispose();
   }
 
@@ -264,6 +278,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     var weight = 0;
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
+
+    //ソナー部のY位置と高さを取得
+    var sonarWidget =
+        globalKeySonar.currentContext?.findRenderObject() as RenderBox;
+    var sonarHeight = sonarWidget.size.height;
+    var sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
+
+    //海上部の高さ
+    var shoreWidget =
+        globalKeyShore.currentContext?.findRenderObject() as RenderBox;
+    _shoreHeight = shoreWidget.size.height;
 
     //共通乱数 0.0～0.999... の乱数の作成 ※共通じゃだめなところには使っちゃだめ
     var rand = (new math.Random()).nextDouble();
@@ -417,6 +442,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         ' m';
     _pointer_x = 0;
     _pointer_y = ((_depth / _max_depth) * (size.height - _appBarHeight) * 0.60);
+    //_pointer_y += sonarTop + _appBarHeight;
     //debugPrint(_pointer_y.toString());
 //         //魚探画像に光点表示
 //         $('.point_img').css('margin-top', (point_height * 1.2) + "%");
@@ -593,11 +619,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
     if (hannornd > 0.96 && _jiai > depthrnd) {
-      //ソナー部のY位置と高さを取得
-      var sonarWidget =
-          globalKeySonar.currentContext?.findRenderObject() as RenderBox;
-      var sonarHeight = sonarWidget.size.height;
-      var sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
       var fishy = (sonarTop - _appBarHeight) + (sonarHeight * _just_tana);
       //レンジ分バラケ
       var barake = (_tana_range * ((0.2 - depthrnd) * 1.5));
@@ -735,178 +756,244 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             //child: new Stack(children: <Widget>[
             //背景スプライト
             //SpriteWidget(RootNode(size)),
-            child: Column(children: <Widget>[
-              new Stack(children: <Widget>[
+            child: new Stack(children: <Widget>[
+              Column(children: <Widget>[
                 //海上
                 Container(
-                    decoration: BoxDecoration(
-                        //color: clsColor._getColorFromHex("200070"),
-                        gradient: LinearGradient(
-                  begin: FractionalOffset.topCenter,
-                  end: FractionalOffset.bottomCenter,
-                  colors: [Colors.red, Colors.blue],
-                  stops: const [
-                    0.0,
-                    1.0,
-                  ],
-                ))),
+                  key: globalKeyShore,
+                  decoration: BoxDecoration(
+                      // image: DecorationImage(
+                      //   image: AssetImage('Assets/Images/sencho.png'),
+                      //   fit: BoxFit.cover, //？？？全画面にするときはここ有効化
+                      // ),
+                      //color: clsColor._getColorFromHex("200070"),
+                      gradient: LinearGradient(
+                    begin: FractionalOffset.topCenter,
+                    end: FractionalOffset.bottomCenter,
+                    colors: [
+                      clsColor._getColorFromHex("5495FF"),
+                      clsColor._getColorFromHex("EFFAFF")
+                    ],
+                    stops: const [
+                      0.0,
+                      1.0,
+                    ],
+                  )),
+                  child: Column(children: <Widget>[
+                    Container(
+                        margin: EdgeInsets.only(top: 5),
+                        //テンションとドラグレベルのスライダーをstackで重ねて表示
+                        child: new Stack(children: <Widget>[
+                          //テンションスライダー ？？？描画のみなのでスライダーは不適切かも
+                          SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 20, //全体の縦長
+                                valueIndicatorColor: Colors.white, //背景の色
+                                activeTrackColor:
+                                    _tension_activeTrackColor, //値有りエリアの色
+                                inactiveTrackColor: Colors.white,
+                                activeTickMarkColor:
+                                    Colors.black.withOpacity(0.0), //値ツマミの色
+                                thumbColor:
+                                    Colors.black.withOpacity(0.0), //現在レベルの色
+                                thumbShape: RoundSliderThumbShape(
+                                    enabledThumbRadius: 0), //値ツマミの径
+                                overlayColor: Colors.black
+                                    .withOpacity(0.0), //値ツマミフォーカス時の色
+                                //inactiveTrackColor: Colors.amber,
+                                //inactiveTickMarkColor: Colors.blue,
+                              ),
+                              child: Slider(
+                                value: _tension,
+                                min: TENSION_VAL_MIN,
+                                max: TENSION_VAL_MAX,
+                                divisions:
+                                    (TENSION_VAL_MAX - TENSION_VAL_MIN) as int,
+                                onChanged: (double value) {
+                                  //ユーザが変更するものではないのでコメント
+                                  //   setState(() {
+                                  //     _tension = value.roundToDouble();
+                                  //   });
+                                },
+                              )),
+                          //ドラグスライダー
+                          SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 2, //全体の縦長
+                                valueIndicatorColor:
+                                    Colors.black.withOpacity(0.0), //背景の色
+                                activeTrackColor:
+                                    Colors.black.withOpacity(0.0), //値有りエリアの色
+                                inactiveTrackColor:
+                                    Colors.black.withOpacity(0.0), //値無しエリアの色
+                                activeTickMarkColor:
+                                    Colors.black.withOpacity(0.0), //各value値の色
+                                thumbColor: Colors.red, //値ツマミの色
+                                thumbShape: RoundSliderThumbShape(
+                                    enabledThumbRadius: 12), //ツマミの大きさ
+                                overlayColor: Colors.black
+                                    .withOpacity(0.0), //値ツマミフォーカス時の色
+                                //inactiveTrackColor: Colors.amber,
+                                //inactiveTickMarkColor: Colors.blue,
+                              ),
+                              child: Slider(
+                                value: _drag,
+                                //MAX-MINはテンションと同じ
+                                min: TENSION_VAL_MIN,
+                                max: TENSION_VAL_MAX,
+                                divisions:
+                                    (TENSION_VAL_MAX - TENSION_VAL_MIN) as int,
+                                onChanged: (double value) {
+                                  setState(() {
+                                    _drag = value.roundToDouble();
+                                  });
+                                },
+                              )),
+                        ])),
+
+                    //巻速度スライダー
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 20, //全体の縦長
+                        valueIndicatorColor: Colors.white, //背景の色
+                        activeTrackColor: _speed_activeTrackColor, //値有りエリアの色
+                        inactiveTrackColor: Colors.white,
+                        activeTickMarkColor:
+                            Colors.black.withOpacity(0.0), //値ツマミの色
+                        thumbColor: Colors.black.withOpacity(0.0), //現在レベルの色
+                        thumbShape: RoundSliderThumbShape(
+                            enabledThumbRadius: 0), //値ツマミの径
+                        overlayColor:
+                            Colors.black.withOpacity(0.0), //値ツマミフォーカス時の色
+                        //inactiveTrackColor: Colors.amber,
+                        //inactiveTickMarkColor: Colors.blue,
+                      ),
+                      child: Slider(
+                        value: _speed,
+                        //MAX-MINはテンションと同じ
+                        min: SPEED_VAL_MIN,
+                        max: SPEED_VAL_MAX,
+                        divisions: (SPEED_VAL_MAX - SPEED_VAL_MIN) as int,
+                        onChanged: (double value) {
+                          //画面スワイプで動かす
+                        },
+                      ),
+                    ),
+                    Stack(children: <Widget>[
+                      Container(
+                        alignment: Alignment.center,
+                        child: GestureDetector(
+                          onTap: () {
+                            var result = showDialog<int>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("何かや！"),
+                                    content: Column(children: <Widget>[
+                                      new Image(
+                                        image: AssetImage(
+                                            'assets/images/sencho.png'),
+                                        width: 150,
+                                        height: 150,
+                                      ),
+                                      Text('わしゃあ忙しいんで！'),
+                                      //Text('もっと浅く'),
+                                    ]),
+                                    actions: <Widget>[
+                                      // ボタン領域
+                                      // FlatButton(
+                                      //   child: Text("Cancel"),
+                                      //   onPressed: () => Navigator.pop(context),
+                                      // ),
+                                      FlatButton(
+                                        child: Text("OK"),
+                                        onPressed: () {
+                                          //_point += fish['point'] as int;
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                });
+                          },
+                          child: new Image(
+                            image: AssetImage('Assets/Images/ship.png'),
+                            width: 60,
+                            height: 40,
+                          ),
+                        ),
+                      ),
+                      Container(
+                          height: 40,
+                          child: AnimatedBuilder(
+                            animation: waveController, // waveControllerを設定
+                            builder: (context, child) => Stack(
+                              children: <Widget>[
+                                // ↓ 追加部分
+                                // 1
+                                ClipPath(
+                                  // 3
+                                  child: Container(
+                                      color: clsColor
+                                          ._getColorFromHex("02D5F2")
+                                          .withOpacity(1.0)),
+                                  // 2
+                                  clipper: WaveClipper(
+                                      context, waveController.value, 0),
+                                ),
+                                // 2つ目の波
+                                ClipPath(
+                                  child: Container(
+                                      color: clsColor
+                                          ._getColorFromHex("02D5F2")
+                                          .withOpacity(0.3)),
+                                  clipper: WaveClipper(
+                                      context, waveController.value, 0.5),
+                                ),
+                                // ↑ 追加部分
+                              ],
+                            ),
+                          ))
+                    ]),
+                  ]),
+                ),
                 //海中
                 Container(
                     decoration: BoxDecoration(
+                        border: Border.all(
+                            color: clsColor._getColorFromHex("02D5F2")),
                         //color: clsColor._getColorFromHex("200070"),
                         gradient: LinearGradient(
-                      begin: FractionalOffset.topCenter,
-                      end: FractionalOffset.bottomCenter,
-                      colors: [
-                        clsColor._getColorFromHex("200070").withOpacity(0.6),
-                        clsColor._getColorFromHex("200070").withOpacity(1.0),
-                      ],
-                      stops: const [
-                        0.0,
-                        1.0,
-                      ],
-                    )
+                          begin: FractionalOffset.topCenter,
+                          end: FractionalOffset.bottomCenter,
+                          colors: [
+                            clsColor._getColorFromHex("02D5F2"),
+                            clsColor._getColorFromHex("013367"),
+                          ],
+                          stops: const [
+                            0.0,
+                            1.0,
+                          ],
+                        )
+                        // ,
                         // // 背景画像
                         // image: DecorationImage(
-                        //   image: AssetImage('Assets/Images/player.png'),
+                        //   image: AssetImage('Assets/Images/sencho.png'),
                         //   fit: BoxFit.cover, //？？？全画面にするときはここ有効化
-                        //),
+                        // ),
                         ),
                     // 内側の余白（パディング）
                     //padding: EdgeInsets.all(8),
                     // 外側の余白（マージン）
                     //margin: EdgeInsets.all(8),
                     width: size.width,
-                    height: size.height - _appBarHeight,
+                    height: size.height - _appBarHeight - _shoreHeight,
                     child: Column(
                       children: <Widget>[
                         // new Expanded(
                         //     child:
-                        Column(children: <Widget>[
-                          Container(
-                              margin: EdgeInsets.only(top: 5),
-                              //テンションとドラグレベルのスライダーをstackで重ねて表示
-                              child: new Stack(children: <Widget>[
-                                //テンションスライダー ？？？描画のみなのでスライダーは不適切かも
-                                SliderTheme(
-                                    data: SliderTheme.of(context).copyWith(
-                                      trackHeight: 20, //全体の縦長
-                                      valueIndicatorColor: Colors.white, //背景の色
-                                      activeTrackColor:
-                                          _tension_activeTrackColor, //値有りエリアの色
-                                      inactiveTrackColor: Colors.white,
-                                      activeTickMarkColor: Colors.black
-                                          .withOpacity(0.0), //値ツマミの色
-                                      thumbColor: Colors.black
-                                          .withOpacity(0.0), //現在レベルの色
-                                      thumbShape: RoundSliderThumbShape(
-                                          enabledThumbRadius: 0), //値ツマミの径
-                                      overlayColor: Colors.black
-                                          .withOpacity(0.0), //値ツマミフォーカス時の色
-                                      //inactiveTrackColor: Colors.amber,
-                                      //inactiveTickMarkColor: Colors.blue,
-                                    ),
-                                    child: Slider(
-                                      value: _tension,
-                                      min: TENSION_VAL_MIN,
-                                      max: TENSION_VAL_MAX,
-                                      divisions: (TENSION_VAL_MAX -
-                                          TENSION_VAL_MIN) as int,
-                                      onChanged: (double value) {
-                                        //ユーザが変更するものではないのでコメント
-                                        //   setState(() {
-                                        //     _tension = value.roundToDouble();
-                                        //   });
-                                      },
-                                    )),
-                                //ドラグスライダー
-                                SliderTheme(
-                                    data: SliderTheme.of(context).copyWith(
-                                      trackHeight: 2, //全体の縦長
-                                      valueIndicatorColor:
-                                          Colors.black.withOpacity(0.0), //背景の色
-                                      activeTrackColor: Colors.black
-                                          .withOpacity(0.0), //値有りエリアの色
-                                      inactiveTrackColor: Colors.black
-                                          .withOpacity(0.0), //値無しエリアの色
-                                      activeTickMarkColor: Colors.black
-                                          .withOpacity(0.0), //各value値の色
-                                      thumbColor: Colors.red, //値ツマミの色
-                                      thumbShape: RoundSliderThumbShape(
-                                          enabledThumbRadius: 12), //ツマミの大きさ
-                                      overlayColor: Colors.black
-                                          .withOpacity(0.0), //値ツマミフォーカス時の色
-                                      //inactiveTrackColor: Colors.amber,
-                                      //inactiveTickMarkColor: Colors.blue,
-                                    ),
-                                    child: Slider(
-                                      value: _drag,
-                                      //MAX-MINはテンションと同じ
-                                      min: TENSION_VAL_MIN,
-                                      max: TENSION_VAL_MAX,
-                                      divisions: (TENSION_VAL_MAX -
-                                          TENSION_VAL_MIN) as int,
-                                      onChanged: (double value) {
-                                        setState(() {
-                                          _drag = value.roundToDouble();
-                                        });
-                                      },
-                                    )),
-                              ])),
 
-                          //巻速度スライダー
-                          SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 20, //全体の縦長
-                              valueIndicatorColor: Colors.white, //背景の色
-                              activeTrackColor:
-                                  _speed_activeTrackColor, //値有りエリアの色
-                              inactiveTrackColor: Colors.white,
-                              activeTickMarkColor:
-                                  Colors.black.withOpacity(0.0), //値ツマミの色
-                              thumbColor:
-                                  Colors.black.withOpacity(0.0), //現在レベルの色
-                              thumbShape: RoundSliderThumbShape(
-                                  enabledThumbRadius: 0), //値ツマミの径
-                              overlayColor:
-                                  Colors.black.withOpacity(0.0), //値ツマミフォーカス時の色
-                              //inactiveTrackColor: Colors.amber,
-                              //inactiveTickMarkColor: Colors.blue,
-                            ),
-                            child: Slider(
-                              value: _speed,
-                              //MAX-MINはテンションと同じ
-                              min: SPEED_VAL_MIN,
-                              max: SPEED_VAL_MAX,
-                              divisions: (SPEED_VAL_MAX - SPEED_VAL_MIN) as int,
-                              onChanged: (double value) {
-                                //画面スワイプで動かす
-                              },
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(left: 10),
-                                padding: const EdgeInsets.all(5.0),
-                                decoration: BoxDecoration(
-                                    border:
-                                        Border.all(color: Colors.red, width: 3),
-                                    color: Colors.white),
-                                child: Text(_disp_depth,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                    )),
-                              ),
-                              Text(_disp_info,
-                                  style: TextStyle(
-                                    backgroundColor: _info_backColor,
-                                  )),
-                            ],
-                          ),
-                        ]),
                         //),
                         //ソナー画面
                         Expanded(
@@ -1007,6 +1094,28 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 //3分割目カラム（ポイント表示）
                                 Column(
                                   children: <Widget>[
+                                    Row(
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10),
+                                          padding: const EdgeInsets.all(5.0),
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.red, width: 3),
+                                              color: Colors.white),
+                                          child: Text(_disp_depth,
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20,
+                                              )),
+                                        ),
+                                        // Text(_disp_info,
+                                        //     style: TextStyle(
+                                        //       backgroundColor: _info_backColor,
+                                        //     )),
+                                      ],
+                                    ),
                                     Container(
                                       //width: size.width / 3,
                                       padding: const EdgeInsets.all(5.0),
@@ -1023,17 +1132,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         ),
                       ],
                     )),
-                Stack(children: <Widget>[
-                  //タップ時の光点
-                  (tapPointerList.isNotEmpty)
-                      ? Stack(children: tapPointerList)
-                      : Text(""),
-                  //反応光点
-                  (fishPointerList.isNotEmpty)
-                      ? Stack(children: fishPointerList)
-                      : Text(""),
-                ]),
-              ])
+              ]),
+              Stack(children: <Widget>[
+                //タップ時の光点
+                (tapPointerList.isNotEmpty)
+                    ? Stack(children: tapPointerList)
+                    : Text(""),
+                //反応光点
+                (fishPointerList.isNotEmpty)
+                    ? Stack(children: fishPointerList)
+                    : Text(""),
+              ]),
             ])));
   }
 
