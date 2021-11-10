@@ -18,7 +18,7 @@
 //済・海面の波
 //済・船押して船長呼び出しの機能 深いとこ／浅いとこ行って欲しい機能
 //済・船長呼び出しボタン→子メニュー（ポップアップ？横メニュー？）で選択→船長絵「わかった」
-//・水深によってバックの色の濃さ変える
+//済・水深によってバックの色の濃さ変える
 //・海底を描画（波と同じようなロジックでいける？）
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
@@ -223,6 +223,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _depth_change = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
   var _depth_change_scan_cnt = 0; //深さの変化傾向スキャンカウント数
   var _depth_change_order = 0; //変化傾向 初期値は現状維持
+  var _disp_depth_lv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
+  var _disp_depth_lv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
 
   var _now_duration_lv; //光点点滅レベル
   var _shoreHeight = 0.0;
@@ -458,6 +460,23 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //debugPrint(_pointer_y.toString());
 //         //魚探画像に光点表示
 //         $('.point_img').css('margin-top', (point_height * 1.2) + "%");
+
+    //背景色
+    if (_max_depth < 100) {
+      //水深10mまでは中層の範囲は固定
+      _disp_depth_lv1 = 1.0;
+    } else {
+      //水深150mで0.1にする
+      _disp_depth_lv1 = ((_max_depth - 100) / 1400) * -0.9 + 1;
+      //debugPrint(_disp_depth_lv1.toString());
+    }
+    if (_max_depth < 1000) {
+      //水深10mまでは深層の範囲は固定
+      _disp_depth_lv2 = 1.0;
+    } else {
+      //水深500mで0.1にする
+      _disp_depth_lv2 = ((_max_depth - 1000) / 4000) * -0.9 + 1;
+    }
 
     //釣り上げ判定
     if (_flg_hit && _depth <= 1) {
@@ -883,83 +902,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             var result = await showDialog<int>(
                               context: context,
                               barrierDismissible: false,
-
                               builder: (_) {
                                 return SenchoDialog(
                                   depth_change_order: _depth_change_order,
                                   point: _point,
                                 );
                               },
-
-                              // builder: (BuildContext context) {
-                              //   return AlertDialog(
-                              //     title: Text("船長"),
-                              //     content: Container(
-                              //       height: size.height / 2,
-                              //       child: Column(children: <Widget>[
-                              //         new Image(
-                              //           image: AssetImage(
-                              //               'assets/images/sencho.png'),
-                              //           width: 150,
-                              //           height: 150,
-                              //         ),
-                              //         Text(waveController.value.toString()),
-                              //         ElevatedButton.icon(
-                              //           icon: const Icon(
-                              //             Icons.close,
-                              //             color: Colors.white,
-                              //           ),
-                              //           label: const Text('深いとこがいい'),
-                              //           style: ElevatedButton.styleFrom(
-                              //             primary:
-                              //                 Colors.blue.withOpacity(0.5),
-                              //             onPrimary: Colors.white,
-                              //           ),
-                              //           onPressed: () {
-                              //             setState(() {
-                              //               _sencho_message = "深くしていくで！";
-                              //             });
-                              //           },
-                              //         ),
-
-                              //         ElevatedButton.icon(
-                              //           icon: const Icon(
-                              //             Icons.close,
-                              //             color: Colors.white,
-                              //           ),
-                              //           label: const Text('浅いとこがいい'),
-                              //           style: ElevatedButton.styleFrom(
-                              //             primary:
-                              //                 Colors.blue.withOpacity(0.5),
-                              //             onPrimary: Colors.white,
-                              //           ),
-                              //           onPressed: () {
-                              //             setState(() {
-                              //               _sencho_message = "浅くしていくで！";
-                              //             });
-                              //           },
-                              //         ),
-                              //         ElevatedButton.icon(
-                              //           icon: const Icon(
-                              //             Icons.close,
-                              //             color: Colors.white,
-                              //           ),
-                              //           label: const Text('なんでもないです'),
-                              //           style: ElevatedButton.styleFrom(
-                              //             primary:
-                              //                 Colors.black.withOpacity(0.5),
-                              //             onPrimary: Colors.white,
-                              //           ),
-                              //           onPressed: () {
-                              //             Navigator.pop(context);
-                              //           },
-                              //         ),
-
-                              //         //Text('もっと浅く'),
-                              //       ]),
-                              //     ),
-                              //   );
-                              // }
                             );
                             debugPrint(result.toString());
                             setState(() {
@@ -1017,11 +965,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                           colors: [
                             clsColor._getColorFromHex("02D5F2"),
                             clsColor._getColorFromHex("013367"),
+                            clsColor._getColorFromHex("002142"),
+                            clsColor._getColorFromHex("000000"),
                           ],
-                          stops: const [
-                            0.0,
-                            1.0,
-                          ],
+                          stops: [0.0, _disp_depth_lv1, _disp_depth_lv2, 1.0],
                         )
                         // ,
                         // // 背景画像
