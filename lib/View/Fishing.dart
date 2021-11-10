@@ -15,9 +15,13 @@
 //済・深さ表示をやっぱり上にする
 //済・棚の可変化
 //済・海上の範囲を描画
-//・海面の波
-//・船押して船長呼び出しの機能 深いとこ／浅いとこ行って欲しい機能
-//・船長呼び出しボタン→子メニュー（ポップアップ？横メニュー？）で選択→船長絵「わかった」
+//済・海面の波
+//済・船押して船長呼び出しの機能 深いとこ／浅いとこ行って欲しい機能
+//済・船長呼び出しボタン→子メニュー（ポップアップ？横メニュー？）で選択→船長絵「わかった」
+//・水深によってバックの色の濃さ変える
+//・海底を描画（波と同じようなロジックでいける？）
+//・海底に漁礁とか
+//・通知インフォメーション 今が時合で！みたいな
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
 //・ドラグが出てる時はどっか揺らすみたいな
 //・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
@@ -44,6 +48,7 @@ import 'package:fish_flutter/Model/LightSpot.dart';
 import 'package:fish_flutter/Model/TapPointer.dart';
 import 'package:fish_flutter/Model/FishPointer.dart';
 import 'package:fish_flutter/Model/WaveClipper.dart';
+import 'package:fish_flutter/Model/SenchoDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -93,7 +98,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     2: {
       'name': "鯉",
       'image': "koi.jpg",
-      'text': "うれしいね",
+      'text': "ヤッターマン",
       'hp': 3000, //このスキャン経過で0になる
       'add_max': 10,
       'add_min': -6,
@@ -167,6 +172,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   final POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
   final POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
 
+  //final Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
+  final Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
+
 // グローバル変数としてGlobalKey型の変数（プロパティ）を定義
   GlobalKey globalKeySonar = GlobalKey();
   GlobalKey globalKeyShore = GlobalKey();
@@ -214,14 +222,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   var _depth_change = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
   var _depth_change_scan_cnt = 0; //深さの変化傾向スキャンカウント数
+  var _depth_change_order = 0; //変化傾向 初期値は現状維持
 
   var _now_duration_lv; //光点点滅レベル
   var _shoreHeight = 0.0;
+
+  var _sencho_message = ""; //船長の発言
+
   late Offset offset = Offset(0.0, 0.0);
   late double _appBarHeight = 0.0;
 
   late AnimationController waveController; // AnimationControllerの宣言
-  static const darkBlue = Color(0xFF264bc5); // 波の色
 
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
@@ -297,7 +308,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _depth_change_scan_cnt++;
     if (_depth_change_scan_cnt > DEPTH_CHANGE_SCAN) {
       _depth_change_scan_cnt = 0;
-      _depth_change = 0.5 + ((0.5 - rand) / 10);
+      _depth_change = DEPTH_CHANGE_ORDERS[_depth_change_order]! +
+          ((DEPTH_CHANGE_ORDERS[_depth_change_order]! - rand) / 10);
       debugPrint("深さ変化傾向" + _depth_change.toString());
     }
 
@@ -666,25 +678,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         // ),
 
         body: GestureDetector(
-            //behavior: HitTestBehavior.translucent,
-            //子のコントロールタップ時は反応しないようにできないか・・・？
-            //画面タップ時
-            //onPanDown: (DragDownDetails details) {
-            //debugPrint("タップ");
-            // chenge_clutch(false);
-            // _ontap = true;
-            //},
-            //タップした時
-            // onTapDown: (TapDownDetails details) {
-            //   debugPrint("たっぷだうん");
-            //   offset = Offset(details.globalPosition.dx,
-            //       details.globalPosition.dy - _appBarHeight);
-            //   _tapAnimation = AnimationController(
-            //       duration: Duration(milliseconds: TAP_POINTER_DURATION_MSEC),
-            //       vsync: this);
-            //   generateTapPointer(details);
-            //   debugPrint(tapPointerList.length.toString());
-            // },
             //ドラッグ操作が開始された時
             onPanStart: (DragStartDetails details) {
               debugPrint("ドラッグ開始");
@@ -883,39 +876,95 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       Container(
                         alignment: Alignment.center,
                         child: GestureDetector(
-                          onTap: () {
-                            var result = showDialog<int>(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text("何かや！"),
-                                    content: Column(children: <Widget>[
-                                      new Image(
-                                        image: AssetImage(
-                                            'assets/images/sencho.png'),
-                                        width: 150,
-                                        height: 150,
-                                      ),
-                                      Text('わしゃあ忙しいんで！'),
-                                      //Text('もっと浅く'),
-                                    ]),
-                                    actions: <Widget>[
-                                      // ボタン領域
-                                      // FlatButton(
-                                      //   child: Text("Cancel"),
-                                      //   onPressed: () => Navigator.pop(context),
-                                      // ),
-                                      FlatButton(
-                                        child: Text("OK"),
-                                        onPressed: () {
-                                          //_point += fish['point'] as int;
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                });
+                          onTap: () async {
+                            setState(() {
+                              _sencho_message = "わしゃあ忙しいんで！";
+                            });
+                            var result = await showDialog<int>(
+                              context: context,
+                              barrierDismissible: false,
+
+                              builder: (_) {
+                                return SenchoDialog(
+                                  depth_change_order: _depth_change_order,
+                                  point: _point,
+                                );
+                              },
+
+                              // builder: (BuildContext context) {
+                              //   return AlertDialog(
+                              //     title: Text("船長"),
+                              //     content: Container(
+                              //       height: size.height / 2,
+                              //       child: Column(children: <Widget>[
+                              //         new Image(
+                              //           image: AssetImage(
+                              //               'assets/images/sencho.png'),
+                              //           width: 150,
+                              //           height: 150,
+                              //         ),
+                              //         Text(waveController.value.toString()),
+                              //         ElevatedButton.icon(
+                              //           icon: const Icon(
+                              //             Icons.close,
+                              //             color: Colors.white,
+                              //           ),
+                              //           label: const Text('深いとこがいい'),
+                              //           style: ElevatedButton.styleFrom(
+                              //             primary:
+                              //                 Colors.blue.withOpacity(0.5),
+                              //             onPrimary: Colors.white,
+                              //           ),
+                              //           onPressed: () {
+                              //             setState(() {
+                              //               _sencho_message = "深くしていくで！";
+                              //             });
+                              //           },
+                              //         ),
+
+                              //         ElevatedButton.icon(
+                              //           icon: const Icon(
+                              //             Icons.close,
+                              //             color: Colors.white,
+                              //           ),
+                              //           label: const Text('浅いとこがいい'),
+                              //           style: ElevatedButton.styleFrom(
+                              //             primary:
+                              //                 Colors.blue.withOpacity(0.5),
+                              //             onPrimary: Colors.white,
+                              //           ),
+                              //           onPressed: () {
+                              //             setState(() {
+                              //               _sencho_message = "浅くしていくで！";
+                              //             });
+                              //           },
+                              //         ),
+                              //         ElevatedButton.icon(
+                              //           icon: const Icon(
+                              //             Icons.close,
+                              //             color: Colors.white,
+                              //           ),
+                              //           label: const Text('なんでもないです'),
+                              //           style: ElevatedButton.styleFrom(
+                              //             primary:
+                              //                 Colors.black.withOpacity(0.5),
+                              //             onPrimary: Colors.white,
+                              //           ),
+                              //           onPressed: () {
+                              //             Navigator.pop(context);
+                              //           },
+                              //         ),
+
+                              //         //Text('もっと浅く'),
+                              //       ]),
+                              //     ),
+                              //   );
+                              // }
+                            );
+                            debugPrint(result.toString());
+                            setState(() {
+                              _depth_change_order = result as int;
+                            });
                           },
                           child: new Image(
                             image: AssetImage('Assets/Images/ship.png'),
@@ -930,15 +979,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             animation: waveController, // waveControllerを設定
                             builder: (context, child) => Stack(
                               children: <Widget>[
-                                // ↓ 追加部分
-                                // 1
+                                //Text(waveController.value.toString()), // テスト用
+                                // 1つ目の波
                                 ClipPath(
-                                  // 3
                                   child: Container(
                                       color: clsColor
                                           ._getColorFromHex("02D5F2")
                                           .withOpacity(1.0)),
-                                  // 2
                                   clipper: WaveClipper(
                                       context, waveController.value, 0),
                                 ),
