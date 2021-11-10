@@ -17,7 +17,7 @@ class WaveClipper extends CustomClipper<Path> {
         Offset(
           i.toDouble() * 3, // X座標
           //math.sin(step * 2 * math.pi - offset) * 45 + height * 0.5, // Y座標
-          math.sin(step * 2 * math.pi - offset) * WaveHeight + 33, // Y座標
+          math.sin(step * 2 * math.pi - offset) * WaveHeight + 31, // Y座標
         ),
       );
     }
