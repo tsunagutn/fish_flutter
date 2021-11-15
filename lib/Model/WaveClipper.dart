@@ -3,7 +3,8 @@ import 'dart:math' as math;
 
 class WaveClipper extends CustomClipper<Path> {
   // 1
-  static const WaveHeight = 3; //波の高さ
+  static const WaveHeight = 4; //波の高さ
+  static const WaveHindo = 3; //波の頻度 低いほど多い
 
   WaveClipper(this.context, this.waveControllerValue, this.offset) {
     final width = MediaQuery.of(context).size.width; // 画面の横幅
@@ -11,11 +12,11 @@ class WaveClipper extends CustomClipper<Path> {
     //final height = 50; // 画面の高さ
 
     // coordinateListに波の座標を追加
-    for (var i = 0; i <= width / 3; i++) {
+    for (var i = 0; i <= width / WaveHindo; i++) {
       final step = (i / width) - waveControllerValue;
       coordinateList.add(
         Offset(
-          i.toDouble() * 3, // X座標
+          i.toDouble() * WaveHindo, // X座標
           //math.sin(step * 2 * math.pi - offset) * 45 + height * 0.5, // Y座標
           math.sin(step * 2 * math.pi - offset) * WaveHeight + 31, // Y座標
         ),

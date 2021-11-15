@@ -19,7 +19,10 @@
 //済・船押して船長呼び出しの機能 深いとこ／浅いとこ行って欲しい機能
 //済・船長呼び出しボタン→子メニュー（ポップアップ？横メニュー？）で選択→船長絵「わかった」
 //済・水深によってバックの色の濃さ変える
-//・海底を描画（波と同じようなロジックでいける？）
+//済・海底を描画（波と同じようなロジックでいける？）
+//済・魚種毎にいい棚の設定
+//済・魚種毎にいい速度の設定
+//済・ソナーの0m地点に水面とか船の画像。
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
@@ -29,20 +32,18 @@
 //・テンションバー 危ないときアニメーション光るようにする
 //・テンションとスピードバーのデザインを整備 スライダーじゃなくする？
 //・ソナーに反応光点描画にする。
-//・ソナーの0m地点に水面とか船の画像。
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
-//・魚種毎にいい棚の設定
-//・魚種毎にいい速度の設定
 //・魚種毎にバレ条件の設定
 //・画面左に竿リール表示、上下ドラッグで動かす、ジグのシャクリ
-//・アワセシステム ARVRモード時はスマホをジャイロで動かす、通常時は下にドラッグでアワセ
-//  アワセの上手くいきかたで初期バラシレベルが決まるみたいな
-//・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
-//・背景にrod、ジャイロで動かす
 //・アワセシステム
+//  アワセの上手くいきかたで初期バラシレベルが決まるみたいな
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
+//夢
+//・アワセシステム ARVRモード時はスマホをジャイロで動かす、通常時は下にドラッグでアワセ
+//・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
+//・背景にrod、ジャイロで動かす
 
 import 'package:fish_flutter/Model/LightSpot.dart';
 import 'package:fish_flutter/Model/TapPointer.dart';
@@ -73,14 +74,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'name': "アジ", //魚種名
       'image': "aji.jpg", //超過画面の画像
       'text': "あなたは幸せを感じました", //釣果画面のコメント
-      'hp': 1000, //このスキャン経過で0になる
+      'hp': 300, //このスキャン経過で0になる
       'add_max': 30, //引きの最大
       'add_min': -10, //引きの最小（最大との乖離が暴れ度）
       'weight': 2, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
-      'wariai': 3, //HIT率
+      'wariai': 1.0, //HIT率 条件全一致で確定1.0～
       'point': 100, //ポイントの基礎値
-      'tana_min': 0.0,
-      'tana_max': 0.5,
+      'tana_min': 0, //生息域 上 0.1m単位
+      'tana_max': 100, //生息域 下 0.1m単位
+      'hit_fall': 0.2, //フォール志向
+      'hit_speed_just': 50, //スピード志向
+      'hit_speed_range': 40, //スピード志向範囲+-
     },
     1: {
       'name': "タチウオ",
@@ -90,10 +94,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'add_max': 13,
       'add_min': -5,
       'weight': 2, //重さ
-      'wariai': 2,
+      'wariai': 0.7,
       'point': 200, //ポイントの基礎値
-      'tana_min': 0.2,
-      'tana_max': 0.6,
+      'tana_min': 100, //生息域 上 0.1m単位
+      'tana_max': 300, //生息域 下 0.1m単位
+      'hit_fall': 0.3,
+      'hit_speed_just': 100,
+      'hit_speed_range': 50,
     },
     2: {
       'name': "鯉",
@@ -103,10 +110,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'add_max': 10,
       'add_min': -6,
       'weight': 3, //重さ
-      'wariai': 2,
+      'wariai': 0.5,
       'point': 200, //ポイントの基礎値
-      'tana_min': 0.0,
-      'tana_max': 0.3,
+      'tana_min': 0, //生息域 上 0.1m単位
+      'tana_max': 300, //生息域 下 0.1m単位
+      'hit_fall': 0.1,
+      'hit_speed_just': 75,
+      'hit_speed_range': 50,
     },
     3: {
       'name': "マダイ",
@@ -116,10 +126,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'add_max': 15,
       'add_min': -6,
       'weight': 3, //重さ
-      'wariai': 2,
+      'wariai': 0.5,
       'point': 300, //ポイントの基礎値
-      'tana_min': 0.5,
-      'tana_max': 0.8,
+      'tana_min': 500, //生息域 上 0.1m単位
+      'tana_max': 1000, //生息域 下 0.1m単位
+      'hit_fall': 0.1,
+      'hit_speed_just': 150,
+      'hit_speed_range': 50,
     },
     4: {
       'name': "宮澤クン",
@@ -129,10 +142,45 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'add_max': 30,
       'add_min': -10,
       'weight': 4, //重さ
-      'wariai': 1,
+      'wariai': 0.05,
       'point': 99999, //ポイントの基礎値
-      'tana_min': 0.9,
-      'tana_max': 1.0,
+      'tana_min': 500, //生息域 上 0.1m単位
+      'tana_max': 1000, //生息域 下 0.1m単位
+      'hit_fall': 0.6,
+      'hit_speed_just': 250,
+      'hit_speed_range': 50,
+    },
+    0: {
+      'name': "サバ", //魚種名
+      'image': "aji.jpg", //超過画面の画像
+      'text': "写真は仮です", //釣果画面のコメント
+      'hp': 500, //このスキャン経過で0になる
+      'add_max': 10, //引きの最大
+      'add_min': -5, //引きの最小（最大との乖離が暴れ度）
+      'weight': 2, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      'wariai': 1.0, //HIT率 条件全一致で確定1.0～
+      'point': 100, //ポイントの基礎値
+      'tana_min': 0, //生息域 上 0.1m単位
+      'tana_max': 70, //生息域 下 0.1m単位
+      'hit_fall': 0.2, //フォール志向
+      'hit_speed_just': 150, //スピード志向
+      'hit_speed_range': 30, //スピード志向範囲+-
+    },
+    0: {
+      'name': "サゴシ", //魚種名
+      'image': "aji.jpg", //超過画面の画像
+      'text': "写真はもう仮です", //釣果画面のコメント
+      'hp': 1000, //このスキャン経過で0になる
+      'add_max': 20, //引きの最大
+      'add_min': -5, //引きの最小（最大との乖離が暴れ度）
+      'weight': 3, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      'wariai': 0.6, //HIT率 条件全一致で確定1.0～
+      'point': 300, //ポイントの基礎値
+      'tana_min': 0, //生息域 上 0.1m単位
+      'tana_max': 200, //生息域 下 0.1m単位
+      'hit_fall': 1.0, //フォール志向
+      'hit_speed_just': 170, //スピード志向
+      'hit_speed_range': 40, //スピード志向範囲+-
     },
   };
 
@@ -178,6 +226,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 // グローバル変数としてGlobalKey型の変数（プロパティ）を定義
   GlobalKey globalKeySonar = GlobalKey();
   GlobalKey globalKeyShore = GlobalKey();
+  GlobalKey globalKeyBottom = GlobalKey();
 
   //アニメーション関連
   late AnimationController _animationController; //光点の光アニメーション
@@ -208,8 +257,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _pointer_y = 0.0; //ソナー部光点TOP
   var _pointer_x = 50.0; //ソナー部光点LEFT
   var _point = 0; //獲得ポイント
-  var _just_tana = 0.5; //HIT確率判定 棚
-  var _tana_range = 50.0; //0.1m単位 +-まではHIT圏内
+  var _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
+  var _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
   var _tana_change_scan_cnt = 0; //棚変化スキャンカウント数
   var _jiai = 0.5; //時合度 0.0～0.9999...
   var _jiai_change_scan_cnt = 0; //時合度の変化スキャンカウント数
@@ -228,6 +277,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   var _now_duration_lv; //光点点滅レベル
   var _shoreHeight = 0.0;
+  var _BottomHeight = 0.0;
 
   var _sencho_message = ""; //船長の発言
 
@@ -303,6 +353,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         globalKeyShore.currentContext?.findRenderObject() as RenderBox;
     _shoreHeight = shoreWidget.size.height;
 
+    //海底部の高さ
+    var BottomWidget =
+        globalKeyBottom.currentContext?.findRenderObject() as RenderBox;
+    _BottomHeight = BottomWidget.size.height;
+
     //共通乱数 0.0～0.999... の乱数の作成 ※共通じゃだめなところには使っちゃだめ
     var rand = (new math.Random()).nextDouble();
 
@@ -327,8 +382,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _tana_change_scan_cnt++;
     if (_tana_change_scan_cnt > TANA_CHANGE_SCAN) {
       _tana_change_scan_cnt = 0;
-      _just_tana = (new math.Random()).nextDouble();
-      debugPrint("タナ" + _just_tana.toString());
+      _justTana = (new math.Random()).nextDouble();
+      debugPrint("タナ" + _justTana.toString());
     }
 
     if (_flg_hit) {
@@ -455,7 +510,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         ((_max_depth).round() / 10).toStringAsFixed(1) +
         ' m';
     _pointer_x = 0;
-    _pointer_y = ((_depth / _max_depth) * (size.height - _appBarHeight) * 0.60);
+    _pointer_y = ((_depth / _max_depth) *
+        (size.height - _appBarHeight - _shoreHeight - _BottomHeight));
     //_pointer_y += sonarTop + _appBarHeight;
     //debugPrint(_pointer_y.toString());
 //         //魚探画像に光点表示
@@ -520,86 +576,122 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //光点点滅速度関連の変数
     final durationMax = POINT_DURATION_MSEC[POINT_DURATION_MSEC.length - 1]!;
     final durationMin = POINT_DURATION_MSEC[0]!;
-    var duration;
+    var duration = 0;
 
-    //HIT確率の算出
     if (!_flg_hit) {
-      var hit_prob = 0.0;
+      //HIT判定処理
+      var hitTanaProb = 0.0;
       //HIT棚との差分
-      final just_tana = (_max_depth * _just_tana);
-      var tana_diff = (_depth - just_tana).abs();
+      final justTana = (_max_depth * _justTana);
+      var tanaDiff = (_depth - justTana).abs();
       //差分が範囲内か
-      if (tana_diff < _tana_range) {
-        hit_prob = 1.0 * ((tana_diff - _tana_range).abs() / _tana_range);
+      if (tanaDiff < _justTanaRange) {
+        hitTanaProb =
+            1.0 * ((tanaDiff - _justTanaRange).abs() / _justTanaRange);
       }
-      if (hit_prob < 0.1) {
-        hit_prob = 0.1; //最低でも1割
+      if (hitTanaProb < 0.1) {
+        hitTanaProb = 0.1; //最低でも1割
       }
 
-      //速さが範囲内か
-      var hit_speedprob = 0.0;
-      //糸出中、かつ水深MAXではない時
-      if (_onclutch && _depth < _max_depth) {
-        hit_speedprob = 0.2; //フォール中の補正
-      } else {
-        //ドラグ出中、止めている時、水深1m未満、水深MAXの時は判定しない
-        if (_tension_activeTrackColor != TENSION_COLOR_DRAG &&
-            _ontap &&
-            _depth > 10 &&
-            _depth < _max_depth) {
-          //HITスピードとの差分
-          var speed_diff = (_speed - HIT_JUST_SPEED).abs();
-          //差分が範囲内か
-          if (speed_diff < HIT_SPEED_RANGE) {
-            hit_speedprob =
-                1.0 * ((speed_diff - HIT_SPEED_RANGE).abs() / HIT_SPEED_RANGE);
-          }
-          if (hit_speedprob < 0.1) {
-            hit_speedprob = 0.1;
-          }
-        }
-      }
-      //HIT確率の算出
-      var hitprob = (hit_prob * hit_speedprob) / 100;
+      //var fishs = FISH_TABLE;
+      Map<int, Map<String, dynamic>> fishs = {...FISH_TABLE};
 
-      //HIT確率から点滅速度を算出
-      duration = durationMax -
-          ((durationMax - durationMin) * (hit_prob * hit_speedprob)).floor();
+      //深さから可能性のある種を抽出
+      fishs.removeWhere((key, value) => _depth < value['tana_min']);
+      fishs.removeWhere((key, value) => _depth > value['tana_max']);
 
-      _disp_info = (hitprob * 100).toStringAsFixed(2) + ' %';
-      _info_backColor = Colors.white;
-
-      //HIT率に伴いポインタの色を変える
-      _pointer_color = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
-
-      //1～0の乱数よりも大きい？
-      var hitrnd = (new math.Random()).nextDouble();
-
-      //debugPrint("HIT比較" + (hitprob).toString() + hitrnd.toString());
-      if (hitprob > hitrnd) {
-        //0以上10未満の乱数
-        var rndfish = (new math.Random()).nextInt(9);
-        //何が釣れたか判定
-        var wariai_add = 0;
-        for (var i = 0; i < FISH_TABLE.length; i++) {
-          var row = FISH_TABLE[i]!;
-          wariai_add += (row['wariai'] as int);
-          if (rndfish < wariai_add) {
-            //i 番目の魚が釣れた
-            _fishidx = i;
-            _hit_scan_cnt = row['hp'];
-            break;
+      var maxProb = 0.0;
+      //種毎の判定
+      fishs.forEach((key, value) {
+        var fish = fishs[key]!;
+        var hitSpeedprob = 0.0;
+        //糸出中、かつ水深MAXではない時
+        if (_onclutch && _depth < _max_depth) {
+          hitSpeedprob = fish['hit_fall']; //フォール中の補正
+        } else {
+          //ドラグ出中、止めている時、水深1m未満、水深MAXの時は判定しない
+          if (_tension_activeTrackColor != TENSION_COLOR_DRAG &&
+              _ontap &&
+              _depth > 10 &&
+              _depth < _max_depth) {
+            //HITスピードとの差分
+            var speedDiff = (_speed - fish['hit_speed_just']).abs();
+            //差分が範囲内か
+            if (speedDiff < fish['hit_speed_range']) {
+              hitSpeedprob = 1.0 *
+                  ((speedDiff - fish['hit_speed_range']).abs() /
+                      fish['hit_speed_range']);
+            }
+            if (hitSpeedprob < 0.1) {
+              hitSpeedprob = 0.1;
+            }
           }
         }
-        //HITと判定
-        _flg_hit = true;
-        //ligntSpotAnimation(POINT_DURATION_MSEC_FAST); //光点アニメーションを早くする
+        //HIT確率の算出
+        var hitProb =
+            (hitTanaProb * hitSpeedprob * _jiai) * fish['wariai'] / 100;
 
-        //console.log("HIT!!!");
-        debugPrint("HIT!!!");
-        _disp_info = 'HIT!!!';
-        _info_backColor = TENSION_COLOR_DANGER;
-      }
+        if (hitTanaProb * hitSpeedprob > maxProb) {
+          maxProb = hitTanaProb * hitSpeedprob * _jiai;
+        }
+        //1～0の乱数生成
+        var hitrnd = (new math.Random()).nextDouble();
+
+        //HIT判定
+        if (hitProb > hitrnd) {
+          //var wariai_add = 0;
+          //for (var i = 0; i < FISH_TABLE.length; i++) {
+
+          // //ここは↑でやる？
+          // var fishs = FISH_TABLE;
+          // //深さから種を抽出
+          // fishs.removeWhere((key, value) => _depth < value['tana_min']);
+          // fishs.removeWhere((key, value) => _depth > value['tana_max']);
+
+          //全種の割合値の合計を算出
+          //var wariaisum = 0;
+
+          // FISH_TABLE.forEach((key, value) {
+          //   wariaisum += value['wariai'] as int;
+          // });
+          //var wariaiavg = wariaisum / FISH_TABLE.length;
+
+          //整数の乱数生成 0～全種の割合値合計（randomはMAXは含まれないので-1しなくて良い）
+          // var rndfish = (new math.Random()).nextInt(_hitTable.length);
+          // for (var i = 0; i < fishs.length; i++) {
+          //   var row = fishs[i]!;
+          //   wariai_add += (row['wariai'] as int);
+          //   debugPrint(wariai_add.toString());
+
+          //   if (rndfish < wariai_add) {
+          //i 番目HIT
+          _fishidx = key;
+          _hit_scan_cnt = fish['hp'];
+          //HITと判定
+          _flg_hit = true;
+          debugPrint("HIT!!!");
+          _disp_info = 'HIT!!!';
+          _info_backColor = TENSION_COLOR_DANGER;
+        }
+        if (_flg_hit) {
+          //ループ抜け
+          return;
+        } else {
+          //HIT確率から点滅速度を算出
+          duration =
+              durationMax - ((durationMax - durationMin) * maxProb).floor();
+          // _disp_info = (hitProb * 100).toStringAsFixed(2) + ' %';
+          // _info_backColor = Colors.white;
+          //HIT率に伴いポインタの色を変える？
+          _pointer_color = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
+        }
+      });
+      //ligntSpotAnimation(POINT_DURATION_MSEC_FAST); //光点アニメーションを早くする
+
+      //console.log("HIT!!!");
+      //});
+
+      //}
     } else {
       //HIT中の処理
       _pointer_color = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
@@ -650,14 +742,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
     if (hannornd > 0.96 && _jiai > depthrnd) {
-      var fishy = (sonarTop - _appBarHeight) + (sonarHeight * _just_tana);
+      var fishy = (sonarTop - _appBarHeight) + (sonarHeight * _justTana);
       //レンジ分バラケ
-      var barake = (_tana_range * ((0.2 - depthrnd) * 1.5));
+      var barake = (_justTanaRange * ((0.2 - depthrnd) * 1.5));
       barake = (barake < 0) ? 0 : barake;
       barake = (barake > (sonarTop - _appBarHeight) + sonarHeight)
           ? (sonarTop - _appBarHeight) + sonarHeight
           : barake;
-      fishy = fishy + (_tana_range * ((0.2 - depthrnd) * 1.5));
+      fishy = fishy + (_justTanaRange * ((0.2 - depthrnd) * 1.5));
       generateFishPointer(fishy, 20);
     }
 
@@ -894,6 +986,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     Stack(children: <Widget>[
                       Container(
                         alignment: Alignment.center,
+                        // margin: EdgeInsets.only(
+                        //     top: math.sin(waveController.value * 0.5 * math.pi),
+                        //     left: math.sin(waveController.value * math.pi)),
                         child: GestureDetector(
                           onTap: () async {
                             setState(() {
@@ -982,36 +1077,65 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     // 外側の余白（マージン）
                     //margin: EdgeInsets.all(8),
                     width: size.width,
-                    height: size.height - _appBarHeight - _shoreHeight,
+                    height: size.height -
+                        _appBarHeight -
+                        _shoreHeight -
+                        _BottomHeight,
+                    child: Column(children: <Widget>[
+                      // new Expanded(
+                      //     child:
+
+                      //),
+                      //ソナー画面
+                      Expanded(
+                        //描画エリア
+                        child: Container(
+                          key: globalKeySonar,
+                          child: Stack(children: <Widget>[
+                            //ソナー光点
+                            Container(
+                              margin: EdgeInsets.only(
+                                  top: _pointer_y, left: _pointer_x),
+                              child: CustomPaint(
+                                painter: LightSpot(
+                                    POINTER_SIZE,
+                                    POINTER_BACK_SIZE,
+                                    _animationRadius.value,
+                                    _pointer_color,
+                                    0,
+                                    0),
+                              ),
+                            ),
+                          ]),
+                        ),
+                      ),
+                    ])),
+
+                //海底
+                Container(
+                    key: globalKeyBottom,
+                    decoration: BoxDecoration(
+
+                        //color: clsColor._getColorFromHex("200070"),
+                        gradient: LinearGradient(
+                      begin: FractionalOffset.topCenter,
+                      end: FractionalOffset.bottomCenter,
+                      colors: [
+                        clsColor._getColorFromHex("758661"),
+                        clsColor._getColorFromHex("455E42"),
+                        clsColor._getColorFromHex("0A081F"),
+                      ],
+                      stops: [0.0, 0.6, 1.0],
+                    )),
+                    // 内側の余白（パディング）
+                    //padding: EdgeInsets.all(8),
+                    // 外側の余白（マージン）
+                    //margin: EdgeInsets.all(8),
                     child: Column(
                       children: <Widget>[
                         // new Expanded(
                         //     child:
 
-                        //),
-                        //ソナー画面
-                        Expanded(
-                          //描画エリア
-                          child: Container(
-                            key: globalKeySonar,
-                            child: Stack(children: <Widget>[
-                              //ソナー光点
-                              Container(
-                                margin: EdgeInsets.only(
-                                    top: _pointer_y, left: _pointer_x),
-                                child: CustomPaint(
-                                  painter: LightSpot(
-                                      POINTER_SIZE,
-                                      POINTER_BACK_SIZE,
-                                      _animationRadius.value,
-                                      _pointer_color,
-                                      0,
-                                      0),
-                                ),
-                              ),
-                            ]),
-                          ),
-                        ),
                         //画面下部
                         Container(
                           margin: EdgeInsets.all(3),
