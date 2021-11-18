@@ -29,6 +29,9 @@
 //済・テンションとスピードバーのデザインを整備 スライダーじゃなくする？
 //済・ソナーに反応光点描画にする。
 //済・テンション連動点滅がおかしい
+//済・魚種毎に大きさ範囲
+//・ヘッダを大改修
+//・魚図鑑画面
 //・%を表示してる方がおもしろい・・・
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
@@ -37,14 +40,12 @@
 //・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
-//・魚種毎に大きさ範囲
 //・魚種毎にバレ条件の設定
 //・魚種毎に巻き志向←→リアクション志向
 //・画面左に竿リール表示、上下ドラッグで動かす、ジグのシャクリ
 //・竿リール表示を左右切り替えるやつを反対側に
 //・アワセシステム
 //  アワセの上手くいきかたで初期バラシレベルが決まるみたいな
-//・魚図鑑画面
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
 //夢
@@ -77,8 +78,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれる
-//  static const DEBUGFLG = true;
-  static const DEBUGFLG = false;
+  static const DEBUGFLG = true;
+//  static const DEBUGFLG = false;
 
   //魚種定義 wariaiの合計値は10にすること
   static const Map<int, Map<String, dynamic>> FISH_TABLE = {
@@ -567,7 +568,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       debugPrint("つりあげ");
       //釣りあげ時のモーダル
       var fish = FISH_TABLE[_fishidx]!;
-      var size = ((fish['size_max'] - fish['size_min']) * _fishSize +
+      var fishSize = ((fish['size_max'] - fish['size_min']) * _fishSize +
           fish['size_min']);
       debugPrint("おおきさ" + size.toString());
       var point = fish['point'] + (fish['point'] * _fishSize).floor();
@@ -576,17 +577,24 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           barrierDismissible: false,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text(fish['name'] + "がつれました"),
-              content: Column(children: <Widget>[
-                new Image(
-                  image: AssetImage('assets/images/' + fish['image']),
-                  width: 150,
-                  height: 150,
-                ),
-                Text(size.toStringAsFixed(1) + "cmです"),
-                Text(point.toString() + 'ポイント獲得です'),
-                Text(fish['text']),
-              ]),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              backgroundColor: clsColor._getColorFromHex('D1F6FF'),
+              title: Text(fish['text']),
+              content: Container(
+                  height: size.height / 3,
+                  child: Column(children: <Widget>[
+                    new Image(
+                      image: AssetImage('assets/images/' + fish['image']),
+                      // width: 150,
+                      // height: 150,
+                    ),
+                    Text(fish['name'] +
+                        "　" +
+                        fishSize.toStringAsFixed(1) +
+                        "cm"),
+                    Text(point.toString() + 'ポイント獲得です'),
+                  ])),
               actions: <Widget>[
                 // ボタン領域
                 // FlatButton(
