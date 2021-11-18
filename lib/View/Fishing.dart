@@ -77,10 +77,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれる
-  final DEBUGFLG = true;
+//  static const DEBUGFLG = true;
+  static const DEBUGFLG = false;
 
   //魚種定義 wariaiの合計値は10にすること
-  final Map<int, Map<String, dynamic>> FISH_TABLE = {
+  static const Map<int, Map<String, dynamic>> FISH_TABLE = {
     0: {
       'name': "アジ", //魚種名
       'image': "aji.jpg", //超過画面の画像
@@ -210,7 +211,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   };
 
   //光点の点滅速度
-  final Map<int, int> POINT_DURATION_MSEC = {
+  static const Map<int, int> POINT_DURATION_MSEC = {
     0: 50,
     1: 100,
     2: 300,
@@ -219,37 +220,37 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     5: 2000,
   };
 
-  //final TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
-  final TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
-  //final TIMER_INTERVAL = 17; //1スキャン時間(msec) 60FPS
-  final TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
-  final TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
-  final TENSION_LINECUT = 290.0; //糸切れ判定値
-  final SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
-  final SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
-  final HOSEI_MAX = 3;
-  final HIT_JUST_SPEED = 150;
-  final HIT_SPEED_RANGE = 80; //+-まではHIT県内
-  final BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
-  final MAX_RAND_ADD_TENSION = 3; //何もしてない時テンションがウロウロするののMAX値
-  final MIN_RAND_ADD_TENSION = -8; //〃 MIN値
+  //static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
+  static const TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
+  //static const TIMER_INTERVAL = 17; //1スキャン時間(msec) 60FPS
+  static const TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
+  static const TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
+  static const TENSION_LINECUT = 290.0; //糸切れ判定値
+  static const SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
+  static const SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
+  static const HOSEI_MAX = 3;
+  static const HIT_JUST_SPEED = 150;
+  static const HIT_SPEED_RANGE = 80; //+-まではHIT県内
+  static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
+  static const MAX_RAND_ADD_TENSION = 3; //何もしてない時テンションがウロウロするののMAX値
+  static const MIN_RAND_ADD_TENSION = -8; //〃 MIN値
   final TENSION_COLOR_SAFE = clsColor._getColorFromHex("4CFF00");
   final TENSION_COLOR_DRAG = clsColor._getColorFromHex("FFD800");
   final TENSION_COLOR_DANGER = clsColor._getColorFromHex("DD0000");
   final SPEED_COLOR = clsColor._getColorFromHex("0094FF");
   final SPEED_COLOR_REELING = clsColor._getColorFromHex("0026FF");
-  final TAP_POINTER_DURATION_MSEC = 500; //タップ時のエフェクト 速度
-  final TAP_POINTER_MAX_RADIUS = 10.0; //タップ時のエフェクト 最大大きさ
-  // final DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
-  // final JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
-  final DEPTH_CHANGE_SCAN = 50; //このスキャン毎に深さの変化傾向が変わる
-  final JIAI_CHANGE_SCAN = 150; //このスキャン毎に時合度が変わる
-  final TANA_CHANGE_SCAN = 300; //このスキャン毎にタナが変わる
-  final POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
-  final POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
+  static const TAP_POINTER_DURATION_MSEC = 500; //タップ時のエフェクト 速度
+  static const TAP_POINTER_MAX_RADIUS = 10.0; //タップ時のエフェクト 最大大きさ
+  // static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
+  // static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
+  static const DEPTH_CHANGE_SCAN = 50; //このスキャン毎に深さの変化傾向が変わる
+  static const JIAI_CHANGE_SCAN = 150; //このスキャン毎に時合度が変わる
+  static const TANA_CHANGE_SCAN = 300; //このスキャン毎にタナが変わる
+  static const POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
+  static const POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
 
-  //final Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
-  final Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
+  //static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
+  static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
 
 // グローバル変数としてGlobalKey型の変数（プロパティ）を定義
   GlobalKey globalKeySonar = GlobalKey();
@@ -263,27 +264,27 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   // late Animation<double> _TapPointerRadius;
 
   //状態フラグ変数
-  var _ontap = false; //現在タップ中フラグ
-  var _onclutch = false; //現在クラッチ状態
-  var _flg_hit = false; //現在HIT中フラグ
-  var _flg_gameover = false; //現在ゲームオーバーフラグ
+  var _onTap = false; //現在タップ中フラグ
+  var _onClutch = false; //現在クラッチ状態
+  var _flgHit = false; //現在HIT中フラグ
+  var _flgGameOver = false; //現在ゲームオーバーフラグ
 
   //ステート変数
   var _tension = 0.0; //テンション値
   var _drag = 250.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _depth = 0.0; //現在糸出し量(0.1m)
-  var _max_depth = 187.0; //最大水深(0.1m)
-  var _disp_depth = '0.0 m'; //深さ表示用
-  var _disp_info = '0.00 %'; //HIT率表示用（デバッグ用）
-  var _tension_activeTrackColor =
+  var _maxDepth = 187.0; //最大水深(0.1m)
+  var _dispDepth = '0.0 m'; //深さ表示用
+  var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
+  var _tensionActiveTrackColor =
       clsColor._getColorFromHex("4CFF00"); //テンションゲージの色
-  var _speed_activeTrackColor = clsColor._getColorFromHex("0094FF"); //スピードゲージの色
-  var _info_backColor = Colors.white; //HIT率表示の背景色（デバッグ用）
-  var _clutch_backColor = Colors.red; //クラッチボタンの背景色
-  Color _pointer_color = Colors.yellow; //ソナー部光点の色
-  var _pointer_y = 0.0; //ソナー部光点TOP
-  var _pointer_x = 50.0; //ソナー部光点LEFT
+  var _speedActiveTrackColor = clsColor._getColorFromHex("0094FF"); //スピードゲージの色
+  var _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
+  var _clutchBackColor = Colors.red; //クラッチボタンの背景色
+  Color _pointerColor = Colors.yellow; //ソナー部光点の色
+  var _lightSpotY = 0.0; //ソナー部光点TOP
+  var _lightSpotX = 50.0; //ソナー部光点LEFT
   var _point = 0; //獲得ポイント
   var _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
   var _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
@@ -361,7 +362,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       return;
     }
 
-    if (_flg_gameover) {
+    if (_flgGameOver) {
       //ゲームオーバー中は無処理
       return;
     }
@@ -417,7 +418,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       debugPrint("タナ" + _justTana.toString());
     }
 
-    if (_flg_hit) {
+    if (_flgHit) {
       //debugPrint("HIT中1");
       if (_hit_scan_cnt > 0) {
         _hit_scan_cnt--;
@@ -432,13 +433,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
     add_val = (rand * (mx + 1 - (mn))).floor() + (mn) + weight;
 
-    if (_onclutch) {
+    if (_onClutch) {
       //クラッチON中はマイナス補正を最大化
       add_val = HOSEI_MAX * -1;
       //水深を加算
       _depth++;
     } else {
-      if (_ontap) {
+      if (_onTap) {
         //巻きスピード
         var hosei = (_speed % SPEED_VAL_MAX) % HOSEI_MAX;
         //var hosei = (_speed % SPEED_VAL_MAX);
@@ -463,14 +464,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (val > TENSION_LINECUT) {
       //糸切れ
       debugPrint("いときれ");
-      _flg_gameover = true;
+      _flgGameOver = true;
       gameovertext = "糸が切れました。\nゲームオーバーです。\nゲームオーバーなのでもう何もできません";
     }
     //座礁判定
-    if (_max_depth < 2.0) {
+    if (_maxDepth < 2.0) {
       //座礁
       debugPrint("座礁");
-      _flg_gameover = true;
+      _flgGameOver = true;
       gameovertext = "船が座礁しました。\nゲームオーバーです。\nゲームオーバーなのでもう何もできません";
     }
     if (gameovertext != "") {
@@ -500,7 +501,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //ドラグ判定
     var drag_val = _drag;
-    //_tension_activeTrackColor = TENSION_COLOR_SAFE;
+    //_tensionActiveTrackColor = TENSION_COLOR_SAFE;
     if (val > drag_val) {
       //テンションとドラグレベルの差分
       var drag_diff = val - drag_val;
@@ -509,7 +510,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       //ドラグ出た分テンションを減らす
       val = val - (drag_diff / 25);
       //テンションゲージの色を変える
-      _tension_activeTrackColor = TENSION_COLOR_DRAG;
+      _tensionActiveTrackColor = TENSION_COLOR_DRAG;
       //audio.currentTime = 0;
       //audio.play();
       //var duration = 200; // 振動時間
@@ -518,55 +519,51 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //  else {
     //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
     //   if (val >= (TENSION_VAL_MAX * 0.9)) {
-    //     _tension_activeTrackColor = TENSION_COLOR_DANGER;
+    //     _tensionActiveTrackColor = TENSION_COLOR_DANGER;
     //   }
     // }
 
     if (val > TENSION_VAL_MAX) val = TENSION_VAL_MAX;
     if (val < TENSION_VAL_MIN) val = TENSION_VAL_MIN;
 
-    if (_depth > _max_depth) _depth = _max_depth;
+    if (_depth > _maxDepth) _depth = _maxDepth;
     if (_depth < 0) _depth = 0.0;
 
     //テンション確定
     _tension = val;
 
     //テンションによってテンションバーの色を変える
-    _tension_activeTrackColor = clsColor._getColorRange(
+    _tensionActiveTrackColor = clsColor._getColorRange(
         TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, TENSION_VAL_MAX);
 
     //水深表示
-    _disp_depth = ((_depth).round() / 10).toStringAsFixed(1) +
+    _dispDepth = ((_depth).round() / 10).toStringAsFixed(1) +
         " / " +
-        ((_max_depth).round() / 10).toStringAsFixed(1) +
+        ((_maxDepth).round() / 10).toStringAsFixed(1) +
         ' m';
-    _pointer_x = 0;
-    _pointer_y = ((_depth / _max_depth) *
+    _lightSpotX = 0;
+    _lightSpotY = ((_depth / _maxDepth) *
         (size.height - _appBarHeight - _shoreHeight - _BottomHeight));
-    //_pointer_y += sonarTop + _appBarHeight;
-    //debugPrint(_pointer_y.toString());
-//         //魚探画像に光点表示
-//         $('.point_img').css('margin-top', (point_height * 1.2) + "%");
 
     //背景色
-    if (_max_depth < 100) {
+    if (_maxDepth < 100) {
       //水深10mまでは中層の範囲は固定
       _disp_depth_lv1 = 1.0;
     } else {
       //水深150mで0.1にする
-      _disp_depth_lv1 = ((_max_depth - 100) / 1400) * -0.9 + 1;
+      _disp_depth_lv1 = ((_maxDepth - 100) / 1400) * -0.9 + 1;
       //debugPrint(_disp_depth_lv1.toString());
     }
-    if (_max_depth < 1000) {
+    if (_maxDepth < 1000) {
       //水深10mまでは深層の範囲は固定
       _disp_depth_lv2 = 1.0;
     } else {
       //水深500mで0.1にする
-      _disp_depth_lv2 = ((_max_depth - 1000) / 4000) * -0.9 + 1;
+      _disp_depth_lv2 = ((_maxDepth - 1000) / 4000) * -0.9 + 1;
     }
 
     //釣り上げ判定
-    if (_flg_hit && _depth <= 1) {
+    if (_flgHit && _depth <= 1) {
       debugPrint("つりあげ");
       //釣りあげ時のモーダル
       var fish = FISH_TABLE[_fishidx]!;
@@ -606,7 +603,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               ],
             );
           });
-      _flg_hit = false;
+      _flgHit = false;
     }
 
     //光点点滅速度関連の変数
@@ -614,11 +611,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     final durationMin = POINT_DURATION_MSEC[0]!;
     var duration = 0;
 
-    if (!_flg_hit) {
+    if (!_flgHit) {
       //HIT判定処理
       var hitTanaProb = 0.0;
       //HIT棚との差分
-      final justTana = (_max_depth * _justTana);
+      final justTana = (_maxDepth * _justTana);
       var tanaDiff = (_depth - justTana).abs();
       //差分が範囲内か
       if (tanaDiff < _justTanaRange) {
@@ -642,14 +639,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         var fish = fishs[key]!;
         var hitSpeedprob = 0.0;
         //糸出中、かつ水深MAXではない時
-        if (_onclutch && _depth < _max_depth) {
+        if (_onClutch && _depth < _maxDepth) {
           hitSpeedprob = fish['hit_fall']; //フォール中の補正
         } else {
-          //ドラグ出中、止めている時、水深1m未満、水深MAXの時は判定しない
-          if (_tension_activeTrackColor != TENSION_COLOR_DRAG &&
-              _ontap &&
-              _depth > 10 &&
-              _depth < _max_depth) {
+          //ドラグ出中、止めている時、水深0m未満、水深MAXの時は判定しない
+          if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
+              _onTap &&
+              _depth > 0 &&
+              _depth < _maxDepth) {
             //HITスピードとの差分
             var speedDiff = (_speed - fish['hit_speed_just']).abs();
             //差分が範囲内か
@@ -685,34 +682,34 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           _fishSize = (new math.Random()).nextDouble();
           _hit_scan_cnt = fish['hp'];
           //HITと判定
-          _flg_hit = true;
+          _flgHit = true;
           debugPrint("HIT!!!");
-          _disp_info = 'HIT!!!';
-          _info_backColor = TENSION_COLOR_DANGER;
+          _dispInfo = 'HIT!!!';
+          _infoBackColor = TENSION_COLOR_DANGER;
         }
-        if (_flg_hit) {
+        if (_flgHit) {
           //ループ抜け
           return;
         } else {
           //HIT確率から点滅速度を算出
           duration =
               durationMax - ((durationMax - durationMin) * maxProb).floor();
-          _disp_info = (maxProb * 100).toStringAsFixed(0) + ' %';
-          _info_backColor = Colors.white;
+          _dispInfo = (maxProb * 100).toStringAsFixed(0) + ' %';
+          _infoBackColor = Colors.white;
           //HIT率に伴いポインタの色を変える？
-          _pointer_color = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
+          _pointerColor = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
         }
       });
     } else {
       //HIT中の処理
-      _pointer_color = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
+      _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
 
       //テンションから点滅速度を算出
       duration = durationMax -
           ((durationMax - durationMin) * (_tension / TENSION_VAL_MAX)).floor();
 
       //バレ判定 水深MAXかテンション一定未満で条件成立
-      if (_depth >= _max_depth || val <= TENSION_VAL_MIN + 20) {
+      if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
         _bare_cnt++;
       } else {
         _bare_cnt = 0;
@@ -721,7 +718,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         //バレ条件成立が一定スキャン保持でバレとする
         debugPrint("バレ");
 
-        _flg_hit = false;
+        _flgHit = false;
         //console.log("bare...");
         //バレのモーダル表示
         //show_modal_bare();
@@ -751,7 +748,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //最大深さをランダムで増減
     var depthrnd = (new math.Random()).nextDouble();
-    _max_depth += 1 * ((_depth_change) - depthrnd);
+    _maxDepth += 1 * ((_depth_change) - depthrnd);
 
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
@@ -816,7 +813,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               // $('#bg-video2').addClass("invisible");
 
               chenge_clutch(false);
-              _ontap = true;
+              _onTap = true;
               //タップ時の画面エフェクト
               offset = Offset(details.globalPosition.dx,
                   details.globalPosition.dy - _appBarHeight);
@@ -824,7 +821,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
               //generateFishPointer(100);
               //タップ時はスピードスライダの色替え
-              _speed_activeTrackColor = SPEED_COLOR_REELING;
+              _speedActiveTrackColor = SPEED_COLOR_REELING;
             },
             //ドラッグ操作で位置が変化した時
             onPanUpdate: (DragUpdateDetails details) {
@@ -832,7 +829,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 return;
               }
               var mX = 0.0;
-              if (!_ontap) {
+              if (!_onTap) {
                 return;
               }
               //現在のX座標を取得する
@@ -861,9 +858,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               debugPrint("タップはなし");
               chenge_clutch(false);
               //add_min = -10;
-              _ontap = false;
+              _onTap = false;
               //スピードスライダの色を戻す
-              _speed_activeTrackColor = SPEED_COLOR;
+              _speedActiveTrackColor = SPEED_COLOR;
               // var video = $('#bg-video').get(0);
               // video.src = './static/videos/Position2_巻き上げ3.mp4';
               // video.pause();
@@ -918,7 +915,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     ),
                                     CustomPaint(
                                       painter: new SliderPainter(
-                                        activeColor: _tension_activeTrackColor,
+                                        activeColor: _tensionActiveTrackColor,
                                         value: _tension / TENSION_VAL_MAX,
                                         backRadius: _animationRadius.value,
                                         maxBackRadius: POINTER_BACK_SIZE,
@@ -933,7 +930,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                           //       trackHeight: 20, //全体の縦長
                           //       valueIndicatorColor: Colors.white, //背景の色
                           //       activeTrackColor:
-                          //           _tension_activeTrackColor, //値有りエリアの色
+                          //           _tensionActiveTrackColor, //値有りエリアの色
                           //       inactiveTrackColor: Colors.white,
                           //       activeTickMarkColor:
                           //           Colors.black.withOpacity(0.0), //値ツマミの色
@@ -1011,7 +1008,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               ),
                               CustomPaint(
                                 painter: new SliderPainter(
-                                  activeColor: _speed_activeTrackColor,
+                                  activeColor: _speedActiveTrackColor,
                                   value: _speed / SPEED_VAL_MAX,
                                   backRadius: 0,
                                   maxBackRadius: 0,
@@ -1023,7 +1020,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     //   data: SliderTheme.of(context).copyWith(
                     //     trackHeight: 20, //全体の縦長
                     //     valueIndicatorColor: Colors.white, //背景の色
-                    //     activeTrackColor: _speed_activeTrackColor, //値有りエリアの色
+                    //     activeTrackColor: _speedActiveTrackColor, //値有りエリアの色
                     //     inactiveTrackColor: Colors.white,
                     //     activeTickMarkColor:
                     //         Colors.black.withOpacity(0.0), //値ツマミの色
@@ -1127,28 +1124,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             clsColor._getColorFromHex("000000"),
                           ],
                           stops: [0.0, _disp_depth_lv1, _disp_depth_lv2, 1.0],
-                        )
-                        // ,
-                        // // 背景画像
-                        // image: DecorationImage(
-                        //   image: AssetImage('Assets/Images/sencho.png'),
-                        //   fit: BoxFit.cover, //？？？全画面にするときはここ有効化
-                        // ),
-                        ),
-                    // 内側の余白（パディング）
-                    //padding: EdgeInsets.all(8),
-                    // 外側の余白（マージン）
-                    //margin: EdgeInsets.all(8),
+                        )),
                     width: size.width,
                     height: size.height -
                         _appBarHeight -
                         _shoreHeight -
                         _BottomHeight,
                     child: Column(children: <Widget>[
-                      // new Expanded(
-                      //     child:
-
-                      //),
                       //ソナー画面
                       Expanded(
                         //描画エリア
@@ -1158,13 +1140,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             //ソナー光点
                             Container(
                               margin: EdgeInsets.only(
-                                  top: _pointer_y, left: _pointer_x),
+                                  top: _lightSpotY, left: _lightSpotX),
                               child: CustomPaint(
                                 painter: LightSpot(
                                     POINTER_SIZE,
                                     POINTER_BACK_SIZE,
                                     _animationRadius.value,
-                                    _pointer_color,
+                                    _pointerColor,
                                     0,
                                     0),
                               ),
@@ -1235,7 +1217,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                           child: ElevatedButton(
                                             child: const Text('クラッチ'),
                                             style: ElevatedButton.styleFrom(
-                                              primary: _clutch_backColor, //背景色
+                                              primary: _clutchBackColor, //背景色
                                               onPrimary: Colors.black, //押したときの色
                                               shape: const StadiumBorder(),
                                               side: BorderSide(
@@ -1248,7 +1230,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                               //document.getElementById( 'clutch_sound' ).currentTime = 0 ;
                                               //$('#clutch_sound').get(0).play();
                                               ////var video = $('#bg-video').get(0);
-                                              if (!_onclutch) {
+                                              if (!_onClutch) {
                                                 //クラッチOFFの場合、クラッチONする
                                                 //$('#btn_clutch').addClass("btn_clutch_on");
                                                 chenge_clutch(true);
@@ -1284,7 +1266,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                               border: Border.all(
                                                   color: Colors.red, width: 3),
                                               color: Colors.white),
-                                          child: Text(_disp_depth,
+                                          child: Text(_dispDepth,
                                               style: TextStyle(
                                                 color: Colors.black,
                                                 fontWeight: FontWeight.bold,
@@ -1293,9 +1275,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                         ),
                                       ],
                                     ),
-                                    Text(_disp_info,
+                                    Text(_dispInfo,
                                         style: TextStyle(
-                                          backgroundColor: _info_backColor,
+                                          backgroundColor: _infoBackColor,
                                         )),
                                     Container(
                                       //width: size.width / 3,
@@ -1372,17 +1354,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   //クラッチ状態変更
   void chenge_clutch(bool flg) {
-    if (flg == _onclutch) {
+    if (flg == _onClutch) {
       //状態変更無し時は無処理
       return;
     }
     if (flg) {
       //クラッチOFF→ONに変更
-      _clutch_backColor = Colors.lightBlue;
+      _clutchBackColor = Colors.lightBlue;
     } else {
-      _clutch_backColor = Colors.red;
+      _clutchBackColor = Colors.red;
     }
-    _onclutch = flg;
+    _onClutch = flg;
   }
 
   bool ligntSpotAnimation(bool initflg, int duration_msec) {
