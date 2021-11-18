@@ -24,22 +24,27 @@
 //済・魚種毎にいい速度の設定
 //済・ソナーの0m地点に水面とか船の画像。
 //済・スライダー関係を全部canvasにする
+//済・テンションバーのデザインが変
+//済・テンションバー 危ないときアニメーション光るようにする
+//済・テンションとスピードバーのデザインを整備 スライダーじゃなくする？
+//済・ソナーに反応光点描画にする。
+//済・テンション連動点滅がおかしい
 //・%を表示してる方がおもしろい・・・
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
 //・ドラグが出てる時はどっか揺らすみたいな
 //・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
-//・テンションバーのデザインが変
-//・テンションバー 危ないときアニメーション光るようにする
-//・テンションとスピードバーのデザインを整備 スライダーじゃなくする？
-//・ソナーに反応光点描画にする。
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
+//・魚種毎に大きさ範囲
 //・魚種毎にバレ条件の設定
+//・魚種毎に巻き志向←→リアクション志向
 //・画面左に竿リール表示、上下ドラッグで動かす、ジグのシャクリ
+//・竿リール表示を左右切り替えるやつを反対側に
 //・アワセシステム
 //  アワセの上手くいきかたで初期バラシレベルが決まるみたいな
+//・魚図鑑画面
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
 //夢
@@ -71,6 +76,9 @@ class Fishing extends StatefulWidget {
 class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
+  //デバッグフラグ すぐつれる
+  final DEBUGFLG = true;
+
   //魚種定義 wariaiの合計値は10にすること
   final Map<int, Map<String, dynamic>> FISH_TABLE = {
     0: {
@@ -88,6 +96,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_fall': 0.2, //フォール志向
       'hit_speed_just': 50, //スピード志向
       'hit_speed_range': 40, //スピード志向範囲+-
+      'size_min': 7.6, //大きさ範囲最小
+      'size_max': 51.3, //大きさ範囲最大
     },
     1: {
       'name': "タチウオ",
@@ -104,6 +114,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_fall': 0.3,
       'hit_speed_just': 100,
       'hit_speed_range': 50,
+      'size_min': 64.0,
+      'size_max': 150.5,
     },
     2: {
       'name': "鯉",
@@ -120,6 +132,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_fall': 0.1,
       'hit_speed_just': 75,
       'hit_speed_range': 50,
+      'size_min': 34.4,
+      'size_max': 114.8,
     },
     3: {
       'name': "マダイ",
@@ -136,6 +150,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_fall': 0.1,
       'hit_speed_just': 150,
       'hit_speed_range': 50,
+      'size_min': 26.3,
+      'size_max': 86.8,
     },
     4: {
       'name': "宮澤クン",
@@ -152,8 +168,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_fall': 0.6,
       'hit_speed_just': 250,
       'hit_speed_range': 50,
+      'size_min': 9999.9,
+      'size_max': 19999.9,
     },
-    0: {
+    5: {
       'name': "サバ", //魚種名
       'image': "aji.jpg", //超過画面の画像
       'text': "写真は仮です", //釣果画面のコメント
@@ -168,8 +186,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_fall': 0.2, //フォール志向
       'hit_speed_just': 150, //スピード志向
       'hit_speed_range': 30, //スピード志向範囲+-
+      'size_min': 14.3,
+      'size_max': 67.2,
     },
-    0: {
+    6: {
       'name': "サゴシ", //魚種名
       'image': "aji.jpg", //超過画面の画像
       'text': "写真はもう仮です", //釣果画面のコメント
@@ -184,16 +204,19 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_fall': 1.0, //フォール志向
       'hit_speed_just': 170, //スピード志向
       'hit_speed_range': 40, //スピード志向範囲+-
+      'size_min': 35.3,
+      'size_max': 69.9,
     },
   };
 
   //光点の点滅速度
   final Map<int, int> POINT_DURATION_MSEC = {
-    0: 100,
-    1: 300,
-    2: 700,
-    3: 1000,
-    4: 2000,
+    0: 50,
+    1: 100,
+    2: 300,
+    3: 700,
+    4: 1000,
+    5: 2000,
   };
 
   //final TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
@@ -271,6 +294,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _cursorx = 0.0; //ドラッグ操作開始時の座標X
 
   var _fishidx = 0; //現在HIT中の魚種IDX
+  var _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
   var _hit_scan_cnt = 0; //HITしてからのスキャン数
   var _bare_cnt = 0; //バレ判定カウント
 
@@ -291,6 +315,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   late AnimationController waveController; // AnimationControllerの宣言
 
+  var _ligntSpotAnimationChangeing = false;
+
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
   // var audio = new Audio(url);
@@ -307,7 +333,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //光点アニメーションの初期化
     _now_duration_lv = POINT_DURATION_MSEC.length - 1; //初期値は最大値
-    ligntSpotAnimation(POINT_DURATION_MSEC[_now_duration_lv]!);
+    ligntSpotAnimation(true, POINT_DURATION_MSEC[_now_duration_lv]!);
     //定周期タイマの設定
     Timer.periodic(
       Duration(milliseconds: TIMER_INTERVAL),
@@ -399,9 +425,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       //テンション増減にHIT中補正をかける
       var fish = FISH_TABLE[_fishidx]!;
       mx += (fish['add_max'] as int) *
-          (_hit_scan_cnt / (fish['hp'] as int)).round();
+          (_hit_scan_cnt / (fish['hp'] as int) * _fishSize).round();
       mn += (fish['add_min'] as int) *
-          (_hit_scan_cnt / (fish['hp'] as int)).round();
+          (_hit_scan_cnt / (fish['hp'] as int) * _fishSize).round();
       weight = fish['weight'];
     }
     add_val = (rand * (mx + 1 - (mn))).floor() + (mn) + weight;
@@ -544,6 +570,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       debugPrint("つりあげ");
       //釣りあげ時のモーダル
       var fish = FISH_TABLE[_fishidx]!;
+      var size = ((fish['size_max'] - fish['size_min']) * _fishSize +
+          fish['size_min']);
+      debugPrint("おおきさ" + size.toString());
+      var point = fish['point'] + (fish['point'] * _fishSize).floor();
       var result = showDialog<int>(
           context: context,
           barrierDismissible: false,
@@ -556,7 +586,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   width: 150,
                   height: 150,
                 ),
-                Text(fish['point'].toString() + 'ポイント獲得です'),
+                Text(size.toStringAsFixed(1) + "cmです"),
+                Text(point.toString() + 'ポイント獲得です'),
                 Text(fish['text']),
               ]),
               actions: <Widget>[
@@ -568,7 +599,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 FlatButton(
                   child: Text("OK"),
                   onPressed: () {
-                    _point += fish['point'] as int;
+                    _point += point as int;
                     Navigator.pop(context);
                   },
                 ),
@@ -637,15 +668,21 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             (hitTanaProb * hitSpeedprob * _jiai) * fish['wariai'] / 100;
 
         if (hitTanaProb * hitSpeedprob > maxProb) {
-          maxProb = hitTanaProb * hitSpeedprob * _jiai;
+          maxProb = hitTanaProb * hitSpeedprob * _jiai * fish['wariai'];
         }
         //1～0の乱数生成
         var hitrnd = (new math.Random()).nextDouble();
+        if (DEBUGFLG) {
+          //すぐつれる
+          hitrnd = 0.001;
+        }
 
         //HIT判定
         if (hitProb > hitrnd) {
           //i 番目HIT
           _fishidx = key;
+          //大きさ決定
+          _fishSize = (new math.Random()).nextDouble();
           _hit_scan_cnt = fish['hp'];
           //HITと判定
           _flg_hit = true;
@@ -704,9 +741,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       }
     }
     //点滅速度レベルが変化した？
-    if (new_duration_lv != _now_duration_lv) {
-      _now_duration_lv = new_duration_lv;
-      ligntSpotAnimation(POINT_DURATION_MSEC[_now_duration_lv] as int);
+    if (new_duration_lv != _now_duration_lv || _ligntSpotAnimationChangeing) {
+      if (ligntSpotAnimation(
+          false, POINT_DURATION_MSEC[new_duration_lv] as int)) {
+        //今回のアニメーションが止まってから変化させる
+        _now_duration_lv = new_duration_lv;
+      }
     }
 
     //最大深さをランダムで増減
@@ -1345,16 +1385,28 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _onclutch = flg;
   }
 
-  void ligntSpotAnimation(int duration_msec) {
-    //アニメーションの定義
-    _animationController = AnimationController(
-        duration: Duration(milliseconds: duration_msec), vsync: this);
-    _animationRadius =
-        Tween(begin: 0.0, end: POINTER_BACK_SIZE).animate(_animationController)
-          ..addListener(() {
-            setState(() {});
-          });
-    _animationController.repeat(reverse: false);
+  bool ligntSpotAnimation(bool initflg, int duration_msec) {
+    if (initflg || !_animationController.isAnimating) {
+      debugPrint("あたらしい");
+      //アニメーションの定義
+      _animationController = AnimationController(
+          duration: Duration(milliseconds: duration_msec), vsync: this);
+      _animationRadius = Tween(begin: 0.0, end: POINTER_BACK_SIZE)
+          .animate(_animationController)
+        ..addListener(() {
+          setState(() {});
+        });
+      _animationController.repeat(reverse: false);
+      _ligntSpotAnimationChangeing = false;
+      return true;
+    } else {
+      if (!_ligntSpotAnimationChangeing) {
+        debugPrint("止める指示");
+        _animationController.forward();
+        _ligntSpotAnimationChangeing = true;
+      }
+      return false;
+    }
   }
 }
 
