@@ -41,6 +41,7 @@
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
 //・魚種毎にバレ条件の設定
+//・魚種毎に底生志向
 //・魚種毎に巻き志向←→リアクション志向
 //・画面左に竿リール表示、上下ドラッグで動かす、ジグのシャクリ
 //・竿リール表示を左右切り替えるやつを反対側に
@@ -122,7 +123,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     2: {
       'name': "鯉",
       'image': "koi.jpg",
-      'text': "ヤッターマン",
+      'text': "スーパーレア",
       'hp': 3000, //このスキャン経過で0になる
       'add_max': 10,
       'add_min': -6,
@@ -194,7 +195,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     6: {
       'name': "サゴシ", //魚種名
       'image': "aji.jpg", //超過画面の画像
-      'text': "写真はもう仮です", //釣果画面のコメント
+      'text': "あなたは満足を得ました", //釣果画面のコメント
       'hp': 1000, //このスキャン経過で0になる
       'add_max': 20, //引きの最大
       'add_min': -5, //引きの最小（最大との乖離が暴れ度）
@@ -289,9 +290,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _point = 0; //獲得ポイント
   var _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
   var _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
-  var _tana_change_scan_cnt = 0; //棚変化スキャンカウント数
+  var _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
   var _jiai = 0.5; //時合度 0.0～0.9999...
-  var _jiai_change_scan_cnt = 0; //時合度の変化スキャンカウント数
+  var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
 
   var _cursorx = 0.0; //ドラッグ操作開始時の座標X
 
@@ -310,7 +311,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _shoreHeight = 0.0;
   var _BottomHeight = 0.0;
 
-  var _sencho_message = ""; //船長の発言
+  var _senchoMessage = ""; //船長の発言
 
   late Offset offset = Offset(0.0, 0.0);
   late double _appBarHeight = 0.0;
@@ -368,7 +369,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       return;
     }
 
-    num add_val = 0;
+    num addVal = 0;
     var mx = MAX_RAND_ADD_TENSION;
     var mn = MIN_RAND_ADD_TENSION;
     var weight = 0;
@@ -404,17 +405,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
 
     //時合の変化判定
-    _jiai_change_scan_cnt++;
-    if (_jiai_change_scan_cnt > JIAI_CHANGE_SCAN) {
-      _jiai_change_scan_cnt = 0;
+    _jiaiChangeScanCnt++;
+    if (_jiaiChangeScanCnt > JIAI_CHANGE_SCAN) {
+      _jiaiChangeScanCnt = 0;
       _jiai = (new math.Random()).nextDouble();
       debugPrint("時合度" + _jiai.toString());
     }
 
     //タナの変化判定
-    _tana_change_scan_cnt++;
-    if (_tana_change_scan_cnt > TANA_CHANGE_SCAN) {
-      _tana_change_scan_cnt = 0;
+    _tanaChangeScanCnt++;
+    if (_tanaChangeScanCnt > TANA_CHANGE_SCAN) {
+      _tanaChangeScanCnt = 0;
       _justTana = (new math.Random()).nextDouble();
       debugPrint("タナ" + _justTana.toString());
     }
@@ -432,11 +433,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           (_hit_scan_cnt / (fish['hp'] as int) * _fishSize).round();
       weight = fish['weight'];
     }
-    add_val = (rand * (mx + 1 - (mn))).floor() + (mn) + weight;
+    addVal = (rand * (mx + 1 - (mn))).floor() + (mn) + weight;
 
     if (_onClutch) {
       //クラッチON中はマイナス補正を最大化
-      add_val = HOSEI_MAX * -1;
+      addVal = HOSEI_MAX * -1;
       //水深を加算
       _depth++;
     } else {
@@ -445,19 +446,19 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         var hosei = (_speed % SPEED_VAL_MAX) % HOSEI_MAX;
         //var hosei = (_speed % SPEED_VAL_MAX);
         //タップ中は補正を加味する
-        add_val = add_val + hosei.round();
+        addVal = addVal + hosei.round();
         //水深減算
         _depth = _depth - _speed / SPEED_VAL_MAX;
       }
     }
-    if (add_val > 0) {
+    if (addVal > 0) {
       //テンション+時は現在テンションによって補正をかける
-      add_val * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
+      addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
       //二次関数 テンション上がるごとに上がりにくくする
-      add_val = add_val +
-          (add_val * -1) * (MathPow._getPow(2, (_tension / TENSION_VAL_MAX)));
+      addVal = addVal +
+          (addVal * -1) * (MathPow._getPow(2, (_tension / TENSION_VAL_MAX)));
     }
-    var val = _tension + add_val;
+    var val = _tension + addVal;
 
     //ゲームオーバー判定
     var gameovertext = "";
@@ -576,40 +577,54 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
-              backgroundColor: clsColor._getColorFromHex('D1F6FF'),
-              title: Text(fish['text']),
-              content: Container(
-                  height: size.height / 3,
-                  child: Column(children: <Widget>[
-                    new Image(
-                      image: AssetImage('assets/images/' + fish['image']),
-                      // width: 150,
-                      // height: 150,
+            return Container(
+                // height: size.height / 3,
+                // width: size.width / 1.5,
+                decoration: new BoxDecoration(
+                    image: new DecorationImage(
+                  image: new AssetImage("assets/images/fishback.jpg"),
+                  fit: BoxFit.cover,
+                )),
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                  backgroundColor:
+                      clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
+                  title: Text(fish['text']),
+                  content: Container(
+                      height: size.height / 3,
+                      // decoration: new BoxDecoration(
+                      //     image: new DecorationImage(
+                      //   image: new AssetImage("assets/images/fishback.jpg"),
+                      //   fit: BoxFit.cover,
+                      // )),
+                      child: Column(children: <Widget>[
+                        new Image(
+                          image: AssetImage('assets/images/' + fish['image']),
+                          // width: 150,
+                          // height: 150,
+                        ),
+                        Text(fish['name'] +
+                            "　" +
+                            fishSize.toStringAsFixed(1) +
+                            "cm"),
+                        Text(point.toString() + 'ポイント獲得です'),
+                      ])),
+                  actions: <Widget>[
+                    // ボタン領域
+                    // FlatButton(
+                    //   child: Text("Cancel"),
+                    //   onPressed: () => Navigator.pop(context),
+                    // ),
+                    FlatButton(
+                      child: Text("OK"),
+                      onPressed: () {
+                        _point += point as int;
+                        Navigator.pop(context);
+                      },
                     ),
-                    Text(fish['name'] +
-                        "　" +
-                        fishSize.toStringAsFixed(1) +
-                        "cm"),
-                    Text(point.toString() + 'ポイント獲得です'),
-                  ])),
-              actions: <Widget>[
-                // ボタン領域
-                // FlatButton(
-                //   child: Text("Cancel"),
-                //   onPressed: () => Navigator.pop(context),
-                // ),
-                FlatButton(
-                  child: Text("OK"),
-                  onPressed: () {
-                    _point += point as int;
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            );
+                  ],
+                ));
           });
       _flgHit = false;
     }
@@ -846,9 +861,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               var movex = mX - _cursorx;
               //x座標記憶を更新
               _cursorx = mX;
-              var add_val = (movex / (1000 / 2) * SPEED_VAL_MAX);
+              var addVal = (movex / (1000 / 2) * SPEED_VAL_MAX);
               //巻き速度値に加算
-              var val = _speed + add_val;
+              var val = _speed + addVal;
               if (val > SPEED_VAL_MAX) val = SPEED_VAL_MAX;
               if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
               _speed = val;
@@ -1060,7 +1075,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         child: GestureDetector(
                           onTap: () async {
                             setState(() {
-                              _sencho_message = "わしゃあ忙しいんで！";
+                              _senchoMessage = "わしゃあ忙しいんで！";
                             });
                             var result = await showDialog<int>(
                               context: context,
