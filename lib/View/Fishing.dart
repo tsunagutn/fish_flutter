@@ -61,7 +61,6 @@ import 'package:fish_flutter/Model/WaveClipper.dart';
 import 'package:fish_flutter/Model/SenchoDialog.dart';
 import 'package:fish_flutter/Model/SliderPainter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import 'DrawerItem.dart';
 import 'dart:async';
@@ -496,15 +495,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
 
     //ドラグ判定
-    var drag_val = _drag;
+    var dragVal = _drag;
     //_tensionActiveTrackColor = TENSION_COLOR_SAFE;
-    if (val > drag_val) {
+    if (val > dragVal) {
       //テンションとドラグレベルの差分
-      var drag_diff = val - drag_val;
+      var dragDiff = val - dragVal;
       //ドラグ出た分深さを増やす
-      _depth = _depth + drag_diff / 30;
+      _depth = _depth + dragDiff / 30;
       //ドラグ出た分テンションを減らす
-      val = val - (drag_diff / 25);
+      val = val - (dragDiff / 25);
       //テンションゲージの色を変える
       _tensionActiveTrackColor = TENSION_COLOR_DRAG;
       //audio.currentTime = 0;
@@ -755,20 +754,20 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     duration = duration > durationMax ? durationMax : duration;
     duration = duration < durationMin ? durationMin : duration;
     //今回の点滅速度レベル 初期値は最大値
-    var new_duration_lv = POINT_DURATION_MSEC.length - 1;
+    var newDurationLv = POINT_DURATION_MSEC.length - 1;
     for (var lv = 0; lv < POINT_DURATION_MSEC.length; lv++) {
       var d = POINT_DURATION_MSEC[lv]!;
       if (d > duration) {
-        new_duration_lv = lv;
+        newDurationLv = lv;
         break;
       }
     }
     //点滅速度レベルが変化した？
-    if (new_duration_lv != _nowDurationLv || _ligntSpotAnimationChangeing) {
+    if (newDurationLv != _nowDurationLv || _ligntSpotAnimationChangeing) {
       if (ligntSpotAnimation(
-          false, POINT_DURATION_MSEC[new_duration_lv] as int)) {
+          false, POINT_DURATION_MSEC[newDurationLv] as int)) {
         //今回のアニメーションが止まってから変化させる
-        _nowDurationLv = new_duration_lv;
+        _nowDurationLv = newDurationLv;
       }
     }
 
@@ -927,7 +926,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         //テンションとドラグレベルのスライダーをstackで重ねて表示
                         child: new Stack(children: <Widget>[
                           // //テンションスライダー
-
                           Container(
                               margin: EdgeInsets.only(left: 10, right: 10),
                               //color: Colors.white,
