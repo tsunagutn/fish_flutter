@@ -231,8 +231,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
   static const SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   static const HOSEI_MAX = 3;
-  static const HIT_JUST_SPEED = 150;
-  static const HIT_SPEED_RANGE = 80; //+-まではHIT県内
   static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
   static const MAX_RAND_ADD_TENSION = 3; //何もしてない時テンションがウロウロするののMAX値
   static const MIN_RAND_ADD_TENSION = -8; //〃 MIN値
@@ -241,10 +239,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   final TENSION_COLOR_DANGER = clsColor._getColorFromHex("DD0000");
   final SPEED_COLOR = clsColor._getColorFromHex("0094FF");
   final SPEED_COLOR_REELING = clsColor._getColorFromHex("0026FF");
-  static const TAP_POINTER_DURATION_MSEC = 500; //タップ時のエフェクト 速度
-  static const TAP_POINTER_MAX_RADIUS = 10.0; //タップ時のエフェクト 最大大きさ
-  // static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
-  // static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
   static const DEPTH_CHANGE_SCAN = 50; //このスキャン毎に深さの変化傾向が変わる
   static const JIAI_CHANGE_SCAN = 150; //このスキャン毎に時合度が変わる
   static const TANA_CHANGE_SCAN = 300; //このスキャン毎にタナが変わる
@@ -298,18 +292,18 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   var _fishidx = 0; //現在HIT中の魚種IDX
   var _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
-  var _hit_scan_cnt = 0; //HITしてからのスキャン数
-  var _bare_cnt = 0; //バレ判定カウント
+  var _hitScanCnt = 0; //HITしてからのスキャン数
+  var _bareCnt = 0; //バレ判定カウント
 
-  var _depth_change = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
-  var _depth_change_scan_cnt = 0; //深さの変化傾向スキャンカウント数
-  var _depth_change_order = 0; //変化傾向 初期値は現状維持
-  var _disp_depth_lv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
-  var _disp_depth_lv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
+  var _depthChange = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
+  var _depthChangeScanCnt = 0; //深さの変化傾向スキャンカウント数
+  var _depthChangeOrder = 0; //変化傾向 初期値は現状維持
+  var _dispDepthLv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
+  var _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
 
-  var _now_duration_lv; //光点点滅レベル
+  var _nowDurationLv; //光点点滅レベル
   var _shoreHeight = 0.0;
-  var _BottomHeight = 0.0;
+  var _bottomHeight = 0.0;
 
   var _senchoMessage = ""; //船長の発言
 
@@ -335,8 +329,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     });
 
     //光点アニメーションの初期化
-    _now_duration_lv = POINT_DURATION_MSEC.length - 1; //初期値は最大値
-    ligntSpotAnimation(true, POINT_DURATION_MSEC[_now_duration_lv]!);
+    _nowDurationLv = POINT_DURATION_MSEC.length - 1; //初期値は最大値
+    ligntSpotAnimation(true, POINT_DURATION_MSEC[_nowDurationLv]!);
     //定周期タイマの設定
     Timer.periodic(
       Duration(milliseconds: TIMER_INTERVAL),
@@ -388,20 +382,20 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _shoreHeight = shoreWidget.size.height;
 
     //海底部の高さ
-    var BottomWidget =
+    var bottomWidget =
         globalKeyBottom.currentContext?.findRenderObject() as RenderBox;
-    _BottomHeight = BottomWidget.size.height;
+    _bottomHeight = bottomWidget.size.height;
 
     //共通乱数 0.0～0.999... の乱数の作成 ※共通じゃだめなところには使っちゃだめ
     var rand = (new math.Random()).nextDouble();
 
     //深さの変化傾向判定
-    _depth_change_scan_cnt++;
-    if (_depth_change_scan_cnt > DEPTH_CHANGE_SCAN) {
-      _depth_change_scan_cnt = 0;
-      _depth_change = DEPTH_CHANGE_ORDERS[_depth_change_order]! +
-          ((DEPTH_CHANGE_ORDERS[_depth_change_order]! - rand) / 10);
-      debugPrint("深さ変化傾向" + _depth_change.toString());
+    _depthChangeScanCnt++;
+    if (_depthChangeScanCnt > DEPTH_CHANGE_SCAN) {
+      _depthChangeScanCnt = 0;
+      _depthChange = DEPTH_CHANGE_ORDERS[_depthChangeOrder]! +
+          ((DEPTH_CHANGE_ORDERS[_depthChangeOrder]! - rand) / 10);
+      debugPrint("深さ変化傾向" + _depthChange.toString());
     }
 
     //時合の変化判定
@@ -422,15 +416,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     if (_flgHit) {
       //debugPrint("HIT中1");
-      if (_hit_scan_cnt > 0) {
-        _hit_scan_cnt--;
+      if (_hitScanCnt > 0) {
+        _hitScanCnt--;
       }
       //テンション増減にHIT中補正をかける
       var fish = FISH_TABLE[_fishidx]!;
       mx += (fish['add_max'] as int) *
-          (_hit_scan_cnt / (fish['hp'] as int) * _fishSize).round();
+          (_hitScanCnt / (fish['hp'] as int) * _fishSize).round();
       mn += (fish['add_min'] as int) *
-          (_hit_scan_cnt / (fish['hp'] as int) * _fishSize).round();
+          (_hitScanCnt / (fish['hp'] as int) * _fishSize).round();
       weight = fish['weight'];
     }
     addVal = (rand * (mx + 1 - (mn))).floor() + (mn) + weight;
@@ -545,23 +539,23 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         ' m';
     _lightSpotX = 0;
     _lightSpotY = ((_depth / _maxDepth) *
-        (size.height - _appBarHeight - _shoreHeight - _BottomHeight));
+        (size.height - _appBarHeight - _shoreHeight - _bottomHeight));
 
     //背景色
     if (_maxDepth < 100) {
       //水深10mまでは中層の範囲は固定
-      _disp_depth_lv1 = 1.0;
+      _dispDepthLv1 = 1.0;
     } else {
       //水深150mで0.1にする
-      _disp_depth_lv1 = ((_maxDepth - 100) / 1400) * -0.9 + 1;
-      //debugPrint(_disp_depth_lv1.toString());
+      _dispDepthLv1 = ((_maxDepth - 100) / 1400) * -0.9 + 1;
+      //debugPrint(_dispDepthLv1.toString());
     }
     if (_maxDepth < 1000) {
       //水深10mまでは深層の範囲は固定
-      _disp_depth_lv2 = 1.0;
+      _dispDepthLv2 = 1.0;
     } else {
       //水深500mで0.1にする
-      _disp_depth_lv2 = ((_maxDepth - 1000) / 4000) * -0.9 + 1;
+      _dispDepthLv2 = ((_maxDepth - 1000) / 4000) * -0.9 + 1;
     }
 
     //釣り上げ判定
@@ -586,6 +580,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   fit: BoxFit.cover,
                 )),
                 child: AlertDialog(
+                  titleTextStyle: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      shadows: <Shadow>[
+                        Shadow(
+                            offset: Offset(2.0, 4.0),
+                            blurRadius: 2.0,
+                            color: Colors.black)
+                      ]),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20.0))),
                   backgroundColor:
@@ -703,7 +706,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           _fishidx = key;
           //大きさ決定
           _fishSize = (new math.Random()).nextDouble();
-          _hit_scan_cnt = fish['hp'];
+          _hitScanCnt = fish['hp'];
           //HITと判定
           _flgHit = true;
           debugPrint("HIT!!!");
@@ -733,11 +736,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
       //バレ判定 水深MAXかテンション一定未満で条件成立
       if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
-        _bare_cnt++;
+        _bareCnt++;
       } else {
-        _bare_cnt = 0;
+        _bareCnt = 0;
       }
-      if (_bare_cnt >= BARE_MAX) {
+      if (_bareCnt >= BARE_MAX) {
         //バレ条件成立が一定スキャン保持でバレとする
         debugPrint("バレ");
 
@@ -745,7 +748,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         //console.log("bare...");
         //バレのモーダル表示
         //show_modal_bare();
-        _bare_cnt = 0;
+        _bareCnt = 0;
       }
     }
 
@@ -761,17 +764,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       }
     }
     //点滅速度レベルが変化した？
-    if (new_duration_lv != _now_duration_lv || _ligntSpotAnimationChangeing) {
+    if (new_duration_lv != _nowDurationLv || _ligntSpotAnimationChangeing) {
       if (ligntSpotAnimation(
           false, POINT_DURATION_MSEC[new_duration_lv] as int)) {
         //今回のアニメーションが止まってから変化させる
-        _now_duration_lv = new_duration_lv;
+        _nowDurationLv = new_duration_lv;
       }
     }
 
     //最大深さをランダムで増減
     var depthrnd = (new math.Random()).nextDouble();
-    _maxDepth += 1 * ((_depth_change) - depthrnd);
+    _maxDepth += 1 * ((_depthChange) - depthrnd);
 
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
@@ -1082,14 +1085,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               barrierDismissible: false,
                               builder: (_) {
                                 return SenchoDialog(
-                                  depth_change_order: _depth_change_order,
+                                  depth_change_order: _depthChangeOrder,
                                   point: _point,
                                 );
                               },
                             );
                             debugPrint(result.toString());
                             setState(() {
-                              _depth_change_order = result as int;
+                              _depthChangeOrder = result as int;
                             });
                           },
                           child: new Image(
@@ -1146,13 +1149,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             clsColor._getColorFromHex("002142"),
                             clsColor._getColorFromHex("000000"),
                           ],
-                          stops: [0.0, _disp_depth_lv1, _disp_depth_lv2, 1.0],
+                          stops: [0.0, _dispDepthLv1, _dispDepthLv2, 1.0],
                         )),
                     width: size.width,
                     height: size.height -
                         _appBarHeight -
                         _shoreHeight -
-                        _BottomHeight,
+                        _bottomHeight,
                     child: Column(children: <Widget>[
                       //ソナー画面
                       Expanded(
