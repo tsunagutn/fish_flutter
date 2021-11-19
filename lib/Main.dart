@@ -1,6 +1,5 @@
 //flutter run -d chrome でchrome動作
 
-import 'package:fish_flutter/Model/lightspot.dart';
 import 'package:flutter/material.dart';
 import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/View/Settings.dart';
