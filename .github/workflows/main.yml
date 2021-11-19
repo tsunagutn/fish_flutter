@@ -21,6 +21,9 @@ jobs:
         flutter config --enable-web
         flutter pub get
 
+    - name: Build
+      run: flutter build web --no-sound-null-safety
+
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v2.8.0
       env:
