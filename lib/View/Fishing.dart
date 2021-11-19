@@ -467,7 +467,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       //座礁
       debugPrint("座礁");
       _flgGameOver = true;
-      gameovertext = "船が座礁しました。\nゲームオーバーです。\nゲームオーバーなのでもう何もできません";
+      gameovertext = "船が座礁しました。\nゲームオーバーです。\nゲームオーバーなのもう何もできません";
     }
     if (gameovertext != "") {
       //ゲームオーバーモーダル
