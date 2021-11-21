@@ -9,17 +9,19 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 
 class FishPointer extends StatefulWidget {
-  const FishPointer(
-      {Key? key,
-      required this.dispsizeX,
-      required this.offsetY,
-      required this.duration,
-      required this.fishsize})
-      : super(key: key);
+  const FishPointer({
+    Key? key,
+    required this.dispsizeX,
+    required this.offsetY,
+    required this.duration,
+    required this.fishsize,
+    required this.takclePositionLeft,
+  }) : super(key: key);
   final double dispsizeX;
   final double offsetY;
   final Duration duration;
   final int fishsize;
+  final bool takclePositionLeft;
   @override
   _FishPointerState createState() => _FishPointerState();
 }
@@ -33,6 +35,14 @@ class _FishPointerState extends State<FishPointer>
     var rnd = (new math.Random()).nextDouble();
     var offsetX = (widget.dispsizeX / 4) +
         (widget.dispsizeX / 2) * (rnd * rnd); //真ん中に集約するように累乗する
+    if (widget.takclePositionLeft) {
+      offsetX += widget.dispsizeX / 4;
+    } else {
+      offsetX -= widget.dispsizeX / 4;
+    }
+    offsetX = (offsetX < 0) ? 0 : offsetX;
+    offsetX = (offsetX > widget.dispsizeX) ? widget.dispsizeX : offsetX;
+
     return CustomPaint(
       painter: FishPainter(
           controller: controller,

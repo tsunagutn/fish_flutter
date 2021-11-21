@@ -31,7 +31,9 @@
 //済・テンション連動点滅がおかしい
 //済・魚種毎に大きさ範囲
 //済・ドラグが出てる時はどっか揺らすみたいな
-//・ヘッダを大改修
+//済・ヘッダを大改修
+//済・画面左に竿リール表示
+//・竿リール表示を左右切り替えるやつを反対側に
 //・魚図鑑画面
 //・%を表示してる方がおもしろい・・・
 //・海底に漁礁とか
@@ -43,8 +45,7 @@
 //・魚種毎にバレ条件の設定
 //・魚種毎に底生志向
 //・魚種毎に巻き志向←→リアクション志向
-//・画面左に竿リール表示、上下ドラッグで動かす、ジグのシャクリ
-//・竿リール表示を左右切り替えるやつを反対側に
+//・上下ドラッグで動かす、ジグのシャクリ
 //・アワセシステム
 //  アワセの上手くいきかたで初期バラシレベルが決まるみたいな
 //・魚種データをDB化して登録画面実装
@@ -54,6 +55,7 @@
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
 
+import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
@@ -325,6 +327,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _reelSizeX = 0.0;
   var _reelSizeY = 0.0;
   var _reelCenterY = 0.0;
+  var _takclePositionLeft = true;
+  var _takcleChangeButtonPosition = MainAxisAlignment.end;
 
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
@@ -553,7 +557,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         " / " +
         ((_maxDepth).round() / 10).toStringAsFixed(1) +
         ' m';
-    _lightSpotX = 0;
+
+    //光点表示位置設定
+    if (_takclePositionLeft) {
+      _lightSpotX = size.width * (2 / 3);
+    } else {
+      _lightSpotX = size.width * (1 / 3);
+    }
     _lightSpotY =
         ((_depth / _maxDepth) * (size.height - _shoreHeight - _bottomHeight));
 
@@ -806,7 +816,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
 
     //タックルの描画
-    _tackleCenterX = 100.0;
+    if (_takclePositionLeft) {
+      _tackleCenterX = 100.0;
+      _takcleChangeButtonPosition = MainAxisAlignment.end;
+    } else {
+      _takcleChangeButtonPosition = MainAxisAlignment.start;
+      _tackleCenterX = size.width - 100.0;
+    }
     _rodSizeX = 20.0;
     _rodSizeY = size.height - _shoreHeight;
     _reelSizeX = 60.0;
@@ -1257,6 +1273,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                           child: Stack(children: <Widget>[
                             //ソナー光点
                             Container(
+                              width: size.width,
                               margin: EdgeInsets.only(
                                   top: _lightSpotY, left: _lightSpotX),
                               child: CustomPaint(
@@ -1271,12 +1288,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             ),
                           ]),
                         ),
-                      ),
+                      )
                     ])),
 
                 //海底
                 Container(
                     key: globalKeyBottom,
+                    height: 60,
                     decoration: BoxDecoration(
 
                         //color: clsColor._getColorFromHex("200070"),
@@ -1290,126 +1308,63 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       ],
                       stops: [0.0, 0.6, 1.0],
                     )),
-                    // 内側の余白（パディング）
-                    //padding: EdgeInsets.all(8),
-                    // 外側の余白（マージン）
-                    //margin: EdgeInsets.all(8),
-                    child: Column(
+                    //画面下部
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        // new Expanded(
-                        //     child:
-
-                        //画面下部
-                        Container(
-                          margin: EdgeInsets.all(3),
-                          child: Row(
-                              //3分割カラムを均等配置
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                //1分割目カラム 水深表示
-                                Column(
-                                  children: <Widget>[
-                                    // Container(
-                                    //   padding: const EdgeInsets.all(5.0),
-                                    //   decoration: BoxDecoration(
-                                    //       border: Border.all(
-                                    //           color: Colors.red, width: 3),
-                                    //       color: Colors.white),
-                                    //   child: Text(_disp_depth,
-                                    //       style: TextStyle(
-                                    //         color: Colors.black,
-                                    //         fontWeight: FontWeight.bold,
-                                    //         fontSize: 20,
-                                    //       )),
-                                    // )
-                                  ],
-                                ),
-                                //2分割目カラム（クラッチボタン）
-                                Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      // SizedBox(
-                                      //     width: 150,
-                                      //     height: 50,
-                                      //     child: ElevatedButton(
-                                      //       child: const Text('クラッチ'),
-                                      //       style: ElevatedButton.styleFrom(
-                                      //         primary: _clutchBackColor, //背景色
-                                      //         onPrimary: Colors.black, //押したときの色
-                                      //         shape: const StadiumBorder(),
-                                      //         side: BorderSide(
-                                      //           color: Colors.black, //枠線の色
-                                      //           width: 2, //枠線の太さ
-                                      //         ),
-                                      //       ),
-                                      //       onPressed: () {
-                                      //         //audio.load();
-                                      //         //document.getElementById( 'clutch_sound' ).currentTime = 0 ;
-                                      //         //$('#clutch_sound').get(0).play();
-                                      //         ////var video = $('#bg-video').get(0);
-                                      //         if (!_onClutch) {
-                                      //           //クラッチOFFの場合、クラッチONする
-                                      //           //$('#btn_clutch').addClass("btn_clutch_on");
-                                      //           chenge_clutch(true);
-
-                                      //           //// video.src = './static/videos/Position2_クラッチ2.mp4';
-                                      //           //// video.play();
-                                      //           //$('#bg-video1').addClass("invisible");
-                                      //           //$('#bg-video2').removeClass("invisible");
-                                      //           //var video =  $('#bg-video2').get(0);
-                                      //           //video.play();
-                                      //         } else {
-                                      //           //$('#btn_clutch').removeClass("btn_clutch_on");
-                                      //           chenge_clutch(false);
-
-                                      //           // // video.src = './static/videos/Position2_巻き上げ3.mp4';
-                                      //           // // video.pause();
-                                      //           // $('#bg-video1').get(0).pause();
-                                      //           // $('#bg-video1').removeClass("invisible");
-                                      //           // $('#bg-video2').addClass("invisible");
-                                      //         }
-                                      //       },
-                                      //    )),
-                                    ]),
-                                //3分割目カラム（ポイント表示）
-                                Column(
-                                  children: <Widget>[
-                                    Row(
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.only(left: 10),
-                                          padding: const EdgeInsets.all(5.0),
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.red, width: 3),
-                                              color: Colors.white),
-                                          child: Text(_dispDepth,
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 20,
-                                              )),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(_dispInfo,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: size.width / 3,
+                              child: (!_takclePositionLeft)
+                                  ? _tacklePositionChangeButton()
+                                  : Text(''),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: size.width / 3,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    margin:
+                                        EdgeInsets.only(left: 10, right: 10),
+                                    padding: const EdgeInsets.all(5.0),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Colors.red, width: 3),
+                                        color: Colors.white),
+                                    child: Text(_dispDepth,
                                         style: TextStyle(
-                                          backgroundColor: _infoBackColor,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
                                         )),
-                                    // Container(
-                                    //   //width: size.width / 3,
-                                    //   padding: const EdgeInsets.all(5.0),
-                                    //   child: Text(_point.toString() + "ポイント",
-                                    //       style: TextStyle(
-                                    //         color: Colors.white,
-                                    //         fontWeight: FontWeight.bold,
-                                    //         fontSize: 10,
-                                    //       )),
-                                    // )
-                                  ],
-                                )
-                              ]),
+                                  ),
+                                  Text(_dispInfo,
+                                      style: TextStyle(
+                                        backgroundColor: _infoBackColor,
+                                      )),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        //),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: size.width / 3,
+                              child: (_takclePositionLeft)
+                                  ? _tacklePositionChangeButton()
+                                  : Text(''),
+                            ),
+                          ],
                         ),
                       ],
                     )),
@@ -1435,6 +1390,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     reelSizeX: _reelSizeX,
                     reelSizeY: _reelSizeY,
                     reelCenterY: _reelCenterY,
+                    onClutch: _onClutch,
                   ),
 //                                      child: Container(
 //                                  height: 500,
@@ -1477,6 +1433,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       offsetY: offsetY,
       duration: duration,
       fishsize: fishsize,
+      takclePositionLeft: _takclePositionLeft,
     );
     setState(() {
       fishPointerList.add(fishPointer);
@@ -1524,6 +1481,35 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       }
       return false;
     }
+  }
+
+  Widget _tacklePositionChangeButton() {
+    return Row(
+        mainAxisAlignment: _takcleChangeButtonPosition,
+        children: <Widget>[
+          // Column(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: <Widget>[
+
+          ElevatedButton(
+              child: const Text('持替'),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.amber, //背景色
+                onPrimary: Colors.black, //押したときの色
+                shape: const StadiumBorder(),
+                side: BorderSide(
+                  color: Colors.black, //枠線の色
+                  width: 2, //枠線の太さ
+                ),
+              ),
+              onPressed: () {
+                if (_takclePositionLeft) {
+                  _takclePositionLeft = false;
+                } else {
+                  _takclePositionLeft = true;
+                }
+              }),
+        ]);
   }
 }
 

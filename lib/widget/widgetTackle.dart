@@ -12,9 +12,8 @@ class widgetTackle extends CustomPainter {
     required this.reelSizeX,
     required this.reelSizeY,
     required this.reelCenterY,
-    // required this.dragShaKeY,
+    required this.onClutch,
   });
-  //final Color activeColor;
   final double shoreHeight;
   final Size dispSize;
   final double tackleCenterX;
@@ -23,10 +22,7 @@ class widgetTackle extends CustomPainter {
   final double reelSizeX;
   final double reelSizeY;
   final double reelCenterY;
-  // final double backRadius;
-  // final double maxBackRadius;
-  // final int dragShaKeX;
-  // final int dragShaKeY;
+  final bool onClutch;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -94,9 +90,15 @@ class widgetTackle extends CustomPainter {
     canvas.drawPath(path, paint);
 
     //クラッチ
+    var dragColor;
+    if (onClutch) {
+      dragColor = Colors.lightBlue;
+    } else {
+      dragColor = Colors.red;
+    }
     path = Path();
     paint = new Paint()
-      ..color = Colors.red
+      ..color = dragColor
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
