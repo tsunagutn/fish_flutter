@@ -7,11 +7,15 @@ class SliderPainter extends CustomPainter {
     required this.value,
     required this.backRadius,
     required this.maxBackRadius,
+    required this.dragShaKeX,
+    required this.dragShaKeY,
   });
   final Color activeColor;
   final double value;
   final double backRadius;
   final double maxBackRadius;
+  final int dragShaKeX;
+  final int dragShaKeY;
 
   //後光の設定
   static const Map<int, Map<String, double>> lightLayers = {
@@ -43,6 +47,11 @@ class SliderPainter extends CustomPainter {
     paint.color = Colors.deepOrange;
     var path = Path();
 
+    var leftStart = 0.0 + dragShaKeX;
+    var leftEnd = size.width + dragShaKeX;
+    var topStart = 0.0 + dragShaKeY;
+    var topEnd = 20.0 + dragShaKeY;
+
     if (this.activeColor.red > 150) {
       var radius = 0.0;
       //後光配列ループ
@@ -67,10 +76,10 @@ class SliderPainter extends CustomPainter {
           ..style = PaintingStyle.fill
           ..strokeWidth = 2;
 
-        path.moveTo(0 - radius, 0 - radius);
-        path.lineTo(0 - radius, 20 + radius);
-        path.lineTo(size.width + radius, 20 + radius);
-        path.lineTo(size.width + radius, 0 - radius);
+        path.moveTo(leftStart - radius, topStart - radius);
+        path.lineTo(leftStart - radius, topEnd + radius);
+        path.lineTo(leftEnd + radius, topEnd + radius);
+        path.lineTo(leftEnd + radius, topStart - radius);
         path.close();
         canvas.drawPath(path, paint);
       }
@@ -84,10 +93,10 @@ class SliderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(0, 20);
-    path.lineTo(size.width, 20);
-    path.lineTo(size.width, 0);
+    path.moveTo(leftStart, topStart);
+    path.lineTo(leftStart, topEnd);
+    path.lineTo(leftEnd, topEnd);
+    path.lineTo(leftEnd, topStart);
     path.close();
     canvas.drawPath(path, paint);
 
@@ -98,10 +107,10 @@ class SliderPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
-    path.moveTo(0, 0);
-    path.lineTo(0, 20);
-    path.lineTo(size.width * this.value, 20);
-    path.lineTo(size.width * this.value, 0);
+    path.moveTo(leftStart, topStart);
+    path.lineTo(leftStart, topEnd);
+    path.lineTo(leftEnd * this.value, topEnd);
+    path.lineTo(leftEnd * this.value, topStart);
     path.close();
     canvas.drawPath(path, paint);
 
@@ -111,10 +120,10 @@ class SliderPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill;
     //..strokeWidth = 2;
-    path.moveTo((size.width * this.value), 0);
-    path.lineTo((size.width * this.value), 20);
-    path.lineTo(size.width, 20);
-    path.lineTo(size.width, 0);
+    path.moveTo((leftEnd * this.value), topStart);
+    path.lineTo((leftEnd * this.value), topEnd);
+    path.lineTo(leftEnd, topEnd);
+    path.lineTo(leftEnd, topStart);
     path.close();
     canvas.drawPath(path, paint);
   }

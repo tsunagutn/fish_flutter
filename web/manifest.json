@@ -1,6 +1,6 @@
 {
-    "name": "checklist",
-    "short_name": "checklist",
+    "name": "fish",
+    "short_name": "fish",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

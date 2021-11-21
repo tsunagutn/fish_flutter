@@ -30,13 +30,13 @@
 //済・ソナーに反応光点描画にする。
 //済・テンション連動点滅がおかしい
 //済・魚種毎に大きさ範囲
+//済・ドラグが出てる時はどっか揺らすみたいな
 //・ヘッダを大改修
 //・魚図鑑画面
 //・%を表示してる方がおもしろい・・・
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
-//・ドラグが出てる時はどっか揺らすみたいな
 //・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
@@ -54,12 +54,12 @@
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
 
-import 'package:fish_flutter/Model/LightSpot.dart';
-import 'package:fish_flutter/Model/TapPointer.dart';
-import 'package:fish_flutter/Model/FishPointer.dart';
-import 'package:fish_flutter/Model/WaveClipper.dart';
-import 'package:fish_flutter/Model/SenchoDialog.dart';
-import 'package:fish_flutter/Model/SliderPainter.dart';
+import 'package:fish_flutter/widget/LightSpot.dart';
+import 'package:fish_flutter/widget/TapPointer.dart';
+import 'package:fish_flutter/widget/FishPointer.dart';
+import 'package:fish_flutter/widget/WaveClipper.dart';
+import 'package:fish_flutter/widget/SenchoDialog.dart';
+import 'package:fish_flutter/widget/SliderPainter.dart';
 import 'package:flutter/material.dart';
 
 import 'DrawerItem.dart';
@@ -274,6 +274,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
   var _tensionActiveTrackColor =
       clsColor._getColorFromHex("4CFF00"); //テンションゲージの色
+  var _dragShaKeX = 0;
+  var _dragShaKeY = 0;
   var _speedActiveTrackColor = clsColor._getColorFromHex("0094FF"); //スピードゲージの色
   var _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
   var _clutchBackColor = Colors.red; //クラッチボタンの背景色
@@ -506,17 +508,21 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       val = val - (dragDiff / 25);
       //テンションゲージの色を変える
       _tensionActiveTrackColor = TENSION_COLOR_DRAG;
+      //テンションゲージを揺らす
+      _dragShaKeX = 5 - (new math.Random()).nextInt(9);
+      _dragShaKeY = 5 - (new math.Random()).nextInt(9);
       //audio.currentTime = 0;
       //audio.play();
       //var duration = 200; // 振動時間
       //navigator.vibrate(duration);
+    } else {
+      //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
+      //   if (val >= (TENSION_VAL_MAX * 0.9)) {
+      //     _tensionActiveTrackColor = TENSION_COLOR_DANGER;
+      //   }
+      _dragShaKeX = 0;
+      _dragShaKeY = 0;
     }
-    //  else {
-    //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
-    //   if (val >= (TENSION_VAL_MAX * 0.9)) {
-    //     _tensionActiveTrackColor = TENSION_COLOR_DANGER;
-    //   }
-    // }
 
     if (val > TENSION_VAL_MAX) val = TENSION_VAL_MAX;
     if (val < TENSION_VAL_MIN) val = TENSION_VAL_MIN;
@@ -537,8 +543,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         ((_maxDepth).round() / 10).toStringAsFixed(1) +
         ' m';
     _lightSpotX = 0;
-    _lightSpotY = ((_depth / _maxDepth) *
-        (size.height - _appBarHeight - _shoreHeight - _bottomHeight));
+    _lightSpotY =
+        ((_depth / _maxDepth) * (size.height - _shoreHeight - _bottomHeight));
 
     //背景色
     if (_maxDepth < 100) {
@@ -778,13 +784,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
     if (hannornd > 0.96 && _jiai > depthrnd) {
-      var fishy = (sonarTop - _appBarHeight) + (sonarHeight * _justTana);
+      var fishy = sonarTop + (sonarHeight * _justTana);
       //レンジ分バラケ
       var barake = (_justTanaRange * ((0.2 - depthrnd) * 1.5));
       barake = (barake < 0) ? 0 : barake;
-      barake = (barake > (sonarTop - _appBarHeight) + sonarHeight)
-          ? (sonarTop - _appBarHeight) + sonarHeight
-          : barake;
+      barake =
+          (barake > sonarTop + sonarHeight) ? sonarTop + sonarHeight : barake;
       fishy = fishy + (_justTanaRange * ((0.2 - depthrnd) * 1.5));
       generateFishPointer(fishy, 20);
     }
@@ -801,22 +806,74 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     final Size size = MediaQuery.of(context).size;
 
     return Scaffold(
+        // appBar: AppBar(
+        //   title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        //     Text("環境設定"),
+        //   ]),
+        //   leading: IconButton(
+        //     // 戻るアイコン
+        //     icon: Icon(Icons.arrow_back),
+        //     color: Colors.white,
+        //     iconSize: 30.0,
+        //     onPressed: () {
+        //       //前画面に戻る
+        //       Navigator.of(context).pop();
+        //     },
+        //   ),
+        // ),
+        extendBodyBehindAppBar: true, // <--- ここ
         appBar: AppBar(
-          title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text("環境設定"),
-          ]),
+          // title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          //   Text("環境設定"),
+          // ]),
+          backgroundColor: clsColor._getColorFromHex("FFFFFF").withOpacity(0.1),
+          //title: Text(_senchoMessage),
+          //左上
           leading: IconButton(
             // 戻るアイコン
-            icon: Icon(Icons.arrow_back),
+            icon: Icon(Icons.menu_book),
             color: Colors.white,
             iconSize: 30.0,
             onPressed: () {
-              //前画面に戻る
-              Navigator.of(context).pop();
+              //図鑑モーダルの表示
             },
           ),
+          //右上（複数可）
+          actions: [
+            Container(
+                margin: EdgeInsets.only(right: 10),
+                child:
+                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  IconButton(
+                    // 戻るアイコン
+                    icon: Icon(Icons.shopping_cart),
+                    color: Colors.white,
+                    iconSize: 30.0,
+                    onPressed: () {
+                      //買い物モーダルの表示
+                    },
+                  ),
+                  Text(
+                    _point.toString() + "ポイント",
+                  ),
+                ])),
+          ],
+          flexibleSpace:
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+              Container(
+                color: Colors.white,
+                child: Text(
+                  _senchoMessage,
+                  style: TextStyle(
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+              )
+            ]),
+          ]),
         ),
-        endDrawer: DrawerItem(),
+        //endDrawer: DrawerItem(),
 
         // body: SafeArea(
         //   child: SpriteWidget(
@@ -840,8 +897,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               chenge_clutch(false);
               _onTap = true;
               //タップ時の画面エフェクト
-              offset = Offset(details.globalPosition.dx,
-                  details.globalPosition.dy - _appBarHeight);
+              offset =
+                  Offset(details.globalPosition.dx, details.globalPosition.dy);
               generateTapPointer(details);
 
               //generateFishPointer(100);
@@ -921,7 +978,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   )),
                   child: Column(children: <Widget>[
                     Container(
-                        margin: EdgeInsets.only(top: 5),
+                        //appBarは透過なのでその分の高さを加算
+                        margin: EdgeInsets.only(top: _appBarHeight + 10),
                         height: 45,
                         //テンションとドラグレベルのスライダーをstackで重ねて表示
                         child: new Stack(children: <Widget>[
@@ -943,6 +1001,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                         value: _tension / TENSION_VAL_MAX,
                                         backRadius: _animationRadius.value,
                                         maxBackRadius: POINTER_BACK_SIZE,
+                                        dragShaKeX: _dragShaKeX,
+                                        dragShaKeY: _dragShaKeY,
                                       ),
                                       child: Container(
 //                                  height: 500,
@@ -1036,6 +1096,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   value: _speed / SPEED_VAL_MAX,
                                   backRadius: 0,
                                   maxBackRadius: 0,
+                                  dragShaKeX: 0,
+                                  dragShaKeY: 0,
                                 ),
                                 child: Container(),
                               )
@@ -1151,7 +1213,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         )),
                     width: size.width,
                     height: size.height -
-                        _appBarHeight -
+                        //_appBarHeight -
                         _shoreHeight -
                         _bottomHeight,
                     child: Column(children: <Widget>[
