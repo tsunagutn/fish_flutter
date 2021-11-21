@@ -60,6 +60,8 @@ import 'package:fish_flutter/widget/FishPointer.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
 import 'package:fish_flutter/widget/SenchoDialog.dart';
 import 'package:fish_flutter/widget/SliderPainter.dart';
+import 'package:fish_flutter/widget/widgetTackle.dart';
+
 import 'package:flutter/material.dart';
 
 import 'DrawerItem.dart';
@@ -289,7 +291,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _jiai = 0.5; //時合度 0.0～0.9999...
   var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
 
-  var _cursorx = 0.0; //ドラッグ操作開始時の座標X
+  var _cursorX = 0.0; //ドラッグ操作開始時の座標X
+  var _cursorY = 0.0; //ドラッグ操作開始時の座標Y
 
   var _fishidx = 0; //現在HIT中の魚種IDX
   var _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
@@ -314,6 +317,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   late AnimationController waveController; // AnimationControllerの宣言
 
   var _ligntSpotAnimationChangeing = false;
+
+  //タックルの描画関連
+  var _tackleCenterX = 0.0;
+  var _rodSizeX = 0.0;
+  var _rodSizeY = 0.0;
+  var _reelSizeX = 0.0;
+  var _reelSizeY = 0.0;
+  var _reelCenterY = 0.0;
 
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
@@ -794,6 +805,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       generateFishPointer(fishy, 20);
     }
 
+    //タックルの描画
+    _tackleCenterX = 100.0;
+    _rodSizeX = 20.0;
+    _rodSizeY = size.height - _shoreHeight;
+    _reelSizeX = 60.0;
+    _reelSizeY = 60.0;
+    _reelCenterY = size.height - 60 - 40;
+
     //debugPrint(_tension.toString());
     setState(() {});
   }
@@ -841,22 +860,22 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           //右上（複数可）
           actions: [
             Container(
-                margin: EdgeInsets.only(right: 10),
-                child:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  IconButton(
-                    // 戻るアイコン
-                    icon: Icon(Icons.shopping_cart),
-                    color: Colors.white,
-                    iconSize: 30.0,
-                    onPressed: () {
-                      //買い物モーダルの表示
-                    },
-                  ),
-                  Text(
-                    _point.toString() + "ポイント",
-                  ),
-                ])),
+                child: ElevatedButton(
+              child:
+                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                Icon(
+                  Icons.shopping_cart,
+                  color: Colors.white,
+                  size: 30.0,
+                ),
+                Text(
+                  _point.toString() + "ポイント",
+                ),
+              ]),
+              onPressed: () {
+                //買い物モーダルの表示
+              },
+            )),
           ],
           flexibleSpace:
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -885,14 +904,27 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             //ドラッグ操作が開始された時
             onPanStart: (DragStartDetails details) {
               debugPrint("ドラッグ開始");
-              _cursorx = details.localPosition.dx;
-              //add_min = -1;
-              // var video = $('#bg-video').get(0);
-              // video.src = './static/videos/Position2_巻き上げ3.mp4';
-              // video.play();
-              // $('#bg-video1').get(0).play();
-              // $('#bg-video1').removeClass("invisible");
-              // $('#bg-video2').addClass("invisible");
+              _cursorX = details.localPosition.dx;
+              _cursorY = details.localPosition.dy;
+
+//クラッチOFF時、タップ箇所がクラッチ部分か？
+              if (!_onClutch &&
+                  _cursorX > _tackleCenterX - (_reelSizeX / 2) &&
+                  _cursorX < _tackleCenterX + (_reelSizeX / 2) &&
+                  _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
+                  _cursorY < _reelCenterY + _reelSizeY) {
+                chenge_clutch(true);
+                return;
+              }
+
+              //   path.moveTo(tackleCenterX - (reelSizeX / 2),
+              //       reelCenterY + reelSizeY / 2 + 3);
+              // path.lineTo(
+              //     tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
+              // path.lineTo(
+              //     tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
+              // path.lineTo(tackleCenterX + (reelSizeX / 2),
+              //     reelCenterY + reelSizeY / 2 + 3);
 
               chenge_clutch(false);
               _onTap = true;
@@ -917,9 +949,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               //現在のX座標を取得する
               mX = details.localPosition.dx; //X座標
               //初期位置から動いた値を取得
-              var movex = mX - _cursorx;
+              var movex = mX - _cursorX;
               //x座標記憶を更新
-              _cursorx = mX;
+              _cursorX = mX;
               var addVal = (movex / (1000 / 2) * SPEED_VAL_MAX);
               //巻き速度値に加算
               var val = _speed + addVal;
@@ -938,7 +970,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             //タップ、ドラッグ操作が終了した時
             onPanEnd: (DragEndDetails details) {
               debugPrint("タップはなし");
-              chenge_clutch(false);
+              //chenge_clutch(false);
               //add_min = -10;
               _onTap = false;
               //スピードスライダの色を戻す
@@ -1297,48 +1329,48 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      SizedBox(
-                                          width: 150,
-                                          height: 50,
-                                          child: ElevatedButton(
-                                            child: const Text('クラッチ'),
-                                            style: ElevatedButton.styleFrom(
-                                              primary: _clutchBackColor, //背景色
-                                              onPrimary: Colors.black, //押したときの色
-                                              shape: const StadiumBorder(),
-                                              side: BorderSide(
-                                                color: Colors.black, //枠線の色
-                                                width: 2, //枠線の太さ
-                                              ),
-                                            ),
-                                            onPressed: () {
-                                              //audio.load();
-                                              //document.getElementById( 'clutch_sound' ).currentTime = 0 ;
-                                              //$('#clutch_sound').get(0).play();
-                                              ////var video = $('#bg-video').get(0);
-                                              if (!_onClutch) {
-                                                //クラッチOFFの場合、クラッチONする
-                                                //$('#btn_clutch').addClass("btn_clutch_on");
-                                                chenge_clutch(true);
+                                      // SizedBox(
+                                      //     width: 150,
+                                      //     height: 50,
+                                      //     child: ElevatedButton(
+                                      //       child: const Text('クラッチ'),
+                                      //       style: ElevatedButton.styleFrom(
+                                      //         primary: _clutchBackColor, //背景色
+                                      //         onPrimary: Colors.black, //押したときの色
+                                      //         shape: const StadiumBorder(),
+                                      //         side: BorderSide(
+                                      //           color: Colors.black, //枠線の色
+                                      //           width: 2, //枠線の太さ
+                                      //         ),
+                                      //       ),
+                                      //       onPressed: () {
+                                      //         //audio.load();
+                                      //         //document.getElementById( 'clutch_sound' ).currentTime = 0 ;
+                                      //         //$('#clutch_sound').get(0).play();
+                                      //         ////var video = $('#bg-video').get(0);
+                                      //         if (!_onClutch) {
+                                      //           //クラッチOFFの場合、クラッチONする
+                                      //           //$('#btn_clutch').addClass("btn_clutch_on");
+                                      //           chenge_clutch(true);
 
-                                                //// video.src = './static/videos/Position2_クラッチ2.mp4';
-                                                //// video.play();
-                                                //$('#bg-video1').addClass("invisible");
-                                                //$('#bg-video2').removeClass("invisible");
-                                                //var video =  $('#bg-video2').get(0);
-                                                //video.play();
-                                              } else {
-                                                //$('#btn_clutch').removeClass("btn_clutch_on");
-                                                chenge_clutch(false);
+                                      //           //// video.src = './static/videos/Position2_クラッチ2.mp4';
+                                      //           //// video.play();
+                                      //           //$('#bg-video1').addClass("invisible");
+                                      //           //$('#bg-video2').removeClass("invisible");
+                                      //           //var video =  $('#bg-video2').get(0);
+                                      //           //video.play();
+                                      //         } else {
+                                      //           //$('#btn_clutch').removeClass("btn_clutch_on");
+                                      //           chenge_clutch(false);
 
-                                                // // video.src = './static/videos/Position2_巻き上げ3.mp4';
-                                                // // video.pause();
-                                                // $('#bg-video1').get(0).pause();
-                                                // $('#bg-video1').removeClass("invisible");
-                                                // $('#bg-video2').addClass("invisible");
-                                              }
-                                            },
-                                          )),
+                                      //           // // video.src = './static/videos/Position2_巻き上げ3.mp4';
+                                      //           // // video.pause();
+                                      //           // $('#bg-video1').get(0).pause();
+                                      //           // $('#bg-video1').removeClass("invisible");
+                                      //           // $('#bg-video2').addClass("invisible");
+                                      //         }
+                                      //       },
+                                      //    )),
                                     ]),
                                 //3分割目カラム（ポイント表示）
                                 Column(
@@ -1365,16 +1397,16 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                         style: TextStyle(
                                           backgroundColor: _infoBackColor,
                                         )),
-                                    Container(
-                                      //width: size.width / 3,
-                                      padding: const EdgeInsets.all(5.0),
-                                      child: Text(_point.toString() + "ポイント",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 10,
-                                          )),
-                                    )
+                                    // Container(
+                                    //   //width: size.width / 3,
+                                    //   padding: const EdgeInsets.all(5.0),
+                                    //   child: Text(_point.toString() + "ポイント",
+                                    //       style: TextStyle(
+                                    //         color: Colors.white,
+                                    //         fontWeight: FontWeight.bold,
+                                    //         fontSize: 10,
+                                    //       )),
+                                    // )
                                   ],
                                 )
                               ]),
@@ -1382,6 +1414,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       ],
                     )),
               ]),
+              //画面全体的に描画するもの
               Stack(children: <Widget>[
                 //タップ時の光点
                 (tapPointerList.isNotEmpty)
@@ -1391,6 +1424,22 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 (fishPointerList.isNotEmpty)
                     ? Stack(children: fishPointerList)
                     : Text(""),
+                //タックルの描画
+                CustomPaint(
+                  painter: new widgetTackle(
+                    shoreHeight: _shoreHeight,
+                    dispSize: size,
+                    tackleCenterX: _tackleCenterX,
+                    rodSizeX: _rodSizeX,
+                    rodSizeY: _rodSizeY,
+                    reelSizeX: _reelSizeX,
+                    reelSizeY: _reelSizeY,
+                    reelCenterY: _reelCenterY,
+                  ),
+//                                      child: Container(
+//                                  height: 500,
+//                                          ),
+                ),
               ]),
             ])));
   }
