@@ -33,7 +33,8 @@
 //済・ドラグが出てる時はどっか揺らすみたいな
 //済・ヘッダを大改修
 //済・画面左に竿リール表示
-//・竿リール表示を左右切り替えるやつを反対側に
+//済・竿リール表示を左右切り替えるやつを反対側に
+//・バレシステムを何とかする
 //・魚図鑑画面
 //・%を表示してる方がおもしろい・・・
 //・海底に漁礁とか
@@ -247,6 +248,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const TANA_CHANGE_SCAN = 300; //このスキャン毎にタナが変わる
   static const POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
   static const POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
+  static const ROD_STANDUP_MAX = 100.0; //竿立て度MAX
 
   //static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
   static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
@@ -278,7 +280,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
   var _tensionActiveTrackColor =
       clsColor._getColorFromHex("4CFF00"); //テンションゲージの色
-  var _dragShaKeX = 0;
+  var _dragShaKeX = 0; //ドラグスライダーを揺らす用
   var _dragShaKeY = 0;
   var _speedActiveTrackColor = clsColor._getColorFromHex("0094FF"); //スピードゲージの色
   var _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
@@ -329,6 +331,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _reelCenterY = 0.0;
   var _takclePositionLeft = true;
   var _takcleChangeButtonPosition = MainAxisAlignment.end;
+  var _rodStandUp = 0.0;
 
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
@@ -922,8 +925,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               debugPrint("ドラッグ開始");
               _cursorX = details.localPosition.dx;
               _cursorY = details.localPosition.dy;
-
-//クラッチOFF時、タップ箇所がクラッチ部分か？
+              //クラッチOFF時、タップ箇所がクラッチ部分か？
               if (!_onClutch &&
                   _cursorX > _tackleCenterX - (_reelSizeX / 2) &&
                   _cursorX < _tackleCenterX + (_reelSizeX / 2) &&
@@ -958,23 +960,32 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               if (size.isEmpty) {
                 return;
               }
-              var mX = 0.0;
               if (!_onTap) {
                 return;
               }
-              //現在のX座標を取得する
+              var mX = 0.0;
+              var mY = 0.0;
+              //現在の座標を取得する
               mX = details.localPosition.dx; //X座標
+              mY = details.localPosition.dy; //Y座標
               //初期位置から動いた値を取得
-              var movex = mX - _cursorX;
+              var moveX = mX - _cursorX;
+              var moveY = mY - _cursorY;
               //x座標記憶を更新
               _cursorX = mX;
-              var addVal = (movex / (1000 / 2) * SPEED_VAL_MAX);
-              //巻き速度値に加算
+              _cursorY = mY;
+              //巻き速度値の計算
+              var addVal = (moveX / (1000 / 2) * SPEED_VAL_MAX);
               var val = _speed + addVal;
               if (val > SPEED_VAL_MAX) val = SPEED_VAL_MAX;
               if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
               _speed = val;
-              setState(() {});
+              //アワセ値
+              addVal = (moveY / 100);
+              val = _rodStandUp + addVal;
+              if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
+              if (val < 0) val = 0;
+              _rodStandUp = val;
 
               //videoの再生スピード調整（1～300）
               //$('#bg-video1').get(0).playbackRate = Math.floor(val / 15) / 10;
@@ -1391,6 +1402,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     reelSizeY: _reelSizeY,
                     reelCenterY: _reelCenterY,
                     onClutch: _onClutch,
+                    rodStandUp: _rodStandUp,
+                    rodTension: _tension / TENSION_VAL_MAX,
                   ),
 //                                      child: Container(
 //                                  height: 500,
