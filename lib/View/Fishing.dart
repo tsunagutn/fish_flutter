@@ -34,8 +34,12 @@
 //済・ヘッダを大改修
 //済・画面左に竿リール表示
 //済・竿リール表示を左右切り替えるやつを反対側に
+//済・ロッドの曲がりを表現
+//済・アワセシステム
+//・アワセの上手くいきかたで初期バラシレベルが決まるみたいな
 //・バレシステムを何とかする
 //・魚図鑑画面
+//・いけすシステム
 //・%を表示してる方がおもしろい・・・
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
@@ -47,8 +51,6 @@
 //・魚種毎に底生志向
 //・魚種毎に巻き志向←→リアクション志向
 //・上下ドラッグで動かす、ジグのシャクリ
-//・アワセシステム
-//  アワセの上手くいきかたで初期バラシレベルが決まるみたいな
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
 //夢
@@ -249,6 +251,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
   static const POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
   static const ROD_STANDUP_MAX = 100.0; //竿立て度MAX
+  static const BAIT_CNT_MAX = 30; //アタリ判定期間
+  static const FOOKING_TENSION = 150; //アワセ成功閾値
 
   //static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
   static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
@@ -267,6 +271,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //状態フラグ変数
   var _onTap = false; //現在タップ中フラグ
   var _onClutch = false; //現在クラッチ状態
+  var _flgBait = false; //現在アタリ中フラグ
   var _flgHit = false; //現在HIT中フラグ
   var _flgGameOver = false; //現在ゲームオーバーフラグ
 
@@ -297,6 +302,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   var _cursorX = 0.0; //ドラッグ操作開始時の座標X
   var _cursorY = 0.0; //ドラッグ操作開始時の座標Y
+
+  var _baitCnt = 0; //当たってからのスキャン数
+  var _baitMaxTension = 0.0; //バイト中の最大テンション
+  var _fookingLv = 0.0; //フッキングの成功度
 
   var _fishidx = 0; //現在HIT中の魚種IDX
   var _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
@@ -433,7 +442,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       debugPrint("タナ" + _justTana.toString());
     }
 
-    if (_flgHit) {
+    if (_flgBait || _flgHit) {
+      //アタリ中orHIT中のテンション計算
       //debugPrint("HIT中1");
       if (_hitScanCnt > 0) {
         _hitScanCnt--;
@@ -462,6 +472,20 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         addVal = addVal + hosei.round();
         //水深減算
         _depth = _depth - _speed / SPEED_VAL_MAX;
+      } else {
+        if (!_flgBait && !_flgHit) {
+          //巻いていない&釣れていない時はマイナス補正
+          addVal = addVal - HOSEI_MAX;
+        }
+      }
+
+      //debugPrint(_rodStandUp.toString());
+      //シャクリによるテンション増加
+      addVal = addVal + _rodStandUp * 10;
+      if (_rodStandUp > 0.0) {
+        _rodStandUp -= 0.5; //1スキャン毎に0.5ずつ消える
+      } else {
+        _rodStandUp = 0.0;
       }
     }
     if (addVal > 0) {
@@ -624,7 +648,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
                   title: Text(fish['text']),
                   content: Container(
-                      height: size.height / 3,
+                      height: size.height / 2,
                       // decoration: new BoxDecoration(
                       //     image: new DecorationImage(
                       //   image: new AssetImage("assets/images/fishback.jpg"),
@@ -636,10 +660,21 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                           // width: 150,
                           // height: 150,
                         ),
-                        Text(fish['name'] +
-                            "　" +
-                            fishSize.toStringAsFixed(1) +
-                            "cm"),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(fish['name'] +
+                                  "　" +
+                                  fishSize.toStringAsFixed(1) +
+                                  "cm"),
+                              if (_fishSize > 0.8 && _fishSize < 0.95)
+                                Icon(Icons.star, color: Colors.grey),
+                              if (_fishSize > 0.95)
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.yellow,
+                                ),
+                            ]),
                         Text(point.toString() + 'ポイント獲得です'),
                       ])),
                   actions: <Widget>[
@@ -658,6 +693,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   ],
                 ));
           });
+      _flgBait = false;
       _flgHit = false;
     }
 
@@ -666,8 +702,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     final durationMin = POINT_DURATION_MSEC[0]!;
     var duration = 0;
 
-    if (!_flgHit) {
-      //HIT判定処理
+    if (!_flgBait && !_flgHit) {
+      //アタリ判定処理
       var hitTanaProb = 0.0;
       //HIT棚との差分
       final justTana = (_maxDepth * _justTana);
@@ -736,13 +772,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           //大きさ決定
           _fishSize = (new math.Random()).nextDouble();
           _hitScanCnt = fish['hp'];
-          //HITと判定
-          _flgHit = true;
-          debugPrint("HIT!!!");
-          _dispInfo = 'HIT!!!';
+          //アタリと判定
+          _flgBait = true;
+          _baitCnt = 0;
+          _baitMaxTension = 0.0;
+          debugPrint("アタリ");
+          _dispInfo = 'アタリ';
           _infoBackColor = TENSION_COLOR_DANGER;
         }
-        if (_flgHit) {
+        if (_flgBait || _flgHit) {
           //ループ抜け
           return;
         } else {
@@ -756,28 +794,59 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         }
       });
     } else {
-      //HIT中の処理
-      _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
-
-      //テンションから点滅速度を算出
-      duration = durationMax -
-          ((durationMax - durationMin) * (_tension / TENSION_VAL_MAX)).floor();
-
-      //バレ判定 水深MAXかテンション一定未満で条件成立
-      if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
-        _bareCnt++;
+      //アタリ中またはHIT中の処理
+      if (_flgBait) {
+        //当たってからのスキャン数加算
+        _baitCnt++;
+        if (_baitCnt > BAIT_CNT_MAX) {
+          //アタリ判定期間終了
+          if (_baitMaxTension > FOOKING_TENSION) {
+            //バイト中の最大テンションが一定値を超えるとHIT
+            _flgBait = false;
+            _flgHit = true;
+            debugPrint('HIT!!!!');
+            _dispInfo = "HIT!";
+            //フッキングの成功度
+            _fookingLv = _tension - FOOKING_TENSION;
+            if (_fookingLv > 100.0) _fookingLv = 100.0;
+          } else {
+            //アワセ失敗
+            _flgBait = false;
+          }
+        } else {
+          //アタリ中
+          if (_tension > _baitMaxTension) {
+            //バイト中の最大テンションを記憶
+            _baitMaxTension = _tension;
+          }
+          _pointerColor = clsColor._getColorFromHex("FF6A00"); //アタリ中はオレンジ
+          //点滅速度最大
+          duration = durationMax;
+        }
       } else {
-        _bareCnt = 0;
-      }
-      if (_bareCnt >= BARE_MAX) {
-        //バレ条件成立が一定スキャン保持でバレとする
-        debugPrint("バレ");
+        _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
 
-        _flgHit = false;
-        //console.log("bare...");
-        //バレのモーダル表示
-        //show_modal_bare();
-        _bareCnt = 0;
+        //テンションから点滅速度を算出
+        duration = durationMax -
+            ((durationMax - durationMin) * (_tension / TENSION_VAL_MAX))
+                .floor();
+
+        //バレ判定 水深MAXかテンション一定未満で条件成立
+        if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
+          _bareCnt++;
+        } else {
+          _bareCnt = 0;
+        }
+        if (_bareCnt >= BARE_MAX) {
+          //バレ条件成立が一定スキャン保持でバレとする
+          debugPrint("バレ");
+          _flgBait = false;
+          _flgHit = false;
+          //console.log("bare...");
+          //バレのモーダル表示
+          //show_modal_bare();
+          _bareCnt = 0;
+        }
       }
     }
 

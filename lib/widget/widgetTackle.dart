@@ -90,7 +90,7 @@ class widgetTackle extends CustomPainter {
 
     path.moveTo(tackleCenterX + 70, shoreHeight + (rodSizeY * rodTension));
     path.lineTo(tackleCenterX + 50 - (rodSizeX / 6),
-        shoreHeight + (rodSizeY / 4) + (rodSizeY / 4 * rodTension));
+        shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
     path.lineTo(tackleCenterX + 30 - (rodSizeX / 3),
         shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
     path.lineTo(tackleCenterX - 10 - (rodSizeX / 2), shoreHeight + rodSizeY);
@@ -98,7 +98,7 @@ class widgetTackle extends CustomPainter {
     path.lineTo(tackleCenterX + 30 + (rodSizeX / 3),
         shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
     path.lineTo(tackleCenterX + 50 + (rodSizeX / 6),
-        shoreHeight + (rodSizeY / 4) + (rodSizeY / 4 * rodTension));
+        shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
 
     path.close();
     canvas.drawPath(path, paint);
