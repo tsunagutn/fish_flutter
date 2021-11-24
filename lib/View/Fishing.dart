@@ -36,10 +36,14 @@
 //済・竿リール表示を左右切り替えるやつを反対側に
 //済・ロッドの曲がりを表現
 //済・アワセシステム
-//・アワセの上手くいきかたで初期バラシレベルが決まるみたいな
-//・バレシステムを何とかする
+//済・魚種毎にバレ条件の設定
+//済・アワセの上手くいきかたで初期バラシレベルが決まるみたいな
+//済・バレシステムを何とかする
+//・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？
+//・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
 //・魚図鑑画面
 //・いけすシステム
+//・赤ポイント緑ポイント青ポイント
 //・%を表示してる方がおもしろい・・・
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
@@ -47,7 +51,6 @@
 //・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
-//・魚種毎にバレ条件の設定
 //・魚種毎に底生志向
 //・魚種毎に巻き志向←→リアクション志向
 //・上下ドラッグで動かす、ジグのシャクリ
@@ -58,18 +61,16 @@
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
 
-import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
 import 'package:fish_flutter/widget/SenchoDialog.dart';
 import 'package:fish_flutter/widget/SliderPainter.dart';
-import 'package:fish_flutter/widget/widgetTackle.dart';
+import 'package:fish_flutter/widget/tacklePainter.dart';
 
 import 'package:flutter/material.dart';
 
-import 'DrawerItem.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -88,7 +89,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const DEBUGFLG = true;
 //  static const DEBUGFLG = false;
 
-  //魚種定義 wariaiの合計値は10にすること
+  //魚種定義
   static const Map<int, Map<String, dynamic>> FISH_TABLE = {
     0: {
       'name': "アジ", //魚種名
@@ -107,6 +108,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_speed_range': 40, //スピード志向範囲+-
       'size_min': 7.6, //大きさ範囲最小
       'size_max': 51.3, //大きさ範囲最大
+      'bait_cnt_max': 20, //アタリ発生からアワセまでの猶予スキャン
+      'fooking_tension': 50, //アワセ成功テンション
+      'bare_min': 20, //HIT後のバレ判定スキャン数（これプラスアワセレベル）
     },
     1: {
       'name': "タチウオ",
@@ -125,6 +129,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_speed_range': 50,
       'size_min': 64.0,
       'size_max': 150.5,
+      'bait_cnt_max': 20,
+      'fooking_tension': 80,
+      'bare_min': 20,
     },
     2: {
       'name': "鯉",
@@ -143,6 +150,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_speed_range': 50,
       'size_min': 34.4,
       'size_max': 114.8,
+      'bait_cnt_max': 40,
+      'fooking_tension': 100,
+      'bare_min': 20,
     },
     3: {
       'name': "マダイ",
@@ -161,6 +171,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_speed_range': 50,
       'size_min': 26.3,
       'size_max': 86.8,
+      'bait_cnt_max': 30,
+      'fooking_tension': 150,
+      'bare_min': 20,
     },
     4: {
       'name': "宮澤クン",
@@ -179,6 +192,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_speed_range': 50,
       'size_min': 9999.9,
       'size_max': 19999.9,
+      'bait_cnt_max': 10,
+      'fooking_tension': 150,
+      'bare_min': 20,
     },
     5: {
       'name': "サバ", //魚種名
@@ -197,6 +213,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_speed_range': 30, //スピード志向範囲+-
       'size_min': 14.3,
       'size_max': 67.2,
+      'bait_cnt_max': 15,
+      'fooking_tension': 80,
+      'bare_min': 20,
     },
     6: {
       'name': "サゴシ", //魚種名
@@ -215,6 +234,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       'hit_speed_range': 40, //スピード志向範囲+-
       'size_min': 35.3,
       'size_max': 69.9,
+      'bait_cnt_max': 15,
+      'fooking_tension': 120,
+      'bare_min': 20,
     },
   };
 
@@ -237,7 +259,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
   static const SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   static const HOSEI_MAX = 3;
-  static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
+  //static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
   static const MAX_RAND_ADD_TENSION = 3; //何もしてない時テンションがウロウロするののMAX値
   static const MIN_RAND_ADD_TENSION = -8; //〃 MIN値
   final TENSION_COLOR_SAFE = clsColor._getColorFromHex("4CFF00");
@@ -245,14 +267,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   final TENSION_COLOR_DANGER = clsColor._getColorFromHex("DD0000");
   final SPEED_COLOR = clsColor._getColorFromHex("0094FF");
   final SPEED_COLOR_REELING = clsColor._getColorFromHex("0026FF");
-  static const DEPTH_CHANGE_SCAN = 50; //このスキャン毎に深さの変化傾向が変わる
-  static const JIAI_CHANGE_SCAN = 150; //このスキャン毎に時合度が変わる
-  static const TANA_CHANGE_SCAN = 300; //このスキャン毎にタナが変わる
+  static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
+  static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
+  static const TANA_CHANGE_SCAN = 3000; //このスキャン毎にタナが変わる
   static const POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
   static const POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
   static const ROD_STANDUP_MAX = 100.0; //竿立て度MAX
-  static const BAIT_CNT_MAX = 30; //アタリ判定期間
-  static const FOOKING_TENSION = 150; //アワセ成功閾値
+  // static const BAIT_CNT_MAX = 30; //アタリ判定期間
+  // static const FOOKING_TENSION = 150; //アワセ成功閾値
 
   //static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
   static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
@@ -265,8 +287,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //アニメーション関連
   late AnimationController _animationController; //光点の光アニメーション
   late Animation<double> _animationRadius;
-  // late AnimationController _tapAnimation; //タップ時の波紋アニメーション
-  // late Animation<double> _TapPointerRadius;
+  late AnimationController _hitAnimationController; //ヒット時のテキストアニメーション
+  late Animation<double> _hitLeft;
 
   //状態フラグ変数
   var _onTap = false; //現在タップ中フラグ
@@ -370,12 +392,16 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       vsync: this, // おきまり
     )..repeat(); // リピート設定
 
+    _hitAnimationController = AnimationController(
+        duration: Duration(milliseconds: 2000), vsync: this);
+
     super.initState();
   }
 
   void dispose() {
     _animationController.dispose();
     waveController.dispose(); // AnimationControllerは明示的にdisposeする。
+    _hitAnimationController.dispose();
     super.dispose();
   }
 
@@ -443,7 +469,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
 
     if (_flgBait || _flgHit) {
-      //アタリ中orHIT中のテンション計算
+      //アタリ中 or HIT中のテンション計算
       //debugPrint("HIT中1");
       if (_hitScanCnt > 0) {
         _hitScanCnt--;
@@ -480,8 +506,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       }
 
       //debugPrint(_rodStandUp.toString());
-      //シャクリによるテンション増加
-      addVal = addVal + _rodStandUp * 10;
+      //シャクリによるテンション増加？？？竿長さによって係数を可変にする
+      addVal = addVal + _rodStandUp * 15;
       if (_rodStandUp > 0.0) {
         _rodStandUp -= 0.5; //1スキャン毎に0.5ずつ消える
       } else {
@@ -618,7 +644,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       var fish = FISH_TABLE[_fishidx]!;
       var fishSize = ((fish['size_max'] - fish['size_min']) * _fishSize +
           fish['size_min']);
-      debugPrint("おおきさ" + size.toString());
+      //debugPrint("おおきさ" + size.toString());
       var point = fish['point'] + (fish['point'] * _fishSize).floor();
       var result = showDialog<int>(
           context: context,
@@ -794,21 +820,33 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         }
       });
     } else {
+      var fish = FISH_TABLE[_fishidx]!;
       //アタリ中またはHIT中の処理
       if (_flgBait) {
         //当たってからのスキャン数加算
         _baitCnt++;
-        if (_baitCnt > BAIT_CNT_MAX) {
+        if (_baitCnt > fish['bait_cnt_max']) {
           //アタリ判定期間終了
-          if (_baitMaxTension > FOOKING_TENSION) {
+          if (_baitMaxTension > fish['fooking_tension']) {
             //バイト中の最大テンションが一定値を超えるとHIT
             _flgBait = false;
             _flgHit = true;
             debugPrint('HIT!!!!');
             _dispInfo = "HIT!";
             //フッキングの成功度
-            _fookingLv = _tension - FOOKING_TENSION;
+            _fookingLv = _tension - fish['fooking_tension'];
             if (_fookingLv > 100.0) _fookingLv = 100.0;
+            //HIT時のアニメーション
+            //アニメーションの定義
+            _hitAnimationController = AnimationController(
+                duration: Duration(milliseconds: 2000), vsync: this);
+            _hitLeft = Tween(begin: 0.0, end: size.width).animate(
+                _hitAnimationController
+                    .drive(CurveTween(curve: Curves.slowMiddle)))
+              ..addListener(() {
+                setState(() {});
+              });
+            _hitAnimationController.forward();
           } else {
             //アワセ失敗
             _flgBait = false;
@@ -831,13 +869,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             ((durationMax - durationMin) * (_tension / TENSION_VAL_MAX))
                 .floor();
 
-        //バレ判定 水深MAXかテンション一定未満で条件成立
+        //バレ判定 水深MAXかテンション一定未満で条件成立？？？
         if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
           _bareCnt++;
         } else {
           _bareCnt = 0;
         }
-        if (_bareCnt >= BARE_MAX) {
+        if (_bareCnt >= fish['bare_min'] + _fookingLv.floor()) {
           //バレ条件成立が一定スキャン保持でバレとする
           debugPrint("バレ");
           _flgBait = false;
@@ -1000,7 +1038,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   _cursorX < _tackleCenterX + (_reelSizeX / 2) &&
                   _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
                   _cursorY < _reelCenterY + _reelSizeY) {
-                chenge_clutch(true);
+                chengeClutch(true);
                 return;
               }
 
@@ -1013,7 +1051,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               // path.lineTo(tackleCenterX + (reelSizeX / 2),
               //     reelCenterY + reelSizeY / 2 + 3);
 
-              chenge_clutch(false);
+              chengeClutch(false);
               _onTap = true;
               //タップ時の画面エフェクト
               offset =
@@ -1066,7 +1104,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             //タップ、ドラッグ操作が終了した時
             onPanEnd: (DragEndDetails details) {
               debugPrint("タップはなし");
-              //chenge_clutch(false);
+              //chengeClutch(false);
               //add_min = -10;
               _onTap = false;
               //スピードスライダの色を戻す
@@ -1137,37 +1175,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                           ),
                                     )
                                   ])),
-                          // SliderTheme(
-                          //     data: SliderTheme.of(context).copyWith(
-                          //       trackHeight: 20, //全体の縦長
-                          //       valueIndicatorColor: Colors.white, //背景の色
-                          //       activeTrackColor:
-                          //           _tensionActiveTrackColor, //値有りエリアの色
-                          //       inactiveTrackColor: Colors.white,
-                          //       activeTickMarkColor:
-                          //           Colors.black.withOpacity(0.0), //値ツマミの色
-                          //       thumbColor:
-                          //           Colors.black.withOpacity(0.0), //現在レベルの色
-                          //       thumbShape: RoundSliderThumbShape(
-                          //           enabledThumbRadius: 0), //値ツマミの径
-                          //       overlayColor: Colors.black
-                          //           .withOpacity(0.0), //値ツマミフォーカス時の色
-                          //       //inactiveTrackColor: Colors.amber,
-                          //       //inactiveTickMarkColor: Colors.blue,
-                          //     ),
-                          //     child: Slider(
-                          //       value: _tension,
-                          //       min: TENSION_VAL_MIN,
-                          //       max: TENSION_VAL_MAX,
-                          //       divisions:
-                          //           (TENSION_VAL_MAX - TENSION_VAL_MIN) as int,
-                          //       onChanged: (double value) {
-                          //         //ユーザが変更するものではないのでコメント
-                          //         //   setState(() {
-                          //         //     _tension = value.roundToDouble();
-                          //         //   });
-                          //       },
-                          //)),
                           //ドラグスライダー
                           Container(
                             margin: EdgeInsets.only(top: 10),
@@ -1188,8 +1195,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                       enabledThumbRadius: 10), //ツマミの大きさ
                                   overlayColor: Colors.black
                                       .withOpacity(0.0), //値ツマミフォーカス時の色
-                                  //inactiveTrackColor: Colors.amber,
-                                  //inactiveTickMarkColor: Colors.blue,
                                 ),
                                 child: Slider(
                                   value: _drag,
@@ -1230,33 +1235,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 child: Container(),
                               )
                             ])),
-                    // SliderTheme(
-                    //   data: SliderTheme.of(context).copyWith(
-                    //     trackHeight: 20, //全体の縦長
-                    //     valueIndicatorColor: Colors.white, //背景の色
-                    //     activeTrackColor: _speedActiveTrackColor, //値有りエリアの色
-                    //     inactiveTrackColor: Colors.white,
-                    //     activeTickMarkColor:
-                    //         Colors.black.withOpacity(0.0), //値ツマミの色
-                    //     thumbColor: Colors.black.withOpacity(0.0), //現在レベルの色
-                    //     thumbShape: RoundSliderThumbShape(
-                    //         enabledThumbRadius: 0), //値ツマミの径
-                    //     overlayColor:
-                    //         Colors.black.withOpacity(0.0), //値ツマミフォーカス時の色
-                    //     //inactiveTrackColor: Colors.amber,
-                    //     //inactiveTickMarkColor: Colors.blue,
-                    //   ),
-                    //   child: Slider(
-                    //     value: _speed,
-                    //     //MAX-MINはテンションと同じ
-                    //     min: SPEED_VAL_MIN,
-                    //     max: SPEED_VAL_MAX,
-                    //     divisions: (SPEED_VAL_MAX - SPEED_VAL_MIN) as int,
-                    //     onChanged: (double value) {
-                    //       //画面スワイプで動かす
-                    //     },
-                    //   ),
-                    // ),
                     Stack(children: <Widget>[
                       Container(
                         alignment: Alignment.center,
@@ -1461,23 +1439,41 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     : Text(""),
                 //タックルの描画
                 CustomPaint(
-                  painter: new widgetTackle(
+                  painter: new tacklePainter(
                     shoreHeight: _shoreHeight,
                     dispSize: size,
+                    takclePositionLeft: _takclePositionLeft,
                     tackleCenterX: _tackleCenterX,
                     rodSizeX: _rodSizeX,
                     rodSizeY: _rodSizeY,
                     reelSizeX: _reelSizeX,
                     reelSizeY: _reelSizeY,
                     reelCenterY: _reelCenterY,
-                    onClutch: _onClutch,
+                    clutchBackColor: _clutchBackColor,
                     rodStandUp: _rodStandUp,
                     rodTension: _tension / TENSION_VAL_MAX,
                   ),
-//                                      child: Container(
-//                                  height: 500,
-//                                          ),
                 ),
+                if (_hitAnimationController.isAnimating)
+                  Container(
+                    margin: EdgeInsets.only(
+                        left: _hitLeft.value, top: size.height / 2),
+                    child: Text(
+                      "HIT!",
+                      style: TextStyle(
+                          color: Colors.red.withOpacity(0.8),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 100,
+                          fontFamily: 'OpenSans',
+                          fontStyle: FontStyle.italic,
+                          shadows: <Shadow>[
+                            Shadow(
+                                offset: Offset(5.0, 10.0),
+                                blurRadius: 2.0,
+                                color: Colors.black.withOpacity(0.8))
+                          ]),
+                    ),
+                  ),
               ]),
             ])));
   }
@@ -1527,7 +1523,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   }
 
   //クラッチ状態変更
-  void chenge_clutch(bool flg) {
+  void chengeClutch(bool flg) {
     if (flg == _onClutch) {
       //状態変更無し時は無処理
       return;

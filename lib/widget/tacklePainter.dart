@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
-class widgetTackle extends CustomPainter {
-  const widgetTackle({
+class tacklePainter extends CustomPainter {
+  const tacklePainter({
     //required this.activeColor,
     required this.shoreHeight,
     required this.dispSize,
+    required this.takclePositionLeft,
     required this.tackleCenterX,
     required this.rodSizeX,
     required this.rodSizeY,
     required this.reelSizeX,
     required this.reelSizeY,
     required this.reelCenterY,
-    required this.onClutch,
+    required this.clutchBackColor,
     required this.rodStandUp,
     required this.rodTension,
   });
   final double shoreHeight;
   final Size dispSize;
+  final bool takclePositionLeft;
   final double tackleCenterX;
   final double rodSizeX;
   final double rodSizeY;
   final double reelSizeX;
   final double reelSizeY;
   final double reelCenterY;
-  final bool onClutch;
+  final Color clutchBackColor;
   final double rodStandUp;
   final double rodTension;
 
@@ -46,11 +47,11 @@ class widgetTackle extends CustomPainter {
         begin: FractionalOffset.topCenter,
         end: FractionalOffset.bottomCenter,
         colors: <Color>[
-          Color(0xffA33F44),
-          Color(0xffA33F44),
-          Color(0xffA33F44),
-          Color(0xffCC2222),
-          Color(0xffDD2222),
+          Color(0xff4C4C4C),
+          Color(0xff4C4C4C),
+          Color(0xff4C4C4C),
+          Color(0xff4C4C4C),
+          Color(0xff4C4C4C),
         ],
         stops: [
           0.08,
@@ -76,24 +77,39 @@ class widgetTackle extends CustomPainter {
       ..strokeWidth = 2;
     path = Path();
 
+    var position = 1;
+    if (!takclePositionLeft) {
+      position = -1;
+    }
     //描画原点 竿元左側
     // var gentenX = tackleCenterX;
     // var gentenY = shoreHeight + rodSizeY;
-    // const sides = 10; //竿を何分割で表示するか
-    // const
+    const sides = 5; //竿描画の分割数
+    const maxZurashiX = 80; //ナナメ表示するための横軸ズラシ
+    const maxZurashiXBottom = 10; //竿元の横軸ズラシ
 
-    // path.moveTo(gentenX, gentenY);
+    //竿先端
+    // path.moveTo(tackleCenterX + ((maxZurashiX - maxZurashiXBottom) * position),
+    //     shoreHeight + (rodSizeY * rodTension)); //テンション最大なら竿元まで下がる
 
-    // for (var i = 1; i < sides; i++) {
-    // path.lineTo(gentenX + (rodSizeY / sides), shoreHeight + rodSizeY);
+    // for (var i = 1; i <= sides; i++) {
+    //   var zurashiX = ((maxZurashiX / sides) * (sides - i)) - maxZurashiXBottom;
+    //   var tensionY = rodSizeY * (rodTension * (i / sides));
+
+    //   path.lineTo(
+    //       tackleCenterX + (zurashiX) - (rodSizeX / (sides / i)),
+    //       //shoreHeight + (rodSizeY / ((maxZurashiX / sides) * i)) + tensionY);
+    //       shoreHeight + tensionY);
     // }
 
     path.moveTo(tackleCenterX + 70, shoreHeight + (rodSizeY * rodTension));
+
     path.lineTo(tackleCenterX + 50 - (rodSizeX / 6),
         shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
     path.lineTo(tackleCenterX + 30 - (rodSizeX / 3),
         shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
     path.lineTo(tackleCenterX - 10 - (rodSizeX / 2), shoreHeight + rodSizeY);
+
     path.lineTo(tackleCenterX - 10 + (rodSizeX / 2), shoreHeight + rodSizeY);
     path.lineTo(tackleCenterX + 30 + (rodSizeX / 3),
         shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
@@ -140,15 +156,9 @@ class widgetTackle extends CustomPainter {
     canvas.drawPath(path, paint);
 
     //クラッチ
-    var dragColor;
-    if (onClutch) {
-      dragColor = Colors.lightBlue;
-    } else {
-      dragColor = Colors.red;
-    }
     path = Path();
     paint = new Paint()
-      ..color = dragColor
+      ..color = clutchBackColor
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
