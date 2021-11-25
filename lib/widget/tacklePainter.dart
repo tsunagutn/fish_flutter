@@ -102,18 +102,21 @@ class tacklePainter extends CustomPainter {
     //       shoreHeight + tensionY);
     // }
 
-    path.moveTo(tackleCenterX + 70, shoreHeight + (rodSizeY * rodTension));
+    path.moveTo(
+        tackleCenterX + (70 * position), shoreHeight + (rodSizeY * rodTension));
 
-    path.lineTo(tackleCenterX + 50 - (rodSizeX / 6),
+    path.lineTo(tackleCenterX + (50 * position) - (rodSizeX / 6),
         shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
-    path.lineTo(tackleCenterX + 30 - (rodSizeX / 3),
+    path.lineTo(tackleCenterX + (30 * position) - (rodSizeX / 3),
         shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
-    path.lineTo(tackleCenterX - 10 - (rodSizeX / 2), shoreHeight + rodSizeY);
+    path.lineTo(tackleCenterX + (-10 * position) - (rodSizeX / 2),
+        shoreHeight + rodSizeY);
 
-    path.lineTo(tackleCenterX - 10 + (rodSizeX / 2), shoreHeight + rodSizeY);
-    path.lineTo(tackleCenterX + 30 + (rodSizeX / 3),
+    path.lineTo(tackleCenterX + (-10 * position) + (rodSizeX / 2),
+        shoreHeight + rodSizeY);
+    path.lineTo(tackleCenterX + (30 * position) + (rodSizeX / 3),
         shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
-    path.lineTo(tackleCenterX + 50 + (rodSizeX / 6),
+    path.lineTo(tackleCenterX + (50 * position) + (rodSizeX / 6),
         shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
 
     path.close();

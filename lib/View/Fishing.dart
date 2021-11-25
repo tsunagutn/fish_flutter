@@ -39,7 +39,7 @@
 //済・魚種毎にバレ条件の設定
 //済・アワセの上手くいきかたで初期バラシレベルが決まるみたいな
 //済・バレシステムを何とかする
-//・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？
+//・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？→しない
 //・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
 //・魚図鑑画面
 //・いけすシステム
@@ -61,6 +61,9 @@
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
 
+import 'package:fish_flutter/Model/FishModel.dart';
+import 'package:fish_flutter/View/Test.dart';
+import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
@@ -90,155 +93,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 //  static const DEBUGFLG = false;
 
   //魚種定義
-  static const Map<int, Map<String, dynamic>> FISH_TABLE = {
-    0: {
-      'name': "アジ", //魚種名
-      'image': "aji.jpg", //超過画面の画像
-      'text': "あなたは幸せを感じました", //釣果画面のコメント
-      'hp': 300, //このスキャン経過で0になる
-      'add_max': 30, //引きの最大
-      'add_min': -10, //引きの最小（最大との乖離が暴れ度）
-      'weight': 2, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
-      'wariai': 1.0, //HIT率 条件全一致で確定1.0～
-      'point': 100, //ポイントの基礎値
-      'tana_min': 0, //生息域 上 0.1m単位
-      'tana_max': 100, //生息域 下 0.1m単位
-      'hit_fall': 0.2, //フォール志向
-      'hit_speed_just': 50, //スピード志向
-      'hit_speed_range': 40, //スピード志向範囲+-
-      'size_min': 7.6, //大きさ範囲最小
-      'size_max': 51.3, //大きさ範囲最大
-      'bait_cnt_max': 20, //アタリ発生からアワセまでの猶予スキャン
-      'fooking_tension': 50, //アワセ成功テンション
-      'bare_min': 20, //HIT後のバレ判定スキャン数（これプラスアワセレベル）
-    },
-    1: {
-      'name': "タチウオ",
-      'image': "tachiuo.jpg",
-      'text': "おおきいぞっ",
-      'hp': 250, //このスキャン経過で0になる
-      'add_max': 13,
-      'add_min': -5,
-      'weight': 2, //重さ
-      'wariai': 0.7,
-      'point': 200, //ポイントの基礎値
-      'tana_min': 100, //生息域 上 0.1m単位
-      'tana_max': 300, //生息域 下 0.1m単位
-      'hit_fall': 0.3,
-      'hit_speed_just': 100,
-      'hit_speed_range': 50,
-      'size_min': 64.0,
-      'size_max': 150.5,
-      'bait_cnt_max': 20,
-      'fooking_tension': 80,
-      'bare_min': 20,
-    },
-    2: {
-      'name': "鯉",
-      'image': "koi.jpg",
-      'text': "スーパーレア",
-      'hp': 3000, //このスキャン経過で0になる
-      'add_max': 10,
-      'add_min': -6,
-      'weight': 3, //重さ
-      'wariai': 0.5,
-      'point': 200, //ポイントの基礎値
-      'tana_min': 0, //生息域 上 0.1m単位
-      'tana_max': 300, //生息域 下 0.1m単位
-      'hit_fall': 0.1,
-      'hit_speed_just': 75,
-      'hit_speed_range': 50,
-      'size_min': 34.4,
-      'size_max': 114.8,
-      'bait_cnt_max': 40,
-      'fooking_tension': 100,
-      'bare_min': 20,
-    },
-    3: {
-      'name': "マダイ",
-      'image': "madai.jpg",
-      'text': "あなたは満足を得ました",
-      'hp': 1000,
-      'add_max': 15,
-      'add_min': -6,
-      'weight': 3, //重さ
-      'wariai': 0.5,
-      'point': 300, //ポイントの基礎値
-      'tana_min': 500, //生息域 上 0.1m単位
-      'tana_max': 1000, //生息域 下 0.1m単位
-      'hit_fall': 0.1,
-      'hit_speed_just': 150,
-      'hit_speed_range': 50,
-      'size_min': 26.3,
-      'size_max': 86.8,
-      'bait_cnt_max': 30,
-      'fooking_tension': 150,
-      'bare_min': 20,
-    },
-    4: {
-      'name': "宮澤クン",
-      'image': "sakana.jpg",
-      'text': "スー　パー　レア",
-      'hp': 5000,
-      'add_max': 30,
-      'add_min': -10,
-      'weight': 4, //重さ
-      'wariai': 0.05,
-      'point': 99999, //ポイントの基礎値
-      'tana_min': 500, //生息域 上 0.1m単位
-      'tana_max': 1000, //生息域 下 0.1m単位
-      'hit_fall': 0.6,
-      'hit_speed_just': 250,
-      'hit_speed_range': 50,
-      'size_min': 9999.9,
-      'size_max': 19999.9,
-      'bait_cnt_max': 10,
-      'fooking_tension': 150,
-      'bare_min': 20,
-    },
-    5: {
-      'name': "サバ", //魚種名
-      'image': "aji.jpg", //超過画面の画像
-      'text': "写真は仮です", //釣果画面のコメント
-      'hp': 500, //このスキャン経過で0になる
-      'add_max': 10, //引きの最大
-      'add_min': -5, //引きの最小（最大との乖離が暴れ度）
-      'weight': 2, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
-      'wariai': 1.0, //HIT率 条件全一致で確定1.0～
-      'point': 100, //ポイントの基礎値
-      'tana_min': 0, //生息域 上 0.1m単位
-      'tana_max': 70, //生息域 下 0.1m単位
-      'hit_fall': 0.2, //フォール志向
-      'hit_speed_just': 150, //スピード志向
-      'hit_speed_range': 30, //スピード志向範囲+-
-      'size_min': 14.3,
-      'size_max': 67.2,
-      'bait_cnt_max': 15,
-      'fooking_tension': 80,
-      'bare_min': 20,
-    },
-    6: {
-      'name': "サゴシ", //魚種名
-      'image': "aji.jpg", //超過画面の画像
-      'text': "あなたは満足を得ました", //釣果画面のコメント
-      'hp': 1000, //このスキャン経過で0になる
-      'add_max': 20, //引きの最大
-      'add_min': -5, //引きの最小（最大との乖離が暴れ度）
-      'weight': 3, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
-      'wariai': 0.6, //HIT率 条件全一致で確定1.0～
-      'point': 300, //ポイントの基礎値
-      'tana_min': 0, //生息域 上 0.1m単位
-      'tana_max': 200, //生息域 下 0.1m単位
-      'hit_fall': 1.0, //フォール志向
-      'hit_speed_just': 170, //スピード志向
-      'hit_speed_range': 40, //スピード志向範囲+-
-      'size_min': 35.3,
-      'size_max': 69.9,
-      'bait_cnt_max': 15,
-      'fooking_tension': 120,
-      'bare_min': 20,
-    },
-  };
+  late FishsModel FISH_TABLE;
 
   //光点の点滅速度
   static const Map<int, int> POINT_DURATION_MSEC = {
@@ -287,8 +142,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //アニメーション関連
   late AnimationController _animationController; //光点の光アニメーション
   late Animation<double> _animationRadius;
-  late AnimationController _hitAnimationController; //ヒット時のテキストアニメーション
-  late Animation<double> _hitLeft;
+  late AnimationController _centerTextAnimationController; //画面中央に出すテキストアニメーション
+  late Animation<double> _centerTextLeft;
 
   //状態フラグ変数
   var _onTap = false; //現在タップ中フラグ
@@ -344,6 +199,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _shoreHeight = 0.0;
   var _bottomHeight = 0.0;
 
+  var _centerTextMain = "";
+  var _centerTextMainColor = Colors.red;
+  var _centerTextSub = "";
+  var _centerTextSubColor = Colors.black;
   var _senchoMessage = ""; //船長の発言
 
   late Offset offset = Offset(0.0, 0.0);
@@ -370,6 +229,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    //魚テーブルを初期化
+    FISH_TABLE = new FishsModel();
+
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
     // null safety対応で?（null以外の時のみアクセス）をつける
@@ -392,7 +254,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       vsync: this, // おきまり
     )..repeat(); // リピート設定
 
-    _hitAnimationController = AnimationController(
+    _centerTextAnimationController = AnimationController(
         duration: Duration(milliseconds: 2000), vsync: this);
 
     super.initState();
@@ -401,7 +263,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   void dispose() {
     _animationController.dispose();
     waveController.dispose(); // AnimationControllerは明示的にdisposeする。
-    _hitAnimationController.dispose();
+    _centerTextAnimationController.dispose();
     super.dispose();
   }
 
@@ -475,12 +337,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         _hitScanCnt--;
       }
       //テンション増減にHIT中補正をかける
-      var fish = FISH_TABLE[_fishidx]!;
-      mx += (fish['add_max'] as int) *
-          (_hitScanCnt / (fish['hp'] as int) * _fishSize).round();
-      mn += (fish['add_min'] as int) *
-          (_hitScanCnt / (fish['hp'] as int) * _fishSize).round();
-      weight = fish['weight'];
+      var fish = FISH_TABLE.fishs[_fishidx]!;
+      mx += fish.addMax * (_hitScanCnt / fish.hp * _fishSize).round();
+      mn += fish.addMin * (_hitScanCnt / fish.hp * _fishSize).round();
+      weight = fish.weight;
     }
     addVal = (rand * (mx + 1 - (mn))).floor() + (mn) + weight;
 
@@ -641,11 +501,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (_flgHit && _depth <= 1) {
       debugPrint("つりあげ");
       //釣りあげ時のモーダル
-      var fish = FISH_TABLE[_fishidx]!;
-      var fishSize = ((fish['size_max'] - fish['size_min']) * _fishSize +
-          fish['size_min']);
+      var fish = FISH_TABLE.fishs[_fishidx]!;
+      var fishSize = ((fish.sizeMax - fish.sizeMin) * _fishSize + fish.sizeMin);
       //debugPrint("おおきさ" + size.toString());
-      var point = fish['point'] + (fish['point'] * _fishSize).floor();
+      var point = fish.point + (fish.point * _fishSize).floor();
       var result = showDialog<int>(
           context: context,
           barrierDismissible: false,
@@ -672,7 +531,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.all(Radius.circular(20.0))),
                   backgroundColor:
                       clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
-                  title: Text(fish['text']),
+                  title: Text(fish.text),
                   content: Container(
                       height: size.height / 2,
                       // decoration: new BoxDecoration(
@@ -682,14 +541,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       // )),
                       child: Column(children: <Widget>[
                         new Image(
-                          image: AssetImage('assets/images/' + fish['image']),
+                          image: AssetImage('assets/images/' + fish.image),
                           // width: 150,
                           // height: 150,
                         ),
                         Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              Text(fish['name'] +
+                              Text(fish.name +
                                   "　" +
                                   fishSize.toStringAsFixed(1) +
                                   "cm"),
@@ -743,12 +602,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         hitTanaProb = 0.2; //棚範囲外の最低保証
       }
 
-      //var fishs = FISH_TABLE;
-      Map<int, Map<String, dynamic>> fishs = {...FISH_TABLE};
-
-      //深さから可能性のある種を抽出
-      fishs.removeWhere((key, value) => _depth < value['tana_min']);
-      fishs.removeWhere((key, value) => _depth > value['tana_max']);
+      // //深さから可能性のある種を抽出
+      var fishs = FISH_TABLE.extractDepth(_depth);
 
       var maxProb = 0.0;
       //種毎の判定
@@ -757,7 +612,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         var hitSpeedprob = 0.0;
         //糸出中、かつ水深MAXではない時
         if (_onClutch && _depth < _maxDepth) {
-          hitSpeedprob = fish['hit_fall']; //フォール中の補正
+          hitSpeedprob = fish.hitFall; //フォール中の補正
         } else {
           //ドラグ出中、止めている時、水深0m未満、水深MAXの時は判定しない
           if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
@@ -765,12 +620,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               _depth > 0 &&
               _depth < _maxDepth) {
             //HITスピードとの差分
-            var speedDiff = (_speed - fish['hit_speed_just']).abs();
+            var speedDiff = (_speed - fish.hitSpeedJust).abs();
             //差分が範囲内か
-            if (speedDiff < fish['hit_speed_range']) {
+            if (speedDiff < fish.hitSpeedRange) {
               hitSpeedprob = 1.0 *
-                  ((speedDiff - fish['hit_speed_range']).abs() /
-                      fish['hit_speed_range']);
+                  ((speedDiff - fish.hitSpeedRange).abs() / fish.hitSpeedRange);
             }
             if (hitSpeedprob < 0.2) {
               hitSpeedprob = 0.2; //速度範囲外の最低保証
@@ -778,17 +632,16 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           }
         }
         //HIT確率の算出
-        var hitProb =
-            (hitTanaProb * hitSpeedprob * _jiai) * fish['wariai'] / 100;
+        var hitProb = (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
 
         if (hitTanaProb * hitSpeedprob > maxProb) {
-          maxProb = hitTanaProb * hitSpeedprob * _jiai * fish['wariai'];
+          maxProb = hitTanaProb * hitSpeedprob * _jiai * fish.wariai;
         }
         //1～0の乱数生成
         var hitrnd = (new math.Random()).nextDouble();
         if (DEBUGFLG) {
           //すぐつれる
-          hitrnd = 0.001;
+          hitrnd = 0.0005;
         }
 
         //HIT判定
@@ -797,7 +650,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           _fishidx = key;
           //大きさ決定
           _fishSize = (new math.Random()).nextDouble();
-          _hitScanCnt = fish['hp'];
+          _hitScanCnt = fish.hp;
           //アタリと判定
           _flgBait = true;
           _baitCnt = 0;
@@ -820,33 +673,38 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         }
       });
     } else {
-      var fish = FISH_TABLE[_fishidx]!;
+      var fish = FISH_TABLE.fishs[_fishidx]!;
       //アタリ中またはHIT中の処理
       if (_flgBait) {
         //当たってからのスキャン数加算
         _baitCnt++;
-        if (_baitCnt > fish['bait_cnt_max']) {
+        if (_baitCnt > fish.baitCntMax) {
           //アタリ判定期間終了
-          if (_baitMaxTension > fish['fooking_tension']) {
+          if (_baitMaxTension > fish.fookingTension) {
             //バイト中の最大テンションが一定値を超えるとHIT
             _flgBait = false;
             _flgHit = true;
             debugPrint('HIT!!!!');
             _dispInfo = "HIT!";
             //フッキングの成功度
-            _fookingLv = _tension - fish['fooking_tension'];
+            _fookingLv = _tension - fish.fookingTension;
             if (_fookingLv > 100.0) _fookingLv = 100.0;
-            //HIT時のアニメーション
-            //アニメーションの定義
-            _hitAnimationController = AnimationController(
+            //HITメッセージ
+            _centerTextMain = "HIT!";
+            _centerTextMainColor = Colors.red;
+            _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
+            _centerTextSubColor = Colors.yellow;
+
+            //HIT時のアニメーションの定義
+            _centerTextAnimationController = AnimationController(
                 duration: Duration(milliseconds: 2000), vsync: this);
-            _hitLeft = Tween(begin: 0.0, end: size.width).animate(
-                _hitAnimationController
+            _centerTextLeft = Tween(begin: 0.0, end: size.width / 2).animate(
+                _centerTextAnimationController
                     .drive(CurveTween(curve: Curves.slowMiddle)))
               ..addListener(() {
                 setState(() {});
               });
-            _hitAnimationController.forward();
+            _centerTextAnimationController.forward();
           } else {
             //アワセ失敗
             _flgBait = false;
@@ -875,7 +733,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         } else {
           _bareCnt = 0;
         }
-        if (_bareCnt >= fish['bare_min'] + _fookingLv.floor()) {
+        if (_bareCnt >= fish.bareMin + _fookingLv.floor()) {
           //バレ条件成立が一定スキャン保持でバレとする
           debugPrint("バレ");
           _flgBait = false;
@@ -979,8 +837,21 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             icon: Icon(Icons.menu_book),
             color: Colors.white,
             iconSize: 30.0,
-            onPressed: () {
-              //図鑑モーダルの表示
+            onPressed: () async {
+              // //図鑑モーダルの表示
+              // var result = await showDialog<int>(
+              //   context: context,
+              //   barrierDismissible: false,
+              //   builder: (_) {
+              //     return BookDialog(
+              //       fishTable: FISH_TABLE,
+              //     );
+              //   },
+              // );
+              // debugPrint(result.toString());
+              // setState(() {
+              //   _depthChangeOrder = result as int;
+              // });
             },
           ),
           //右上（複数可）
@@ -1454,26 +1325,45 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     rodTension: _tension / TENSION_VAL_MAX,
                   ),
                 ),
-                if (_hitAnimationController.isAnimating)
+                if (_centerTextAnimationController.isAnimating)
                   Container(
-                    margin: EdgeInsets.only(
-                        left: _hitLeft.value, top: size.height / 2),
-                    child: Text(
-                      "HIT!",
-                      style: TextStyle(
-                          color: Colors.red.withOpacity(0.8),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 100,
-                          fontFamily: 'OpenSans',
-                          fontStyle: FontStyle.italic,
-                          shadows: <Shadow>[
-                            Shadow(
-                                offset: Offset(5.0, 10.0),
-                                blurRadius: 2.0,
-                                color: Colors.black.withOpacity(0.8))
-                          ]),
-                    ),
-                  ),
+                      margin: EdgeInsets.only(
+                          left: _centerTextLeft.value, top: size.height / 2),
+                      child: Column(
+                        children: [
+                          Text(
+                            _centerTextMain,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: _centerTextMainColor.withOpacity(0.8),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 100,
+                                fontFamily: 'OpenSans',
+                                fontStyle: FontStyle.italic,
+                                shadows: <Shadow>[
+                                  Shadow(
+                                      offset: Offset(5.0, 10.0),
+                                      blurRadius: 2.0,
+                                      color: Colors.black.withOpacity(0.8))
+                                ]),
+                          ),
+                          Text(
+                            _centerTextSub,
+                            style: TextStyle(
+                                color: _centerTextSubColor.withOpacity(0.8),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 40,
+                                fontFamily: 'OpenSans',
+                                fontStyle: FontStyle.italic,
+                                shadows: <Shadow>[
+                                  Shadow(
+                                      offset: Offset(5.0, 10.0),
+                                      blurRadius: 2.0,
+                                      color: Colors.black.withOpacity(0.8))
+                                ]),
+                          ),
+                        ],
+                      )),
               ]),
             ])));
   }
