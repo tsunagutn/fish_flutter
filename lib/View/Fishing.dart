@@ -369,7 +369,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
       //debugPrint(_rodStandUp.toString());
       //シャクリによるテンション増加？？？竿長さによって係数を可変にする
-      addVal = addVal + _rodStandUp * 15;
+      addVal = addVal + _rodStandUp * 30;
       if (_rodStandUp > 0.0) {
         _rodStandUp -= 0.5; //1スキャン毎に0.5ずつ消える
       } else {
@@ -1141,35 +1141,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
-                      Container(
-                          height: 40,
-                          child: AnimatedBuilder(
-                            animation: waveController, // waveControllerを設定
-                            builder: (context, child) => Stack(
-                              children: <Widget>[
-                                Text(""), // テスト用
-                                // 1つ目の波
-                                ClipPath(
-                                  child: Container(
-                                      color: clsColor
-                                          ._getColorFromHex("02D5F2")
-                                          .withOpacity(1.0)),
-                                  clipper: WaveClipper(
-                                      context, waveController.value, 0),
-                                ),
-                                // 2つ目の波
-                                ClipPath(
-                                  child: Container(
-                                      color: clsColor
-                                          ._getColorFromHex("02D5F2")
-                                          .withOpacity(0.3)),
-                                  clipper: WaveClipper(
-                                      context, waveController.value, 0.5),
-                                ),
-                                // ↑ 追加部分
-                              ],
-                            ),
-                          ))
                     ]),
                   ]),
                 ),
