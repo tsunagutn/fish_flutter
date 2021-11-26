@@ -8,8 +8,8 @@ class WaveClipper extends CustomClipper<Path> {
 
   WaveClipper(this.context, this.waveControllerValue, this.offset) {
     final width = MediaQuery.of(context).size.width; // 画面の横幅
-    final height = MediaQuery.of(context).size.height; // 画面の高さ
-    //final height = 50; // 画面の高さ
+    //final height = MediaQuery.of(context).size.height; // 画面の高さ
+    final height = 40; // 画面の高さ
 
     // coordinateListに波の座標を追加
     for (var i = 0; i <= width / WaveHindo; i++) {
@@ -36,8 +36,8 @@ class WaveClipper extends CustomClipper<Path> {
       // addPolygon: coordinateListに入っている座標を直線で結ぶ。
       //             false -> 最後に始点に戻らない
       ..addPolygon(coordinateList, false)
-      ..lineTo(size.width, size.height) // 画面右下へ
-      ..lineTo(0, size.height) // 画面左下へ
+      ..lineTo(size.width, 40) // 画面右下へ
+      ..lineTo(0, 40) // 画面左下へ
       ..close(); // 始点に戻る
     return path;
   }
