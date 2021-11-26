@@ -1147,26 +1147,25 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             animation: waveController, // waveControllerを設定
                             builder: (context, child) => Stack(
                               children: <Widget>[
-                                Text(""), // テスト用
+                                //？？？iPhoneのsafariで描画できない,androidはOK
                                 // 1つ目の波
                                 ClipPath(
                                   child: Container(
                                       color: clsColor
-                                          ._getColorFromHex("FF0000")
+                                          ._getColorFromHex("02D5F2")
                                           .withOpacity(1.0)),
                                   clipper: WaveClipper(
                                       context, waveController.value, 0),
-                                )
-                                // ,
-                                // // 2つ目の波
-                                // ClipPath(
-                                //   child: Container(
-                                //       color: clsColor
-                                //           ._getColorFromHex("02D5F2")
-                                //           .withOpacity(0.3)),
-                                //   clipper: WaveClipper(
-                                //       context, waveController.value, 0.5),
-                                // ),
+                                ),
+                                // 2つ目の波
+                                ClipPath(
+                                  child: Container(
+                                      color: clsColor
+                                          ._getColorFromHex("02D5F2")
+                                          .withOpacity(0.3)),
+                                  clipper: WaveClipper(
+                                      context, waveController.value, 0.5),
+                                ),
                                 // ↑ 追加部分
                               ],
                             ),
