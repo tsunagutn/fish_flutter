@@ -37063,31 +37063,31 @@ s.aK=s.aK+this.b
 A.ef(this.c,!1).n6(0,null)},
 $S:0}
 A.a6C.prototype={
-$2(a,b){var s,r,q,p,o,n,m=this,l=m.c.h(0,a)
-l.toString
-s=m.b
-if(s.fr&&s.k3<s.k4)r=l.ch
+$2(a,b){var s,r,q,p,o,n,m,l=this,k=l.c.h(0,a)
+k.toString
+s=l.b
+if(s.fr&&s.k3<s.k4)r=k.ch
 else{if(!s.rx.k(0,s.f))if(s.dy){q=s.k3
 q=q>0&&q<s.k4}else q=!1
 else q=!1
-if(q){p=Math.abs(s.k2-l.cx)
-q=l.cy
+if(q){p=Math.abs(s.k2-k.cx)
+q=k.cy
 r=p<q?Math.abs(p-q)/q:0
-if(r<0.2)r=0.2}else r=0}q=m.a
+if(r<0.2)r=0.2}else r=0}q=l.a
 o=q.c*r
-n=o*s.ai*l.x
+n=o*s.ai*k.x
 if(o>q.d)q.d=n
-B.aK.k5()
-if(n/100>0.0005){s.aO=a
+m=B.aK.k5()
+if(n/100>m){s.aO=a
 s.b2=B.aK.k5()
-s.bg=l.d
+s.bg=k.d
 s.fx=!0
 s.b_=s.ba=0
 A.e6().$1("\u30a2\u30bf\u30ea")
 s.r2="\u30a2\u30bf\u30ea"
 s.y1=s.r}if(s.fx||s.fy)return
-else{l=m.d
-q.b=l-B.c.cM((l-m.e)*q.d)
+else{k=l.d
+q.b=k-B.c.cM((k-l.e)*q.d)
 s.r2=B.c.T(q.d*100,0)+" %"
 s.y1=B.j
 s.ad=A.ct("ffd900")}},
@@ -37565,7 +37565,7 @@ aH(){return new A.NC(B.l)}}
 A.NC.prototype={
 aV(){this.br()
 this.e="\u4f55\u304b\u3084\uff01"},
-I(a,b){var s=this,r=null,q=A.b8("\u8239\u9577",r,r,r,r,r,r),p=b.N(t.w).f,o=A.EQ(150,new A.hP("assets/images/sencho.png"),150),n=A.b8(s.e,r,r,r,r,r,r),m=B.c.au(127.5)
+I(a,b){var s=this,r=null,q=A.b8("\u8239\u9577",r,r,r,r,r,r),p=b.N(t.w).f,o=A.EQ(150,new A.hP("Assets/Images/sencho.png"),150),n=A.b8(s.e,r,r,r,r,r,r),m=B.c.au(127.5)
 return A.adx(r,r,A.b3(r,A.d6(A.b([o,n,A.a6r(B.dO,B.LT,new A.a9V(s),A.ug(r,r,r,r,r,r,r,r,B.j,r,r,A.Q(m,33,150,243),r,r,r,r,r,r,r)),A.a6r(B.dO,B.LP,new A.a9W(s),A.ug(r,r,r,r,r,r,r,r,B.j,r,r,A.Q(m,33,150,243),r,r,r,r,r,r,r)),A.a6r(B.dO,B.LS,new A.a9X(s),A.ug(r,r,r,r,r,r,r,r,B.j,r,r,A.Q(m,33,150,243),r,r,r,r,r,r,r)),A.a6r(B.dO,B.LR,new A.a9Y(s,b),A.ug(r,r,r,r,r,r,r,r,B.j,r,r,A.Q(m,0,0,0),r,r,r,r,r,r,r)),A.b8(B.f.i(s.a.d)+"\u30dd\u30a4\u30f3\u30c8",r,r,r,r,r,r)],t.p),B.y,B.Q,B.x),B.k,r,r,r,r,p.a.b/2,r,r,r,r,r,r),r,q,r)}}
 A.a9V.prototype={
 $0(){var s=this.a
