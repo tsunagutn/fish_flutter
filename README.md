@@ -1,4 +1,4 @@
-# checklist
+# fish_flutter
 
 A new Flutter project.
 

@@ -1,7 +1,7 @@
-class CheckListTestModel {
+class fish_flutterTestModel {
   String title;
   //コンストラクタ
-  CheckListTestModel({
+  fish_flutterTestModel({
     required this.title,
   });
 }
