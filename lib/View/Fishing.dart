@@ -518,7 +518,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 // width: size.width / 1.5,
                 decoration: new BoxDecoration(
                     image: new DecorationImage(
-                  image: new AssetImage("assets/images/fishback.jpg"),
+                  image: new AssetImage("Assets/Images/fishback.jpg"),
                   fit: BoxFit.cover,
                 )),
                 child: AlertDialog(
@@ -540,12 +540,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       height: size.height / 2,
                       // decoration: new BoxDecoration(
                       //     image: new DecorationImage(
-                      //   image: new AssetImage("assets/images/fishback.jpg"),
+                      //   image: new AssetImage("Assets/Images/fishback.jpg"),
                       //   fit: BoxFit.cover,
                       // )),
                       child: Column(children: <Widget>[
                         new Image(
-                          image: AssetImage('assets/images/' + fish.image),
+                          image: AssetImage('Assets/Images/' + fish.image),
                           // width: 150,
                           // height: 150,
                         ),
@@ -1147,7 +1147,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             animation: waveController, // waveControllerを設定
                             builder: (context, child) => Stack(
                               children: <Widget>[
-                                //Text(waveController.value.toString()), // テスト用
+                                Text(""), // テスト用
                                 // 1つ目の波
                                 ClipPath(
                                   child: Container(
@@ -1191,11 +1191,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               ],
                               stops: [0.0, _dispDepthLv1, _dispDepthLv2, 1.0],
                             )),
-                        width: size.width,
-                        // height: size.height -
-                        //     //_appBarHeight -
-                        //     _shoreHeight -
-                        //     _bottomHeight,
                         child: Column(children: <Widget>[
                           //ソナー画面
                           Expanded(
