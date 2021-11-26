@@ -238,16 +238,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     WidgetsBinding.instance?.addPostFrameCallback((cb) {
       //AppBarの高さを取得
       _appBarHeight = AppBar().preferredSize.height;
+
+      //定周期タイマの開始
+      Timer.periodic(
+        Duration(milliseconds: TIMER_INTERVAL),
+        _onTimer,
+      );
     });
 
     //光点アニメーションの初期化
     _nowDurationLv = POINT_DURATION_MSEC.length - 1; //初期値は最大値
     ligntSpotAnimation(true, POINT_DURATION_MSEC[_nowDurationLv]!);
-    //定周期タイマの設定
-    Timer.periodic(
-      Duration(milliseconds: TIMER_INTERVAL),
-      _onTimer,
-    );
 
     waveController = AnimationController(
       duration: const Duration(seconds: 3), // アニメーションの間隔を3秒に設定
@@ -264,6 +265,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _animationController.dispose();
     waveController.dispose(); // AnimationControllerは明示的にdisposeする。
     _centerTextAnimationController.dispose();
+    fishPointerList.clear();
     super.dispose();
   }
 
@@ -498,7 +500,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
 
     //釣り上げ判定
-    if (_flgHit && _depth <= 1) {
+    if (_flgHit && _depth <= 0) {
+      _flgBait = false;
+      _flgHit = false;
       debugPrint("つりあげ");
       //釣りあげ時のモーダル
       var fish = FISH_TABLE.fishs[_fishidx]!;
@@ -578,8 +582,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   ],
                 ));
           });
-      _flgBait = false;
-      _flgHit = false;
     }
 
     //光点点滅速度関連の変数
@@ -1172,53 +1174,54 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   ]),
                 ),
                 //海中
-                Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: clsColor._getColorFromHex("02D5F2")),
-                        //color: clsColor._getColorFromHex("200070"),
-                        gradient: LinearGradient(
-                          begin: FractionalOffset.topCenter,
-                          end: FractionalOffset.bottomCenter,
-                          colors: [
-                            clsColor._getColorFromHex("02D5F2"),
-                            clsColor._getColorFromHex("013367"),
-                            clsColor._getColorFromHex("002142"),
-                            clsColor._getColorFromHex("000000"),
-                          ],
-                          stops: [0.0, _dispDepthLv1, _dispDepthLv2, 1.0],
-                        )),
-                    width: size.width,
-                    height: size.height -
-                        //_appBarHeight -
-                        _shoreHeight -
-                        _bottomHeight,
-                    child: Column(children: <Widget>[
-                      //ソナー画面
-                      Expanded(
-                        //描画エリア
-                        child: Container(
-                          key: globalKeySonar,
-                          child: Stack(children: <Widget>[
-                            //ソナー光点
-                            Container(
-                              width: size.width,
-                              margin: EdgeInsets.only(
-                                  top: _lightSpotY, left: _lightSpotX),
-                              child: CustomPaint(
-                                painter: LightSpot(
-                                    POINTER_SIZE,
-                                    POINTER_BACK_SIZE,
-                                    _animationRadius.value,
-                                    _pointerColor,
-                                    0,
-                                    0),
-                              ),
+                Expanded(
+                    child: Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                                color: clsColor._getColorFromHex("02D5F2")),
+                            //color: clsColor._getColorFromHex("200070"),
+                            gradient: LinearGradient(
+                              begin: FractionalOffset.topCenter,
+                              end: FractionalOffset.bottomCenter,
+                              colors: [
+                                clsColor._getColorFromHex("02D5F2"),
+                                clsColor._getColorFromHex("013367"),
+                                clsColor._getColorFromHex("002142"),
+                                clsColor._getColorFromHex("000000"),
+                              ],
+                              stops: [0.0, _dispDepthLv1, _dispDepthLv2, 1.0],
+                            )),
+                        width: size.width,
+                        // height: size.height -
+                        //     //_appBarHeight -
+                        //     _shoreHeight -
+                        //     _bottomHeight,
+                        child: Column(children: <Widget>[
+                          //ソナー画面
+                          Expanded(
+                            //描画エリア
+                            child: Container(
+                              key: globalKeySonar,
+                              child: Stack(children: <Widget>[
+                                //ソナー光点
+                                Container(
+                                  width: size.width,
+                                  margin: EdgeInsets.only(
+                                      top: _lightSpotY, left: _lightSpotX),
+                                  child: CustomPaint(
+                                    painter: LightSpot(
+                                        POINTER_SIZE,
+                                        POINTER_BACK_SIZE,
+                                        _animationRadius.value,
+                                        _pointerColor,
+                                        0,
+                                        0),
+                                  ),
+                                ),
+                              ]),
                             ),
-                          ]),
-                        ),
-                      )
-                    ])),
+                          )
+                        ]))),
 
                 //海底
                 Container(
