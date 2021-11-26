@@ -1152,20 +1152,21 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 ClipPath(
                                   child: Container(
                                       color: clsColor
-                                          ._getColorFromHex("02D5F2")
+                                          ._getColorFromHex("FF0000")
                                           .withOpacity(1.0)),
                                   clipper: WaveClipper(
                                       context, waveController.value, 0),
-                                ),
-                                // 2つ目の波
-                                ClipPath(
-                                  child: Container(
-                                      color: clsColor
-                                          ._getColorFromHex("02D5F2")
-                                          .withOpacity(0.3)),
-                                  clipper: WaveClipper(
-                                      context, waveController.value, 0.5),
-                                ),
+                                )
+                                // ,
+                                // // 2つ目の波
+                                // ClipPath(
+                                //   child: Container(
+                                //       color: clsColor
+                                //           ._getColorFromHex("02D5F2")
+                                //           .withOpacity(0.3)),
+                                //   clipper: WaveClipper(
+                                //       context, waveController.value, 0.5),
+                                // ),
                                 // ↑ 追加部分
                               ],
                             ),
