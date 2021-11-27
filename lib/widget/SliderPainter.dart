@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'dart:math' as math;
 
 class SliderPainter extends CustomPainter {
   const SliderPainter({
     required this.activeColor,
+    required this.inactiveColor,
     required this.value,
     required this.backRadius,
     required this.maxBackRadius,
-    required this.dragShaKeX,
-    required this.dragShaKeY,
+    required this.flgShaKe,
   });
   final Color activeColor;
+  final Color inactiveColor;
   final double value;
   final double backRadius;
   final double maxBackRadius;
-  final int dragShaKeX;
-  final int dragShaKeY;
+  final bool flgShaKe;
 
   //後光の設定
   static const Map<int, Map<String, double>> lightLayers = {
@@ -38,6 +38,13 @@ class SliderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    var dragShaKeX = 0;
+    var dragShaKeY = 0;
+    if (flgShaKe) {
+      //テンションゲージを揺らす
+      dragShaKeX = 5 - (new math.Random()).nextInt(9);
+      dragShaKeY = 5 - (new math.Random()).nextInt(9);
+    }
     var paint = Paint();
 
     // paint.color = Colors.greenAccent;
@@ -116,7 +123,7 @@ class SliderPainter extends CustomPainter {
 
     path = Path();
     paint = new Paint()
-      ..color = Colors.white
+      ..color = inactiveColor
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill;
     //..strokeWidth = 2;

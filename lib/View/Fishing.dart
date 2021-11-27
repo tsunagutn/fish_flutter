@@ -40,7 +40,7 @@
 //済・アワセの上手くいきかたで初期バラシレベルが決まるみたいな
 //済・バレシステムを何とかする
 //・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？→しない
-//・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
+//済・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
 //・魚図鑑画面
 //・いけすシステム
 //・赤ポイント緑ポイント青ポイント
@@ -88,7 +88,7 @@ class Fishing extends StatefulWidget {
 class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
-  //デバッグフラグ すぐつれる
+  //デバッグフラグ すぐつれちゃう
   //static const DEBUGFLG = true;
   static const DEBUGFLG = false;
 
@@ -162,8 +162,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
   var _tensionActiveTrackColor =
       clsColor._getColorFromHex("4CFF00"); //テンションゲージの色
-  var _dragShaKeX = 0; //ドラグスライダーを揺らす用
-  var _dragShaKeY = 0;
+  var _flgShaKe = false; //ドラグスライダーを揺らす用
   var _speedActiveTrackColor = clsColor._getColorFromHex("0094FF"); //スピードゲージの色
   var _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
   var _clutchBackColor = Colors.red; //クラッチボタンの背景色
@@ -432,15 +431,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (val > dragVal) {
       //テンションとドラグレベルの差分
       var dragDiff = val - dragVal;
-      //ドラグ出た分深さを増やす
+      //ドラグ出た分深さを増やす？？？出すぎ？
       _depth = _depth + dragDiff / 30;
-      //ドラグ出た分テンションを減らす
+      //ドラグ出た分テンションを減らす？？？減らなすぎ？
       val = val - (dragDiff / 25);
       //テンションゲージの色を変える
       _tensionActiveTrackColor = TENSION_COLOR_DRAG;
-      //テンションゲージを揺らす
-      _dragShaKeX = 5 - (new math.Random()).nextInt(9);
-      _dragShaKeY = 5 - (new math.Random()).nextInt(9);
       //audio.currentTime = 0;
       //audio.play();
       //var duration = 200; // 振動時間
@@ -450,8 +446,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       //   if (val >= (TENSION_VAL_MAX * 0.9)) {
       //     _tensionActiveTrackColor = TENSION_COLOR_DANGER;
       //   }
-      _dragShaKeX = 0;
-      _dragShaKeY = 0;
     }
 
     if (val > TENSION_VAL_MAX) val = TENSION_VAL_MAX;
@@ -696,17 +690,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             _centerTextMainColor = Colors.red;
             _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
             _centerTextSubColor = Colors.yellow;
-
-            //HIT時のアニメーションの定義
-            _centerTextAnimationController = AnimationController(
-                duration: Duration(milliseconds: 2000), vsync: this);
-            _centerTextLeft = Tween(begin: 0.0, end: size.width / 2).animate(
-                _centerTextAnimationController
-                    .drive(CurveTween(curve: Curves.slowMiddle)))
-              ..addListener(() {
-                setState(() {});
-              });
-            _centerTextAnimationController.forward();
+            startCenterInfo();
           } else {
             //アワセ失敗
             _flgBait = false;
@@ -743,6 +727,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           //console.log("bare...");
           //バレのモーダル表示
           //show_modal_bare();
+          //バレメッセージ
+          _centerTextMain = "";
+          _centerTextMainColor = Colors.blue;
+          _centerTextSub = "バレました";
+          _centerTextSubColor = Colors.blue;
+          startCenterInfo();
+
           _bareCnt = 0;
         }
       }
@@ -1037,11 +1028,16 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     CustomPaint(
                                       painter: new SliderPainter(
                                         activeColor: _tensionActiveTrackColor,
+                                        inactiveColor: (_flgBait || _flgHit)
+                                            ? Colors.black
+                                            : Colors.white,
                                         value: _tension / TENSION_VAL_MAX,
                                         backRadius: _animationRadius.value,
                                         maxBackRadius: POINTER_BACK_SIZE,
-                                        dragShaKeX: _dragShaKeX,
-                                        dragShaKeY: _dragShaKeY,
+                                        flgShaKe:
+                                            (_flgBait || (_tension > _drag))
+                                                ? true
+                                                : false,
                                       ),
                                       child: Container(
 //                                  height: 500,
@@ -1099,11 +1095,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               CustomPaint(
                                 painter: new SliderPainter(
                                   activeColor: _speedActiveTrackColor,
+                                  inactiveColor: Colors.white,
                                   value: _speed / SPEED_VAL_MAX,
                                   backRadius: 0,
                                   maxBackRadius: 0,
-                                  dragShaKeX: 0,
-                                  dragShaKeY: 0,
+                                  flgShaKe: false,
                                 ),
                                 child: Container(),
                               )
@@ -1476,6 +1472,21 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 }
               }),
         ]);
+  }
+
+  //画面中央のメッセージ
+  startCenterInfo() {
+    //HIT時のアニメーションの定義
+    _centerTextAnimationController = AnimationController(
+        duration: Duration(milliseconds: 2000), vsync: this);
+    _centerTextLeft =
+        Tween(begin: 0.0, end: MediaQuery.of(context).size.width / 2).animate(
+            _centerTextAnimationController
+                .drive(CurveTween(curve: Curves.slowMiddle)))
+          ..addListener(() {
+            setState(() {});
+          });
+    _centerTextAnimationController.forward();
   }
 }
 
