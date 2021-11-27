@@ -5,6 +5,7 @@ class FishsModel {
   FishsModel() {
     //シーダーみたいなやつ
     fishs[0] = new FishModel(
+        id: 0,
         name: "アジ",
         image: "aji.jpg",
         text: "あなたは幸せを感じました",
@@ -26,6 +27,7 @@ class FishsModel {
         bareMin: 20);
 
     fishs[1] = new FishModel(
+      id: 1,
       name: "タチウオ",
       image: "tachiuo.jpg",
       text: "おおきいぞっ",
@@ -47,6 +49,7 @@ class FishsModel {
       bareMin: 20,
     );
     fishs[2] = new FishModel(
+      id: 2,
       name: "鯉",
       image: "koi.jpg",
       text: "スーパーレア",
@@ -68,6 +71,7 @@ class FishsModel {
       bareMin: 20,
     );
     fishs[3] = new FishModel(
+      id: 3,
       name: "マダイ",
       image: "madai.jpg",
       text: "あなたは満足を得ました",
@@ -90,6 +94,7 @@ class FishsModel {
     );
 
     fishs[4] = new FishModel(
+      id: 4,
       name: "宮澤クン",
       image: "sakana.jpg",
       text: "スー　パー　レア",
@@ -112,6 +117,7 @@ class FishsModel {
     );
 
     fishs[5] = new FishModel(
+      id: 5,
       name: "サバ", //魚種名
       image: "aji.jpg", //超過画面の画像
       text: "写真は仮です", //釣果画面のコメント
@@ -134,6 +140,7 @@ class FishsModel {
     );
 
     fishs[6] = new FishModel(
+      id: 6,
       name: "サゴシ", //魚種名
       image: "aji.jpg", //超過画面の画像
       text: "あなたは満足を得ました", //釣果画面のコメント
@@ -169,6 +176,7 @@ class FishsModel {
 }
 
 class FishModel {
+  int id; //一意識別キー
   String name; //魚種名
   String image; //画像ファイル名
   String text; //釣果画面のコメント
@@ -191,6 +199,7 @@ class FishModel {
 
   //コンストラクタ
   FishModel({
+    required this.id,
     required this.name,
     required this.image,
     required this.text,
@@ -211,4 +220,9 @@ class FishModel {
     required this.fookingTension,
     required this.bareMin,
   });
+
+  //サイズ割合（0.0～1.0）を元に実サイズを返す
+  double getSize(size) {
+    return ((sizeMax - sizeMin) * size + sizeMin);
+  }
 }

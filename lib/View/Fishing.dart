@@ -42,6 +42,7 @@
 //・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？→しない
 //済・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
 //・魚図鑑画面
+//・設定画面 合わせの強さ調節
 //・いけすシステム
 //・赤ポイント緑ポイント青ポイント
 //・%を表示してる方がおもしろい・・・
@@ -62,6 +63,7 @@
 //・背景にrod、ジャイロで動かす
 
 import 'package:fish_flutter/Model/FishModel.dart';
+import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/View/Test.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
@@ -89,8 +91,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれちゃう
-  //static const DEBUGFLG = true;
-  static const DEBUGFLG = false;
+  static const DEBUGFLG = true;
+  //static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
@@ -222,6 +224,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _takcleChangeButtonPosition = MainAxisAlignment.end;
   var _rodStandUp = 0.0;
 
+  //釣果リスト
+  late FishesResultModel fishesResult;
+
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
   // var audio = new Audio(url);
@@ -230,6 +235,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   void initState() {
     //魚テーブルを初期化
     FISH_TABLE = new FishsModel();
+    //釣果リストを初期化
+    fishesResult = new FishesResultModel();
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -498,11 +505,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       _flgBait = false;
       _flgHit = false;
       debugPrint("つりあげ");
-      //釣りあげ時のモーダル
       var fish = FISH_TABLE.fishs[_fishidx]!;
-      var fishSize = ((fish.sizeMax - fish.sizeMin) * _fishSize + fish.sizeMin);
+      var fishSize = fish.getSize(_fishSize);
       //debugPrint("おおきさ" + size.toString());
       var point = fish.point + (fish.point * _fishSize).floor();
+      //釣果リストに登録
+      fishesResult.addResult(fish.id, _fishSize);
+      //釣りあげ時のモーダル
       var result = showDialog<int>(
           context: context,
           barrierDismissible: false,
@@ -832,19 +841,20 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             iconSize: 30.0,
             onPressed: () async {
               // //図鑑モーダルの表示
-              // var result = await showDialog<int>(
-              //   context: context,
-              //   barrierDismissible: false,
-              //   builder: (_) {
-              //     return BookDialog(
-              //       fishTable: FISH_TABLE,
-              //     );
-              //   },
-              // );
-              // debugPrint(result.toString());
-              // setState(() {
-              //   _depthChangeOrder = result as int;
-              // });
+              var result = await showDialog<int>(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) {
+                  return BookDialog(
+                    fishsTable: FISH_TABLE,
+                    fishesResult: fishesResult,
+                  );
+                },
+              );
+              debugPrint(result.toString());
+              setState(() {
+                _depthChangeOrder = result as int;
+              });
             },
           ),
           //右上（複数可）
