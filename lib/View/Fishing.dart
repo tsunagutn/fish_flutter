@@ -91,8 +91,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれちゃう
-  static const DEBUGFLG = true;
-  //static const DEBUGFLG = false;
+  //static const DEBUGFLG = true;
+  static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
