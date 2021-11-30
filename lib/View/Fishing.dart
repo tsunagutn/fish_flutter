@@ -1466,11 +1466,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                     padding: EdgeInsets.all(0),
-                                    primary: Colors.orange.withOpacity(0.0),
-                                    //onPrimary: Colors.purple,
-                                    shape: RoundedRectangleBorder(
-                                        //borderRadius: BorderRadius.circular(30.0),
-                                        ),
                                     side: BorderSide(
                                       color: Colors.black, //枠線!
                                       width: 1, //枠線！
@@ -1482,6 +1477,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     image: DecorationImage(
                                         image:
                                             AssetImage('Assets/Images/rod.png'),
+                                        colorFilter: new ColorFilter.mode(Colors.black.withOpacity((_depth > 0.0? 0.7 : 1.0)), BlendMode.dstATop),
                                         fit: BoxFit.fill),
                                   ),
                                 ),
@@ -1495,11 +1491,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                     padding: EdgeInsets.all(0),
-                                    primary: Colors.orange.withOpacity(0.0),
-                                    //onPrimary: Colors.purple,
-                                    shape: RoundedRectangleBorder(
-                                        //borderRadius: BorderRadius.circular(30.0),
-                                        ),
                                     side: BorderSide(
                                       color: Colors.black, //枠線!
                                       width: 1, //枠線！
@@ -1511,6 +1502,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     image: DecorationImage(
                                         image: AssetImage(
                                             'Assets/Images/reel.png'),
+                                        colorFilter: new ColorFilter.mode(Colors.black.withOpacity((_depth > 0.0? 0.7 : 1.0)), BlendMode.dstATop),
                                         fit: BoxFit.fill),
                                   ),
                                 ),
@@ -1524,11 +1516,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                     padding: EdgeInsets.all(0),
-                                    primary: Colors.orange.withOpacity(0.0),
-                                    //onPrimary: Colors.purple,
-                                    shape: RoundedRectangleBorder(
-                                        //borderRadius: BorderRadius.circular(30.0),
-                                        ),
                                     side: BorderSide(
                                       color: Colors.black, //枠線!
                                       width: 1, //枠線！
@@ -1539,11 +1526,22 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   decoration: BoxDecoration(
                                     image: DecorationImage(
                                         image: AssetImage(
-                                            'Assets/Images/tairaba.png'),
+                                            'Assets/Images/' + lures.getLureData(haveTackle.getUseLure().lureId).image
+                                        ),
+                                        colorFilter: new ColorFilter.mode(Colors.black.withOpacity((_depth > 0.0? 0.7 : 1.0)), BlendMode.dstATop),
                                         fit: BoxFit.fill),
                                   ),
                                 ),
-                                onPressed: () async {},
+                                onPressed: () async {
+                                  if (_depth > 0.0) return;
+                                  var result = await showDialog<int>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_)
+                                  {
+                                    return showTacleChangeDialog(mode: 'lure');
+                                  });
+                                },
                               ),
                             ),
                           ],
@@ -1615,7 +1613,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   bool ligntSpotAnimation(bool initflg, int duration_msec) {
     if (initflg || !_animationController.isAnimating) {
-      debugPrint("あたらしい");
       //アニメーションの定義
       _animationController = AnimationController(
           duration: Duration(milliseconds: duration_msec), vsync: this);
@@ -1629,7 +1626,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       return true;
     } else {
       if (!_ligntSpotAnimationChangeing) {
-        debugPrint("止める指示");
         _animationController.forward();
         _ligntSpotAnimationChangeing = true;
       }
@@ -1637,6 +1633,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
   }
 
+  //持ち替えボタン
   Widget _tacklePositionChangeButton() {
     return Row(
         mainAxisAlignment: _takcleChangeButtonPosition,
@@ -1679,6 +1676,30 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             setState(() {});
           });
     _centerTextAnimationController.forward();
+  }
+
+  //タックル変更ダイアログ
+  Widget showTacleChangeDialog({required String mode}) {
+int a = 1;
+
+    return Container(
+        // height: size.height / 3,
+        // width: size.width / 1.5,
+        decoration: new BoxDecoration(
+        image: new DecorationImage(
+        image: new AssetImage("Assets/Images/fishback.jpg"),
+    fit: BoxFit.cover,
+    )),
+    child:AlertDialog(
+        title: Text("タックル変更"),
+        content: Container(
+          height: MediaQuery.of(context).size.height / 2,
+          child: Column(children: <Widget>[
+
+          ]),
+        )));
+
+
   }
 }
 

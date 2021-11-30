@@ -6,12 +6,12 @@ enum enumLureDiv {
 
 //ルアーマスタ
 class LuresModel {
-  late Map<int, LureModel> lures = new Map<int, LureModel>();
+  late List<LureModel> lures = [];
 
   //コンストラクタ
   LuresModel() {
     //シーダーみたいなやつ
-    lures[0] = new LureModel(
+    lures.add(new LureModel(
       id: 0,
       div: enumLureDiv.tairaba.index,
       name: "タイラバ ストレート 60g",
@@ -24,7 +24,11 @@ class LuresModel {
       reeling: 0.7,
       jerk: 0.1,
       prise: 700,
-    );
+    ));
+  }
+
+  LureModel getLureData(int id) {
+    return lures.firstWhere((element) => element.id.compareTo(id) == 0);
   }
 }
 
