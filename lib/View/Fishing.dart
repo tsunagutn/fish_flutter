@@ -41,7 +41,8 @@
 //済・バレシステムを何とかする
 //・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？→しない
 //済・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
-//・魚図鑑画面
+//済・魚図鑑画面
+//・魚詳細画面
 //・設定画面 合わせの強さ調節
 //・いけすシステム
 //・赤ポイント緑ポイント青ポイント
@@ -62,9 +63,10 @@
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
 
+import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
-import 'package:fish_flutter/View/Test.dart';
+import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
@@ -91,11 +93,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれちゃう
-  //static const DEBUGFLG = true;
-  static const DEBUGFLG = false;
+  static const DEBUGFLG = true;
+  //static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
+  //ルアーリスト定義
+  late LuresModel lures;
+  //所持定義
+  late HaveTackleModel haveTackle;
 
   //光点の点滅速度
   static const Map<int, int> POINT_DURATION_MSEC = {
@@ -146,6 +152,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   late Animation<double> _animationRadius;
   late AnimationController _centerTextAnimationController; //画面中央に出すテキストアニメーション
   late Animation<double> _centerTextLeft;
+  late AnimationController
+      _tackleMenuAnimationController; //タックルメニューをフワフワさすアニメーション
+  late Animation<double> _tackleMenuAnime;
 
   //状態フラグ変数
   var _onTap = false; //現在タップ中フラグ
@@ -233,10 +242,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    //魚テーブルを初期化
+    //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
     //釣果リストを初期化
     fishesResult = new FishesResultModel();
+    //ルアーリストを初期化？？？本当はDBマスタから全取得
+    lures = new LuresModel();
+    //所持リストを初期化
+    haveTackle = new HaveTackleModel();
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -264,6 +277,20 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _centerTextAnimationController = AnimationController(
         duration: Duration(milliseconds: 2000), vsync: this);
 
+    _tackleMenuAnimationController = AnimationController(
+        duration: Duration(milliseconds: 1500), vsync: this);
+
+    //アニメーションの定義
+    _tackleMenuAnimationController = AnimationController(
+        duration: Duration(milliseconds: 1500), vsync: this);
+    _tackleMenuAnime = Tween(begin: 0.0, end: 1.0)
+        .animate(_tackleMenuAnimationController)
+        .drive(CurveTween(curve: Curves.easeInOut))
+      ..addListener(() {
+        setState(() {});
+      });
+    _tackleMenuAnimationController.repeat(reverse: true);
+
     super.initState();
   }
 
@@ -271,6 +298,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _animationController.dispose();
     waveController.dispose(); // AnimationControllerは明示的にdisposeする。
     _centerTextAnimationController.dispose();
+    _tackleMenuAnimationController.dispose();
     fishPointerList.clear();
     super.dispose();
   }
@@ -578,7 +606,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     FlatButton(
                       child: Text("OK"),
                       onPressed: () {
-                        _point += point as int;
+                        _point += point;
                         Navigator.pop(context);
                       },
                     ),
@@ -787,11 +815,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //タックルの描画
     if (_takclePositionLeft) {
-      _tackleCenterX = 100.0;
+      _tackleCenterX = 80.0;
       _takcleChangeButtonPosition = MainAxisAlignment.end;
     } else {
       _takcleChangeButtonPosition = MainAxisAlignment.start;
-      _tackleCenterX = size.width - 100.0;
+      _tackleCenterX = size.width - 80.0;
     }
     _rodSizeX = 20.0;
     _rodSizeY = size.height - _shoreHeight;
@@ -834,28 +862,30 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           backgroundColor: clsColor._getColorFromHex("FFFFFF").withOpacity(0.1),
           //title: Text(_senchoMessage),
           //左上
-          leading: IconButton(
-            // 戻るアイコン
-            icon: Icon(Icons.menu_book),
-            color: Colors.white,
-            iconSize: 30.0,
-            onPressed: () async {
-              // //図鑑モーダルの表示
-              var result = await showDialog<int>(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) {
-                  return BookDialog(
-                    fishsTable: FISH_TABLE,
-                    fishesResult: fishesResult,
+          leading: Row(
+            children: [
+              IconButton(
+                // 図鑑アイコン
+                icon: Icon(Icons.menu_book),
+                color: Colors.white,
+                iconSize: 30.0,
+                onPressed: () async {
+                  // //図鑑モーダルの表示
+                  var result = await showDialog<int>(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) {
+                      return BookDialog(
+                        fishsTable: FISH_TABLE,
+                        fishesResult: fishesResult,
+                      );
+                    },
                   );
+                  debugPrint(result.toString());
+                  setState(() {});
                 },
-              );
-              debugPrint(result.toString());
-              setState(() {
-                _depthChangeOrder = result as int;
-              });
-            },
+              ),
+            ],
           ),
           //右上（複数可）
           actions: [
@@ -908,8 +938,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               _cursorY = details.localPosition.dy;
               //クラッチOFF時、タップ箇所がクラッチ部分か？
               if (!_onClutch &&
-                  _cursorX > _tackleCenterX - (_reelSizeX / 2) &&
-                  _cursorX < _tackleCenterX + (_reelSizeX / 2) &&
+                  // _cursorX > _tackleCenterX - (_reelSizeX / 2) &&
+                  // _cursorX < _tackleCenterX + (_reelSizeX / 2) &&
+                  _cursorX > _tackleCenterX - (_reelSizeX) &&
+                  _cursorX < _tackleCenterX + (_reelSizeX) &&
                   _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
                   _cursorY < _reelCenterY + _reelSizeY) {
                 chengeClutch(true);
@@ -1081,7 +1113,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   min: TENSION_VAL_MIN,
                                   max: TENSION_VAL_MAX,
                                   divisions: (TENSION_VAL_MAX - TENSION_VAL_MIN)
-                                      as int,
+                                      .floor(),
                                   onChanged: (double value) {
                                     setState(() {
                                       _drag = value.roundToDouble();
@@ -1368,6 +1400,156 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                           ),
                         ],
                       )),
+                //UI関係
+                Container(
+                    margin: EdgeInsets.only(
+                        top: _shoreHeight + (5 * _tackleMenuAnime.value),
+                        left: 0),
+                    width: 60,
+                    height: 180,
+                    // decoration: BoxDecoration(
+                    //   gradient: LinearGradient(
+                    //     begin: FractionalOffset.center,
+                    //     end: FractionalOffset.bottomRight,
+                    //     colors: [
+                    //       clsColor._getColorFromHex("444444").withOpacity(0.2),
+                    //       clsColor._getColorFromHex("222222").withOpacity(0.2),
+                    //       clsColor._getColorFromHex("000000").withOpacity(0.2),
+                    //     ],
+                    //     stops: [0.0, 0.6, 1.0],
+                    //   ),
+                    // border: const Border(
+                    //   top: const BorderSide(
+                    //     color: Colors.black,
+                    //     width: 2,
+                    //   ),
+                    //   right: const BorderSide(
+                    //     color: Colors.black,
+                    //     width: 2,
+                    //   ),
+                    //   bottom: const BorderSide(
+                    //     color: Colors.black,
+                    //     width: 2,
+                    //   ),
+                    // ),
+                    //borderRadius: BorderRadius.circular(8.0),
+                    //   boxShadow: [
+                    //     BoxShadow(
+                    //       color: Colors.grey.withOpacity(0.5),
+                    //       spreadRadius: 0,
+                    //       blurRadius: 4,
+                    //       offset: Offset(0, 2),
+                    //     ),
+                    //   ],
+                    // ),
+                    child: Column(
+                      children: [
+                        // Container(
+                        //   width: 60,
+                        //   child: Text(
+                        //     "TACKLE",
+                        //     textAlign: TextAlign.center,
+                        //     style: TextStyle(
+                        //       fontStyle: FontStyle.italic,
+                        //       backgroundColor: Colors.white.withOpacity(0.6),
+                        //     ),
+                        //   ),
+                        // ),
+                        Expanded(
+                            child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            //竿
+                            SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    padding: EdgeInsets.all(0),
+                                    primary: Colors.orange.withOpacity(0.0),
+                                    //onPrimary: Colors.purple,
+                                    shape: RoundedRectangleBorder(
+                                        //borderRadius: BorderRadius.circular(30.0),
+                                        ),
+                                    side: BorderSide(
+                                      color: Colors.black, //枠線!
+                                      width: 1, //枠線！
+                                    )),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image:
+                                            AssetImage('Assets/Images/rod.png'),
+                                        fit: BoxFit.fill),
+                                  ),
+                                ),
+                                onPressed: () async {},
+                              ),
+                            ),
+                            //リール
+                            SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    padding: EdgeInsets.all(0),
+                                    primary: Colors.orange.withOpacity(0.0),
+                                    //onPrimary: Colors.purple,
+                                    shape: RoundedRectangleBorder(
+                                        //borderRadius: BorderRadius.circular(30.0),
+                                        ),
+                                    side: BorderSide(
+                                      color: Colors.black, //枠線!
+                                      width: 1, //枠線！
+                                    )),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'Assets/Images/reel.png'),
+                                        fit: BoxFit.fill),
+                                  ),
+                                ),
+                                onPressed: () async {},
+                              ),
+                            ),
+                            //ルアー
+                            SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    padding: EdgeInsets.all(0),
+                                    primary: Colors.orange.withOpacity(0.0),
+                                    //onPrimary: Colors.purple,
+                                    shape: RoundedRectangleBorder(
+                                        //borderRadius: BorderRadius.circular(30.0),
+                                        ),
+                                    side: BorderSide(
+                                      color: Colors.black, //枠線!
+                                      width: 1, //枠線！
+                                    )),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'Assets/Images/tairaba.png'),
+                                        fit: BoxFit.fill),
+                                  ),
+                                ),
+                                onPressed: () async {},
+                              ),
+                            ),
+                          ],
+                        )),
+                      ],
+                    )),
               ]),
             ])));
   }

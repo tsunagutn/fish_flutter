@@ -102,8 +102,8 @@ class tacklePainter extends CustomPainter {
     //       shoreHeight + tensionY);
     // }
 
-    path.moveTo(
-        tackleCenterX + (70 * position), shoreHeight + (rodSizeY * rodTension));
+    path.moveTo(tackleCenterX + (70 * position) + (30 * position * rodTension),
+        shoreHeight + (rodSizeY * rodTension));
 
     path.lineTo(tackleCenterX + (50 * position) - (rodSizeX / 6),
         shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
@@ -129,15 +129,17 @@ class tacklePainter extends CustomPainter {
 
     path = Path();
     paint = new Paint()
-      ..color = Colors.black
+      ..color = Colors.black.withOpacity(0.3)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
     path.moveTo(tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY);
     path.lineTo(tackleCenterX - reelSizeX, reelCenterY - (reelSizeY / 2));
     path.lineTo(tackleCenterX - reelSizeX, reelCenterY + (reelSizeY / 2));
-    path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
+    // path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
+    // path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
+    path.lineTo(tackleCenterX - (reelSizeX), reelCenterY + reelSizeY);
+    path.lineTo(tackleCenterX + (reelSizeX), reelCenterY + reelSizeY);
     path.lineTo(tackleCenterX + reelSizeX, reelCenterY + (reelSizeY / 2));
     path.lineTo(tackleCenterX + reelSizeX, reelCenterY - (reelSizeY / 2));
     path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY);
@@ -147,7 +149,7 @@ class tacklePainter extends CustomPainter {
     //糸巻部分
     path = Path();
     paint = new Paint()
-      ..color = Colors.white
+      ..color = Colors.white.withOpacity(0.3)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
@@ -165,12 +167,18 @@ class tacklePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
+    // path.moveTo(
+    //     tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
+    // path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
+    // path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
+    // path.lineTo(
+    //     tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
     path.moveTo(
-        tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
-    path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
+        tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
+    path.lineTo(tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY);
+    path.lineTo(tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY);
     path.lineTo(
-        tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
+        tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
     path.close();
     canvas.drawPath(path, paint);
   }

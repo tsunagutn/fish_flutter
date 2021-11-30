@@ -1,19 +1,21 @@
+import 'dart:html';
+
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:flutter/material.dart';
 
-class BookDialog extends StatefulWidget {
+class TackleMenuDialog extends StatefulWidget {
   @override
-  const BookDialog({
+  const TackleMenuDialog({
     required this.fishsTable,
     required this.fishesResult,
   });
   final FishsModel fishsTable;
   final FishesResultModel fishesResult;
-  _BookDialogState createState() => _BookDialogState();
+  _TackleMenuDialogState createState() => _TackleMenuDialogState();
 }
 
-class _BookDialogState extends State<BookDialog>
+class _TackleMenuDialogState extends State<TackleMenuDialog>
     with SingleTickerProviderStateMixin {
   List<FishModel> fishList = [];
 
