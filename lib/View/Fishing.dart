@@ -810,7 +810,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       barake =
           (barake > sonarTop + sonarHeight) ? sonarTop + sonarHeight : barake;
       fishy = fishy + (_justTanaRange * ((0.2 - depthrnd) * 1.5));
-      generateFishPointer(fishy, 20);
+      generateFishPointer(fishy, 20.0);
     }
 
     //タックルの描画
@@ -1578,7 +1578,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   List<FishPointer> fishPointerList = <FishPointer>[];
   // アニメーションの終了を Future<void>.delayed で待ち、終わった時に removeAt(0) でリストから取り出している
   // 取り出すと そのタイミングで dispose が呼ばれる。
-  Future<void> generateFishPointer(offsetY, fishsize) async {
+  Future<void> generateFishPointer(offsetY, fishPointerSize) async {
     const duration = const Duration(milliseconds: 20000);
     var size = MediaQuery.of(context).size;
     final fishPointer = FishPointer(
@@ -1586,7 +1586,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       dispsizeX: size.width, //画面サイズX
       offsetY: offsetY,
       duration: duration,
-      fishsize: fishsize,
+      fishPointerSize: fishPointerSize,
       takclePositionLeft: _takclePositionLeft,
     );
     setState(() {

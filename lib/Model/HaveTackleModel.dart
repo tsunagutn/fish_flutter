@@ -2,14 +2,14 @@
 import 'package:fish_flutter/Model/LuresModel.dart';
 
 class HaveTackleModel {
-  late List<HaveLuresModel> haveLures;
+  late List<HaveLuresModel> haveLures = [];
 
   //コンストラクタ
   HaveTackleModel() {
+    haveLures = [];
     //テスト用 初期所持ルアーを登録
     haveLures.add(new HaveLuresModel(lureId: 0, lureHp: 700, flgUse: true));
 
-    haveLures = [];
   }
 
   // //使用中ルアーを返す

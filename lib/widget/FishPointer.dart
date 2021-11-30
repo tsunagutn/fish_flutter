@@ -14,13 +14,13 @@ class FishPointer extends StatefulWidget {
     required this.dispsizeX,
     required this.offsetY,
     required this.duration,
-    required this.fishsize,
+    required this.fishPointerSize,
     required this.takclePositionLeft,
   }) : super(key: key);
   final double dispsizeX;
   final double offsetY;
   final Duration duration;
-  final int fishsize;
+  final double fishPointerSize;
   final bool takclePositionLeft;
   @override
   _FishPointerState createState() => _FishPointerState();
@@ -48,7 +48,7 @@ class _FishPointerState extends State<FishPointer>
           controller: controller,
           offsetX: offsetX,
           offsetY: widget.offsetY,
-          fishsize: widget.fishsize),
+          fishPointerSize: widget.fishPointerSize),
     );
   }
 
@@ -74,13 +74,13 @@ class FishPainter extends CustomPainter {
       {required this.controller,
       required this.offsetX,
       required this.offsetY,
-      required this.fishsize})
+      required this.fishPointerSize})
       : super(repaint: controller); // repaint に controller を渡さないと再描画されない
   final double offsetX;
   final double offsetY;
   final Animation<double> controller;
 
-  final fishsize; //サカナ大きさ？？？可変にするべき
+  final fishPointerSize; //サカナ大きさ？？？可変にするべき
 
   @override
   Future<void> paint(Canvas canvas, Size size) async {
@@ -104,14 +104,14 @@ class FishPainter extends CustomPainter {
     //canvas.drawImage(uiimage, Offset(200, offset_y), paint);
     //canvas.drawCircle(Offset(200, offset_y), 10, paint);
     canvas.drawArc(
-        Offset(offsetX, offsetY) & Size(fishsize, fishsize),
+        Offset(offsetX, offsetY) & Size(fishPointerSize, fishPointerSize),
         210 * math.pi / 180, //startAngle
         140 * math.pi / 180, //sweepAngle
         false, //中心からの切り出し？trueならピザ形状
         paint);
     canvas.drawArc(
-        Offset(offsetX, offsetY - (fishsize * 0.5834)) &
-            Size(fishsize, fishsize),
+        Offset(offsetX, offsetY - (fishPointerSize * 0.5834)) &
+            Size(fishPointerSize, fishPointerSize),
         10 * math.pi / 180, //startAngle
         140 * math.pi / 180, //sweepAngle
         false, //中心からの切り出し？trueならピザ形状
