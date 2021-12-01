@@ -25,6 +25,36 @@ class LuresModel {
       jerk: 0.1,
       prise: 700,
     ));
+
+    lures.add(new LureModel(
+      id: 1,
+      div: enumLureDiv.tairaba.index,
+      name: "タイラバ ストレート 100g",
+      image: "tairaba.png",
+      text: "タダ巻きで使おう2",
+      hp: 2000,
+      weight: 120.0,
+      size: 20,
+      fall: 0.1,
+      reeling: 0.7,
+      jerk: 0.1,
+      prise: 700,
+    ));
+
+    lures.add(new LureModel(
+      id: 2,
+      div: enumLureDiv.tairaba.index,
+      name: "タイラバ ストレート 999g",
+      image: "tairaba.png",
+      text: "タダ巻きで使おう3",
+      hp: 2000,
+      weight: 999.0,
+      size: 20,
+      fall: 0.1,
+      reeling: 0.7,
+      jerk: 0.1,
+      prise: 700,
+    ));
   }
 
   LureModel getLureData(int id) {

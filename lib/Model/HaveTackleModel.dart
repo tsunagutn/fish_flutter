@@ -1,5 +1,6 @@
 //装備しているタックルのモデル
 import 'package:fish_flutter/Model/LuresModel.dart';
+import 'package:flutter/foundation.dart';
 
 class HaveTackleModel {
   late List<HaveLureModel> haveLures = [];
@@ -8,6 +9,8 @@ class HaveTackleModel {
   HaveTackleModel() {
     //テスト用 初期所持ルアーを登録
     haveLures.add(new HaveLureModel(lureId: 0, lureHp: 700, flgUse: true));
+    haveLures.add(new HaveLureModel(lureId: 1, lureHp: 700, flgUse: false));
+    haveLures.add(new HaveLureModel(lureId: 2, lureHp: 700, flgUse: false));
   }
 
   // //使用中ルアーを返す
@@ -29,8 +32,13 @@ class HaveTackleModel {
 
   //ルアーチェンジ
   changeLure(int lureId) {
+    debugPrint(lureId.toString());
     //haveLures全てのレコードのflgUseをfalseにする
+    haveLures.where((item) => item.lureId != lureId).forEach((value) {
+      value.flgUse = false;
+    });
     //引数のレコードのflgUseをtrueにする
+    haveLures.firstWhere((item) => item.lureId == lureId).flgUse = true;
   }
 
   //使用中のルアーIDを返す
