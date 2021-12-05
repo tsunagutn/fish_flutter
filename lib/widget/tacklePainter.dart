@@ -129,17 +129,17 @@ class tacklePainter extends CustomPainter {
 
     path = Path();
     paint = new Paint()
-      ..color = Colors.black.withOpacity(0.3)
+      ..color = Colors.black.withOpacity(0.6)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
     path.moveTo(tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY);
     path.lineTo(tackleCenterX - reelSizeX, reelCenterY - (reelSizeY / 2));
     path.lineTo(tackleCenterX - reelSizeX, reelCenterY + (reelSizeY / 2));
-    // path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
-    // path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
+    path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
     path.lineTo(tackleCenterX - (reelSizeX), reelCenterY + reelSizeY);
     path.lineTo(tackleCenterX + (reelSizeX), reelCenterY + reelSizeY);
+    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
     path.lineTo(tackleCenterX + reelSizeX, reelCenterY + (reelSizeY / 2));
     path.lineTo(tackleCenterX + reelSizeX, reelCenterY - (reelSizeY / 2));
     path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY);
@@ -149,7 +149,7 @@ class tacklePainter extends CustomPainter {
     //糸巻部分
     path = Path();
     paint = new Paint()
-      ..color = Colors.white.withOpacity(0.3)
+      ..color = Colors.white.withOpacity(0.6)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
@@ -167,18 +167,18 @@ class tacklePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
-    // path.moveTo(
-    //     tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
-    // path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
-    // path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
-    // path.lineTo(
-    //     tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
     path.moveTo(
-        tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
-    path.lineTo(tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY);
+        tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
+    path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
+    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
     path.lineTo(
-        tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
+        tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
+    // path.moveTo(
+    //     tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
+    // path.lineTo(tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY);
+    // path.lineTo(tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY);
+    // path.lineTo(
+    //     tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
     path.close();
     canvas.drawPath(path, paint);
   }

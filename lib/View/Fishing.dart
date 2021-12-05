@@ -67,7 +67,9 @@ import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/Model/HaveTackleModel.dart';
+import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
+import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
@@ -93,8 +95,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれちゃう
-  static const DEBUGFLG = true;
-  //static const DEBUGFLG = false;
+  //static const DEBUGFLG = true;
+  static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
@@ -128,7 +130,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   final TENSION_COLOR_SAFE = clsColor._getColorFromHex("4CFF00");
   final TENSION_COLOR_DRAG = clsColor._getColorFromHex("FFD800");
   final TENSION_COLOR_DANGER = clsColor._getColorFromHex("DD0000");
-  final SPEED_COLOR = clsColor._getColorFromHex("0094FF");
+  final SPEED_COLOR = clsColor._getColorFromHex("93D2FF");
   final SPEED_COLOR_REELING = clsColor._getColorFromHex("0026FF");
   static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
   static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
@@ -184,8 +186,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
   var _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
   var _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
-  var _jiai = 0.5; //時合度 0.0～0.9999...
+  var _jiai = 0.9; //時合度 0.0～0.9999...
   var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
+
+  List<SpeedRange> _listSpeedRange = []; //可能性ある魚種毎のスピード範囲
 
   var _cursorX = 0.0; //ドラッグ操作開始時の座標X
   var _cursorY = 0.0; //ドラッグ操作開始時の座標Y
@@ -371,6 +375,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       debugPrint("タナ" + _justTana.toString());
     }
 
+    //Hルアー重さ
+    var lureWeight =
+        lures.getLureData(haveTackle.getUseLure().lureId).weight.floor();
     if (_flgBait || _flgHit) {
       //アタリ中 or HIT中のテンション計算
       //debugPrint("HIT中1");
@@ -381,15 +388,18 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       var fish = FISH_TABLE.fishs[_fishidx]!;
       mx += fish.addMax * (_hitScanCnt / fish.hp * _fishSize).round();
       mn += fish.addMin * (_hitScanCnt / fish.hp * _fishSize).round();
-      weight = fish.weight;
+      weight = fish.weight + lureWeight;
+    } else {
+      //HIT中でない時はルアー重さで補正をかける
+      weight = lureWeight;
     }
-    addVal = (rand * (mx + 1 - (mn))).floor() + (mn) + weight;
+    addVal = (rand * (mx + 1 - (mn))).floor() + (mn) + (weight / 200);
 
     if (_onClutch) {
       //クラッチON中はマイナス補正を最大化
       addVal = HOSEI_MAX * -1;
       //水深を加算
-      //ルアー重さによってフォール速度に補正をかける
+      //ルアー重さによってフォール速度に補正をかける 60gの時0.1m/スキャン
       _depth += (lures.getLureData(haveTackle.getUseLure().lureId).weight / 60);
     } else {
       if (_onTap) {
@@ -397,19 +407,19 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         var hosei = (_speed % SPEED_VAL_MAX) % HOSEI_MAX;
         //var hosei = (_speed % SPEED_VAL_MAX);
         //タップ中は補正を加味する
-        addVal = addVal + hosei.round();
+        addVal += hosei.round();
         //水深減算
         _depth = _depth - _speed / SPEED_VAL_MAX;
       } else {
         if (!_flgBait && !_flgHit) {
           //巻いていない&釣れていない時はマイナス補正
-          addVal = addVal - HOSEI_MAX;
+          addVal -= HOSEI_MAX;
         }
       }
 
       //debugPrint(_rodStandUp.toString());
       //シャクリによるテンション増加？？？竿長さによって係数を可変にする
-      addVal = addVal + _rodStandUp * 30;
+      addVal += _rodStandUp * 35;
       if (_rodStandUp > 0.0) {
         _rodStandUp -= 0.5; //1スキャン毎に0.5ずつ消える
       } else {
@@ -418,7 +428,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
     if (addVal > 0) {
       //テンション+時は現在テンションによって補正をかける
-      addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
+      //addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
       //二次関数 テンション上がるごとに上がりにくくする
       addVal = addVal +
           (addVal * -1) * (MathPow._getPow(2, (_tension / TENSION_VAL_MAX)));
@@ -626,7 +636,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     final durationMin = POINT_DURATION_MSEC[0]!;
     var duration = 0;
 
-    if (!_flgBait && !_flgHit) {
+    if (!(_flgBait || _flgHit)) {
       //アタリ判定処理
       var hitTanaProb = 0.0;
       //HIT棚との差分
@@ -645,13 +655,16 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       var fishs = FISH_TABLE.extractDepth(_depth);
 
       var maxProb = 0.0;
+      _listSpeedRange = []; //速度リスト初期化
       //種毎の判定
       fishs.forEach((key, value) {
         var fish = fishs[key]!;
         var hitSpeedprob = 0.0;
+        var hitSpeedprobDisp = 0.0;
         //糸出中、かつ水深MAXではない時
         if (_onClutch && _depth < _maxDepth) {
           hitSpeedprob = fish.hitFall; //フォール中の補正
+          hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
         } else {
           //ドラグ出中、止めている時、水深0m未満、水深MAXの時は判定しない
           if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
@@ -669,6 +682,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               hitSpeedprob = 0.2; //速度範囲外の最低保証
             }
           }
+          hitSpeedprobDisp = hitSpeedprob;
         }
         //HIT確率の算出
         var hitProb = (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
@@ -676,6 +690,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         if (hitTanaProb * hitSpeedprob > maxProb) {
           maxProb = hitTanaProb * hitSpeedprob * _jiai * fish.wariai;
         }
+        //魚種毎の速度レンジと確率を記憶（描画用）
+        _listSpeedRange.add(new SpeedRange(
+            justSpeed: fish.hitSpeedJust,
+            rangeSpeed: fish.hitSpeedRange,
+            hitSpeedProb: hitSpeedprobDisp));
+
         //1～0の乱数生成
         var hitrnd = (new math.Random()).nextDouble();
         if (DEBUGFLG) {
@@ -760,7 +780,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
           _bareCnt++;
         } else {
-          _bareCnt = 0;
+          //_bareCnt = 0;
         }
         if (_bareCnt >= fish.bareMin + _fookingLv.floor()) {
           //バレ条件成立が一定スキャン保持でバレとする
@@ -811,11 +831,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (hannornd > 0.96 && _jiai > depthrnd) {
       var fishy = sonarTop + (sonarHeight * _justTana);
       //レンジ分バラケ
-      var barake = (_justTanaRange * ((0.2 - depthrnd) * 1.5));
-      barake = (barake < 0) ? 0 : barake;
-      barake =
-          (barake > sonarTop + sonarHeight) ? sonarTop + sonarHeight : barake;
-      fishy = fishy + (_justTanaRange * ((0.2 - depthrnd) * 1.5));
+      var barakeLevel = 4; //バラケ度
+      var barake = (_justTanaRange * ((0.5 - depthrnd) * barakeLevel));
+      fishy = fishy + barake;
+      fishy = (fishy < _shoreHeight) ? _shoreHeight : fishy;
+      fishy = (fishy > _shoreHeight + sonarHeight)
+          ? _shoreHeight + sonarHeight
+          : fishy;
       generateFishPointer(fishy, 20.0);
     }
 
@@ -945,11 +967,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               _cursorY = details.localPosition.dy;
               //クラッチOFF時、タップ箇所がクラッチ部分か？
               if (!_onClutch &&
-                  // _cursorX > _tackleCenterX - (_reelSizeX / 2) &&
-                  // _cursorX < _tackleCenterX + (_reelSizeX / 2) &&
-                  _cursorX > _tackleCenterX - (_reelSizeX) &&
-                  _cursorX < _tackleCenterX + (_reelSizeX) &&
-                  _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
+                  // _cursorX > _tackleCenterX - (_reelSizeX) &&
+                  // _cursorX < _tackleCenterX + (_reelSizeX) &&
+                  // _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
+                  // _cursorY < _reelCenterY + _reelSizeY)
+                  //リールをタップで
+                  _cursorX > _tackleCenterX - _reelSizeX &&
+                  _cursorX < _tackleCenterX + _reelSizeX &&
+                  _cursorY > _reelCenterY - _reelSizeY &&
                   _cursorY < _reelCenterY + _reelSizeY) {
                 chengeClutch(true);
                 return;
@@ -1151,8 +1176,21 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   flgShaKe: false,
                                 ),
                                 child: Container(),
+                              ),
+                              //可能性のある魚種の速度範囲表示
+                              CustomPaint(
+                                painter: new FishRangeSliderPainter(
+                                  activeColor: _speedActiveTrackColor,
+                                  inactiveColor: Colors.red,
+                                  backRadius: 0,
+                                  maxBackRadius: 0,
+                                  maxSpeed: SPEED_VAL_MAX,
+                                  speedRange: _listSpeedRange,
+                                ),
+                                child: Container(),
                               )
                             ])),
+
                     Stack(children: <Widget>[
                       Container(
                         alignment: Alignment.center,
@@ -1162,7 +1200,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         child: GestureDetector(
                           onTap: () async {
                             setState(() {
-                              _senchoMessage = "わしゃあ忙しいんで！";
+                              //_senchoMessage = "わしゃあ忙しいんで！";
                             });
                             var result = await showDialog<int>(
                               context: context,
@@ -1317,10 +1355,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                           fontSize: 20,
                                         )),
                                   ),
-                                  Text(_dispInfo,
-                                      style: TextStyle(
-                                        backgroundColor: _infoBackColor,
-                                      )),
+                                  // Text(_dispInfo,
+                                  //     style: TextStyle(
+                                  //       backgroundColor: _infoBackColor,
+                                  //     )),
                                 ],
                               ),
                             ),
@@ -1469,10 +1507,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             //竿
                             GestureDetector(
                                 onTap: () async {
-                                  setState(() {
-                                    _selectTacleIcon = 'rod';
-                                    _showTacleChangeDialog = true;
-                                  });
+                                  if (_depth <= 0.0) {
+                                    setState(() {
+                                      _selectTacleIcon = 'rod';
+                                      _showTacleChangeDialog = true;
+                                    });
+                                  }
                                 },
                                 child: tackleIcon(
                                     tackleIconSize: 40.0,
@@ -1482,10 +1522,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             //リール
                             GestureDetector(
                                 onTap: () async {
-                                  setState(() {
-                                    _selectTacleIcon = 'reel';
-                                    _showTacleChangeDialog = true;
-                                  });
+                                  if (_depth <= 0.0) {
+                                    setState(() {
+                                      _selectTacleIcon = 'reel';
+                                      _showTacleChangeDialog = true;
+                                    });
+                                  }
                                 },
                                 child: tackleIcon(
                                     tackleIconSize: 40.0,
@@ -1495,10 +1537,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             //ルアー
                             GestureDetector(
                                 onTap: () async {
-                                  setState(() {
-                                    _selectTacleIcon = 'lure';
-                                    _showTacleChangeDialog = true;
-                                  });
+                                  if (_depth <= 0.0) {
+                                    setState(() {
+                                      _selectTacleIcon = 'lure';
+                                      _showTacleChangeDialog = true;
+                                    });
+                                  }
                                 },
                                 child: tackleIcon(
                                     tackleIconSize: 40.0,

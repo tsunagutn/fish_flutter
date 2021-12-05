@@ -12,7 +12,7 @@ class FishsModel {
         hp: 300,
         addMax: 30,
         addMin: -10,
-        weight: 2,
+        weight: 200,
         wariai: 1.0,
         point: 100,
         tanaMin: 0,
@@ -34,7 +34,7 @@ class FishsModel {
       hp: 250, //このスキャン経過で0になる
       addMax: 13,
       addMin: -5,
-      weight: 2, //重さ
+      weight: 500, //重さ
       wariai: 0.7,
       point: 200, //ポイントの基礎値
       tanaMin: 100, //生息域 上 0.1m単位
@@ -56,7 +56,7 @@ class FishsModel {
       hp: 3000, //このスキャン経過で0になる
       addMax: 10,
       addMin: -6,
-      weight: 3, //重さ
+      weight: 1500, //重さ
       wariai: 0.5,
       point: 200, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
@@ -78,7 +78,7 @@ class FishsModel {
       hp: 1000,
       addMax: 15,
       addMin: -6,
-      weight: 3, //重さ
+      weight: 2000, //重さ
       wariai: 0.5,
       point: 300, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
@@ -101,7 +101,7 @@ class FishsModel {
       hp: 5000,
       addMax: 30,
       addMin: -10,
-      weight: 4, //重さ
+      weight: 4000, //重さ
       wariai: 0.05,
       point: 99999, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
@@ -124,7 +124,7 @@ class FishsModel {
       hp: 500, //このスキャン経過で0になる
       addMax: 10, //引きの最大
       addMin: -5, //引きの最小（最大との乖離が暴れ度）
-      weight: 2, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 1.0, //HIT率 条件全一致で確定1.0～
       point: 100, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
@@ -147,7 +147,7 @@ class FishsModel {
       hp: 1000, //このスキャン経過で0になる
       addMax: 20, //引きの最大
       addMin: -5, //引きの最小（最大との乖離が暴れ度）
-      weight: 3, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.6, //HIT率 条件全一致で確定1.0～
       point: 300, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
@@ -183,7 +183,7 @@ class FishModel {
   int hp; //このスキャン経過で0になる
   int addMax; //引きの最大
   int addMin; //引きの最小（最大との乖離が暴れ度）
-  int weight; //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+  int weight; //重さ g単位（HP0時の最低重量、これが無いとバレ判定にひっかかる）
   double wariai; //HIT率 条件全一致で確定1.0～
   int point; //ポイントの基礎値
   int tanaMin; //生息域 上 0.1m単位
