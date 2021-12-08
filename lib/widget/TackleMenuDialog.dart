@@ -22,7 +22,7 @@ class _TackleMenuDialogState extends State<TackleMenuDialog>
   @override
   void initState() {
     super.initState();
-    widget.fishsTable.fishs.forEach((key, value) {
+    widget.fishsTable.fishs.forEach((value) {
       fishList.add(value);
     });
   }

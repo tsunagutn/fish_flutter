@@ -3,12 +3,13 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "ae814a89aef70337fb190b801f24b923",
+  "assets/AssetManifest.json": "9e5c24a1e79ad77fedb1f9a043d01312",
 "assets/Assets/Images/aeae.png": "bc5c3f756fa13507f2ff00a818c8cec2",
 "assets/Assets/Images/aji.jpg": "ef6d833d1feb21685b2cf83a2ad9abcd",
 "assets/Assets/Images/bc4-3.jpg": "6a7fece23647c6d3c5c0f79d724502d5",
 "assets/Assets/Images/fish.png": "2690dcdef769464d5a04f57529ab8737",
 "assets/Assets/Images/fishback.jpg": "cccd1f3d68e9ff004efb15bfbde56ed4",
+"assets/Assets/Images/jig.png": "89c822c67ef2f22de295089524b6c9a5",
 "assets/Assets/Images/koi.jpg": "f1aca98e1ebf00168e4d098338ec5672",
 "assets/Assets/Images/madai.jpg": "b913d99cf40756d8d6e9b7df7785e045",
 "assets/Assets/Images/mube.jpg": "a24c408a4af32fc528e5af87c9297ecb",
@@ -33,9 +34,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "d732d4ca9b7ddd10cb8ed348f668e394",
-"/": "d732d4ca9b7ddd10cb8ed348f668e394",
-"main.dart.js": "72993a511c249a97458b92622b1f5120",
+"index.html": "e9766bd26681918a8174191683e0e529",
+"/": "e9766bd26681918a8174191683e0e529",
+"main.dart.js": "5ac2c45e78e1bcbbfbdeeef8c7035a97",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };
