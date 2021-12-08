@@ -1,17 +1,17 @@
 class FishsModel {
-  late Map<int, FishModel> fishs = new Map<int, FishModel>();
+  late List<FishModel> fishs = [];
 
   //コンストラクタ
   FishsModel() {
     //シーダーみたいなやつ
-    fishs[0] = new FishModel(
+    fishs.add(new FishModel(
         id: 0,
         name: "アジ",
         image: "aji.jpg",
         text: "あなたは幸せを感じました",
         hp: 300,
-        addMax: 30,
-        addMin: -10,
+        addMax: 3,
+        addMin: -2,
         weight: 200,
         wariai: 1.0,
         point: 100,
@@ -24,9 +24,9 @@ class FishsModel {
         sizeMax: 51.3,
         baitCntMax: 20,
         fookingTension: 50,
-        bareMin: 20);
+        bareMin: 20));
 
-    fishs[1] = new FishModel(
+    fishs.add(new FishModel(
       id: 1,
       name: "タチウオ",
       image: "tachiuo.jpg",
@@ -47,8 +47,8 @@ class FishsModel {
       baitCntMax: 20,
       fookingTension: 80,
       bareMin: 20,
-    );
-    fishs[2] = new FishModel(
+    ));
+    fishs.add(new FishModel(
       id: 2,
       name: "鯉",
       image: "koi.jpg",
@@ -69,8 +69,8 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 100,
       bareMin: 20,
-    );
-    fishs[3] = new FishModel(
+    ));
+    fishs.add(new FishModel(
       id: 3,
       name: "マダイ",
       image: "madai.jpg",
@@ -91,9 +91,9 @@ class FishsModel {
       baitCntMax: 30,
       fookingTension: 150,
       bareMin: 20,
-    );
+    ));
 
-    fishs[4] = new FishModel(
+    fishs.add(new FishModel(
       id: 4,
       name: "宮澤クン",
       image: "sakana.jpg",
@@ -114,9 +114,9 @@ class FishsModel {
       baitCntMax: 10,
       fookingTension: 150,
       bareMin: 20,
-    );
+    ));
 
-    fishs[5] = new FishModel(
+    fishs.add(new FishModel(
       id: 5,
       name: "サバ", //魚種名
       image: "aji.jpg", //超過画面の画像
@@ -137,9 +137,9 @@ class FishsModel {
       baitCntMax: 15,
       fookingTension: 80,
       bareMin: 20,
-    );
+    ));
 
-    fishs[6] = new FishModel(
+    fishs.add(new FishModel(
       id: 6,
       name: "サゴシ", //魚種名
       image: "aji.jpg", //超過画面の画像
@@ -155,22 +155,27 @@ class FishsModel {
       hitFall: 1.0, //フォール志向
       hitSpeedJust: 170, //スピード志向
       hitSpeedRange: 40, //スピード志向範囲+-
-      sizeMin: 35.3,
+      sizeMin: 18.3,
       sizeMax: 69.9,
       baitCntMax: 15,
       fookingTension: 120,
       bareMin: 20,
-    );
+    ));
+  }
+
+  //IDを指定して魚情報を取得
+  FishModel getFishDetail(int id) {
+    FishModel ret = fishs.firstWhere((fish) => fish.id == id);
+    return ret;
   }
 
   //水深から可能性のある魚種のみ抽出して返す
-  Map<int, FishModel> extractDepth(double depth) {
+  List<FishModel> extractDepth(double depth) {
     //Mapを値コピー
-    Map<int, FishModel> extractFishs = {...fishs};
+    List<FishModel> extractFishs = [...fishs];
     //深さから可能性のある魚種のみ抽出
-    extractFishs.removeWhere((key, value) => depth < value.tanaMin);
-    extractFishs.removeWhere((key, value) => depth > value.tanaMax);
-
+    extractFishs.removeWhere((value) => depth < value.tanaMin);
+    extractFishs.removeWhere((value) => depth > value.tanaMax);
     return extractFishs;
   }
 }
@@ -224,5 +229,14 @@ class FishModel {
   //サイズ割合（0.0～1.0）を元に実サイズを返す
   double getSize(size) {
     return ((sizeMax - sizeMin) * size + sizeMin);
+  }
+
+  Map<String, List<double>> getPrmLevels() {
+    final Map<String, List<double>> ret = {
+      'hp': [300, 500, 1000, 2000, 4000],
+      'addMax': [3, 5, 10, 20, 30],
+      'abare': [3, 5, 10, 20, 30],
+    };
+    return ret;
   }
 }

@@ -42,11 +42,17 @@
 //・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？→しない
 //済・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
 //済・魚図鑑画面
+//済・%を表示してる方がおもしろい・・・
+//済・ルアー変更
+//・ルアー耐久システム
 //・魚詳細画面
 //・設定画面 合わせの強さ調節
+//・実績
 //・いけすシステム
 //・赤ポイント緑ポイント青ポイント
-//・%を表示してる方がおもしろい・・・
+//・光点が横に走る
+//・水流
+//・水中に泡とか
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
@@ -71,6 +77,7 @@ import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
+import 'package:fish_flutter/widget/RadarChart.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
@@ -130,7 +137,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   final TENSION_COLOR_SAFE = clsColor._getColorFromHex("4CFF00");
   final TENSION_COLOR_DRAG = clsColor._getColorFromHex("FFD800");
   final TENSION_COLOR_DANGER = clsColor._getColorFromHex("DD0000");
-  final SPEED_COLOR = clsColor._getColorFromHex("93D2FF");
+  final SPEED_COLOR = clsColor._getColorFromHex("83BBE2");
   final SPEED_COLOR_REELING = clsColor._getColorFromHex("0026FF");
   static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
   static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
@@ -385,7 +392,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         _hitScanCnt--;
       }
       //テンション増減にHIT中補正をかける
-      var fish = FISH_TABLE.fishs[_fishidx]!;
+      var fish = FISH_TABLE.fishs[_fishidx];
       mx += fish.addMax * (_hitScanCnt / fish.hp * _fishSize).round();
       mn += fish.addMin * (_hitScanCnt / fish.hp * _fishSize).round();
       weight = fish.weight + lureWeight;
@@ -549,7 +556,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       _flgBait = false;
       _flgHit = false;
       debugPrint("つりあげ");
-      var fish = FISH_TABLE.fishs[_fishidx]!;
+      var fish = FISH_TABLE.fishs[_fishidx];
       var fishSize = fish.getSize(_fishSize);
       //debugPrint("おおきさ" + size.toString());
       var point = fish.point + (fish.point * _fishSize).floor();
@@ -656,9 +663,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
       var maxProb = 0.0;
       _listSpeedRange = []; //速度リスト初期化
+      duration = durationMax;
       //種毎の判定
-      fishs.forEach((key, value) {
-        var fish = fishs[key]!;
+      fishs.forEach((fish) {
         var hitSpeedprob = 0.0;
         var hitSpeedprobDisp = 0.0;
         //糸出中、かつ水深MAXではない時
@@ -706,7 +713,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         //HIT判定
         if (hitProb > hitrnd) {
           //i 番目HIT
-          _fishidx = key;
+          _fishidx = fishs.indexOf(fish);
           //大きさ決定
           _fishSize = (new math.Random()).nextDouble();
           _hitScanCnt = fish.hp;
@@ -732,7 +739,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         }
       });
     } else {
-      var fish = FISH_TABLE.fishs[_fishidx]!;
+      var fish = FISH_TABLE.fishs[_fishidx];
       //アタリ中またはHIT中の処理
       if (_flgBait) {
         //当たってからのスキャン数加算
@@ -980,15 +987,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 return;
               }
 
-              //   path.moveTo(tackleCenterX - (reelSizeX / 2),
-              //       reelCenterY + reelSizeY / 2 + 3);
-              // path.lineTo(
-              //     tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
-              // path.lineTo(
-              //     tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
-              // path.lineTo(tackleCenterX + (reelSizeX / 2),
-              //     reelCenterY + reelSizeY / 2 + 3);
-
               chengeClutch(false);
               _onTap = true;
               //タップ時の画面エフェクト
@@ -1031,13 +1029,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
               if (val < 0) val = 0;
               _rodStandUp = val;
-
-              //videoの再生スピード調整（1～300）
-              //$('#bg-video1').get(0).playbackRate = Math.floor(val / 15) / 10;
-
-              // if (size.isEmpty) {
-              //   return;
-              // }
             },
             //タップ、ドラッグ操作が終了した時
             onPanEnd: (DragEndDetails details) {
@@ -1047,12 +1038,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               _onTap = false;
               //スピードスライダの色を戻す
               _speedActiveTrackColor = SPEED_COLOR;
-              // var video = $('#bg-video').get(0);
-              // video.src = './static/videos/Position2_巻き上げ3.mp4';
-              // video.pause();
-              // $('#bg-video1').get(0).pause();
-              // $('#bg-video1').removeClass("invisible");
-              // $('#bg-video2').addClass("invisible");
             },
             //child: new Stack(children: <Widget>[
             //背景スプライト
@@ -1452,54 +1437,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         left: 0),
                     width: 60,
                     height: 180,
-                    // decoration: BoxDecoration(
-                    //   gradient: LinearGradient(
-                    //     begin: FractionalOffset.center,
-                    //     end: FractionalOffset.bottomRight,
-                    //     colors: [
-                    //       clsColor._getColorFromHex("444444").withOpacity(0.2),
-                    //       clsColor._getColorFromHex("222222").withOpacity(0.2),
-                    //       clsColor._getColorFromHex("000000").withOpacity(0.2),
-                    //     ],
-                    //     stops: [0.0, 0.6, 1.0],
-                    //   ),
-                    // border: const Border(
-                    //   top: const BorderSide(
-                    //     color: Colors.black,
-                    //     width: 2,
-                    //   ),
-                    //   right: const BorderSide(
-                    //     color: Colors.black,
-                    //     width: 2,
-                    //   ),
-                    //   bottom: const BorderSide(
-                    //     color: Colors.black,
-                    //     width: 2,
-                    //   ),
-                    // ),
-                    //borderRadius: BorderRadius.circular(8.0),
-                    //   boxShadow: [
-                    //     BoxShadow(
-                    //       color: Colors.grey.withOpacity(0.5),
-                    //       spreadRadius: 0,
-                    //       blurRadius: 4,
-                    //       offset: Offset(0, 2),
-                    //     ),
-                    //   ],
-                    // ),
                     child: Column(
                       children: [
-                        // Container(
-                        //   width: 60,
-                        //   child: Text(
-                        //     "TACKLE",
-                        //     textAlign: TextAlign.center,
-                        //     style: TextStyle(
-                        //       fontStyle: FontStyle.italic,
-                        //       backgroundColor: Colors.white.withOpacity(0.6),
-                        //     ),
-                        //   ),
-                        // ),
                         Expanded(
                             child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1562,7 +1501,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         )),
                       ],
                     )),
-
                 AnimatedPadding(
                   //curve: Curves.easeOutExpo,
                   padding: EdgeInsets.only(
@@ -1572,178 +1510,196 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   duration: Duration(milliseconds: 200),
                   child: GestureDetector(
                     onTap: () {
-                      //欄外のタップイベントを起こさないためのイベント
+                      //欄外のタップイベントを起こさないための空イベント
                     },
-                    onPanStart: (DragStartDetails details) {},
+                    onPanStart: (DragStartDetails details) {
+                      //欄外のタップイベントを起こさないための空イベント
+                    },
                     child: Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                                color: Colors.black.withOpacity(0.3),
-                                width: 1)),
-                        //title: Text("タックル変更"),
-                        child: Container(
-                          color: Colors.black.withOpacity(0.3),
-                          child: Column(children: <Widget>[
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "使用中のタックル",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                        fontFamily: 'OpenSans',
-                                        decoration: TextDecoration.none,
-                                        shadows: <Shadow>[
-                                          Shadow(
-                                              offset: Offset(1.0, 3.0),
-                                              blurRadius: 2.0,
-                                              color:
-                                                  Colors.black.withOpacity(0.8))
-                                        ]),
-                                  )
-                                ]),
-                            Container(
-                              margin: EdgeInsets.only(top: 4, bottom: 4),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  //現在選択中のルアー
-                                  //竿
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _selectTacleIcon = 'rod';
-                                      });
-                                    },
-                                    child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: tackleIcon(
-                                            tackleIconSize: 60.0,
-                                            imagePath: 'Assets/Images/rod.png',
-                                            flgSelect: _selectTacleIcon == 'rod'
-                                                ? true
-                                                : false,
-                                            subText: '')),
-                                  ),
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Colors.black.withOpacity(0.3), width: 1)),
+                      //title: Text("タックル変更"),
+                      child: Visibility(
+                          visible: _showTacleChangeDialog,
+                          child: Container(
+                            color: Colors.black.withOpacity(0.3),
+                            child: Column(children: <Widget>[
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "使用中のタックル",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          fontFamily: 'OpenSans',
+                                          decoration: TextDecoration.none,
+                                          shadows: <Shadow>[
+                                            Shadow(
+                                                offset: Offset(1.0, 3.0),
+                                                blurRadius: 2.0,
+                                                color: Colors.black
+                                                    .withOpacity(0.8))
+                                          ]),
+                                    )
+                                  ]),
+                              Container(
+                                //margin: EdgeInsets.only(top: 4, bottom: 4),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    //現在選択中のルアー
+                                    //竿
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectTacleIcon = 'rod';
+                                        });
+                                      },
+                                      child: Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: tackleIcon(
+                                              tackleIconSize: 60.0,
+                                              imagePath:
+                                                  'Assets/Images/rod.png',
+                                              flgSelect:
+                                                  _selectTacleIcon == 'rod'
+                                                      ? true
+                                                      : false,
+                                              subText: '')),
+                                    ),
 
-                                  //リール
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _selectTacleIcon = 'reel';
-                                      });
-                                    },
-                                    child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: tackleIcon(
-                                            tackleIconSize: 60.0,
-                                            imagePath: 'Assets/Images/reel.png',
-                                            flgSelect:
-                                                _selectTacleIcon == 'reel'
-                                                    ? true
-                                                    : false,
-                                            subText: '')),
-                                  ),
-                                  //ルアー
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _selectTacleIcon = 'lure';
-                                      });
-                                    },
-                                    child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: tackleIcon(
-                                            tackleIconSize: 60.0,
-                                            imagePath: 'Assets/Images/' +
-                                                lures
-                                                    .getLureData(haveTackle
-                                                        .getUseLure()
-                                                        .lureId)
-                                                    .image,
-                                            flgSelect:
-                                                _selectTacleIcon == 'lure'
-                                                    ? true
-                                                    : false,
-                                            subText: lures
-                                                    .getLureData(haveTackle
-                                                        .getUseLure()
-                                                        .lureId)
-                                                    .weight
-                                                    .toString() +
-                                                'g')),
-                                  ),
-                                ],
+                                    //リール
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectTacleIcon = 'reel';
+                                        });
+                                      },
+                                      child: Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: tackleIcon(
+                                              tackleIconSize: 60.0,
+                                              imagePath:
+                                                  'Assets/Images/reel.png',
+                                              flgSelect:
+                                                  _selectTacleIcon == 'reel'
+                                                      ? true
+                                                      : false,
+                                              subText: '')),
+                                    ),
+                                    //ルアー
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectTacleIcon = 'lure';
+                                        });
+                                      },
+                                      child: Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: tackleIcon(
+                                              tackleIconSize: 60.0,
+                                              imagePath: 'Assets/Images/' +
+                                                  lures
+                                                      .getLureData(haveTackle
+                                                          .getUseLure()
+                                                          .lureId)
+                                                      .image,
+                                              flgSelect:
+                                                  _selectTacleIcon == 'lure'
+                                                      ? true
+                                                      : false,
+                                              subText: lures
+                                                      .getLureData(haveTackle
+                                                          .getUseLure()
+                                                          .lureId)
+                                                      .weight
+                                                      .toString() +
+                                                  'g')),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            //交換
-                            Container(
-                              margin: EdgeInsets.only(top: 4, bottom: 4),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Container(
-                                      width: 200,
-                                      height: 60,
-                                      color: Colors.white.withOpacity(0.6),
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return Row(children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  //タックル替え
-                                                  haveTackle.changeLure(
-                                                      haveTackle
-                                                          .haveLures[index]
-                                                          .lureId);
-                                                });
-                                              },
-                                              child: Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: tackleIcon(
-                                                      tackleIconSize: 40.0,
-                                                      imagePath: 'Assets/Images/' +
-                                                          lures
-                                                              .getLureData(
-                                                                  haveTackle
-                                                                      .haveLures[
-                                                                          index]
-                                                                      .lureId)
-                                                              .image,
-                                                      flgSelect: haveTackle
-                                                                  .haveLures[
-                                                                      index]
-                                                                  .lureId ==
-                                                              haveTackle
-                                                                  .getUseLure()
-                                                                  .lureId
-                                                          ? true
-                                                          : false,
-                                                      subText: lures
-                                                              .getLureData(
-                                                                  haveTackle
-                                                                      .haveLures[
-                                                                          index]
-                                                                      .lureId)
-                                                              .weight
-                                                              .toString() +
-                                                          'g')),
-                                            ),
-                                          ]);
-                                        },
-                                        itemCount: haveTackle.haveLures.length,
-                                      )),
-                                ],
+                              Container(
+                                  child: Column(
+                                children: [Text("")],
+                              )),
+                              //交換
+                              Container(
+                                margin: EdgeInsets.only(top: 4, bottom: 4),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Container(
+                                        width: 200,
+                                        height: 60,
+                                        color: Colors.white.withOpacity(0.6),
+                                        child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            return Row(children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    //タックル替え
+                                                    haveTackle.changeLure(
+                                                        haveTackle
+                                                            .haveLures[index]
+                                                            .lureId);
+                                                  });
+                                                },
+                                                child: Container(
+                                                    padding: EdgeInsets.all(10),
+                                                    child: tackleIcon(
+                                                        tackleIconSize: 40.0,
+                                                        imagePath: 'Assets/Images/' +
+                                                            lures
+                                                                .getLureData(
+                                                                    haveTackle
+                                                                        .haveLures[
+                                                                            index]
+                                                                        .lureId)
+                                                                .image,
+                                                        flgSelect: haveTackle
+                                                                    .haveLures[
+                                                                        index]
+                                                                    .lureId ==
+                                                                haveTackle
+                                                                    .getUseLure()
+                                                                    .lureId
+                                                            ? true
+                                                            : false,
+                                                        subText: lures
+                                                                .getLureData(
+                                                                    haveTackle
+                                                                        .haveLures[
+                                                                            index]
+                                                                        .lureId)
+                                                                .weight
+                                                                .toString() +
+                                                            'g')),
+                                              ),
+                                            ]);
+                                          },
+                                          itemCount:
+                                              haveTackle.haveLures.length,
+                                        ))
+                                  ],
+                                ),
                               ),
-                            ),
-                          ]),
-                        )),
+                              new RadarChart(
+                                key: UniqueKey(),
+                                items: getLureRadarChartItem(),
+                                radarColors: [Colors.green],
+                                fontColor: Colors.white,
+                              ),
+                            ]),
+                          )),
+                    ),
                   ),
                 ),
               ]),
@@ -1904,83 +1860,19 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     );
   }
 
-//   //タックル変更ダイアログ
-//   Widget showTacleChangeDialog({required String mode}) {
-//     _selectTacleIcon = mode;
-//     return Container(
-//         decoration: BoxDecoration(
-//             border:
-//                 Border.all(color: Colors.black.withOpacity(0.3), width: 100)),
-//         //title: Text("タックル変更"),
-//         child: Container(
-//           height: MediaQuery.of(context).size.height / 2,
-//           color: Colors.cyan,
-//           child: Column(children: <Widget>[
-//             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-//               Text(
-//                 "使用中のタックル",
-//                 textAlign: TextAlign.center,
-//                 style: TextStyle(
-//                     color: Colors.black,
-//                     fontWeight: FontWeight.bold,
-//                     fontSize: 30,
-//                     fontFamily: 'OpenSans',
-//                     decoration: TextDecoration.none,
-//                     shadows: <Shadow>[
-//                       Shadow(
-//                           offset: Offset(1.0, 3.0),
-//                           blurRadius: 2.0,
-//                           color: Colors.black.withOpacity(0.8))
-//                     ]),
-//               )
-//             ]),
-//             Container(
-//               margin: EdgeInsets.only(top: 4, bottom: 4),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   //現在選択中のルアー
-//                   //竿
-//                   GestureDetector(
-//                     onTap: () {
-//                       setState(() {
-//                         _selectTacleIcon = 'rod';
-//                       });
-//                     },
-//                     child: Container(
-//                         padding: EdgeInsets.all(10),
-//                         child: TackleIcon(
-//                             tackleIconSize: 60.0,
-//                             imagePath: 'Assets/Images/rod.png')),
-//                   ),
-
-//                   //リール
-//                   GestureDetector(
-//                     onTap: () async {},
-//                     child: Container(
-//                         padding: EdgeInsets.all(10),
-//                         child: TackleIcon(
-//                             tackleIconSize: 60.0,
-//                             imagePath: 'Assets/Images/reel.png')),
-//                   ),
-//                   //ルアー
-//                   GestureDetector(
-//                     onTap: () async {},
-//                     child: Container(
-//                         padding: EdgeInsets.all(10),
-//                         child: TackleIcon(
-//                             tackleIconSize: 60.0,
-//                             imagePath: 'Assets/Images/' +
-//                                 lures
-//                                     .getLureData(haveTackle.getUseLure().lureId)
-//                                     .image)),
-//                   ),
-//                 ],
-//               ),
-//             )
-//           ]),
-//         ));
-//   }
+  List<RadarChartItemModel> getLureRadarChartItem() {
+    List<RadarChartItemModel> ret = [];
+    ret.add(new RadarChartItemModel(
+        itemName: '巻き',
+        value: lures.getLureData(haveTackle.getUseLure().lureId).reeling));
+    ret.add(new RadarChartItemModel(
+        itemName: 'ﾌｫｰﾙ',
+        value: lures.getLureData(haveTackle.getUseLure().lureId).fall));
+    ret.add(new RadarChartItemModel(
+        itemName: 'ｼｬｸﾘ',
+        value: lures.getLureData(haveTackle.getUseLure().lureId).jerk));
+    return ret;
+  }
 }
 
 class ShakeCurve extends Curve {
