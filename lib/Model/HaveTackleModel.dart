@@ -11,6 +11,7 @@ class HaveTackleModel {
     haveLures.add(new HaveLureModel(lureId: 0, lureHp: 700, flgUse: true));
     haveLures.add(new HaveLureModel(lureId: 1, lureHp: 700, flgUse: false));
     haveLures.add(new HaveLureModel(lureId: 2, lureHp: 700, flgUse: false));
+    haveLures.add(new HaveLureModel(lureId: 3, lureHp: 700, flgUse: false));
   }
 
   // //使用中ルアーを返す

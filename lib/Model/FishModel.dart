@@ -17,13 +17,15 @@ class FishsModel {
         point: 100,
         tanaMin: 0,
         tanaMax: 100,
-        hitFall: 0.2,
+        hitMaki: 0.7,
+        hitJerk: 0.5,
+        hitFall: 0.4,
         hitSpeedJust: 50,
         hitSpeedRange: 40,
         sizeMin: 7.6,
         sizeMax: 51.3,
         baitCntMax: 20,
-        fookingTension: 50,
+        fookingTension: 30,
         bareMin: 20));
 
     fishs.add(new FishModel(
@@ -39,13 +41,15 @@ class FishsModel {
       point: 200, //ポイントの基礎値
       tanaMin: 100, //生息域 上 0.1m単位
       tanaMax: 300, //生息域 下 0.1m単位
-      hitFall: 0.3,
+      hitMaki: 0.2,
+      hitJerk: 0.7,
+      hitFall: 0.5,
       hitSpeedJust: 100,
       hitSpeedRange: 50,
       sizeMin: 64.0,
       sizeMax: 150.5,
       baitCntMax: 20,
-      fookingTension: 80,
+      fookingTension: 60,
       bareMin: 20,
     ));
     fishs.add(new FishModel(
@@ -61,6 +65,8 @@ class FishsModel {
       point: 200, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
       tanaMax: 300, //生息域 下 0.1m単位
+      hitMaki: 0.6,
+      hitJerk: 0.1,
       hitFall: 0.1,
       hitSpeedJust: 75,
       hitSpeedRange: 50,
@@ -83,7 +89,9 @@ class FishsModel {
       point: 300, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
       tanaMax: 1000, //生息域 下 0.1m単位
-      hitFall: 0.1,
+      hitMaki: 0.9,
+      hitJerk: 0.1,
+      hitFall: 0.3,
       hitSpeedJust: 150,
       hitSpeedRange: 50,
       sizeMin: 26.3,
@@ -106,6 +114,8 @@ class FishsModel {
       point: 99999, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
       tanaMax: 5000, //生息域 下 0.1m単位
+      hitMaki: 0.3,
+      hitJerk: 0.8,
       hitFall: 0.6,
       hitSpeedJust: 250,
       hitSpeedRange: 50,
@@ -122,14 +132,16 @@ class FishsModel {
       image: "aji.jpg", //超過画面の画像
       text: "写真は仮です", //釣果画面のコメント
       hp: 500, //このスキャン経過で0になる
-      addMax: 10, //引きの最大
+      addMax: 12, //引きの最大
       addMin: -5, //引きの最小（最大との乖離が暴れ度）
       weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 1.0, //HIT率 条件全一致で確定1.0～
       point: 100, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
       tanaMax: 70, //生息域 下 0.1m単位
-      hitFall: 0.2, //フォール志向
+      hitMaki: 0.6,
+      hitJerk: 0.5,
+      hitFall: 0.5, //フォール志向
       hitSpeedJust: 150, //スピード志向
       hitSpeedRange: 30, //スピード志向範囲+-
       sizeMin: 14.3,
@@ -144,15 +156,17 @@ class FishsModel {
       name: "サゴシ", //魚種名
       image: "aji.jpg", //超過画面の画像
       text: "あなたは満足を得ました", //釣果画面のコメント
-      hp: 1000, //このスキャン経過で0になる
-      addMax: 20, //引きの最大
+      hp: 600, //このスキャン経過で0になる
+      addMax: 8, //引きの最大
       addMin: -5, //引きの最小（最大との乖離が暴れ度）
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.6, //HIT率 条件全一致で確定1.0～
       point: 300, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
       tanaMax: 200, //生息域 下 0.1m単位
-      hitFall: 1.0, //フォール志向
+      hitMaki: 0.3,
+      hitJerk: 0.6,
+      hitFall: 0.8, //フォール志向
       hitSpeedJust: 170, //スピード志向
       hitSpeedRange: 40, //スピード志向範囲+-
       sizeMin: 18.3,
@@ -193,6 +207,8 @@ class FishModel {
   int point; //ポイントの基礎値
   int tanaMin; //生息域 上 0.1m単位
   int tanaMax; //生息域 下 0.1m単位
+  double hitMaki; //巻き志向 0.0～1.0
+  double hitJerk; //ジャーク志向 0.0～1.0
   double hitFall; //フォール志向 0.0～1.0
   int hitSpeedJust; //スピード志向
   int hitSpeedRange; //スピード志向範囲+-
@@ -217,6 +233,8 @@ class FishModel {
     required this.tanaMin,
     required this.tanaMax,
     required this.hitFall,
+    required this.hitMaki,
+    required this.hitJerk,
     required this.hitSpeedJust,
     required this.hitSpeedRange,
     required this.sizeMin,

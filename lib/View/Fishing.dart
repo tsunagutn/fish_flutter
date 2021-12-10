@@ -195,6 +195,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
   var _jiai = 0.9; //時合度 0.0～0.9999...
   var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
+  var _maxLineHp = 50.0; //ラインHP最大値
+  var _nowLineHp = 50.0; //現在ラインHP
 
   List<SpeedRange> _listSpeedRange = []; //可能性ある魚種毎のスピード範囲
 
@@ -444,12 +446,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //ゲームオーバー判定
     var gameovertext = "";
-    //糸切れ判定
+    //糸ダメージ判定
     if (val > TENSION_LINECUT) {
-      //糸切れ
-      debugPrint("いときれ");
-      _flgGameOver = true;
-      gameovertext = "糸が切れました。\nゲームオーバーです。\nゲームオーバーなのでもう何もできません";
+      _nowLineHp--; //ラインHPを減らす
+      if (_nowLineHp < 0) {
+        //糸切れ
+        debugPrint("いときれ");
+        _flgGameOver = true;
+        gameovertext = "糸が切れました。\nゲームオーバーです。\nゲームオーバーなのでもう何もできません";
+      }
     }
     //座礁判定
     if (_maxDepth < 2.0) {
@@ -510,7 +515,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (val < TENSION_VAL_MIN) val = TENSION_VAL_MIN;
 
     if (_depth > _maxDepth) _depth = _maxDepth;
-    if (_depth < 0) _depth = 0.0;
+    if (_depth <= 0) {
+      //深さ0m
+      _depth = 0.0;
+      //ラインHPを回復
+      _nowLineHp = _maxLineHp;
+    }
 
     //テンション確定
     _tension = val;
@@ -713,7 +723,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         //HIT判定
         if (hitProb > hitrnd) {
           //i 番目HIT
-          _fishidx = fishs.indexOf(fish);
+          _fishidx = FISH_TABLE.fishs.indexOf(fish);
           //大きさ決定
           _fishSize = (new math.Random()).nextDouble();
           _hitScanCnt = fish.hp;
@@ -1086,6 +1096,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     ),
                                     CustomPaint(
                                       painter: new SliderPainter(
+                                        height: 20,
                                         activeColor: _tensionActiveTrackColor,
                                         inactiveColor: (_flgBait || _flgHit)
                                             ? Colors.black
@@ -1139,6 +1150,39 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 )),
                           )
                         ])),
+                    //巻速度スライダー
+                    Container(
+                        margin: EdgeInsets.only(left: 10, right: 10),
+                        height: 10,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              CustomPaint(
+                                painter: new SliderPainter(
+                                  height: 5,
+                                  activeColor:
+                                      clsColor._getColorFromHex("FF3030"),
+                                  inactiveColor: Colors.white,
+                                  value: _nowLineHp / _maxLineHp,
+                                  backRadius: 0,
+                                  maxBackRadius: 0,
+                                  flgShaKe: false,
+                                ),
+                                child: Container(),
+                              ),
+                              //可能性のある魚種の速度範囲表示
+                              CustomPaint(
+                                painter: new FishRangeSliderPainter(
+                                  activeColor: _speedActiveTrackColor,
+                                  inactiveColor: Colors.red,
+                                  backRadius: 0,
+                                  maxBackRadius: 0,
+                                  maxSpeed: SPEED_VAL_MAX,
+                                  speedRange: _listSpeedRange,
+                                ),
+                                child: Container(),
+                              )
+                            ])),
 
                     //巻速度スライダー
                     Container(
@@ -1153,6 +1197,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                               ),
                               CustomPaint(
                                 painter: new SliderPainter(
+                                  height: 20,
                                   activeColor: _speedActiveTrackColor,
                                   inactiveColor: Colors.white,
                                   value: _speed / SPEED_VAL_MAX,

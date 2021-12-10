@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 class SliderPainter extends CustomPainter {
   const SliderPainter({
+    required this.height,
     required this.activeColor,
     required this.inactiveColor,
     required this.value,
@@ -10,6 +11,7 @@ class SliderPainter extends CustomPainter {
     required this.maxBackRadius,
     required this.flgShaKe,
   });
+  final double height;
   final Color activeColor;
   final Color inactiveColor;
   final double value;
@@ -57,9 +59,9 @@ class SliderPainter extends CustomPainter {
     var leftStart = 0.0 + dragShaKeX;
     var leftEnd = size.width + dragShaKeX;
     var topStart = 0.0 + dragShaKeY;
-    var topEnd = 20.0 + dragShaKeY;
+    var topEnd = this.height + dragShaKeY;
 
-    if (this.activeColor.red > 150) {
+    if (this.activeColor.red > 150 && maxBackRadius > 0.0) {
       var radius = 0.0;
       //後光配列ループ
       for (var i = 0; i < lightLayers.length; i++) {
