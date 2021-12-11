@@ -44,6 +44,9 @@
 //済・魚図鑑画面
 //済・%を表示してる方がおもしろい・・・
 //済・ルアー変更
+//・意図のスライダーをテンションとひっつける
+//・王冠つきじゃないと詳細アンロックしない
+//・魚種毎に実績
 //・ルアー耐久システム
 //・魚詳細画面
 //・設定画面 合わせの強さ調節
@@ -83,6 +86,7 @@ import 'package:fish_flutter/widget/FishPointer.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
 import 'package:fish_flutter/widget/SenchoDialog.dart';
 import 'package:fish_flutter/widget/SliderPainter.dart';
+import 'package:fish_flutter/widget/fishGetDialog.dart';
 import 'package:fish_flutter/widget/tacklePainter.dart';
 
 import 'package:flutter/material.dart';
@@ -567,85 +571,33 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       _flgHit = false;
       debugPrint("つりあげ");
       var fish = FISH_TABLE.fishs[_fishidx];
-      var fishSize = fish.getSize(_fishSize);
       //debugPrint("おおきさ" + size.toString());
       var point = fish.point + (fish.point * _fishSize).floor();
+      //ポイントを加算
+      _point += point;
+      //初釣果判定
+      var flgNew = true;
+      fishesResult.listFishResult.forEach((val) {
+        if (val.fishId == fish.id) {
+          flgNew = false;
+          return;
+        }
+      });
       //釣果リストに登録
       fishesResult.addResult(fish.id, _fishSize);
       //釣りあげ時のモーダル
       var result = showDialog<int>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return Container(
-                // height: size.height / 3,
-                // width: size.width / 1.5,
-                decoration: new BoxDecoration(
-                    image: new DecorationImage(
-                  image: new AssetImage("Assets/Images/fishback.jpg"),
-                  fit: BoxFit.cover,
-                )),
-                child: AlertDialog(
-                  titleTextStyle: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      shadows: <Shadow>[
-                        Shadow(
-                            offset: Offset(2.0, 4.0),
-                            blurRadius: 2.0,
-                            color: Colors.black)
-                      ]),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
-                  backgroundColor:
-                      clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
-                  title: Text(fish.text),
-                  content: Container(
-                      height: size.height / 2,
-                      // decoration: new BoxDecoration(
-                      //     image: new DecorationImage(
-                      //   image: new AssetImage("Assets/Images/fishback.jpg"),
-                      //   fit: BoxFit.cover,
-                      // )),
-                      child: Column(children: <Widget>[
-                        new Image(
-                          image: AssetImage('Assets/Images/' + fish.image),
-                          // width: 150,
-                          // height: 150,
-                        ),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(fish.name +
-                                  "　" +
-                                  fishSize.toStringAsFixed(1) +
-                                  "cm"),
-                              if (_fishSize > 0.8 && _fishSize < 0.95)
-                                Icon(Icons.star, color: Colors.grey),
-                              if (_fishSize > 0.95)
-                                Icon(
-                                  Icons.star,
-                                  color: Colors.yellow,
-                                ),
-                            ]),
-                        Text(point.toString() + 'ポイント獲得です'),
-                      ])),
-                  actions: <Widget>[
-                    // ボタン領域
-                    // FlatButton(
-                    //   child: Text("Cancel"),
-                    //   onPressed: () => Navigator.pop(context),
-                    // ),
-                    FlatButton(
-                      child: Text("OK"),
-                      onPressed: () {
-                        _point += point;
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                ));
-          });
+        context: context,
+        barrierDismissible: false,
+        builder: (_) {
+          return fishGetDialog(
+              dispSize: size,
+              fish: fish,
+              fishSize: _fishSize,
+              addPoint: point,
+              flgNew: flgNew);
+        },
+      );
     }
 
     //光点点滅速度関連の変数
@@ -1150,7 +1102,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 )),
                           )
                         ])),
-                    //巻速度スライダー
+                    //ラインHPスライダー
                     Container(
                         margin: EdgeInsets.only(left: 10, right: 10),
                         height: 10,
@@ -1170,18 +1122,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 ),
                                 child: Container(),
                               ),
-                              //可能性のある魚種の速度範囲表示
-                              CustomPaint(
-                                painter: new FishRangeSliderPainter(
-                                  activeColor: _speedActiveTrackColor,
-                                  inactiveColor: Colors.red,
-                                  backRadius: 0,
-                                  maxBackRadius: 0,
-                                  maxSpeed: SPEED_VAL_MAX,
-                                  speedRange: _listSpeedRange,
-                                ),
-                                child: Container(),
-                              )
                             ])),
 
                     //巻速度スライダー
@@ -1382,19 +1322,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 20,
+                                          fontSize: 14,
                                         )),
                                   ),
-                                  // Text(_dispInfo,
-                                  //     style: TextStyle(
-                                  //       backgroundColor: _infoBackColor,
-                                  //     )),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        //),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
