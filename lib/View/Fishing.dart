@@ -44,7 +44,7 @@
 //済・魚図鑑画面
 //済・%を表示してる方がおもしろい・・・
 //済・ルアー変更
-//・意図のスライダーをテンションとひっつける
+//済・意図のスライダーをテンションとひっつける
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
 //・ルアー耐久システム
@@ -1031,7 +1031,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     Container(
                         //appBarは透過なのでその分の高さを加算
                         margin: EdgeInsets.only(top: _appBarHeight + 10),
-                        height: 45,
+                        height: 40,
                         //テンションとドラグレベルのスライダーをstackで重ねて表示
                         child: new Stack(children: <Widget>[
                           // //テンションスライダー
@@ -1069,7 +1069,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                           //ドラグスライダー
                           Container(
                             margin: EdgeInsets.only(top: 10),
-                            height: 50,
+                            height: 40,
                             child: SliderTheme(
                                 data: SliderTheme.of(context).copyWith(
                                   //trackHeight: 1, //全体の縦長
@@ -1104,8 +1104,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         ])),
                     //ラインHPスライダー
                     Container(
-                        margin: EdgeInsets.only(left: 10, right: 10),
-                        height: 10,
+                        margin: EdgeInsets.only(left: 10, right: 10, bottom: 5),
+                        height: 5,
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
@@ -1264,6 +1264,34 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                         _pointerColor,
                                         0,
                                         0),
+                                  ),
+                                ),
+                                //魚HPスライダ
+
+                                Visibility(
+                                  visible: _flgHit,
+                                  child: Container(
+                                    width: 30,
+                                    margin: EdgeInsets.only(
+                                        top: _lightSpotY -
+                                            ((_lightSpotY < 18.0)
+                                                ? _lightSpotY
+                                                : 18.0),
+                                        left: _lightSpotX - 18.0),
+                                    child: CustomPaint(
+                                      painter: new SliderPainter(
+                                        height: 5,
+                                        activeColor:
+                                            Colors.red.withOpacity(0.7),
+                                        inactiveColor: Colors.white,
+                                        value: _hitScanCnt /
+                                            FISH_TABLE.fishs[_fishidx].hp,
+                                        backRadius: 0,
+                                        maxBackRadius: 0,
+                                        flgShaKe: false,
+                                      ),
+                                      child: Container(),
+                                    ),
                                   ),
                                 ),
                               ]),
