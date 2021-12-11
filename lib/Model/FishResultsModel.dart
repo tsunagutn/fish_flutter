@@ -19,8 +19,10 @@ class FishesResultModel {
   double getMinSize(int fishId) {
     var minSize = 1.1;
     listFishResult.forEach((val) {
-      if (minSize > val.size) {
-        minSize = val.size;
+      if (val.fishId == fishId) {
+        if (minSize > val.size) {
+          minSize = val.size;
+        }
       }
     });
     if (minSize == 1.1) minSize = 0.0;
@@ -31,8 +33,10 @@ class FishesResultModel {
   double getMaxSize(int fishId) {
     var maxSize = -0.1;
     listFishResult.forEach((val) {
-      if (maxSize < val.size) {
-        maxSize = val.size;
+      if (val.fishId == fishId) {
+        if (maxSize < val.size) {
+          maxSize = val.size;
+        }
       }
     });
     if (maxSize == -0.1) maxSize = 0.0;

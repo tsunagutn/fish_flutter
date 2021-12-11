@@ -141,7 +141,7 @@ class _BookDialogState extends State<BookDialog>
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "生息域",
+                                          "【生息域】",
                                           textAlign: TextAlign.left,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -158,7 +158,7 @@ class _BookDialogState extends State<BookDialog>
                                               "m",
                                         ),
                                         Text(
-                                          "志向",
+                                          "【志向】",
                                           textAlign: TextAlign.left,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
