@@ -9,7 +9,7 @@ class FishsModel {
         name: "アジ",
         image: "aji.jpg",
         text: "あなたは幸せを感じました",
-        hp: 300,
+        hp: 600,
         addMax: 3,
         addMin: -2,
         weight: 200,
@@ -33,9 +33,9 @@ class FishsModel {
       name: "タチウオ",
       image: "tachiuo.jpg",
       text: "おおきいぞっ",
-      hp: 250, //このスキャン経過で0になる
-      addMax: 13,
-      addMin: -5,
+      hp: 500, //このスキャン経過で0になる
+      addMax: 18,
+      addMin: -8,
       weight: 500, //重さ
       wariai: 0.7,
       point: 200, //ポイントの基礎値
@@ -57,10 +57,10 @@ class FishsModel {
       name: "鯉",
       image: "koi.jpg",
       text: "スーパーレア",
-      hp: 3000, //このスキャン経過で0になる
-      addMax: 10,
-      addMin: -6,
-      weight: 1500, //重さ
+      hp: 6000, //このスキャン経過で0になる
+      addMax: 15,
+      addMin: -4,
+      weight: 1000, //重さ
       wariai: 0.5,
       point: 200, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
@@ -81,10 +81,10 @@ class FishsModel {
       name: "マダイ",
       image: "madai.jpg",
       text: "あなたは満足を得ました",
-      hp: 1000,
-      addMax: 15,
-      addMin: -6,
-      weight: 2000, //重さ
+      hp: 3000,
+      addMax: 23,
+      addMin: -15,
+      weight: 1000, //重さ
       wariai: 0.5,
       point: 300, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
@@ -106,7 +106,7 @@ class FishsModel {
       name: "宮澤クン",
       image: "sakana.jpg",
       text: "スー　パー　レア",
-      hp: 5000,
+      hp: 10000,
       addMax: 30,
       addMin: -10,
       weight: 4000, //重さ
@@ -131,17 +131,17 @@ class FishsModel {
       name: "サバ", //魚種名
       image: "aji.jpg", //超過画面の画像
       text: "写真は仮です", //釣果画面のコメント
-      hp: 500, //このスキャン経過で0になる
-      addMax: 12, //引きの最大
-      addMin: -5, //引きの最小（最大との乖離が暴れ度）
-      weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      hp: 800, //このスキャン経過で0になる
+      addMax: 19, //引きの最大
+      addMin: -6, //引きの最小（最大との乖離が暴れ度）
+      weight: 600, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 1.0, //HIT率 条件全一致で確定1.0～
       point: 100, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
       tanaMax: 70, //生息域 下 0.1m単位
-      hitMaki: 0.6,
+      hitMaki: 0.4,
       hitJerk: 0.5,
-      hitFall: 0.5, //フォール志向
+      hitFall: 0.7, //フォール志向
       hitSpeedJust: 150, //スピード志向
       hitSpeedRange: 30, //スピード志向範囲+-
       sizeMin: 14.3,
@@ -156,17 +156,17 @@ class FishsModel {
       name: "サゴシ", //魚種名
       image: "aji.jpg", //超過画面の画像
       text: "あなたは満足を得ました", //釣果画面のコメント
-      hp: 600, //このスキャン経過で0になる
-      addMax: 8, //引きの最大
-      addMin: -5, //引きの最小（最大との乖離が暴れ度）
-      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      hp: 1000, //このスキャン経過で0になる
+      addMax: 15, //引きの最大
+      addMin: -10, //引きの最小（最大との乖離が暴れ度）
+      weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.6, //HIT率 条件全一致で確定1.0～
       point: 300, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
       tanaMax: 200, //生息域 下 0.1m単位
       hitMaki: 0.3,
       hitJerk: 0.6,
-      hitFall: 0.8, //フォール志向
+      hitFall: 0.9, //フォール志向
       hitSpeedJust: 170, //スピード志向
       hitSpeedRange: 40, //スピード志向範囲+-
       sizeMin: 18.3,
@@ -251,9 +251,9 @@ class FishModel {
 
   Map<String, List<double>> getPrmLevels() {
     final Map<String, List<double>> ret = {
-      'hp': [300, 500, 1000, 2000, 4000],
-      'addMax': [3, 5, 10, 20, 30],
-      'abare': [3, 5, 10, 20, 30],
+      'hp': [500, 1000, 2000, 4000, 8000],
+      'addMax': [6, 10, 20, 35, 50],
+      'abare': [6, 10, 15, 30, 50],
     };
     return ret;
   }

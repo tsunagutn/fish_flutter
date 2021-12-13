@@ -45,10 +45,12 @@
 //済・%を表示してる方がおもしろい・・・
 //済・ルアー変更
 //済・意図のスライダーをテンションとひっつける
+//済・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
+//済・魚詳細画面
+//済・魚種毎に巻き志向←→リアクション志向
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
 //・ルアー耐久システム
-//・魚詳細画面
 //・設定画面 合わせの強さ調節
 //・実績
 //・いけすシステム
@@ -59,11 +61,9 @@
 //・海底に漁礁とか
 //・通知インフォメーション 今が時合で！みたいな
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
-//・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
 //・魚種毎に底生志向
-//・魚種毎に巻き志向←→リアクション志向
 //・上下ドラッグで動かす、ジグのシャクリ
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
@@ -136,8 +136,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   static const HOSEI_MAX = 3;
   //static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
-  static const MAX_RAND_ADD_TENSION = 3; //何もしてない時テンションがウロウロするののMAX値
-  static const MIN_RAND_ADD_TENSION = -8; //〃 MIN値
+  static const MAX_RAND_ADD_TENSION = 2; //何もしてない時テンションがウロウロするののMAX値
+  static const MIN_RAND_ADD_TENSION = -11; //〃 MIN値
   final TENSION_COLOR_SAFE = clsColor._getColorFromHex("4CFF00");
   final TENSION_COLOR_DRAG = clsColor._getColorFromHex("FFD800");
   final TENSION_COLOR_DANGER = clsColor._getColorFromHex("DD0000");
@@ -168,6 +168,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   late AnimationController
       _tackleMenuAnimationController; //タックルメニューをフワフワさすアニメーション
   late Animation<double> _tackleMenuAnime;
+  late AnimationController _jerkTextAnimationController; //ジャーク時のテキストアニメーション
+  late Animation<double> _jerkTextLocation;
 
   //状態フラグ変数
   var _onTap = false; //現在タップ中フラグ
@@ -299,6 +301,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _centerTextAnimationController = AnimationController(
         duration: Duration(milliseconds: 2000), vsync: this);
 
+    _jerkTextAnimationController =
+        AnimationController(duration: Duration(milliseconds: 800), vsync: this);
+
     _tackleMenuAnimationController = AnimationController(
         duration: Duration(milliseconds: 1500), vsync: this);
 
@@ -392,12 +397,20 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     var lureWeight =
         lures.getLureData(haveTackle.getUseLure().lureId).weight.floor();
     if (_flgBait || _flgHit) {
-      //アタリ中 or HIT中のテンション計算
       //debugPrint("HIT中1");
+      //魚残HPの計算
       if (_hitScanCnt > 0) {
-        _hitScanCnt--;
+        var minusHp = 1;
+        //テンションが200以上
+        if (_tension > 200.0) {
+          //200との差分の10分の1を補正として加算
+          minusHp += ((_tension - 200.0) / 10).floor();
+        }
+        //テンションが強いほどマイナス値を上げる
+        _hitScanCnt -= minusHp;
+        if (_hitScanCnt < 0) _hitScanCnt = 0;
       }
-      //テンション増減にHIT中補正をかける
+      //アタリ中 or HIT中 テンション増減にHIT中補正をかける
       var fish = FISH_TABLE.fishs[_fishidx];
       mx += fish.addMax * (_hitScanCnt / fish.hp * _fishSize).round();
       mn += fish.addMin * (_hitScanCnt / fish.hp * _fishSize).round();
@@ -433,11 +446,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       //debugPrint(_rodStandUp.toString());
       //シャクリによるテンション増加？？？竿長さによって係数を可変にする
       addVal += _rodStandUp * 35;
-      if (_rodStandUp > 0.0) {
-        _rodStandUp -= 0.5; //1スキャン毎に0.5ずつ消える
-      } else {
-        _rodStandUp = 0.0;
-      }
+      //シャクリによる水深減算
+      _depth -= _rodStandUp * 2;
     }
     if (addVal > 0) {
       //テンション+時は現在テンションによって補正をかける
@@ -603,107 +613,144 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //光点点滅速度関連の変数
     final durationMax = POINT_DURATION_MSEC[POINT_DURATION_MSEC.length - 1]!;
     final durationMin = POINT_DURATION_MSEC[0]!;
-    var duration = 0;
+    var duration = POINT_DURATION_MSEC[_nowDurationLv]!;
 
     if (!(_flgBait || _flgHit)) {
-      //アタリ判定処理
-      var hitTanaProb = 0.0;
-      //HIT棚との差分
-      final justTana = (_maxDepth * _justTana);
-      var tanaDiff = (_depth - justTana).abs();
-      //差分が範囲内か
-      if (tanaDiff < _justTanaRange) {
-        hitTanaProb =
-            1.0 * ((tanaDiff - _justTanaRange).abs() / _justTanaRange);
-      }
-      if (hitTanaProb < 0.2) {
-        hitTanaProb = 0.2; //棚範囲外の最低保証
+      var flgFall = false;
+      var flgMaki = false;
+      var flgJerk = false;
+      //現在の状態
+      if (_onClutch && _depth < _maxDepth) {
+        //糸出中、かつ水深MAXではない時はフォール中
+        flgFall = true;
+      } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
+          _rodStandUp > 0.5 &&
+          _depth > 0 &&
+          _depth < _maxDepth) {
+        //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
+        flgJerk = true;
+      } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
+          _onTap &&
+          _depth > 0 &&
+          _depth < _maxDepth) {
+        //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
+        flgMaki = true;
       }
 
-      // //深さから可能性のある種を抽出
-      var fishs = FISH_TABLE.extractDepth(_depth);
+      if (flgFall || flgMaki || flgJerk) {
+        //アタリ判定処理
+        var hitTanaProb = 0.0;
+        //HIT棚との差分
+        final justTana = (_maxDepth * _justTana);
+        var tanaDiff = (_depth - justTana).abs();
+        //差分が範囲内か
+        if (tanaDiff < _justTanaRange) {
+          hitTanaProb =
+              1.0 * ((tanaDiff - _justTanaRange).abs() / _justTanaRange);
+        }
+        if (hitTanaProb < 0.2) {
+          hitTanaProb = 0.2; //棚範囲外の最低保証
+        }
 
-      var maxProb = 0.0;
-      _listSpeedRange = []; //速度リスト初期化
-      duration = durationMax;
-      //種毎の判定
-      fishs.forEach((fish) {
-        var hitSpeedprob = 0.0;
-        var hitSpeedprobDisp = 0.0;
-        //糸出中、かつ水深MAXではない時
-        if (_onClutch && _depth < _maxDepth) {
-          hitSpeedprob = fish.hitFall; //フォール中の補正
-          hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
-        } else {
-          //ドラグ出中、止めている時、水深0m未満、水深MAXの時は判定しない
-          if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
-              _onTap &&
-              _depth > 0 &&
-              _depth < _maxDepth) {
+        // //深さから可能性のある種を抽出
+        var fishs = FISH_TABLE.extractDepth(_depth);
+
+        var maxProb = 0.0;
+        _listSpeedRange = []; //速度リスト初期化
+        duration = durationMax;
+        //種毎の判定
+        fishs.forEach((fish) {
+          var hitSpeedprob = 0.0;
+          var hitSpeedprobDisp = 0.0;
+          if (flgFall) {
+            //フォール中のHIT率判定 魚のフォール志向 * ルアーのフォール能力
+            hitSpeedprob = fish.hitFall *
+                lures.getLureData(haveTackle.getUseLure().lureId).fall;
+            hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
+          } else if (flgJerk) {
+            //ジャーク中のHIT率判定 魚のジャーク志向 * ルアーのジャーク能力
+            hitSpeedprob = fish.hitJerk *
+                lures.getLureData(haveTackle.getUseLure().lureId).jerk;
+            hitSpeedprobDisp = 0.0; //ジャーク中は巻き速度手本を見せない
+            //debugPrint("じゃーく" + hitSpeedprob.toString());
+            //ジャーク表示
+            startJerk();
+          } else if (flgMaki) {
+            //巻き中のHIT率判定
             //HITスピードとの差分
             var speedDiff = (_speed - fish.hitSpeedJust).abs();
             //差分が範囲内か
             if (speedDiff < fish.hitSpeedRange) {
-              hitSpeedprob = 1.0 *
-                  ((speedDiff - fish.hitSpeedRange).abs() / fish.hitSpeedRange);
+              //巻き中のHIT率判定 HITスピード理想値との乖離割合 * 魚の巻き志向 * ルアーの巻き能力
+              hitSpeedprob = (speedDiff - fish.hitSpeedRange).abs() /
+                  fish.hitSpeedRange *
+                  fish.hitMaki *
+                  lures.getLureData(haveTackle.getUseLure().lureId).reeling;
             }
-            if (hitSpeedprob < 0.2) {
-              hitSpeedprob = 0.2; //速度範囲外の最低保証
+            if (hitSpeedprob < 0.1) {
+              hitSpeedprob = 0.1; //速度範囲外の最低保証
             }
+            hitSpeedprobDisp = hitSpeedprob;
           }
-          hitSpeedprobDisp = hitSpeedprob;
-        }
-        //HIT確率の算出
-        var hitProb = (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
+          //HIT確率の算出
+          var hitProb =
+              (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
 
-        if (hitTanaProb * hitSpeedprob > maxProb) {
-          maxProb = hitTanaProb * hitSpeedprob * _jiai * fish.wariai;
-        }
-        //魚種毎の速度レンジと確率を記憶（描画用）
-        _listSpeedRange.add(new SpeedRange(
-            justSpeed: fish.hitSpeedJust,
-            rangeSpeed: fish.hitSpeedRange,
-            hitSpeedProb: hitSpeedprobDisp));
+          //全魚種で最も高い確率の取得
+          if (hitTanaProb * hitSpeedprob > maxProb) {
+            maxProb = hitTanaProb * hitSpeedprob * _jiai * fish.wariai;
+          }
+          //魚種毎の速度レンジと確率を記憶（描画用）
+          _listSpeedRange.add(new SpeedRange(
+              justSpeed: fish.hitSpeedJust,
+              rangeSpeed: fish.hitSpeedRange,
+              hitSpeedProb: hitSpeedprobDisp));
 
-        //1～0の乱数生成
-        var hitrnd = (new math.Random()).nextDouble();
-        if (DEBUGFLG) {
-          //すぐつれる
-          hitrnd = 0.0005;
-        }
+          //1～0の乱数生成
+          var hitrnd = (new math.Random()).nextDouble();
+          if (DEBUGFLG) {
+            //すぐつれる
+            hitrnd = 0.0005;
+          }
 
-        //HIT判定
-        if (hitProb > hitrnd) {
-          //i 番目HIT
-          _fishidx = FISH_TABLE.fishs.indexOf(fish);
-          //大きさ決定
-          _fishSize = (new math.Random()).nextDouble();
-          _hitScanCnt = fish.hp;
-          //アタリと判定
-          _flgBait = true;
-          _baitCnt = 0;
-          _baitMaxTension = 0.0;
-          debugPrint("アタリ");
-          _dispInfo = 'アタリ';
-          _infoBackColor = TENSION_COLOR_DANGER;
-        }
-        if (_flgBait || _flgHit) {
-          //ループ抜け
-          return;
-        } else {
-          //HIT確率から点滅速度を算出
-          duration =
-              durationMax - ((durationMax - durationMin) * maxProb).floor();
-          _dispInfo = (maxProb * 100).toStringAsFixed(0) + ' %';
-          _infoBackColor = Colors.white;
-          //HIT率に伴いポインタの色を変える？
-          _pointerColor = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
-        }
-      });
+          //HIT判定
+          if (hitProb > hitrnd) {
+            //i 番目HIT
+            _fishidx = FISH_TABLE.fishs.indexOf(fish);
+            //大きさ決定
+            _fishSize = (new math.Random()).nextDouble();
+            if (flgFall) {
+              //フォール中のみアワセ時間を倍にする
+              _baitCnt -= fish.baitCntMax;
+            } else {
+              _baitCnt = 0;
+            }
+            _hitScanCnt = fish.hp;
+            //アタリと判定
+            _flgBait = true;
+            _baitMaxTension = 0.0;
+            debugPrint("アタリ");
+            _dispInfo = 'アタリ';
+            _infoBackColor = TENSION_COLOR_DANGER;
+          }
+          if (_flgBait || _flgHit) {
+          } else {
+            //HIT確率から点滅速度を算出
+            //duration =
+            //durationMax - ((durationMax - durationMin) * maxProb).floor();
+            //debugPrint(duration.toString());
+            _dispInfo = (maxProb * 100).toStringAsFixed(0) + ' %';
+            _infoBackColor = Colors.white;
+            //HIT率に伴いポインタの色を変える？
+            _pointerColor = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
+          }
+        });
+      }
     } else {
-      var fish = FISH_TABLE.fishs[_fishidx];
       //アタリ中またはHIT中の処理
+      var fish = FISH_TABLE.fishs[_fishidx];
       if (_flgBait) {
+        //アタリ中の処理
         //当たってからのスキャン数加算
         _baitCnt++;
         if (_baitCnt > fish.baitCntMax) {
@@ -735,9 +782,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           }
           _pointerColor = clsColor._getColorFromHex("FF6A00"); //アタリ中はオレンジ
           //点滅速度最大
-          duration = durationMax;
+          duration = durationMin;
         }
       } else {
+        //HIT中の処理
         _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
 
         //テンションから点滅速度を算出
@@ -771,6 +819,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       }
     }
 
+    //シャクリ値を減算
+    if (_rodStandUp > 0.0) {
+      _rodStandUp -= 0.5; //1スキャン毎に0.5ずつ消える
+    } else {
+      _rodStandUp = 0.0;
+    }
+
     duration = duration > durationMax ? durationMax : duration;
     duration = duration < durationMin ? durationMin : duration;
     //今回の点滅速度レベル 初期値は最大値
@@ -782,6 +837,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         break;
       }
     }
+    //debugPrint(newDurationLv.toString());
     //点滅速度レベルが変化した？
     if (newDurationLv != _nowDurationLv || _ligntSpotAnimationChangeing) {
       if (ligntSpotAnimation(
@@ -968,11 +1024,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               if (!_onTap) {
                 return;
               }
-              var mX = 0.0;
-              var mY = 0.0;
               //現在の座標を取得する
-              mX = details.localPosition.dx; //X座標
-              mY = details.localPosition.dy; //Y座標
+              var mX = details.localPosition.dx; //X座標
+              var mY = details.localPosition.dy; //Y座標
               //初期位置から動いた値を取得
               var moveX = mX - _cursorX;
               var moveY = mY - _cursorY;
@@ -1001,20 +1055,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               //スピードスライダの色を戻す
               _speedActiveTrackColor = SPEED_COLOR;
             },
-            //child: new Stack(children: <Widget>[
-            //背景スプライト
-            //SpriteWidget(RootNode(size)),
             child: new Stack(children: <Widget>[
               Column(children: <Widget>[
                 //海上
                 Container(
                   key: globalKeyShore,
                   decoration: BoxDecoration(
-                      // image: DecorationImage(
-                      //   image: AssetImage('Assets/Images/sencho.png'),
-                      //   fit: BoxFit.cover, //？？？全画面にするときはここ有効化
-                      // ),
-                      //color: clsColor._getColorFromHex("200070"),
                       gradient: LinearGradient(
                     begin: FractionalOffset.topCenter,
                     end: FractionalOffset.bottomCenter,
@@ -1068,7 +1114,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   ])),
                           //ドラグスライダー
                           Container(
-                            margin: EdgeInsets.only(top: 10),
+                            margin: EdgeInsets.only(top: 15),
                             height: 40,
                             child: SliderTheme(
                                 data: SliderTheme.of(context).copyWith(
@@ -1266,8 +1312,27 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                         0),
                                   ),
                                 ),
-                                //魚HPスライダ
+                                //ジャーク時のテキスト
+                                if (_jerkTextAnimationController.isAnimating)
+                                  Container(
+                                    //width: 30,
+                                    margin: EdgeInsets.only(
+                                        top: _lightSpotY -
+                                            ((_lightSpotY < 18.0)
+                                                ? _lightSpotY
+                                                : (18.0 +
+                                                    _jerkTextLocation.value)),
+                                        left: _lightSpotX +
+                                            (10.0 * _jerkTextLocation.value)),
+                                    child: Text(
+                                      'ｼｬｸﾘ!',
+                                      style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
 
+                                //魚HPスライダ
                                 Visibility(
                                   visible: _flgHit,
                                   child: Container(
@@ -1838,6 +1903,19 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             setState(() {});
           });
     _centerTextAnimationController.forward();
+  }
+
+  //ジャーク表示
+  startJerk() {
+    //ジャーク時のアニメーションの定義
+    _jerkTextAnimationController =
+        AnimationController(duration: Duration(milliseconds: 800), vsync: this);
+    _jerkTextLocation =
+        Tween(begin: 0.0, end: 1.0).animate(_jerkTextAnimationController)
+          ..addListener(() {
+            setState(() {});
+          });
+    _jerkTextAnimationController.forward();
   }
 
   //タックルサムネの表示

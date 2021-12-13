@@ -21,7 +21,7 @@ class LuresModel {
       weight: 60.0,
       size: 200,
       fall: 0.3,
-      reeling: 0.8,
+      reeling: 0.9,
       jerk: 0.1,
       prise: 700,
     ));
@@ -35,8 +35,8 @@ class LuresModel {
       hp: 800,
       weight: 120.0,
       size: 250,
-      fall: 0.5,
-      reeling: 0.8,
+      fall: 0.2,
+      reeling: 0.9,
       jerk: 0.1,
       prise: 700,
     ));
@@ -65,8 +65,8 @@ class LuresModel {
       hp: 5000,
       weight: 80.0,
       size: 230,
-      fall: 0.5,
-      reeling: 0.2,
+      fall: 0.7,
+      reeling: 0.1,
       jerk: 0.9,
       prise: 700,
     ));
