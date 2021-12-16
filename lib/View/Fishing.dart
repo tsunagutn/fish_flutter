@@ -655,8 +655,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           hitTanaProb = 0.2; //棚範囲外の最低保証
         }
 
+        //現在底付近か？
+        var bottom = (_depth > (_maxDepth * 0.8)) ? true : false;
         // //深さから可能性のある種を抽出
-        var fishs = FISH_TABLE.extractDepth(_depth);
+        var fishs = FISH_TABLE.extractDepth(depth: _depth, bottom: bottom);
 
         var maxProb = 0.0;
         _listSpeedRange = []; //速度リスト初期化

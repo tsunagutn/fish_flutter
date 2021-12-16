@@ -5,28 +5,30 @@ class FishsModel {
   FishsModel() {
     //シーダーみたいなやつ
     fishs.add(new FishModel(
-        id: 0,
-        name: "アジ",
-        image: "aji.jpg",
-        text: "あなたは幸せを感じました",
-        hp: 600,
-        addMax: 3,
-        addMin: -2,
-        weight: 200,
-        wariai: 1.0,
-        point: 100,
-        tanaMin: 0,
-        tanaMax: 100,
-        hitMaki: 0.7,
-        hitJerk: 0.5,
-        hitFall: 0.4,
-        hitSpeedJust: 50,
-        hitSpeedRange: 40,
-        sizeMin: 7.6,
-        sizeMax: 51.3,
-        baitCntMax: 20,
-        fookingTension: 30,
-        bareMin: 20));
+      id: 0,
+      name: "アジ",
+      image: "aji.jpg",
+      text: "あなたは幸せを感じました",
+      hp: 600,
+      addMax: 3,
+      addMin: -2,
+      weight: 200,
+      wariai: 1.0,
+      point: 100,
+      tanaMin: 0,
+      tanaMax: 100,
+      hitMaki: 0.7,
+      hitJerk: 0.5,
+      hitFall: 0.4,
+      hitSpeedJust: 50,
+      hitSpeedRange: 40,
+      sizeMin: 7.6,
+      sizeMax: 51.3,
+      baitCntMax: 20,
+      fookingTension: 30,
+      bareMin: 20,
+      flgBottom: false,
+    ));
 
     fishs.add(new FishModel(
       id: 1,
@@ -51,6 +53,7 @@ class FishsModel {
       baitCntMax: 20,
       fookingTension: 60,
       bareMin: 20,
+      flgBottom: false,
     ));
     fishs.add(new FishModel(
       id: 2,
@@ -75,6 +78,7 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 100,
       bareMin: 20,
+      flgBottom: false,
     ));
     fishs.add(new FishModel(
       id: 3,
@@ -99,6 +103,7 @@ class FishsModel {
       baitCntMax: 30,
       fookingTension: 150,
       bareMin: 20,
+      flgBottom: false,
     ));
 
     fishs.add(new FishModel(
@@ -124,6 +129,7 @@ class FishsModel {
       baitCntMax: 10,
       fookingTension: 150,
       bareMin: 20,
+      flgBottom: false,
     ));
 
     fishs.add(new FishModel(
@@ -149,6 +155,7 @@ class FishsModel {
       baitCntMax: 15,
       fookingTension: 80,
       bareMin: 20,
+      flgBottom: false,
     ));
 
     fishs.add(new FishModel(
@@ -174,6 +181,57 @@ class FishsModel {
       baitCntMax: 15,
       fookingTension: 120,
       bareMin: 20,
+      flgBottom: false,
+    ));
+    fishs.add(new FishModel(
+      id: 7,
+      name: "アオハタ", //魚種名
+      image: "aji.jpg", //超過画面の画像
+      text: "底でよく釣れる", //釣果画面のコメント
+      hp: 900, //このスキャン経過で0になる
+      addMax: 16, //引きの最大
+      addMin: -7, //引きの最小（最大との乖離が暴れ度）
+      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      wariai: 0.8, //HIT率 条件全一致で確定1.0～
+      point: 400, //ポイントの基礎値
+      tanaMin: 80, //生息域 上 0.1m単位
+      tanaMax: 850, //生息域 下 0.1m単位
+      hitMaki: 0.6,
+      hitJerk: 0.8,
+      hitFall: 1.0, //フォール志向
+      hitSpeedJust: 80, //スピード志向
+      hitSpeedRange: 60, //スピード志向範囲+-
+      sizeMin: 20.6,
+      sizeMax: 63.2,
+      baitCntMax: 25,
+      fookingTension: 70,
+      bareMin: 35,
+      flgBottom: true,
+    ));
+    fishs.add(new FishModel(
+      id: 8,
+      name: "キジハタ", //魚種名
+      image: "aji.jpg", //超過画面の画像
+      text: "この魚は贅沢です", //釣果画面のコメント
+      hp: 1000, //このスキャン経過で0になる
+      addMax: 18, //引きの最大
+      addMin: -7, //引きの最小（最大との乖離が暴れ度）
+      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      wariai: 0.4, //HIT率 条件全一致で確定1.0～
+      point: 800, //ポイントの基礎値
+      tanaMin: 50, //生息域 上 0.1m単位
+      tanaMax: 700, //生息域 下 0.1m単位
+      hitMaki: 0.6,
+      hitJerk: 0.8,
+      hitFall: 1.0, //フォール志向
+      hitSpeedJust: 70, //スピード志向
+      hitSpeedRange: 60, //スピード志向範囲+-
+      sizeMin: 20.6,
+      sizeMax: 63.2,
+      baitCntMax: 25,
+      fookingTension: 70,
+      bareMin: 35,
+      flgBottom: true,
     ));
   }
 
@@ -184,12 +242,15 @@ class FishsModel {
   }
 
   //水深から可能性のある魚種のみ抽出して返す
-  List<FishModel> extractDepth(double depth) {
+  List<FishModel> extractDepth({required double depth, required bool bottom}) {
     //Mapを値コピー
     List<FishModel> extractFishs = [...fishs];
     //深さから可能性のある魚種のみ抽出
     extractFishs.removeWhere((value) => depth < value.tanaMin);
     extractFishs.removeWhere((value) => depth > value.tanaMax);
+    if (!bottom) {
+      extractFishs.removeWhere((value) => value.flgBottom);
+    }
     return extractFishs;
   }
 }
@@ -217,6 +278,7 @@ class FishModel {
   int baitCntMax; //アタリ発生からアワセまでの猶予スキャン
   int fookingTension; //アワセ成功テンション
   int bareMin; //HIT後のバレ判定スキャン数（これプラスアワセレベル）
+  bool flgBottom; //底生
 
   //コンストラクタ
   FishModel({
@@ -242,6 +304,7 @@ class FishModel {
     required this.baitCntMax,
     required this.fookingTension,
     required this.bareMin,
+    required this.flgBottom,
   });
 
   //サイズ割合（0.0～1.0）を元に実サイズを返す
