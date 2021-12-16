@@ -326,6 +326,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     waveController.dispose(); // AnimationControllerは明示的にdisposeする。
     _centerTextAnimationController.dispose();
     _tackleMenuAnimationController.dispose();
+    _jerkTextAnimationController.dispose();
     fishPointerList.clear();
     super.dispose();
   }
@@ -579,6 +580,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (_flgHit && _depth <= 0) {
       _flgBait = false;
       _flgHit = false;
+      _pointerColor = clsColor._getColorFromHex("ffd900");
+      _nowDurationLv = POINT_DURATION_MSEC.length - 1;
       debugPrint("つりあげ");
       var fish = FISH_TABLE.fishs[_fishidx];
       //debugPrint("おおきさ" + size.toString());
