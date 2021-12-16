@@ -152,6 +152,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                         ),
                     ]),
                 Text(widget.addPoint.toString() + 'ポイント獲得です'),
+                Text(widget.fish.text),
                 if (widget.flgNew)
                   Container(
                     margin: EdgeInsets.only(top: 5),

@@ -48,6 +48,12 @@
 //済・糸のHPシステム？糸切れ値でぷっつり行くのが何か変
 //済・魚詳細画面
 //済・魚種毎に巻き志向←→リアクション志向
+//済・魚種毎に底生志向
+//済・上下ドラッグで動かす、ジグのシャクリ
+//済・大きさでHP可変
+//・タックル変更モーダルに閉じるボタン
+//・自分で船動かす 0m時に左右矢印表示
+//・ゲームオーバー無しにする
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
 //・ルアー耐久システム
@@ -63,8 +69,6 @@
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
 //・糸切れ判定 勢い度を加味して切れるようにする
-//・魚種毎に底生志向
-//・上下ドラッグで動かす、ジグのシャクリ
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
 //夢
@@ -106,8 +110,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれちゃう
-  //static const DEBUGFLG = true;
-  static const DEBUGFLG = false;
+  static const DEBUGFLG = true;
+  //static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
@@ -730,7 +734,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             } else {
               _baitCnt = 0;
             }
-            _hitScanCnt = fish.hp;
+            _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
             //アタリと判定
             _flgBait = true;
             _baitMaxTension = 0.0;
@@ -1355,7 +1359,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                             Colors.red.withOpacity(0.7),
                                         inactiveColor: Colors.white,
                                         value: _hitScanCnt /
-                                            FISH_TABLE.fishs[_fishidx].hp,
+                                            (FISH_TABLE.fishs[_fishidx].hp +
+                                                (FISH_TABLE.fishs[_fishidx].hp *
+                                                    _fishSize)),
                                         backRadius: 0,
                                         maxBackRadius: 0,
                                         flgShaKe: false,

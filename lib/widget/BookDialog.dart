@@ -117,7 +117,8 @@ class _BookDialogState extends State<BookDialog>
                                         Shadow(
                                             offset: Offset(2.0, 4.0),
                                             blurRadius: 2.0,
-                                            color: Colors.black)
+                                            color:
+                                                Colors.black.withOpacity(0.4))
                                       ],
                                     ))),
                             Column(
@@ -157,6 +158,23 @@ class _BookDialogState extends State<BookDialog>
                                                   .toString() +
                                               "m",
                                         ),
+                                        if (_showFishData.flgBottom)
+                                          Container(
+                                            margin: EdgeInsets.only(bottom: 5),
+                                            padding: const EdgeInsets.only(
+                                                left: 5, right: 5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.red,
+                                                    width: 3),
+                                                color: Colors.yellow),
+                                            child: Text("底物",
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                )),
+                                          ),
                                         Text(
                                           "【志向】",
                                           textAlign: TextAlign.left,

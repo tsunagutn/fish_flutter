@@ -3,13 +3,15 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "9e5c24a1e79ad77fedb1f9a043d01312",
+  "assets/AssetManifest.json": "4e83fee971da7e80c38d4333890e5670",
 "assets/Assets/Images/aeae.png": "bc5c3f756fa13507f2ff00a818c8cec2",
 "assets/Assets/Images/aji.jpg": "ef6d833d1feb21685b2cf83a2ad9abcd",
+"assets/Assets/Images/aohata.png": "861ba2f745f4b645eacc716ac208ebe3",
 "assets/Assets/Images/bc4-3.jpg": "6a7fece23647c6d3c5c0f79d724502d5",
 "assets/Assets/Images/fish.png": "2690dcdef769464d5a04f57529ab8737",
 "assets/Assets/Images/fishback.jpg": "cccd1f3d68e9ff004efb15bfbde56ed4",
 "assets/Assets/Images/jig.png": "89c822c67ef2f22de295089524b6c9a5",
+"assets/Assets/Images/kijihata.png": "18cd723649cc1362a043c2405862d3e0",
 "assets/Assets/Images/koi.jpg": "f1aca98e1ebf00168e4d098338ec5672",
 "assets/Assets/Images/madai.jpg": "b913d99cf40756d8d6e9b7df7785e045",
 "assets/Assets/Images/mube.jpg": "a24c408a4af32fc528e5af87c9297ecb",
@@ -34,9 +36,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "d2db2dfc06e4ce64cfcdbf46350d6e44",
-"/": "d2db2dfc06e4ce64cfcdbf46350d6e44",
-"main.dart.js": "a19a29ce46d85fcd8216bdd4d560adcd",
+"index.html": "4dd7e75fd8b8c869801e4e806fdb8826",
+"/": "4dd7e75fd8b8c869801e4e806fdb8826",
+"main.dart.js": "c1cbe0f082b09501a2de0ad460309413",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

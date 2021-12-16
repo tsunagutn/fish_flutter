@@ -84,7 +84,7 @@ class FishsModel {
       id: 3,
       name: "マダイ",
       image: "madai.jpg",
-      text: "あなたは満足を得ました",
+      text: "やるなすたべ",
       hp: 3000,
       addMax: 23,
       addMin: -15,
@@ -162,7 +162,7 @@ class FishsModel {
       id: 6,
       name: "サゴシ", //魚種名
       image: "aji.jpg", //超過画面の画像
-      text: "あなたは満足を得ました", //釣果画面のコメント
+      text: "この魚は美味です", //釣果画面のコメント
       hp: 1000, //このスキャン経過で0になる
       addMax: 15, //引きの最大
       addMin: -10, //引きの最小（最大との乖離が暴れ度）
@@ -186,7 +186,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 7,
       name: "アオハタ", //魚種名
-      image: "aji.jpg", //超過画面の画像
+      image: "aohata.png", //超過画面の画像
       text: "底でよく釣れる", //釣果画面のコメント
       hp: 900, //このスキャン経過で0になる
       addMax: 16, //引きの最大
@@ -211,7 +211,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 8,
       name: "キジハタ", //魚種名
-      image: "aji.jpg", //超過画面の画像
+      image: "kijihata.png", //超過画面の画像
       text: "この魚は贅沢です", //釣果画面のコメント
       hp: 1000, //このスキャン経過で0になる
       addMax: 18, //引きの最大
