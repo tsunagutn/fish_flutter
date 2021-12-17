@@ -51,13 +51,14 @@
 //済・魚種毎に底生志向
 //済・上下ドラッグで動かす、ジグのシャクリ
 //済・大きさでHP可変
-//・タックル変更モーダルに閉じるボタン
+//済・タックル変更モーダルに閉じるボタン
 //・自分で船動かす 0m時に左右矢印表示
 //・ゲームオーバー無しにする
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
 //・ルアー耐久システム
 //・設定画面 合わせの強さ調節
+//・音
 //・実績
 //・いけすシステム
 //・赤ポイント緑ポイント青ポイント
@@ -110,8 +111,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれちゃう
-  static const DEBUGFLG = true;
-  //static const DEBUGFLG = false;
+  //static const DEBUGFLG = true;
+  static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
@@ -153,6 +154,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
   static const POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
   static const ROD_STANDUP_MAX = 100.0; //竿立て度MAX
+  static const JERK_SCAN = 10; //ジャークの継続スキャン数
   // static const BAIT_CNT_MAX = 30; //アタリ判定期間
   // static const FOOKING_TENSION = 150; //アワセ成功閾値
 
@@ -189,7 +191,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _depth = 0.0; //現在糸出し量(0.1m)
   var _maxDepth = 187.0; //最大水深(0.1m)
   var _dispDepth = '0.0 m'; //深さ表示用
-  var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
+  //var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
   var _tensionActiveTrackColor =
       clsColor._getColorFromHex("4CFF00"); //テンションゲージの色
   var _flgShaKe = false; //ドラグスライダーを揺らす用
@@ -212,6 +214,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   var _cursorX = 0.0; //ドラッグ操作開始時の座標X
   var _cursorY = 0.0; //ドラッグ操作開始時の座標Y
+  var _jerkCnt = 0; //ジャークの継続スキャン数
 
   var _baitCnt = 0; //当たってからのスキャン数
   var _baitMaxTension = 0.0; //バイト中の最大テンション
@@ -398,7 +401,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       debugPrint("タナ" + _justTana.toString());
     }
 
-    //Hルアー重さ
+    //ジャーク継続スキャンカウントダウン
+    _jerkCnt--;
+    if (_jerkCnt < 0) {
+      _jerkCnt = 0;
+    }
+
+    //ルアー重さ
     var lureWeight =
         lures.getLureData(haveTackle.getUseLure().lureId).weight.floor();
     if (_flgBait || _flgHit) {
@@ -627,21 +636,27 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       var flgMaki = false;
       var flgJerk = false;
       //現在の状態
-      if (_onClutch && _depth < _maxDepth) {
-        //糸出中、かつ水深MAXではない時はフォール中
-        flgFall = true;
-      } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
-          _rodStandUp > 0.5 &&
-          _depth > 0 &&
-          _depth < _maxDepth) {
-        //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
-        flgJerk = true;
-      } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
-          _onTap &&
-          _depth > 0 &&
-          _depth < _maxDepth) {
-        //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
-        flgMaki = true;
+      if (_depth > 0) {
+        if (_jerkCnt > 0) {
+          //ジャーク状態の継続
+          flgJerk = true;
+        } else {
+          if (_onClutch && _depth < _maxDepth) {
+            //糸出中、かつ水深MAXではない時はフォール中
+            flgFall = true;
+          } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
+              _rodStandUp > 0.5 &&
+              _depth < _maxDepth) {
+            //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
+            flgJerk = true;
+            _jerkCnt = JERK_SCAN; //一度ジャークと判定されたら一定スキャン数ジャーク継続
+          } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
+              _onTap &&
+              _depth < _maxDepth) {
+            //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
+            flgMaki = true;
+          }
+        }
       }
 
       if (flgFall || flgMaki || flgJerk) {
@@ -671,16 +686,25 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         fishs.forEach((fish) {
           var hitSpeedprob = 0.0;
           var hitSpeedprobDisp = 0.0;
+          var hitProb = 0.0;
           if (flgFall) {
             //フォール中のHIT率判定 魚のフォール志向 * ルアーのフォール能力
             hitSpeedprob = fish.hitFall *
                 lures.getLureData(haveTackle.getUseLure().lureId).fall;
             hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
+            //HIT確率の算出 フォールは時合の影響を半分にする
+            hitProb = (hitTanaProb * hitSpeedprob * ((1.0 + _jiai) / 2)) *
+                fish.wariai /
+                100;
           } else if (flgJerk) {
             //ジャーク中のHIT率判定 魚のジャーク志向 * ルアーのジャーク能力
             hitSpeedprob = fish.hitJerk *
                 lures.getLureData(haveTackle.getUseLure().lureId).jerk;
             hitSpeedprobDisp = 0.0; //ジャーク中は巻き速度手本を見せない
+            //HIT確率の算出 ジャークは時合の影響を半分にする
+            hitProb = (hitTanaProb * hitSpeedprob * ((1.0 + _jiai) / 2)) *
+                fish.wariai /
+                100;
             //debugPrint("じゃーく" + hitSpeedprob.toString());
             //ジャーク表示
             startJerk();
@@ -691,8 +715,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             //差分が範囲内か
             if (speedDiff < fish.hitSpeedRange) {
               //巻き中のHIT率判定 HITスピード理想値との乖離割合 * 魚の巻き志向 * ルアーの巻き能力
-              hitSpeedprob = (speedDiff - fish.hitSpeedRange).abs() /
-                  fish.hitSpeedRange *
+              hitSpeedprob = ((speedDiff - fish.hitSpeedRange).abs() /
+                      fish.hitSpeedRange) *
                   fish.hitMaki *
                   lures.getLureData(haveTackle.getUseLure().lureId).reeling;
             }
@@ -700,10 +724,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               hitSpeedprob = 0.1; //速度範囲外の最低保証
             }
             hitSpeedprobDisp = hitSpeedprob;
+            hitProb = (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
           }
-          //HIT確率の算出
-          var hitProb =
-              (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
+          // //HIT確率の算出
+          // var hitProb =
+          //     (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
 
           //全魚種で最も高い確率の取得
           if (hitTanaProb * hitSpeedprob > maxProb) {
@@ -739,7 +764,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             _flgBait = true;
             _baitMaxTension = 0.0;
             debugPrint("アタリ");
-            _dispInfo = 'アタリ';
+            //_dispInfo = 'アタリ';
             _infoBackColor = TENSION_COLOR_DANGER;
           }
           if (_flgBait || _flgHit) {
@@ -748,12 +773,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             //duration =
             //durationMax - ((durationMax - durationMin) * maxProb).floor();
             //debugPrint(duration.toString());
-            _dispInfo = (maxProb * 100).toStringAsFixed(0) + ' %';
+            //_dispInfo = (maxProb * 100).toStringAsFixed(0) + ' %';
             _infoBackColor = Colors.white;
             //HIT率に伴いポインタの色を変える？
             _pointerColor = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
           }
         });
+        //debugPrint(maxProb.toString());
       }
     } else {
       //アタリ中またはHIT中の処理
@@ -769,7 +795,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             _flgBait = false;
             _flgHit = true;
             debugPrint('HIT!!!!');
-            _dispInfo = "HIT!";
+            //_dispInfo = "HIT!";
             //フッキングの成功度
             _fookingLv = _tension - fish.fookingTension;
             if (_fookingLv > 100.0) _fookingLv = 100.0;
@@ -1718,7 +1744,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     Container(
-                                        width: 200,
+                                        width: size.width - 60,
                                         height: 60,
                                         color: Colors.white.withOpacity(0.6),
                                         child: ListView.builder(
@@ -1775,11 +1801,113 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   ],
                                 ),
                               ),
-                              new RadarChart(
-                                key: UniqueKey(),
-                                items: getLureRadarChartItem(),
-                                radarColors: [Colors.green],
-                                fontColor: Colors.white,
+                              Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: Text(
+                                  lures
+                                      .getLureData(
+                                          haveTackle.getUseLure().lureId)
+                                      .name,
+                                  style: TextStyle(
+                                      color: Colors.yellow,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: 10, left: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    //ステータス
+                                    new RadarChart(
+                                      key: UniqueKey(),
+                                      items: getLureRadarChartItem(),
+                                      radarColors: [Colors.green],
+                                      fontColor: Colors.white,
+                                    ),
+                                    Container(
+                                      margin:
+                                          EdgeInsets.only(left: 10, right: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          //重さ
+                                          Row(
+                                            children: [
+                                              Text(
+                                                '重さ：',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              Text(
+                                                lures
+                                                        .getLureData(haveTackle
+                                                            .getUseLure()
+                                                            .lureId)
+                                                        .weight
+                                                        .toString() +
+                                                    'g',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )
+                                            ],
+                                          ),
+                                          //説明テキスト
+                                          // Expanded(
+                                          //     child:
+                                          Container(
+                                              height: 100,
+                                              width: size.width / 2,
+                                              padding: EdgeInsets.only(
+                                                  left: 10, right: 10),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Colors.black,
+                                                      width: 3),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(7.0)),
+                                                  color:
+                                                      clsColor._getColorFromHex(
+                                                          '#DFDFDF')),
+                                              child: Text(
+                                                lures
+                                                    .getLureData(haveTackle
+                                                        .getUseLure()
+                                                        .lureId)
+                                                    .text,
+                                                style: TextStyle(
+                                                    color: Colors.black),
+                                              )),
+                                          //),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              //閉じるボタン
+                              Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: ElevatedButton.icon(
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                  ),
+                                  label: const Text('閉じる'),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.grey.withOpacity(0.5),
+                                    onPrimary: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _showTacleChangeDialog = false;
+                                    });
+                                  },
+                                ),
                               ),
                             ]),
                           )),

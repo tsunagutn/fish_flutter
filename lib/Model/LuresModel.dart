@@ -16,7 +16,7 @@ class LuresModel {
       div: enumLureDiv.tairaba.index,
       name: "タイラバ ストレート 60g",
       image: "tairaba.png",
-      text: "タダ巻きで使おう",
+      text: "鉛にシリコンのヒラヒラが付いた、シンプルなルアー。\nとても傷みやすい。\nタダ巻きで使おう！",
       hp: 500,
       weight: 60.0,
       size: 200,
@@ -29,7 +29,7 @@ class LuresModel {
     lures.add(new LureModel(
       id: 1,
       div: enumLureDiv.tairaba.index,
-      name: "タイラバ ストレート 100g",
+      name: "タイラバ ストレート 120g",
       image: "tairaba.png",
       text: "タダ巻きで使おう2",
       hp: 800,

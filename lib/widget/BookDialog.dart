@@ -167,6 +167,8 @@ class _BookDialogState extends State<BookDialog>
                                                 border: Border.all(
                                                     color: Colors.red,
                                                     width: 3),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(7.0)),
                                                 color: Colors.yellow),
                                             child: Text("底物",
                                                 style: TextStyle(
