@@ -52,7 +52,9 @@
 //済・上下ドラッグで動かす、ジグのシャクリ
 //済・大きさでHP可変
 //済・タックル変更モーダルに閉じるボタン
-//・自分で船動かす 0m時に左右矢印表示
+//済・自分で船動かす 0m時に左右矢印表示
+//・超過画面出すときに画面全体光らす
+//・船動くときに動いてるのわかるようにする
 //・ゲームオーバー無しにする
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
@@ -267,6 +269,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //釣果リスト
   late FishesResultModel fishesResult;
 
+  //船移動
+  // var _MoveLeft = false;
+  // var _MoveRight = false;
+  //船加速度の目標値
+  var _moveShipTarget = 0.5;
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
   // var audio = new Audio(url);
@@ -405,6 +412,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _jerkCnt--;
     if (_jerkCnt < 0) {
       _jerkCnt = 0;
+    }
+
+    //船移動
+    if (_moveShipTarget > _depthChange) {
+      _depthChange += 0.02;
+    }
+    if (_moveShipTarget < _depthChange) {
+      _depthChange -= 0.02;
     }
 
     //ルアー重さ
@@ -1253,25 +1268,29 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             setState(() {
                               //_senchoMessage = "わしゃあ忙しいんで！";
                             });
-                            var result = await showDialog<int>(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (_) {
-                                return SenchoDialog(
-                                  depth_change_order: _depthChangeOrder,
-                                  point: _point,
-                                );
-                              },
-                            );
-                            debugPrint(result.toString());
-                            setState(() {
-                              _depthChangeOrder = result as int;
-                            });
+                            // var result = await showDialog<int>(
+                            //   context: context,
+                            //   barrierDismissible: false,
+                            //   builder: (_) {
+                            //     return SenchoDialog(
+                            //       depth_change_order: _depthChangeOrder,
+                            //       point: _point,
+                            //     );
+                            //   },
+                            // );
+                            // debugPrint(result.toString());
+                            // setState(() {
+                            //   _depthChangeOrder = result as int;
+                            // });
                           },
-                          child: new Image(
-                            image: AssetImage('Assets/Images/ship.png'),
-                            width: 60,
-                            height: 40,
+                          child: Transform.rotate(
+                            //angle: 45 * math.pi / 180,
+                            angle: (405 - (90 * _depthChange)) * math.pi / 180,
+                            child: new Image(
+                              image: AssetImage('Assets/Images/ship.png'),
+                              width: 60,
+                              height: 40,
+                            ),
                           ),
                         ),
                       ),
@@ -1303,7 +1322,52 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                 // ↑ 追加部分
                               ],
                             ),
-                          ))
+                          )),
+                      AnimatedOpacity(
+                          opacity: _depth > 0.0 ? 0.0 : 1.0,
+                          duration: Duration(milliseconds: 200),
+                          child: Container(
+                              margin: EdgeInsets.only(left: 10, right: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
+                                    onTapDown: (details) {
+                                      setState(() {
+                                        _moveShipTarget = 0.3;
+                                      });
+                                    },
+                                    onTapUp: (details) {
+                                      setState(() {
+                                        _moveShipTarget = 0.5;
+                                      });
+                                    },
+                                    child: new Image(
+                                      image: AssetImage(
+                                          'Assets/Images/arrow_left.png'),
+                                      height: 30,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTapDown: (details) {
+                                      setState(() {
+                                        _moveShipTarget = 0.7;
+                                      });
+                                    },
+                                    onTapUp: (details) {
+                                      setState(() {
+                                        _moveShipTarget = 0.5;
+                                      });
+                                    },
+                                    child: new Image(
+                                      image: AssetImage(
+                                          'Assets/Images/arrow_right.png'),
+                                      height: 30,
+                                    ),
+                                  ),
+                                ],
+                              ))),
                     ]),
                   ]),
                 ),

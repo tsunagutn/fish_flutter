@@ -94,7 +94,7 @@ class FishPainter extends CustomPainter {
         .value;
 
     //Image.asset('assets/images/fish.png')
-//var ui.Image uiimage = uiimage.toByteData();
+    //var ui.Image uiimage = uiimage.toByteData();
 
     //if (uiimage != null) {
     final paint = Paint()
@@ -104,7 +104,8 @@ class FishPainter extends CustomPainter {
     //canvas.drawImage(uiimage, Offset(200, offset_y), paint);
     //canvas.drawCircle(Offset(200, offset_y), 10, paint);
     canvas.drawArc(
-        Offset(offsetX, offsetY) & Size(fishPointerSize, fishPointerSize),
+        Offset(offsetX + (20 * opacityValue), offsetY) &
+            Size(fishPointerSize, fishPointerSize),
         210 * math.pi / 180, //startAngle
         140 * math.pi / 180, //sweepAngle
         false, //中心からの切り出し？trueならピザ形状
