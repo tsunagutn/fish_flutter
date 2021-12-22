@@ -1,53 +1,42 @@
 import 'dart:async';
-import 'dart:typed_data';
-
+import 'dart:html';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
-
 import 'dart:math' as math;
 
 class FishPointer extends StatefulWidget {
-  const FishPointer({
+  FishPointer({
     Key? key,
-    required this.dispsizeX,
+    required this.dispSizeX,
+    required this.offsetX,
     required this.offsetY,
     required this.duration,
     required this.fishPointerSize,
     required this.takclePositionLeft,
+    required this.painterKey,
   }) : super(key: key);
-  final double dispsizeX;
+  final double dispSizeX;
+  final double offsetX;
   final double offsetY;
   final Duration duration;
   final double fishPointerSize;
   final bool takclePositionLeft;
+  final GlobalKey painterKey;
+
   @override
   _FishPointerState createState() => _FishPointerState();
 }
 
 class _FishPointerState extends State<FishPointer>
     with SingleTickerProviderStateMixin {
-  // これを忘れずに
-
   @override
   Widget build(BuildContext context) {
-    var rnd = (new math.Random()).nextDouble();
-    var offsetX = (widget.dispsizeX / 4) +
-        (widget.dispsizeX / 2) * (rnd * rnd); //真ん中に集約するように累乗する
-    if (widget.takclePositionLeft) {
-      offsetX += widget.dispsizeX / 4;
-    } else {
-      offsetX -= widget.dispsizeX / 4;
-    }
-    offsetX = (offsetX < 0) ? 0 : offsetX;
-    offsetX = (offsetX > widget.dispsizeX) ? widget.dispsizeX : offsetX;
-
     return CustomPaint(
+      key: widget.painterKey,
       painter: FishPainter(
           controller: controller,
-          offsetX: offsetX,
+          offsetX: widget.offsetX,
           offsetY: widget.offsetY,
+          dispSizeX: widget.dispSizeX,
           fishPointerSize: widget.fishPointerSize),
     );
   }
@@ -74,51 +63,56 @@ class FishPainter extends CustomPainter {
       {required this.controller,
       required this.offsetX,
       required this.offsetY,
+      required this.dispSizeX,
       required this.fishPointerSize})
       : super(repaint: controller); // repaint に controller を渡さないと再描画されない
   final double offsetX;
   final double offsetY;
+  final double dispSizeX;
   final Animation<double> controller;
 
   final fishPointerSize; //サカナ大きさ？？？可変にするべき
+
+  double addX = 0.0; //船の動きに合わせて横動き
 
   @override
   Future<void> paint(Canvas canvas, Size size) async {
     // final ByteData data = await rootBundle.load('assets/images/fish.png');
     // uiimage = await loadImage(new Uint8List.view(data.buffer));
+    if (offsetX + addX < 0.0 || offsetX + addX > dispSizeX) {
+      //画面範囲から外れている場合は描画しない
+    } else {
+      /// Tween<T>(begin: ,end: ) // はじめとおわりの値を指定できる
+      /// CurveTween(curve: ) // Curves. でアニメーションカーブを指定できる
+      final opacityValue = Tween<double>(begin: 1, end: 0)
+          .animate(controller.drive(CurveTween(curve: Curves.easeInOut)))
+          .value;
 
-    /// Tween<T>(begin: ,end: ) // はじめとおわりの値を指定できる
-    /// CurveTween(curve: ) // Curves. でアニメーションカーブを指定できる
-    final opacityValue = Tween<double>(begin: 1, end: 0)
-        .animate(controller.drive(CurveTween(curve: Curves.easeInOut)))
-        .value;
+      //Image.asset('assets/images/fish.png')
+      //var ui.Image uiimage = uiimage.toByteData();
 
-    //Image.asset('assets/images/fish.png')
-    //var ui.Image uiimage = uiimage.toByteData();
-
-    //if (uiimage != null) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2
-      ..color = Colors.white.withOpacity(opacityValue);
-    //canvas.drawImage(uiimage, Offset(200, offset_y), paint);
-    //canvas.drawCircle(Offset(200, offset_y), 10, paint);
-    canvas.drawArc(
-        Offset(offsetX + (20 * opacityValue), offsetY) &
-            Size(fishPointerSize, fishPointerSize),
-        210 * math.pi / 180, //startAngle
-        140 * math.pi / 180, //sweepAngle
-        false, //中心からの切り出し？trueならピザ形状
-        paint);
-    canvas.drawArc(
-        Offset(offsetX, offsetY - (fishPointerSize * 0.5834)) &
-            Size(fishPointerSize, fishPointerSize),
-        10 * math.pi / 180, //startAngle
-        140 * math.pi / 180, //sweepAngle
-        false, //中心からの切り出し？trueならピザ形状
-        paint);
-
-    //}
+      //if (uiimage != null) {
+      final paint = Paint()
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 2
+        ..color = Colors.white.withOpacity(opacityValue);
+      //canvas.drawImage(uiimage, Offset(200, offset_y), paint);
+      //canvas.drawCircle(Offset(200, offset_y), 10, paint);
+      canvas.drawArc(
+          Offset(offsetX + addX, offsetY) &
+              Size(fishPointerSize, fishPointerSize),
+          210 * math.pi / 180, //startAngle
+          140 * math.pi / 180, //sweepAngle
+          false, //中心からの切り出し？trueならピザ形状
+          paint);
+      canvas.drawArc(
+          Offset(offsetX + addX, offsetY - (fishPointerSize * 0.5834)) &
+              Size(fishPointerSize, fishPointerSize),
+          10 * math.pi / 180, //startAngle
+          140 * math.pi / 180, //sweepAngle
+          false, //中心からの切り出し？trueならピザ形状
+          paint);
+    }
   }
 
   @override

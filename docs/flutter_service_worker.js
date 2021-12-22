@@ -3,10 +3,12 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "4e83fee971da7e80c38d4333890e5670",
+  "assets/AssetManifest.json": "0d4d5459b6436949e6c5433bf6c0eb16",
 "assets/Assets/Images/aeae.png": "bc5c3f756fa13507f2ff00a818c8cec2",
-"assets/Assets/Images/aji.jpg": "ef6d833d1feb21685b2cf83a2ad9abcd",
+"assets/Assets/Images/aji.png": "2509f346a816e0a4a6ae2355174e3ccd",
 "assets/Assets/Images/aohata.png": "861ba2f745f4b645eacc716ac208ebe3",
+"assets/Assets/Images/arrow_left.png": "97454757e6b76718d951b11bf14ea1bb",
+"assets/Assets/Images/arrow_right.png": "da0cbb5cf372a6d5e713f8b7cd07f8de",
 "assets/Assets/Images/bc4-3.jpg": "6a7fece23647c6d3c5c0f79d724502d5",
 "assets/Assets/Images/fish.png": "2690dcdef769464d5a04f57529ab8737",
 "assets/Assets/Images/fishback.jpg": "cccd1f3d68e9ff004efb15bfbde56ed4",
@@ -19,6 +21,7 @@ const RESOURCES = {
 "assets/Assets/Images/point.gif": "36dd1c489c2e45c0aa424577efc3975f",
 "assets/Assets/Images/reel.png": "2685cff1e79f0da617a4d6559a041776",
 "assets/Assets/Images/rod.png": "29db2db993c511222f2403652db1d633",
+"assets/Assets/Images/sagoshi.png": "fae93c947cb11522a5f5e39147f4f43b",
 "assets/Assets/Images/sakana.jpg": "197270149d9a9320dff38ed13fa30b18",
 "assets/Assets/Images/sencho.png": "31f93307c5a076363d3acdcbcf4d187c",
 "assets/Assets/Images/ship.png": "2a1bcc57792fd26c57dc9f2c5c438cd4",
@@ -36,9 +39,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "c0ae08e1ec9745067aa608ed8128a64d",
-"/": "c0ae08e1ec9745067aa608ed8128a64d",
-"main.dart.js": "1a481c27cac95fb4997377ab819084ef",
+"index.html": "5e2b1e10a93010e1ad8e3c49db8f37b6",
+"/": "5e2b1e10a93010e1ad8e3c49db8f37b6",
+"main.dart.js": "2486afdcb52a280e220997b6bce7617a",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

@@ -53,8 +53,10 @@
 //済・大きさでHP可変
 //済・タックル変更モーダルに閉じるボタン
 //済・自分で船動かす 0m時に左右矢印表示
+//済・船動くときに動いてるのわかるようにする
+//・ワンタッチで回収ボタン
+//・雲
 //・超過画面出すときに画面全体光らす
-//・船動くときに動いてるのわかるようにする
 //・ゲームオーバー無しにする
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
@@ -100,6 +102,8 @@ import 'package:flutter/material.dart';
 
 import 'dart:async';
 import 'dart:math' as math;
+
+import 'package:flutter/rendering.dart';
 
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
@@ -159,6 +163,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   static const JERK_SCAN = 10; //ジャークの継続スキャン数
   // static const BAIT_CNT_MAX = 30; //アタリ判定期間
   // static const FOOKING_TENSION = 150; //アワセ成功閾値
+  static const MOVE_FISHPOINTER_MAX = 20.0; //最高速度 +-0.5の時の魚反応光点移動量
 
   //static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
   static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
@@ -383,14 +388,14 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //共通乱数 0.0～0.999... の乱数の作成 ※共通じゃだめなところには使っちゃだめ
     var rand = (new math.Random()).nextDouble();
 
-    //深さの変化傾向判定
-    _depthChangeScanCnt++;
-    if (_depthChangeScanCnt > DEPTH_CHANGE_SCAN) {
-      _depthChangeScanCnt = 0;
-      _depthChange = DEPTH_CHANGE_ORDERS[_depthChangeOrder]! +
-          ((DEPTH_CHANGE_ORDERS[_depthChangeOrder]! - rand) / 10);
-      debugPrint("深さ変化傾向" + _depthChange.toString());
-    }
+    // //深さの変化傾向判定
+    // _depthChangeScanCnt++;
+    // if (_depthChangeScanCnt > DEPTH_CHANGE_SCAN) {
+    //   _depthChangeScanCnt = 0;
+    //   _depthChange = DEPTH_CHANGE_ORDERS[_depthChangeOrder]! +
+    //       ((DEPTH_CHANGE_ORDERS[_depthChangeOrder]! - rand) / 10);
+    //   debugPrint("深さ変化傾向" + _depthChange.toString());
+    // }
 
     //時合の変化判定
     _jiaiChangeScanCnt++;
@@ -416,12 +421,20 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
     //船移動
     if (_moveShipTarget > _depthChange) {
-      _depthChange += 0.02;
+      _depthChange += 0.01;
     }
     if (_moveShipTarget < _depthChange) {
-      _depthChange -= 0.02;
+      _depthChange -= 0.01;
     }
-
+    //船移動中は魚反応を移動させる
+    if (_depthChange != 0.5) {
+      fishPointerList.forEach((element) {
+        RenderCustomPaint obj = element.painterKey.currentContext
+            ?.findRenderObject() as RenderCustomPaint;
+        FishPainter obj2 = obj.painter as FishPainter;
+        obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange - 0.5) * -1;
+      });
+    }
     //ルアー重さ
     var lureWeight =
         lures.getLureData(haveTackle.getUseLure().lureId).weight.floor();
@@ -631,12 +644,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         context: context,
         barrierDismissible: false,
         builder: (_) {
-          return fishGetDialog(
-              dispSize: size,
-              fish: fish,
-              fishSize: _fishSize,
-              addPoint: point,
-              flgNew: flgNew);
+          return Stack(
+            children: [
+              //釣りあげダイアログ
+              fishGetDialog(
+                  dispSize: size,
+                  fish: fish,
+                  fishSize: _fishSize,
+                  addPoint: point,
+                  flgNew: flgNew),
+            ],
+          );
         },
       );
     }
@@ -1333,12 +1351,22 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   GestureDetector(
+                                    //タップ開始
                                     onTapDown: (details) {
+                                      if (_depth <= 0.0) {
+                                        setState(() {
+                                          _moveShipTarget = 0.3;
+                                        });
+                                      }
+                                    },
+                                    //タップ終了
+                                    onTapUp: (details) {
                                       setState(() {
-                                        _moveShipTarget = 0.3;
+                                        _moveShipTarget = 0.5;
                                       });
                                     },
-                                    onTapUp: (details) {
+                                    //タップしたままフォーカス外れた時
+                                    onTapCancel: () {
                                       setState(() {
                                         _moveShipTarget = 0.5;
                                       });
@@ -1350,12 +1378,22 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   GestureDetector(
+                                    //タップ開始
                                     onTapDown: (details) {
+                                      if (_depth <= 0.0) {
+                                        setState(() {
+                                          _moveShipTarget = 0.7;
+                                        });
+                                      }
+                                    },
+                                    //タップ終了
+                                    onTapUp: (details) {
                                       setState(() {
-                                        _moveShipTarget = 0.7;
+                                        _moveShipTarget = 0.5;
                                       });
                                     },
-                                    onTapUp: (details) {
+                                    //タップしたままフォーカス外れた時
+                                    onTapCancel: () {
                                       setState(() {
                                         _moveShipTarget = 0.5;
                                       });
@@ -2009,13 +2047,26 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   Future<void> generateFishPointer(offsetY, fishPointerSize) async {
     const duration = const Duration(milliseconds: 20000);
     var size = MediaQuery.of(context).size;
+    var rnd = (new math.Random()).nextDouble();
+    var offsetX =
+        (size.width / 4) + (size.width / 2) * (rnd * rnd); //真ん中に集約するように累乗する
+    if (_takclePositionLeft) {
+      offsetX += size.width / 4;
+    } else {
+      offsetX -= size.width / 4;
+    }
+    offsetX = (offsetX < 0) ? 0 : offsetX;
+    offsetX = (offsetX > size.width) ? size.width : offsetX;
+
     final fishPointer = FishPointer(
       key: UniqueKey(), // 必ずキーを与えること。これによりそれぞれが独立した描画になります。
-      dispsizeX: size.width, //画面サイズX
+      dispSizeX: size.width, //画面サイズX
       offsetY: offsetY,
+      offsetX: offsetX,
       duration: duration,
       fishPointerSize: fishPointerSize,
       takclePositionLeft: _takclePositionLeft,
+      painterKey: GlobalKey(),
     );
     setState(() {
       fishPointerList.add(fishPointer);
