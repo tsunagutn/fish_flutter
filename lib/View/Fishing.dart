@@ -279,6 +279,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   // var _MoveRight = false;
   //船加速度の目標値
   var _moveShipTarget = 0.5;
+
+  var _collect = false; //高速回収中フラグ
+
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
   // var audio = new Audio(url);
@@ -463,7 +466,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
     addVal = (rand * (mx + 1 - (mn))).floor() + (mn) + (weight / 200);
 
-    if (_onClutch) {
+    if (_collect) {
+      //高速回収中
+      _depth -= _maxDepth / 10;
+      _onClutch = false;
+      addVal = HOSEI_MAX * -1;
+    } else if (_onClutch) {
       //クラッチON中はマイナス補正を最大化
       addVal = HOSEI_MAX * -1;
       //水深を加算
@@ -576,6 +584,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       _depth = 0.0;
       //ラインHPを回復
       _nowLineHp = _maxLineHp;
+      //高速回収中フラグをリセット
+      _collect = false;
     }
 
     //テンション確定
@@ -664,7 +674,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     final durationMin = POINT_DURATION_MSEC[0]!;
     var duration = POINT_DURATION_MSEC[_nowDurationLv]!;
 
-    if (!(_flgBait || _flgHit)) {
+    if (!(_flgBait || _flgHit || _collect)) {
       var flgFall = false;
       var flgMaki = false;
       var flgJerk = false;
@@ -852,7 +862,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           //点滅速度最大
           duration = durationMin;
         }
-      } else {
+      } else if (_flgHit) {
         //HIT中の処理
         _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
 
@@ -1598,7 +1608,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                     reelSizeX: _reelSizeX,
                     reelSizeY: _reelSizeY,
                     reelCenterY: _reelCenterY,
-                    clutchBackColor: _clutchBackColor,
+                    clutchBackColor:
+                        (_onClutch ? Colors.lightBlue : Colors.red),
                     rodStandUp: _rodStandUp,
                     rodTension: _tension / TENSION_VAL_MAX,
                   ),
@@ -1643,76 +1654,110 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                         ],
                       )),
                 //UI関係
-                Container(
-                    margin: EdgeInsets.only(
-                        top: _shoreHeight + (5 * _tackleMenuAnime.value),
-                        left: 0),
-                    width: 60,
-                    height: 180,
-                    child: Column(
+                Column(
+                  children: [
+                    Expanded(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                            child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            //竿
-                            GestureDetector(
-                                onTap: () async {
-                                  if (_depth <= 0.0) {
-                                    setState(() {
-                                      _selectTacleIcon = 'rod';
-                                      _showTacleChangeDialog = true;
-                                    });
-                                  }
-                                },
-                                child: tackleIcon(
-                                    tackleIconSize: 40.0,
-                                    imagePath: 'Assets/Images/rod.png',
-                                    flgSelect: false,
-                                    subText: '')),
-                            //リール
-                            GestureDetector(
-                                onTap: () async {
-                                  if (_depth <= 0.0) {
-                                    setState(() {
-                                      _selectTacleIcon = 'reel';
-                                      _showTacleChangeDialog = true;
-                                    });
-                                  }
-                                },
-                                child: tackleIcon(
-                                    tackleIconSize: 40.0,
-                                    imagePath: 'Assets/Images/reel.png',
-                                    flgSelect: false,
-                                    subText: '')),
-                            //ルアー
-                            GestureDetector(
-                                onTap: () async {
-                                  if (_depth <= 0.0) {
-                                    setState(() {
-                                      _selectTacleIcon = 'lure';
-                                      _showTacleChangeDialog = true;
-                                    });
-                                  }
-                                },
-                                child: tackleIcon(
-                                    tackleIconSize: 40.0,
-                                    imagePath: 'Assets/Images/' +
-                                        lures
-                                            .getLureData(
-                                                haveTackle.getUseLure().lureId)
-                                            .image,
-                                    flgSelect: false,
-                                    subText: lures
-                                            .getLureData(
-                                                haveTackle.getUseLure().lureId)
-                                            .weight
-                                            .toString() +
-                                        'g')),
-                          ],
-                        )),
+                        Container(
+                          margin: EdgeInsets.only(
+                              top: _shoreHeight + (5 * _tackleMenuAnime.value),
+                              left: 10),
+                          height: 180,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //竿
+                              GestureDetector(
+                                  onTap: () async {
+                                    if (_depth <= 0.0) {
+                                      setState(() {
+                                        _selectTacleIcon = 'rod';
+                                        _showTacleChangeDialog = true;
+                                      });
+                                    }
+                                  },
+                                  child: tackleIcon(
+                                      tackleIconSize: 40.0,
+                                      imagePath: 'Assets/Images/rod.png',
+                                      flgSelect: false,
+                                      subText: '')),
+                              //リール
+                              GestureDetector(
+                                  onTap: () async {
+                                    if (_depth <= 0.0) {
+                                      setState(() {
+                                        _selectTacleIcon = 'reel';
+                                        _showTacleChangeDialog = true;
+                                      });
+                                    }
+                                  },
+                                  child: tackleIcon(
+                                      tackleIconSize: 40.0,
+                                      imagePath: 'Assets/Images/reel.png',
+                                      flgSelect: false,
+                                      subText: '')),
+                              //ルアー
+                              GestureDetector(
+                                  onTap: () async {
+                                    if (_depth <= 0.0) {
+                                      setState(() {
+                                        _selectTacleIcon = 'lure';
+                                        _showTacleChangeDialog = true;
+                                      });
+                                    }
+                                  },
+                                  child: tackleIcon(
+                                      tackleIconSize: 40.0,
+                                      imagePath: 'Assets/Images/' +
+                                          lures
+                                              .getLureData(haveTackle
+                                                  .getUseLure()
+                                                  .lureId)
+                                              .image,
+                                      flgSelect: false,
+                                      subText: lures
+                                              .getLureData(haveTackle
+                                                  .getUseLure()
+                                                  .lureId)
+                                              .weight
+                                              .toString() +
+                                          'g')),
+                            ],
+                          ),
+                        ),
+                        //回収ボタン デザインは仮だから
+                        AnimatedOpacity(
+                          opacity:
+                              _depth > 0.0 && !_flgBait && !_flgHit ? 1.0 : 0.0,
+                          duration: Duration(milliseconds: 200),
+                          child: Container(
+                            margin: EdgeInsets.only(
+                                top: _shoreHeight + 20, right: 10),
+                            child: ElevatedButton(
+                                child: const Text('回収'),
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.amber, //背景色
+                                  onPrimary: Colors.black, //押したときの色
+                                  shape: const StadiumBorder(),
+                                  side: BorderSide(
+                                    color: Colors.black, //枠線の色
+                                    width: 2, //枠線の太さ
+                                  ),
+                                ),
+                                onPressed: () {
+                                  _collect = true;
+                                  _onClutch = true;
+                                }),
+                          ),
+                        ),
                       ],
                     )),
+                  ],
+                ),
                 AnimatedPadding(
                   //curve: Curves.easeOutExpo,
                   padding: EdgeInsets.only(
@@ -2083,6 +2128,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       //状態変更無し時は無処理
       return;
     }
+    if (_collect) {
+      return;
+    }
     if (flg) {
       //クラッチOFF→ONに変更
       _clutchBackColor = Colors.lightBlue;
@@ -2116,32 +2164,34 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   //持ち替えボタン
   Widget _tacklePositionChangeButton() {
-    return Row(
-        mainAxisAlignment: _takcleChangeButtonPosition,
-        children: <Widget>[
-          // Column(
-          //     mainAxisAlignment: MainAxisAlignment.center,
-          //     children: <Widget>[
+    return Container(
+        margin: EdgeInsets.only(left: 10, right: 10),
+        child: Row(
+            mainAxisAlignment: _takcleChangeButtonPosition,
+            children: <Widget>[
+              // Column(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: <Widget>[
 
-          ElevatedButton(
-              child: const Text('持替'),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.amber, //背景色
-                onPrimary: Colors.black, //押したときの色
-                shape: const StadiumBorder(),
-                side: BorderSide(
-                  color: Colors.black, //枠線の色
-                  width: 2, //枠線の太さ
-                ),
-              ),
-              onPressed: () {
-                if (_takclePositionLeft) {
-                  _takclePositionLeft = false;
-                } else {
-                  _takclePositionLeft = true;
-                }
-              }),
-        ]);
+              ElevatedButton(
+                  child: const Text('持替'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.amber, //背景色
+                    onPrimary: Colors.black, //押したときの色
+                    shape: const StadiumBorder(),
+                    side: BorderSide(
+                      color: Colors.black, //枠線の色
+                      width: 2, //枠線の太さ
+                    ),
+                  ),
+                  onPressed: () {
+                    if (_takclePositionLeft) {
+                      _takclePositionLeft = false;
+                    } else {
+                      _takclePositionLeft = true;
+                    }
+                  }),
+            ]));
   }
 
   //画面中央のメッセージ
