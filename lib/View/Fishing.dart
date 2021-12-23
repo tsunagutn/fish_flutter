@@ -53,8 +53,9 @@
 //済・大きさでHP可変
 //済・タックル変更モーダルに閉じるボタン
 //済・自分で船動かす 0m時に左右矢印表示
-//済・船動くときに動いてるのわかるようにする
-//・ワンタッチで回収ボタン
+//済・船動くときに魚反応動かして動いてるのわかるようにする
+//済・ワンタッチで回収ボタン
+//済・船動かすときにポイント使うようにする
 //・雲
 //・超過画面出すときに画面全体光らす
 //・ゲームオーバー無しにする
@@ -76,6 +77,7 @@
 //・糸切れ判定 勢い度を加味して切れるようにする
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
+//・チュートリアル
 //夢
 //・アワセシステム ARVRモード時はスマホをジャイロで動かす、通常時は下にドラッグでアワセ
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
@@ -165,10 +167,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   // static const FOOKING_TENSION = 150; //アワセ成功閾値
   static const MOVE_FISHPOINTER_MAX = 20.0; //最高速度 +-0.5の時の魚反応光点移動量
 
+  static const SHIP_MOVE_POINT = 1; //船移動時の1スキャンポイント消費
   //static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
   static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.2, 2: 0.8};
 
-// グローバル変数としてGlobalKey型の変数（プロパティ）を定義
+  // グローバル変数としてGlobalKey型の変数（プロパティ）を定義
   GlobalKey globalKeySonar = GlobalKey();
   GlobalKey globalKeyShore = GlobalKey();
   GlobalKey globalKeyBottom = GlobalKey();
@@ -429,14 +432,27 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (_moveShipTarget < _depthChange) {
       _depthChange -= 0.01;
     }
-    //船移動中は魚反応を移動させる
+    //船移動中
     if (_depthChange != 0.5) {
+      //魚反応を移動させる
       fishPointerList.forEach((element) {
         RenderCustomPaint obj = element.painterKey.currentContext
             ?.findRenderObject() as RenderCustomPaint;
         FishPainter obj2 = obj.painter as FishPainter;
         obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange - 0.5) * -1;
       });
+    }
+    //船移動の指示中
+    if (_moveShipTarget != 0.5) {
+      if (_point > 0) {
+        //ポイント消費
+        _point -= SHIP_MOVE_POINT;
+      }
+      if (_point <= 0) {
+        //ポイント切れ
+        _point = 0;
+        _moveShipTarget = 0.5;
+      }
     }
     //ルアー重さ
     var lureWeight =
@@ -1352,7 +1368,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                             ),
                           )),
                       AnimatedOpacity(
-                          opacity: _depth > 0.0 ? 0.0 : 1.0,
+                          opacity: (_depth > 0.0 || _point <= 0) ? 0.0 : 1.0,
                           duration: Duration(milliseconds: 200),
                           child: Container(
                               margin: EdgeInsets.only(left: 10, right: 10),

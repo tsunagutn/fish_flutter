@@ -144,7 +144,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                               .toStringAsFixed(1) +
                           "cm"),
                       if (widget.fishSize > 0.8 && widget.fishSize < 0.95)
-                        Icon(Icons.star, color: Colors.grey),
+                        Icon(Icons.star, color: Colors.teal),
                       if (widget.fishSize > 0.95)
                         Icon(
                           Icons.star,
