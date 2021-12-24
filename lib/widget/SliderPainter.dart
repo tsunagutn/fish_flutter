@@ -47,6 +47,11 @@ class SliderPainter extends CustomPainter {
       dragShaKeX = 5 - (new math.Random()).nextInt(9);
       dragShaKeY = 5 - (new math.Random()).nextInt(9);
     }
+
+    double val = this.value;
+    if (val < 0.0) val = 0.0;
+    if (val > 1.0) val = 1.0;
+
     var paint = Paint();
 
     // paint.color = Colors.greenAccent;
@@ -118,8 +123,8 @@ class SliderPainter extends CustomPainter {
       ..strokeWidth = 2;
     path.moveTo(leftStart, topStart);
     path.lineTo(leftStart, topEnd);
-    path.lineTo(leftEnd * this.value, topEnd);
-    path.lineTo(leftEnd * this.value, topStart);
+    path.lineTo(leftEnd * val, topEnd);
+    path.lineTo(leftEnd * val, topStart);
     path.close();
     canvas.drawPath(path, paint);
 
@@ -129,8 +134,8 @@ class SliderPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill;
     //..strokeWidth = 2;
-    path.moveTo((leftEnd * this.value), topStart);
-    path.lineTo((leftEnd * this.value), topEnd);
+    path.moveTo((leftEnd * val), topStart);
+    path.lineTo((leftEnd * val), topEnd);
     path.lineTo(leftEnd, topEnd);
     path.lineTo(leftEnd, topStart);
     path.close();

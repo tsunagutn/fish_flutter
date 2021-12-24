@@ -57,11 +57,13 @@
 //済・ワンタッチで回収ボタン
 //済・船動かすときにポイント使うようにする
 //済・超過画面出すときに画面全体光らす
-//・雲
 //済・ゲームオーバー無しにする
+//済・ルアー耐久システム
+//・店
+//・雲
+//・時合度が低いのが続かんようにするか、高くできるようにする
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
-//・ルアー耐久システム
 //・設定画面 合わせの強さ調節
 //・音
 //・実績
@@ -541,7 +543,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       if (_nowLineHp < 0) {
         //糸切れ
         debugPrint("いときれ");
-        //HITメッセージ
+        //メッセージ
         _centerTextMain = "BREAK";
         _centerTextMainColor = Colors.red;
         _centerTextSub = "糸が切れちまった!";
@@ -631,6 +633,24 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         " / " +
         ((_maxDepth).round() / 10).toStringAsFixed(1) +
         ' m';
+
+    //使用中ルアーのHP減算
+    HaveLureModel lure = haveTackle.getUseLure();
+    //針は対象外
+    if (lure.lureId != 0) {
+      //テンションに応じたダメージを与える
+      lure.lureHp -= (_tension / 100).floor();
+      if (lure.lureHp < 0.0) {
+        //ルアーがめげた
+        haveTackle.lostLure(lure.id);
+        //メッセージ
+        _centerTextMain = "BROKEN";
+        _centerTextMainColor = Colors.blue;
+        _centerTextSub = "ルアーが破壊!";
+        _centerTextSubColor = Colors.yellow;
+        startCenterInfo();
+      }
+    }
 
     //光点表示位置設定
     if (_takclePositionLeft) {
@@ -1527,8 +1547,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     child: CustomPaint(
                                       painter: new SliderPainter(
                                         height: 5,
-                                        activeColor:
-                                            Colors.red.withOpacity(0.7),
+                                        activeColor: getRaitoColor(_hitScanCnt /
+                                            (FISH_TABLE.fishs[_fishidx].hp +
+                                                (FISH_TABLE.fishs[_fishidx].hp *
+                                                    _fishSize))),
                                         inactiveColor: Colors.white,
                                         value: _hitScanCnt /
                                             (FISH_TABLE.fishs[_fishidx].hp +
@@ -1715,10 +1737,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                     }
                                   },
                                   child: tackleIcon(
-                                      tackleIconSize: 40.0,
-                                      imagePath: 'Assets/Images/rod.png',
-                                      flgSelect: false,
-                                      subText: '')),
+                                    tackleIconSize: 40.0,
+                                    imagePath: 'Assets/Images/rod.png',
+                                    flgSelect: false,
+                                  )),
                               //リール
                               GestureDetector(
                                   onTap: () async {
@@ -1732,8 +1754,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   child: tackleIcon(
                                       tackleIconSize: 40.0,
                                       imagePath: 'Assets/Images/reel.png',
-                                      flgSelect: false,
-                                      subText: '')),
+                                      flgSelect: false)),
                               //ルアー
                               GestureDetector(
                                   onTap: () async {
@@ -1759,7 +1780,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                                   .lureId)
                                               .weight
                                               .toString() +
-                                          'g')),
+                                          'g',
+                                      hp: haveTackle.getUseLure().lureHp,
+                                      maxHp: lures
+                                          .getLureData(
+                                              haveTackle.getUseLure().lureId)
+                                          .hp)),
                             ],
                           ),
                         ),
@@ -1859,8 +1885,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                               flgSelect:
                                                   _selectTacleIcon == 'rod'
                                                       ? true
-                                                      : false,
-                                              subText: '')),
+                                                      : false)),
                                     ),
 
                                     //リール
@@ -1879,8 +1904,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                               flgSelect:
                                                   _selectTacleIcon == 'reel'
                                                       ? true
-                                                      : false,
-                                              subText: '')),
+                                                      : false)),
                                     ),
                                     //ルアー
                                     GestureDetector(
@@ -1909,7 +1933,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                                           .lureId)
                                                       .weight
                                                       .toString() +
-                                                  'g')),
+                                                  'g',
+                                              hp: haveTackle
+                                                  .getUseLure()
+                                                  .lureHp,
+                                              maxHp: lures
+                                                  .getLureData(haveTackle
+                                                      .getUseLure()
+                                                      .lureId)
+                                                  .hp)),
                                     ),
                                   ],
                                 ),
@@ -1949,11 +1981,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                                         tackleIconSize: 40.0,
                                                         imagePath: 'Assets/Images/' +
                                                             lures
-                                                                .getLureData(
-                                                                    haveTackle
-                                                                        .haveLures[
-                                                                            index]
-                                                                        .lureId)
+                                                                .getLureData(haveTackle
+                                                                    .haveLures[
+                                                                        index]
+                                                                    .lureId)
                                                                 .image,
                                                         flgSelect: haveTackle
                                                                     .haveLures[
@@ -1967,12 +1998,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                                         subText: lures
                                                                 .getLureData(
                                                                     haveTackle
-                                                                        .haveLures[
-                                                                            index]
+                                                                        .haveLures[index]
                                                                         .lureId)
                                                                 .weight
                                                                 .toString() +
-                                                            'g')),
+                                                            'g',
+                                                        hp: haveTackle.haveLures[index].lureHp,
+                                                        maxHp: lures.getLureData(haveTackle.haveLures[index].lureId).hp)),
                                               ),
                                             ]);
                                           },
@@ -2261,8 +2293,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     required double tackleIconSize,
     required String imagePath,
     required bool flgSelect,
-    required String subText,
+    String subText = '',
+    int hp = 0,
+    int maxHp = 0,
   }) {
+    final value = hp / maxHp;
     return SizedBox(
       width: tackleIconSize,
       height: tackleIconSize,
@@ -2279,11 +2314,39 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                   BlendMode.dstATop),
               fit: BoxFit.contain),
         ),
-        child: Text(subText),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              subText,
+              style: TextStyle(fontSize: 12),
+            ),
+            Visibility(
+              visible: (maxHp > 0),
+              child: Container(
+                margin: EdgeInsets.all(3),
+                child: CustomPaint(
+                  painter: new SliderPainter(
+                    height: 4,
+                    activeColor: getRaitoColor(value),
+                    inactiveColor: Colors.white,
+                    value: value,
+                    backRadius: 0,
+                    maxBackRadius: 0,
+                    flgShaKe: false,
+                  ),
+                  child: Container(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  //ルアーの能力チャート描画
   List<RadarChartItemModel> getLureRadarChartItem() {
     List<RadarChartItemModel> ret = [];
     ret.add(new RadarChartItemModel(
@@ -2296,6 +2359,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         itemName: 'ｼｬｸﾘ',
         value: lures.getLureData(haveTackle.getUseLure().lureId).jerk));
     return ret;
+  }
+
+  //割合によって色を返す
+  Color getRaitoColor(double raito) {
+    if (raito > 0.7) return Colors.green;
+    if (raito > 0.3) return Colors.amber;
+    return Colors.red;
   }
 }
 
