@@ -14,6 +14,20 @@ class LuresModel {
     lures.add(new LureModel(
       id: 0,
       div: enumLureDiv.tairaba.index,
+      name: "針",
+      image: "hari.png",
+      text: "絶対壊れない\n絶対釣れないことはない",
+      hp: -1,
+      weight: 1.0,
+      size: 1,
+      fall: 0.1,
+      reeling: 0.1,
+      jerk: 0.1,
+      prise: 0,
+    ));
+    lures.add(new LureModel(
+      id: 1,
+      div: enumLureDiv.tairaba.index,
       name: "タイラバ ストレート 60g",
       image: "tairaba.png",
       text: "鉛にシリコンのヒラヒラが付いた、シンプルなルアー。\nとても傷みやすい。\nタダ巻きで使おう！",
@@ -27,7 +41,7 @@ class LuresModel {
     ));
 
     lures.add(new LureModel(
-      id: 1,
+      id: 2,
       div: enumLureDiv.tairaba.index,
       name: "タイラバ ストレート 120g",
       image: "tairaba.png",
@@ -42,11 +56,11 @@ class LuresModel {
     ));
 
     lures.add(new LureModel(
-      id: 2,
+      id: 3,
       div: enumLureDiv.tairaba.index,
       name: "タイラバ ストレート 999g",
       image: "tairaba.png",
-      text: "タダ巻きで使おう3",
+      text: "テスト用\nバチクソ重い",
       hp: 1000,
       weight: 999.0,
       size: 500,
@@ -55,19 +69,46 @@ class LuresModel {
       jerk: 0.5,
       prise: 700,
     ));
-
     lures.add(new LureModel(
-      id: 3,
+      id: 4,
       div: enumLureDiv.jig.index,
       name: "メタルジグ バーチカル 80g",
       image: "jig.png",
-      text: "キラキラしている",
+      text: "鉛製で頑丈\nジャークに特化している",
       hp: 5000,
       weight: 80.0,
-      size: 230,
-      fall: 0.7,
+      size: 200,
+      fall: 0.5,
       reeling: 0.1,
       jerk: 0.9,
+      prise: 700,
+    ));
+    lures.add(new LureModel(
+      id: 5,
+      div: enumLureDiv.jig.index,
+      name: "メタルジグ バーチカル 100g",
+      image: "jig.png",
+      text: "鉛製で頑丈\nジャークに特化している",
+      hp: 6000,
+      weight: 100.0,
+      size: 250,
+      fall: 0.5,
+      reeling: 0.1,
+      jerk: 0.9,
+      prise: 700,
+    ));
+    lures.add(new LureModel(
+      id: 6,
+      div: enumLureDiv.jig.index,
+      name: "メタルジグ スロー 60g",
+      image: "slowjig.png",
+      text: "鉛製で頑丈\nフォールでヒラヒラと誘う\n巻いてもOK",
+      hp: 4000,
+      weight: 100.0,
+      size: 150,
+      fall: 0.8,
+      reeling: 0.5,
+      jerk: 0.4,
       prise: 700,
     ));
   }

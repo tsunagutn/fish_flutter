@@ -56,9 +56,9 @@
 //済・船動くときに魚反応動かして動いてるのわかるようにする
 //済・ワンタッチで回収ボタン
 //済・船動かすときにポイント使うようにする
+//済・超過画面出すときに画面全体光らす
 //・雲
-//・超過画面出すときに画面全体光らす
-//・ゲームオーバー無しにする
+//済・ゲームオーバー無しにする
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
 //・ルアー耐久システム
@@ -192,7 +192,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _onClutch = false; //現在クラッチ状態
   var _flgBait = false; //現在アタリ中フラグ
   var _flgHit = false; //現在HIT中フラグ
-  var _flgGameOver = false; //現在ゲームオーバーフラグ
+  //var _flgGameOver = false; //現在ゲームオーバーフラグ
 
   //ステート変数
   var _tension = 0.0; //テンション値
@@ -363,10 +363,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       return;
     }
 
-    if (_flgGameOver) {
-      //ゲームオーバー中は無処理
-      return;
-    }
+    // if (_flgGameOver) {
+    //   //ゲームオーバー中は無処理
+    //   return;
+    // }
 
     num addVal = 0;
     var mx = MAX_RAND_ADD_TENSION;
@@ -456,6 +456,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         _moveShipTarget = 0.5;
       }
     }
+    //座礁判定
+    if (_maxDepth < 1.0) {
+      //これ以上浅くいけない
+      _maxDepth = 1.0;
+      if (_moveShipTarget < 0.5) _moveShipTarget = 0.5;
+    }
+
     //ルアー重さ
     var lureWeight =
         lures.getLureData(haveTackle.getUseLure().lureId).weight.floor();
@@ -526,49 +533,55 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     }
     var val = _tension + addVal;
 
-    //ゲームオーバー判定
-    var gameovertext = "";
+    // //ゲームオーバー判定
+    // var gameovertext = "";
     //糸ダメージ判定
     if (val > TENSION_LINECUT) {
       _nowLineHp--; //ラインHPを減らす
       if (_nowLineHp < 0) {
         //糸切れ
         debugPrint("いときれ");
-        _flgGameOver = true;
-        gameovertext = "糸が切れました。\nゲームオーバーです。\nゲームオーバーなのでもう何もできません";
+        //HITメッセージ
+        _centerTextMain = "BREAK";
+        _centerTextMainColor = Colors.red;
+        _centerTextSub = "糸が切れちまった!";
+        _centerTextSubColor = Colors.yellow;
+        startCenterInfo();
+        //使用中のルアーを削除
+        haveTackle.lostLure(haveTackle.getUseLure().id);
+        _flgBait = false;
+        _flgHit = false;
       }
     }
-    //座礁判定
-    if (_maxDepth < 2.0) {
-      //座礁
-      debugPrint("座礁");
-      _flgGameOver = true;
-      gameovertext = "船が座礁しました。\nゲームオーバーです。\nゲームオーバーなのもう何もできません";
-    }
-    if (gameovertext != "") {
-      //ゲームオーバーモーダル
-      var result = showDialog<int>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("あーあ"),
-              content: Column(children: <Widget>[
-                Text(gameovertext),
-                Text("あなたは" + _point.toString() + "ポイント獲得して終わりました"),
-              ]),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("メニューに戻ることしかできません"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          });
-      return;
-    }
+    // //座礁
+    // debugPrint("座礁");
+    //   _flgGameOver = true;
+    //   gameovertext = "船が座礁しました。\nゲームオーバーです。\nゲームオーバーなのもう何もできません";
+    // }
+    // if (gameovertext != "") {
+    //   //ゲームオーバーモーダル
+    //   var result = showDialog<int>(
+    //       context: context,
+    //       barrierDismissible: false,
+    //       builder: (BuildContext context) {
+    //         return AlertDialog(
+    //           title: Text("あーあ"),
+    //           content: Column(children: <Widget>[
+    //             Text(gameovertext),
+    //             Text("あなたは" + _point.toString() + "ポイント獲得して終わりました"),
+    //           ]),
+    //           actions: <Widget>[
+    //             FlatButton(
+    //               child: Text("メニューに戻ることしかできません"),
+    //               onPressed: () {
+    //                 Navigator.of(context).pop();
+    //               },
+    //             ),
+    //           ],
+    //         );
+    //       });
+    //   return;
+    // }
 
     //ドラグ判定
     var dragVal = _drag;
@@ -685,6 +698,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           );
         },
       );
+      _depth = 0.0;
     }
 
     //光点点滅速度関連の変数
@@ -1926,7 +1940,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                                     haveTackle.changeLure(
                                                         haveTackle
                                                             .haveLures[index]
-                                                            .lureId);
+                                                            .id);
                                                   });
                                                 },
                                                 child: Container(
@@ -1944,10 +1958,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                                         flgSelect: haveTackle
                                                                     .haveLures[
                                                                         index]
-                                                                    .lureId ==
+                                                                    .id ==
                                                                 haveTackle
                                                                     .getUseLure()
-                                                                    .lureId
+                                                                    .id
                                                             ? true
                                                             : false,
                                                         subText: lures
