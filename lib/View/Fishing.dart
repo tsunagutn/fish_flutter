@@ -119,8 +119,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
 
   //デバッグフラグ すぐつれちゃう
-  //static const DEBUGFLG = true;
-  static const DEBUGFLG = false;
+  static const DEBUGFLG = true;
+  //static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
@@ -436,9 +436,11 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     if (_depthChange != 0.5) {
       //魚反応を移動させる
       fishPointerList.forEach((element) {
+        //描画ごとにglovalkeyを付けているのでそれにアクセス
         RenderCustomPaint obj = element.painterKey.currentContext
             ?.findRenderObject() as RenderCustomPaint;
         FishPainter obj2 = obj.painter as FishPainter;
+        //addxの値を加減算で移動
         obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange - 0.5) * -1;
       });
     }

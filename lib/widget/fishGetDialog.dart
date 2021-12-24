@@ -21,6 +21,8 @@ class fishGetDialog extends StatefulWidget {
 class _fishGetDialogState extends State<fishGetDialog>
     with TickerProviderStateMixin {
   double fishCm = 0.0;
+  late AnimationController _lightingAnimationController;
+  late Animation<double> _lightingValue;
   late AnimationController _rColorAnimationController;
   late Animation<double> _rColorValue;
   late AnimationController _gColorAnimationController;
@@ -32,6 +34,15 @@ class _fishGetDialogState extends State<fishGetDialog>
   void initState() {
     super.initState();
     fishCm = widget.fish.getSize(widget.fishSize);
+    //最初の光
+    _lightingAnimationController = AnimationController(
+        duration: Duration(milliseconds: 3000), vsync: this);
+    _lightingValue =
+        Tween(begin: 1.5, end: 0.0).animate(_lightingAnimationController)
+          ..addListener(() {
+            setState(() {});
+          });
+    _lightingAnimationController.forward();
     //赤
     _rColorAnimationController =
         AnimationController(duration: Duration(milliseconds: 224), vsync: this);
@@ -75,101 +86,118 @@ class _fishGetDialogState extends State<fishGetDialog>
     int g = (255 * _gColorValue.value).floor();
     int b = (255 * _bColorValue.value).floor();
 
-    return Container(
-        decoration: new BoxDecoration(
-            image: new DecorationImage(
-          image: new AssetImage("Assets/Images/fishback.jpg"),
-          fit: BoxFit.cover,
-        )),
-        child: AlertDialog(
-          titleTextStyle: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              shadows: <Shadow>[
-                Shadow(
-                    offset: Offset(2.0, 4.0),
-                    blurRadius: 2.0,
-                    color: Colors.black)
-              ]),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          // backgroundColor:
-          //     clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
-          title: Text("あなたは満足を得ました",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Color.fromRGBO(r, g, b, 1.0),
-                shadows: <Shadow>[
-                  Shadow(
-                      offset: Offset((4.0 * _rColorValue.value), 10.0),
-                      blurRadius: 2.0,
-                      color: Colors.black.withOpacity(0.3))
-                ],
-              )),
-          content: Container(
-              height: widget.dispSize.height / 2,
-              // decoration: new BoxDecoration(
-              //     image: new DecorationImage(
-              //   image: new AssetImage("Assets/Images/fishback.jpg"),
-              //   fit: BoxFit.cover,
-              // )),
-              child: Column(children: <Widget>[
-                new Image(
-                  image: AssetImage('Assets/Images/' + widget.fish.image),
-                  // width: 150,
-                  // height: 150,
+    return Stack(children: [
+      Opacity(
+        //最初に画面全体を光らすために最初は透明にする
+        opacity: _lightingValue.value <= 1.0 ? 1.0 : 0.0,
+        child: Container(
+            decoration: new BoxDecoration(
+                image: new DecorationImage(
+              image: new AssetImage("Assets/Images/fishback.jpg"),
+              fit: BoxFit.cover,
+            )),
+            child: AlertDialog(
+              titleTextStyle: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  shadows: <Shadow>[
+                    Shadow(
+                        offset: Offset(2.0, 4.0),
+                        blurRadius: 2.0,
+                        color: Colors.black)
+                  ]),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              // backgroundColor:
+              //     clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
+              title: Text("あなたは満足を得ました",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Color.fromRGBO(r, g, b, 1.0),
+                    shadows: <Shadow>[
+                      Shadow(
+                          offset: Offset((4.0 * _rColorValue.value), 10.0),
+                          blurRadius: 2.0,
+                          color: Colors.black.withOpacity(0.3))
+                    ],
+                  )),
+              content: Container(
+                  height: widget.dispSize.height / 2,
+                  // decoration: new BoxDecoration(
+                  //     image: new DecorationImage(
+                  //   image: new AssetImage("Assets/Images/fishback.jpg"),
+                  //   fit: BoxFit.cover,
+                  // )),
+                  child: Column(children: <Widget>[
+                    new Image(
+                      image: AssetImage('Assets/Images/' + widget.fish.image),
+                      // width: 150,
+                      // height: 150,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          if (widget.flgNew)
+                            Container(
+                              margin: EdgeInsets.only(right: 3),
+                              padding: const EdgeInsets.all(2.0),
+                              decoration: BoxDecoration(
+                                  border:
+                                      Border.all(color: Colors.black, width: 1),
+                                  color: Colors.black),
+                              child: Text("NEW!",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  )),
+                            ),
+                          Text(widget.fish.name +
+                              "　" +
+                              widget.fish
+                                  .getSize(widget.fishSize)
+                                  .toStringAsFixed(1) +
+                              "cm"),
+                          if (widget.fishSize > 0.8 && widget.fishSize < 0.95)
+                            Icon(Icons.star, color: Colors.teal),
+                          if (widget.fishSize > 0.95)
+                            Icon(
+                              Icons.star,
+                              color: Colors.yellow,
+                            ),
+                        ]),
+                    Text(widget.addPoint.toString() + 'ポイント獲得です'),
+                    Text(widget.fish.text),
+                    if (widget.flgNew)
+                      Container(
+                        margin: EdgeInsets.only(top: 5),
+                        child: Text("おさかな図鑑に登録します",
+                            style: TextStyle(color: Colors.red)),
+                      ),
+                  ])),
+              actions: <Widget>[
+                ElevatedButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      if (widget.flgNew)
-                        Container(
-                          margin: EdgeInsets.only(right: 3),
-                          padding: const EdgeInsets.all(2.0),
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black, width: 1),
-                              color: Colors.black),
-                          child: Text("NEW!",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              )),
-                        ),
-                      Text(widget.fish.name +
-                          "　" +
-                          widget.fish
-                              .getSize(widget.fishSize)
-                              .toStringAsFixed(1) +
-                          "cm"),
-                      if (widget.fishSize > 0.8 && widget.fishSize < 0.95)
-                        Icon(Icons.star, color: Colors.teal),
-                      if (widget.fishSize > 0.95)
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow,
-                        ),
-                    ]),
-                Text(widget.addPoint.toString() + 'ポイント獲得です'),
-                Text(widget.fish.text),
-                if (widget.flgNew)
-                  Container(
-                    margin: EdgeInsets.only(top: 5),
-                    child: Text("おさかな図鑑に登録します",
-                        style: TextStyle(color: Colors.red)),
-                  ),
-              ])),
-          actions: <Widget>[
-            ElevatedButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ));
+              ],
+            )),
+      ),
+      //最初に画面全体を光らす
+      IgnorePointer(
+        ignoring: (_lightingValue.value == 0.0),
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.white.withOpacity(_lightingValue.value > 1.0
+                  ? 2.0 - _lightingValue.value
+                  : _lightingValue.value)),
+        ),
+      ),
+    ]);
   }
 }
 
-                              // builder: (BuildContext context) {
+// builder: (BuildContext context) {
