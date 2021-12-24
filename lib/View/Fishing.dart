@@ -918,7 +918,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     //シャクリ値を減算
     if (_rodStandUp > 0.0) {
       _rodStandUp -= 0.5; //1スキャン毎に0.5ずつ消える
-    } else {
+    }
+    if (_rodStandUp < 0.0) {
+      //マイナスになったら0にする
       _rodStandUp = 0.0;
     }
 
