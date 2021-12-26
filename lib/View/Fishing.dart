@@ -231,7 +231,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   var _jerkCnt = 0; //ジャークの継続スキャン数
 
   var _baitCnt = 0; //当たってからのスキャン数
-  var _baitMaxTension = 0.0; //バイト中の最大テンション
+  //var _baitMaxTension = 0.0; //バイト中の最大テンション
   var _fookingLv = 0.0; //フッキングの成功度
 
   var _fishidx = 0; //現在HIT中の魚種IDX
@@ -859,7 +859,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
             _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
             //アタリと判定
             _flgBait = true;
-            _baitMaxTension = 0.0;
+            //_baitMaxTension = 0.0;
             debugPrint("アタリ");
             //_dispInfo = 'アタリ';
             _infoBackColor = TENSION_COLOR_DANGER;
@@ -883,35 +883,34 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       var fish = FISH_TABLE.fishs[_fishidx];
       if (_flgBait) {
         //アタリ中の処理
-        //当たってからのスキャン数加算
-        _baitCnt++;
-        if (_baitCnt > fish.baitCntMax) {
-          //アタリ判定期間終了
-          if (_baitMaxTension > fish.fookingTension) {
-            //バイト中の最大テンションが一定値を超えるとHIT
-            _flgBait = false;
-            _flgHit = true;
-            debugPrint('HIT!!!!');
-            //_dispInfo = "HIT!";
-            //フッキングの成功度
-            _fookingLv = _tension - fish.fookingTension;
-            if (_fookingLv > 100.0) _fookingLv = 100.0;
-            //HITメッセージ
-            _centerTextMain = "HIT!";
-            _centerTextMainColor = Colors.red;
-            _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
-            _centerTextSubColor = Colors.yellow;
-            startCenterInfo();
-          } else {
+        if (_tension > fish.fookingTension) {
+          //バイト中の最大テンションが一定値を超えるとHIT
+          _flgBait = false;
+          _flgHit = true;
+          debugPrint('HIT!!!!');
+          //_dispInfo = "HIT!";
+          //フッキングの成功度
+          _fookingLv = _tension - fish.fookingTension;
+          if (_fookingLv > 100.0) _fookingLv = 100.0;
+          //HITメッセージ
+          _centerTextMain = "HIT!";
+          _centerTextMainColor = Colors.red;
+          _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
+          _centerTextSubColor = Colors.yellow;
+          startCenterInfo();
+        } else {
+          //当たってからのスキャン数加算
+          _baitCnt++;
+          if (_baitCnt > fish.baitCntMax) {
+            //アタリ判定期間終了
             //アワセ失敗
             _flgBait = false;
           }
-        } else {
           //アタリ中
-          if (_tension > _baitMaxTension) {
-            //バイト中の最大テンションを記憶
-            _baitMaxTension = _tension;
-          }
+          // if (_tension > _baitMaxTension) {
+          //   //バイト中の最大テンションを記憶
+          //   //_baitMaxTension = _tension;
+          // }
           _pointerColor = clsColor._getColorFromHex("FF6A00"); //アタリ中はオレンジ
           //点滅速度最大
           duration = durationMin;
