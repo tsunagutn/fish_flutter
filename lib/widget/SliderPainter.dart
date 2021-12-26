@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/rendering.dart';
+
 class SliderPainter extends CustomPainter {
   const SliderPainter({
     required this.height,
     required this.activeColor,
     required this.inactiveColor,
     required this.value,
+    required this.maxValue,
     required this.backRadius,
     required this.maxBackRadius,
     required this.flgShaKe,
+    required this.flgDispValue,
+    required this.flgDispMaxValue,
   });
   final double height;
   final Color activeColor;
   final Color inactiveColor;
   final double value;
+  final double maxValue;
   final double backRadius;
   final double maxBackRadius;
   final bool flgShaKe;
+  final bool flgDispValue;
+  final bool flgDispMaxValue;
 
   //後光の設定
   static const Map<int, Map<String, double>> lightLayers = {
@@ -48,7 +56,7 @@ class SliderPainter extends CustomPainter {
       dragShaKeY = 5 - (new math.Random()).nextInt(9);
     }
 
-    double val = this.value;
+    double val = this.value / this.maxValue;
     if (val < 0.0) val = 0.0;
     if (val > 1.0) val = 1.0;
 
@@ -140,6 +148,73 @@ class SliderPainter extends CustomPainter {
     path.lineTo(leftEnd, topStart);
     path.close();
     canvas.drawPath(path, paint);
+
+    if (!flgDispValue) {
+      //テキスト表示が無い場合はここで終了
+      return;
+    }
+    // 基本のテキストスタイル
+    final fontsize = (height > 10.0 ? height : 10.0);
+    final textStyle = TextStyle(
+      color: Colors.black,
+      fontSize: fontsize,
+      fontWeight: FontWeight.w900,
+      fontStyle: FontStyle.italic,
+      // shadows: <Shadow>[
+      //   Shadow(offset: Offset(0.0, 0.0), blurRadius: 0.0, color: Colors.yellow)
+      // ],
+    );
+    final textStyleMain = TextStyle(
+      color: Colors.blueGrey,
+      fontSize: fontsize,
+      fontWeight: FontWeight.w100,
+      fontStyle: FontStyle.italic,
+    );
+
+    //表示テキストの定義
+    String text = value.floor().toString();
+    if (flgDispMaxValue) {
+      text += '/' + maxValue.floor().toString();
+    }
+
+    // final textSpan = TextSpan(style: textStyle, children: <TextSpan>[
+    //   TextSpan(text: text.substring(0, 3)),
+    //   TextSpan(
+    //       text: _text.substring(3, 6), style: TextStyle(color: Colors.red)),
+    //   TextSpan(
+    //       text: _text.substring(6, _text.length),
+    //       style: TextStyle(color: Colors.blue)),
+    // ]);
+    ;
+    // テキスト描画用のペインター
+    final textPainter = TextPainter(
+      text: TextSpan(
+          style: textStyle, children: <TextSpan>[TextSpan(text: text)]),
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(
+      minWidth: size.width - 5,
+      maxWidth: size.width - 5,
+    );
+
+    // テキストの描画
+    textPainter.paint(canvas, Offset(leftStart, topStart));
+
+    // テキスト描画用のペインター
+    final textPainterMain = TextPainter(
+      text: TextSpan(
+          style: textStyleMain, children: <TextSpan>[TextSpan(text: text)]),
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.ltr,
+    );
+    textPainterMain.layout(
+      minWidth: size.width - 5,
+      maxWidth: size.width - 5,
+    );
+
+    // テキストの描画
+    textPainterMain.paint(canvas, Offset(leftStart, topStart));
   }
 
   @override

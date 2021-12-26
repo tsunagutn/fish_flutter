@@ -12,11 +12,11 @@ class HaveTackleModel {
     haveLures
         .add(new HaveLureModel(id: 0, lureId: 0, lureHp: 0, flgUse: false));
     haveLures
-        .add(new HaveLureModel(id: 1, lureId: 1, lureHp: 500, flgUse: true));
+        .add(new HaveLureModel(id: 1, lureId: 1, lureHp: 3000, flgUse: true));
     haveLures
-        .add(new HaveLureModel(id: 2, lureId: 2, lureHp: 800, flgUse: false));
+        .add(new HaveLureModel(id: 2, lureId: 2, lureHp: 3000, flgUse: false));
     haveLures
-        .add(new HaveLureModel(id: 3, lureId: 3, lureHp: 1000, flgUse: false));
+        .add(new HaveLureModel(id: 3, lureId: 3, lureHp: 3000, flgUse: false));
     haveLures
         .add(new HaveLureModel(id: 4, lureId: 4, lureHp: 5000, flgUse: false));
     haveLures

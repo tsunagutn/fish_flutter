@@ -36,7 +36,7 @@ class _fishGetDialogState extends State<fishGetDialog>
     fishCm = widget.fish.getSize(widget.fishSize);
     //最初の光
     _lightingAnimationController = AnimationController(
-        duration: Duration(milliseconds: 3000), vsync: this);
+        duration: Duration(milliseconds: 2000), vsync: this);
     _lightingValue =
         Tween(begin: 1.5, end: 0.0).animate(_lightingAnimationController)
           ..addListener(() {
@@ -112,7 +112,7 @@ class _fishGetDialogState extends State<fishGetDialog>
               //     clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
               title: Text("あなたは満足を得ました",
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                    //fontWeight: FontWeight.bold,
                     fontSize: 20,
                     color: Color.fromRGBO(r, g, b, 1.0),
                     shadows: <Shadow>[

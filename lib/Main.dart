@@ -9,6 +9,8 @@ import 'package:fish_flutter/View/Test.dart';
 
 import 'View/LightSpotWegit.dart';
 
+import 'package:google_fonts/google_fonts.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -33,6 +35,10 @@ class MyApp extends StatelessWidget {
         //ヘッダバーの色
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        //基本フォント
+        textTheme: GoogleFonts.yuseiMagicTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
       initialRoute: '/',
       routes: {

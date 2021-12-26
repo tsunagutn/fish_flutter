@@ -59,7 +59,9 @@
 //済・超過画面出すときに画面全体光らす
 //済・ゲームオーバー無しにする
 //済・ルアー耐久システム
+//・スライダーの右下に数値も出す
 //・店
+//・陸から何メートルで釣れる魚変わるシステム
 //・雲
 //・時合度が低いのが続かんようにするか、高くできるようにする
 //・王冠つきじゃないと詳細アンロックしない
@@ -1231,13 +1233,16 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                         inactiveColor: (_flgBait || _flgHit)
                                             ? Colors.black
                                             : Colors.white,
-                                        value: _tension / TENSION_VAL_MAX,
+                                        value: _tension,
+                                        maxValue: TENSION_VAL_MAX,
                                         backRadius: _animationRadius.value,
                                         maxBackRadius: POINTER_BACK_SIZE,
                                         flgShaKe:
                                             (_flgBait || (_tension > _drag))
                                                 ? true
                                                 : false,
+                                        flgDispValue: true,
+                                        flgDispMaxValue: true,
                                       ),
                                       child: Container(
 //                                  height: 500,
@@ -1293,10 +1298,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   activeColor:
                                       clsColor._getColorFromHex("FF3030"),
                                   inactiveColor: Colors.white,
-                                  value: _nowLineHp / _maxLineHp,
+                                  value: _nowLineHp,
+                                  maxValue: _maxLineHp,
                                   backRadius: 0,
                                   maxBackRadius: 0,
                                   flgShaKe: false,
+                                  flgDispValue: true,
+                                  flgDispMaxValue: false,
                                 ),
                                 child: Container(),
                               ),
@@ -1318,10 +1326,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                   height: 20,
                                   activeColor: _speedActiveTrackColor,
                                   inactiveColor: Colors.white,
-                                  value: _speed / SPEED_VAL_MAX,
+                                  value: _speed,
+                                  maxValue: SPEED_VAL_MAX,
                                   backRadius: 0,
                                   maxBackRadius: 0,
                                   flgShaKe: false,
+                                  flgDispValue: true,
+                                  flgDispMaxValue: true,
                                 ),
                                 child: Container(),
                               ),
@@ -1552,13 +1563,16 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                                                 (FISH_TABLE.fishs[_fishidx].hp *
                                                     _fishSize))),
                                         inactiveColor: Colors.white,
-                                        value: _hitScanCnt /
+                                        value: _hitScanCnt.toDouble(),
+                                        maxValue:
                                             (FISH_TABLE.fishs[_fishidx].hp +
                                                 (FISH_TABLE.fishs[_fishidx].hp *
                                                     _fishSize)),
                                         backRadius: 0,
                                         maxBackRadius: 0,
                                         flgShaKe: false,
+                                        flgDispValue: false,
+                                        flgDispMaxValue: false,
                                       ),
                                       child: Container(),
                                     ),
@@ -2297,7 +2311,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     int hp = 0,
     int maxHp = 0,
   }) {
-    final value = hp / maxHp;
+    //final value = hp / maxHp;
     return SizedBox(
       width: tackleIconSize,
       height: tackleIconSize,
@@ -2329,12 +2343,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 child: CustomPaint(
                   painter: new SliderPainter(
                     height: 4,
-                    activeColor: getRaitoColor(value),
+                    activeColor: getRaitoColor(hp / maxHp),
                     inactiveColor: Colors.white,
-                    value: value,
+                    value: hp.toDouble(),
+                    maxValue: maxHp.toDouble(),
                     backRadius: 0,
                     maxBackRadius: 0,
                     flgShaKe: false,
+                    flgDispValue: false,
+                    flgDispMaxValue: false,
                   ),
                   child: Container(),
                 ),
