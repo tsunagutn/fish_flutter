@@ -112,6 +112,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
+import 'package:audioplayers/audioplayers.dart';
+import 'package:fish_flutter/widget/SoundManagerPool.dart';
+
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
 
@@ -119,9 +122,19 @@ class Fishing extends StatefulWidget {
   _FishingState createState() => _FishingState();
 }
 
+enum PlayerState { stopped, playing, paused }
+
 // つりページのステータス管理
 class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   //定数の定義？？？いろいろ環境設定にした方がいいかと
+  //BGM
+  final AudioCache _bgm = AudioCache(
+    fixedPlayer: AudioPlayer(),
+  );
+  late AudioPlayer _ap;
+
+  //SE
+  late SoundManagerPool soundManagerPool;
 
   //デバッグフラグ すぐつれちゃう
   static const DEBUGFLG = true;
@@ -191,6 +204,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   late Animation<double> _tackleMenuAnime;
   late AnimationController _jerkTextAnimationController; //ジャーク時のテキストアニメーション
   late Animation<double> _jerkTextLocation;
+
+  //定周期タイマ
+  late Timer _timer;
 
   //状態フラグ変数
   var _onTap = false; //現在タップ中フラグ
@@ -296,6 +312,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    //BGM再生
+    _ap = new AudioPlayer();
+    this.bgmPlay('Bgm/bgm_field.mp3');
+
+    //SE再生 10つまで同時再生
+    soundManagerPool = new SoundManagerPool(10);
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
     //釣果リストを初期化
@@ -313,10 +335,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       _appBarHeight = AppBar().preferredSize.height;
 
       //定周期タイマの開始
-      Timer.periodic(
-        Duration(milliseconds: TIMER_INTERVAL),
-        _onTimer,
-      );
+      startTimer();
     });
 
     //光点アニメーションの初期化
@@ -352,17 +371,37 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   }
 
   void dispose() {
+    _timer.cancel();
     _animationController.dispose();
     waveController.dispose(); // AnimationControllerは明示的にdisposeする。
     _centerTextAnimationController.dispose();
     _tackleMenuAnimationController.dispose();
     _jerkTextAnimationController.dispose();
     fishPointerList.clear();
+    _ap.stop();
+    _ap.dispose();
     super.dispose();
   }
 
+  Future bgmPlay(file) async {
+    await _ap.play('Assets/' + file);
+    await _ap.setVolume(0.5);
+  }
+
+  Future bgmStop() async {
+    await _ap.stop();
+  }
+
+  //定周期タイマの起動
+  void startTimer() {
+    _timer = Timer.periodic(
+      Duration(milliseconds: TIMER_INTERVAL),
+      onTimer,
+    );
+  }
+
   //定周期処理
-  void _onTimer(Timer timer) {
+  void onTimer(Timer timer) async {
     if (!mounted) {
       //既に画面が無効の場合は無処理
       return;
@@ -522,13 +561,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           addVal -= HOSEI_MAX;
         }
       }
-
       //debugPrint(_rodStandUp.toString());
       //シャクリによるテンション増加？？？竿長さによって係数を可変にする
       addVal += _rodStandUp * 35;
       //シャクリによる水深減算
       _depth -= _rodStandUp * 2;
     }
+
     if (addVal > 0) {
       //テンション+時は現在テンションによって補正をかける
       //addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
@@ -556,6 +595,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         haveTackle.lostLure(haveTackle.getUseLure().id);
         _flgBait = false;
         _flgHit = false;
+        soundManagerPool.playSound('Se/linebreak.mp3');
       }
     }
     // //座礁
@@ -600,10 +640,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       val = val - (dragDiff / 25);
       //テンションゲージの色を変える
       _tensionActiveTrackColor = TENSION_COLOR_DRAG;
-      //audio.currentTime = 0;
-      //audio.play();
-      //var duration = 200; // 振動時間
-      //navigator.vibrate(duration);
+      //ドラグ音再生
+      soundManagerPool.playSound('Se/drag.mp3');
     } else {
       //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
       //   if (val >= (TENSION_VAL_MAX * 0.9)) {
@@ -703,8 +741,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       });
       //釣果リストに登録
       fishesResult.addResult(fish.id, _fishSize);
+
+      soundManagerPool.playSound('Se/jingle01.mp3');
       //釣りあげ時のモーダル
-      var result = showDialog<int>(
+      _timer.cancel(); //定周期タイマ停止
+      bgmStop();
+      var result = await showDialog<int>(
         context: context,
         barrierDismissible: false,
         builder: (_) {
@@ -722,6 +764,8 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
         },
       );
       _depth = 0.0;
+      startTimer(); //定周期タイマ再開
+      bgmPlay('Bgm/bgm_field.mp3');
     }
 
     //光点点滅速度関連の変数
@@ -899,6 +943,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
           _centerTextSubColor = Colors.yellow;
           startCenterInfo();
+
+          soundManagerPool.playSound('Se/hit.mp3');
+          this.bgmPlay('Bgm/bgm_fight.mp3');
         } else {
           //当たってからのスキャン数加算
           _baitCnt++;
@@ -1057,7 +1104,10 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                 color: Colors.white,
                 iconSize: 30.0,
                 onPressed: () async {
+                  _timer.cancel(); //定周期タイマ停止
+                  bgmStop();
                   // //図鑑モーダルの表示
+                  soundManagerPool.playSound('Se/book.mp3');
                   var result = await showDialog<int>(
                     context: context,
                     barrierDismissible: false,
@@ -1065,10 +1115,15 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
                       return BookDialog(
                         fishsTable: FISH_TABLE,
                         fishesResult: fishesResult,
+                        soundManagerPool: soundManagerPool,
                       );
                     },
                   );
-                  debugPrint(result.toString());
+                  soundManagerPool.playSound('Se/book.mp3');
+                  startTimer(); //定周期タイマ再開
+                  this.bgmPlay('Bgm/bgm_field.mp3');
+
+//                  debugPrint(result.toString());
                   setState(() {});
                 },
               ),
@@ -1175,6 +1230,12 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
               _speed = val;
               //アワセ値
               addVal = (moveY / 100);
+              //シャクリ音（小）
+              if (addVal > 0.3) {
+                soundManagerPool.playSound('Se/lowjerk.mp3');
+              } else if (addVal > 0.5) {
+                soundManagerPool.playSound('Se/middlejerk.mp3');
+              }
               val = _rodStandUp + addVal;
               if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
               if (val < 0) val = 0;
@@ -2196,6 +2257,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     setState(() {
       fishPointerList.add(fishPointer);
     });
+    //_cache.play('Se/kk_sonar_low.mp3');
+    //play('Assets/Se/kk_sonar_low.mp3');
+    if (!_flgHit) soundManagerPool.playSound('Se/kk_sonar_low.mp3');
     await Future<void>.delayed(duration);
     setState(() {
       fishPointerList.removeAt(0);
@@ -2218,6 +2282,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       _clutchBackColor = Colors.red;
     }
     _onClutch = flg;
+    soundManagerPool.playSound('Se/clutch.mp3');
   }
 
   bool ligntSpotAnimation(bool initflg, int durationMsec) {
