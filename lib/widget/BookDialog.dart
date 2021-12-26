@@ -170,7 +170,7 @@ class _BookDialogState extends State<BookDialog>
                                                 borderRadius: BorderRadius.all(
                                                     Radius.circular(7.0)),
                                                 color: Colors.yellow),
-                                            child: Text("底物",
+                                            child: Text("根魚",
                                                 style: TextStyle(
                                                   color: Colors.black,
                                                   fontWeight: FontWeight.bold,
