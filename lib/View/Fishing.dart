@@ -1296,7 +1296,7 @@ class _FishingState extends BasePageState<Fishing>
                                         //Text("TENSION/DRAG"),
                                         new Image(
                                           image: AssetImage(
-                                              'Assets/Images/TENSIONDRAG.png'),
+                                              'assets/Images/TENSIONDRAG.png'),
                                         ),
                                         CustomPaint(
                                           painter: new SliderPainter(
@@ -1395,7 +1395,7 @@ class _FishingState extends BasePageState<Fishing>
                                   //Text("SPEED"),
                                   new Image(
                                     image:
-                                        AssetImage('Assets/Images/SPEED.png'),
+                                        AssetImage('assets/Images/SPEED.png'),
                                   ),
                                   CustomPaint(
                                     painter: new SliderPainter(
@@ -1457,7 +1457,7 @@ class _FishingState extends BasePageState<Fishing>
                                 angle:
                                     (405 - (90 * _depthChange)) * math.pi / 180,
                                 child: new Image(
-                                  image: AssetImage('Assets/Images/ship.png'),
+                                  image: AssetImage('assets/Images/ship.png'),
                                   width: 60,
                                   height: 40,
                                 ),
@@ -1526,7 +1526,7 @@ class _FishingState extends BasePageState<Fishing>
                                         },
                                         child: new Image(
                                           image: AssetImage(
-                                              'Assets/Images/arrow_left.png'),
+                                              'assets/Images/arrow_left.png'),
                                           height: 30,
                                         ),
                                       ),
@@ -1553,7 +1553,7 @@ class _FishingState extends BasePageState<Fishing>
                                         },
                                         child: new Image(
                                           image: AssetImage(
-                                              'Assets/Images/arrow_right.png'),
+                                              'assets/Images/arrow_right.png'),
                                           height: 30,
                                         ),
                                       ),
@@ -1846,7 +1846,7 @@ class _FishingState extends BasePageState<Fishing>
                                       },
                                       child: tackleIcon(
                                         tackleIconSize: 40.0,
-                                        imagePath: 'Assets/Images/rod.png',
+                                        imagePath: 'assets/Images/rod.png',
                                         flgSelect: false,
                                       )),
                                   //リール
@@ -1861,7 +1861,7 @@ class _FishingState extends BasePageState<Fishing>
                                       },
                                       child: tackleIcon(
                                           tackleIconSize: 40.0,
-                                          imagePath: 'Assets/Images/reel.png',
+                                          imagePath: 'assets/Images/reel.png',
                                           flgSelect: false)),
                                   //ルアー
                                   GestureDetector(
@@ -1875,7 +1875,7 @@ class _FishingState extends BasePageState<Fishing>
                                       },
                                       child: tackleIcon(
                                           tackleIconSize: 40.0,
-                                          imagePath: 'Assets/Images/' +
+                                          imagePath: 'assets/Images/' +
                                               lures
                                                   .getLureData(haveTackle
                                                       .getUseLure()
@@ -1994,7 +1994,7 @@ class _FishingState extends BasePageState<Fishing>
                                               child: tackleIcon(
                                                   tackleIconSize: 60.0,
                                                   imagePath:
-                                                      'Assets/Images/rod.png',
+                                                      'assets/Images/rod.png',
                                                   flgSelect:
                                                       _selectTacleIcon == 'rod'
                                                           ? true
@@ -2013,7 +2013,7 @@ class _FishingState extends BasePageState<Fishing>
                                               child: tackleIcon(
                                                   tackleIconSize: 60.0,
                                                   imagePath:
-                                                      'Assets/Images/reel.png',
+                                                      'assets/Images/reel.png',
                                                   flgSelect:
                                                       _selectTacleIcon == 'reel'
                                                           ? true
@@ -2030,7 +2030,7 @@ class _FishingState extends BasePageState<Fishing>
                                               padding: EdgeInsets.all(10),
                                               child: tackleIcon(
                                                   tackleIconSize: 60.0,
-                                                  imagePath: 'Assets/Images/' +
+                                                  imagePath: 'assets/Images/' +
                                                       lures
                                                           .getLureData(
                                                               haveTackle
@@ -2100,7 +2100,7 @@ class _FishingState extends BasePageState<Fishing>
                                                         child: tackleIcon(
                                                             tackleIconSize:
                                                                 40.0,
-                                                            imagePath: 'Assets/Images/' +
+                                                            imagePath: 'assets/Images/' +
                                                                 lures
                                                                     .getLureData(haveTackle
                                                                         .haveLures[
@@ -2306,7 +2306,7 @@ class _FishingState extends BasePageState<Fishing>
       fishPointerList.add(fishPointer);
     });
     //_cache.play('Se/kk_sonar_low.mp3');
-    //play('Assets/Se/kk_sonar_low.mp3');
+    //play('assets/Se/kk_sonar_low.mp3');
     if (!_flgHit) soundManagerPool.playSound('Se/kk_sonar_low.mp3');
     await Future<void>.delayed(duration);
     setState(() {

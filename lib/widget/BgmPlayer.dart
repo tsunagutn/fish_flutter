@@ -1,10 +1,11 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audioplayers_api.dart';
+import 'package:flutter/material.dart';
 
 class BgmPlayer {
   late AudioCache _cache;
   AudioPlayer? _player = AudioPlayer();
-  String? nowBgmName;
+  String nowBgmName = '';
   Map<String, Uri> bgmUriMap = Map<String, Uri>();
 
   BgmPlayer() {
@@ -19,14 +20,17 @@ class BgmPlayer {
   }
 
   void playBgm({required String name, bool isLoop = true}) {
+    //if (nowBgmName != '') {
+    //現在何か再生中なら止める
+    stopBgmAny();
+    //}
     nowBgmName = name;
     if (isLoop) {
       _player?.setReleaseMode(ReleaseMode.LOOP);
     } else {
       _player?.setReleaseMode(ReleaseMode.RELEASE);
     }
-    _player?.play(bgmUriMap[name].toString());
-    _player?.setVolume(1.0);
+    _player?.play(bgmUriMap[name].toString(), volume: 0.5);
   }
 
   void pauseBgm(String? name) async {

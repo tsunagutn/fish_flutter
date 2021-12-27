@@ -119,7 +119,7 @@ class _fishTile extends StatelessWidget {
                 Column(
                   children: [
                     new Image(
-                      image: AssetImage('Assets/Images/' + image),
+                      image: AssetImage('assets/Images/' + image),
                       width: 50,
                       height: 50,
                     ),

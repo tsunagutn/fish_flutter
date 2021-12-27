@@ -88,7 +88,7 @@ class _BookDialogState extends State<BookDialog>
                     width: double.maxFinite,
                     decoration: BoxDecoration(
                         image: new DecorationImage(
-                          image: new AssetImage("Assets/Images/fishback.jpg"),
+                          image: new AssetImage("assets/Images/fishback.jpg"),
                           fit: BoxFit.cover,
                         ),
                         border: Border.all(
@@ -104,7 +104,7 @@ class _BookDialogState extends State<BookDialog>
                               margin: EdgeInsets.only(top: 20, bottom: 10),
                               child: new Image(
                                 image: AssetImage(
-                                    'Assets/Images/' + _showFishData.image),
+                                    'assets/Images/' + _showFishData.image),
                                 width: 180,
                               ),
                             ),
@@ -421,7 +421,7 @@ class _BookDialogState extends State<BookDialog>
                 Column(
                   children: [
                     new Image(
-                      image: AssetImage('Assets/Images/' + image),
+                      image: AssetImage('assets/Images/' + image),
                       width: 50,
                       height: 50,
                     ),
