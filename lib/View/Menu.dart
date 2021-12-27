@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 
 import 'package:fish_flutter/View/DrawerItem.dart';
+import 'package:fish_flutter/View/Fishing.dart';
+import 'package:fish_flutter/Class/BasePageState.dart';
 
-class Menu extends StatelessWidget {
+class Menu extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  _menuState createState() {
+    return _menuState();
+  }
+}
+
+class _menuState extends BasePageState<Menu> {
+  _menuState() : super(fileName: "bgm_fight.mp3");
+
+  @override
+  Widget buildChildWidget(BuildContext context) {
+    // <-- 通常のbuildメソッドの代わりに実装
+    return Material(
+        child: Scaffold(
       appBar: AppBar(
         title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text("メインメニュー"),
@@ -29,7 +42,13 @@ class Menu extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                   onTap: () async {
                     final result =
-                        await Navigator.of(context).pushNamed('/fishing');
+                        //await Navigator.of(context).pushNamed('/fishing');
+                        bgm?.loadBgm().then((_) {
+                      // ここでBGMデータの全ロード処理実行
+                      debugPrint(Fishing.screenBgm);
+                      bgm?.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                      Navigator.pushNamed(context, "/fishing"); // 遷移
+                    });
                   },
                   child: Container(
                       margin: const EdgeInsets.all(10.0),
@@ -129,6 +148,6 @@ class Menu extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

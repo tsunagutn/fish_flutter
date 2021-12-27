@@ -114,9 +114,12 @@ import 'package:flutter/rendering.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
+import 'package:fish_flutter/widget/BgmPlayer.dart';
+import 'package:fish_flutter/Class/BasePageState.dart';
 
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
+  static String screenBgm = 'bgm_field.mp3';
 
   @override
   _FishingState createState() => _FishingState();
@@ -125,13 +128,17 @@ class Fishing extends StatefulWidget {
 enum PlayerState { stopped, playing, paused }
 
 // つりページのステータス管理
-class _FishingState extends State<Fishing> with TickerProviderStateMixin {
+class _FishingState extends BasePageState<Fishing>
+    with TickerProviderStateMixin {
+  _FishingState()
+      : super(fileName: Fishing.screenBgm); // <-- 親クラスのコンストラクタにファイル名設定
+
   //定数の定義？？？いろいろ環境設定にした方がいいかと
   //BGM
-  final AudioCache _bgm = AudioCache(
-    fixedPlayer: AudioPlayer(),
-  );
-  late AudioPlayer _ap;
+  // final AudioCache _bgm = AudioCache(
+  //   fixedPlayer: AudioPlayer(),
+  // );
+  // late AudioPlayer _ap;
 
   //SE
   late SoundManagerPool soundManagerPool;
@@ -312,9 +319,9 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    //BGM再生
-    _ap = new AudioPlayer();
-    this.bgmPlay('Bgm/bgm_field.mp3');
+    // //BGM再生
+    // _ap = new AudioPlayer();
+    // this.bgmPlay('Bgm/bgm_field.mp3');
 
     //SE再生 10つまで同時再生
     soundManagerPool = new SoundManagerPool(10);
@@ -378,18 +385,17 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
     _tackleMenuAnimationController.dispose();
     _jerkTextAnimationController.dispose();
     fishPointerList.clear();
-    _ap.stop();
-    _ap.dispose();
+    // _ap.stop();
+    // _ap.dispose();
     super.dispose();
   }
 
   Future bgmPlay(file) async {
-    await _ap.play('Assets/' + file);
-    await _ap.setVolume(0.5);
+    super.bgm?.playBgm(name: file);
   }
 
   Future bgmStop() async {
-    await _ap.stop();
+    super.bgm?.stopBgmAny();
   }
 
   //定周期タイマの起動
@@ -729,8 +735,6 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
       var fish = FISH_TABLE.fishs[_fishidx];
       //debugPrint("おおきさ" + size.toString());
       var point = fish.point + (fish.point * _fishSize).floor();
-      //ポイントを加算
-      _point += point;
       //初釣果判定
       var flgNew = true;
       fishesResult.listFishResult.forEach((val) {
@@ -763,9 +767,13 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           );
         },
       );
+      //モーダル閉じた時
       _depth = 0.0;
+      //ポイントを加算
+      _point += point;
+
       startTimer(); //定周期タイマ再開
-      bgmPlay('Bgm/bgm_field.mp3');
+      bgmPlay(super.fileName);
     }
 
     //光点点滅速度関連の変数
@@ -945,7 +953,7 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
           startCenterInfo();
 
           soundManagerPool.playSound('Se/hit.mp3');
-          this.bgmPlay('Bgm/bgm_fight.mp3');
+          bgmPlay('bgm_fight.mp3');
         } else {
           //当たってからのスキャン数加算
           _baitCnt++;
@@ -1066,1144 +1074,1184 @@ class _FishingState extends State<Fishing> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
-    //スプライトウィジットの初期化
-    //_spriteWidget = new SpriteWidget(new GameNode(MediaQuery.of(context).size));
+  Widget buildChildWidget(BuildContext context) {
+    // <-- 通常のbuildメソッドの代わりに実装
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
-
-    return Scaffold(
-        // appBar: AppBar(
-        //   title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        //     Text("環境設定"),
-        //   ]),
-        //   leading: IconButton(
-        //     // 戻るアイコン
-        //     icon: Icon(Icons.arrow_back),
-        //     color: Colors.white,
-        //     iconSize: 30.0,
-        //     onPressed: () {
-        //       //前画面に戻る
-        //       Navigator.of(context).pop();
-        //     },
-        //   ),
-        // ),
-        extendBodyBehindAppBar: true, // <--- ここ
-        appBar: AppBar(
-          // title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          //   Text("環境設定"),
-          // ]),
-          backgroundColor: clsColor._getColorFromHex("FFFFFF").withOpacity(0.1),
-          //title: Text(_senchoMessage),
-          //左上
-          leading: Row(
-            children: [
-              IconButton(
-                // 図鑑アイコン
-                icon: Icon(Icons.menu_book),
-                color: Colors.white,
-                iconSize: 30.0,
-                onPressed: () async {
-                  _timer.cancel(); //定周期タイマ停止
-                  bgmStop();
-                  // //図鑑モーダルの表示
-                  soundManagerPool.playSound('Se/book.mp3');
-                  var result = await showDialog<int>(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (_) {
-                      return BookDialog(
-                        fishsTable: FISH_TABLE,
-                        fishesResult: fishesResult,
-                        soundManagerPool: soundManagerPool,
+    return Material(
+        child: Scaffold(
+            // appBar: AppBar(
+            //   title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            //     Text("環境設定"),
+            //   ]),
+            //   leading: IconButton(
+            //     // 戻るアイコン
+            //     icon: Icon(Icons.arrow_back),
+            //     color: Colors.white,
+            //     iconSize: 30.0,
+            //     onPressed: () {
+            //       //前画面に戻る
+            //       Navigator.of(context).pop();
+            //     },
+            //   ),
+            // ),
+            extendBodyBehindAppBar: true, // <--- ここ
+            appBar: AppBar(
+              // title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              //   Text("環境設定"),
+              // ]),
+              backgroundColor:
+                  clsColor._getColorFromHex("FFFFFF").withOpacity(0.1),
+              //title: Text(_senchoMessage),
+              //左上
+              leading: Row(
+                children: [
+                  IconButton(
+                    // 図鑑アイコン
+                    icon: Icon(Icons.menu_book),
+                    color: Colors.white,
+                    iconSize: 30.0,
+                    onPressed: () async {
+                      _timer.cancel(); //定周期タイマ停止
+                      bgmStop();
+                      // //図鑑モーダルの表示
+                      soundManagerPool.playSound('Se/book.mp3');
+                      var result = await showDialog<int>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) {
+                          return BookDialog(
+                            fishsTable: FISH_TABLE,
+                            fishesResult: fishesResult,
+                            soundManagerPool: soundManagerPool,
+                          );
+                        },
                       );
-                    },
-                  );
-                  soundManagerPool.playSound('Se/book.mp3');
-                  startTimer(); //定周期タイマ再開
-                  this.bgmPlay('Bgm/bgm_field.mp3');
+                      soundManagerPool.playSound('Se/book.mp3');
+                      startTimer(); //定周期タイマ再開
+                      bgmPlay(super.fileName);
 
 //                  debugPrint(result.toString());
-                  setState(() {});
-                },
+                      setState(() {});
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-          //右上（複数可）
-          actions: [
-            Container(
-                child: ElevatedButton(
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Icon(
-                  Icons.shopping_cart,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
-                Text(
-                  _point.toString() + "ポイント",
-                ),
-              ]),
-              onPressed: () {
-                //買い物モーダルの表示
-              },
-            )),
-          ],
-          flexibleSpace:
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-              Container(
-                color: Colors.white,
-                child: Text(
-                  _senchoMessage,
-                  style: TextStyle(
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-              )
-            ]),
-          ]),
-        ),
-        //endDrawer: DrawerItem(),
-
-        // body: SafeArea(
-        //   child: SpriteWidget(
-        //     RootNode(size),
-        //   ),
-        // ),
-
-        body: GestureDetector(
-            //ドラッグ操作が開始された時
-            onPanStart: (DragStartDetails details) {
-              debugPrint("ドラッグ開始");
-              _showTacleChangeDialog = false;
-              _cursorX = details.localPosition.dx;
-              _cursorY = details.localPosition.dy;
-              //クラッチOFF時、タップ箇所がクラッチ部分か？
-              if (!_onClutch &&
-                  // _cursorX > _tackleCenterX - (_reelSizeX) &&
-                  // _cursorX < _tackleCenterX + (_reelSizeX) &&
-                  // _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
-                  // _cursorY < _reelCenterY + _reelSizeY)
-                  //リールをタップで
-                  _cursorX > _tackleCenterX - _reelSizeX &&
-                  _cursorX < _tackleCenterX + _reelSizeX &&
-                  _cursorY > _reelCenterY - _reelSizeY &&
-                  _cursorY < _reelCenterY + _reelSizeY) {
-                chengeClutch(true);
-                return;
-              }
-
-              chengeClutch(false);
-              _onTap = true;
-              //タップ時の画面エフェクト
-              offset =
-                  Offset(details.globalPosition.dx, details.globalPosition.dy);
-              generateTapPointer(details);
-
-              //generateFishPointer(100);
-              //タップ時はスピードスライダの色替え
-              _speedActiveTrackColor = SPEED_COLOR_REELING;
-            },
-            //ドラッグ操作で位置が変化した時
-            onPanUpdate: (DragUpdateDetails details) {
-              if (size.isEmpty) {
-                return;
-              }
-              if (!_onTap) {
-                return;
-              }
-              //現在の座標を取得する
-              var mX = details.localPosition.dx; //X座標
-              var mY = details.localPosition.dy; //Y座標
-              //初期位置から動いた値を取得
-              var moveX = mX - _cursorX;
-              var moveY = mY - _cursorY;
-              //x座標記憶を更新
-              _cursorX = mX;
-              _cursorY = mY;
-              //巻き速度値の計算
-              var addVal = (moveX / (1000 / 2) * SPEED_VAL_MAX);
-              var val = _speed + addVal;
-              if (val > SPEED_VAL_MAX) val = SPEED_VAL_MAX;
-              if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
-              _speed = val;
-              //アワセ値
-              addVal = (moveY / 100);
-              //シャクリ音（小）
-              if (addVal > 0.3) {
-                soundManagerPool.playSound('Se/lowjerk.mp3');
-              } else if (addVal > 0.5) {
-                soundManagerPool.playSound('Se/middlejerk.mp3');
-              }
-              val = _rodStandUp + addVal;
-              if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
-              if (val < 0) val = 0;
-              _rodStandUp = val;
-            },
-            //タップ、ドラッグ操作が終了した時
-            onPanEnd: (DragEndDetails details) {
-              debugPrint("タップはなし");
-              //chengeClutch(false);
-              //add_min = -10;
-              _onTap = false;
-              //スピードスライダの色を戻す
-              _speedActiveTrackColor = SPEED_COLOR;
-            },
-            child: new Stack(children: <Widget>[
-              Column(children: <Widget>[
-                //海上
+              //右上（複数可）
+              actions: [
                 Container(
-                  key: globalKeyShore,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                    begin: FractionalOffset.topCenter,
-                    end: FractionalOffset.bottomCenter,
-                    colors: [
-                      clsColor._getColorFromHex("5495FF"),
-                      clsColor._getColorFromHex("EFFAFF")
-                    ],
-                    stops: const [
-                      0.0,
-                      1.0,
-                    ],
-                  )),
-                  child: Column(children: <Widget>[
-                    Container(
-                        //appBarは透過なのでその分の高さを加算
-                        margin: EdgeInsets.only(top: _appBarHeight + 10),
-                        height: 40,
-                        //テンションとドラグレベルのスライダーをstackで重ねて表示
-                        child: new Stack(children: <Widget>[
-                          // //テンションスライダー
-                          Container(
-                              margin: EdgeInsets.only(left: 10, right: 10),
-                              //color: Colors.white,
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    //Text("TENSION/DRAG"),
-                                    new Image(
-                                      image: AssetImage(
-                                          'Assets/Images/TENSIONDRAG.png'),
-                                    ),
-                                    CustomPaint(
-                                      painter: new SliderPainter(
-                                        height: 20,
-                                        activeColor: _tensionActiveTrackColor,
-                                        inactiveColor: (_flgBait || _flgHit)
-                                            ? Colors.black
-                                            : Colors.white,
-                                        value: _tension,
-                                        maxValue: TENSION_VAL_MAX,
-                                        backRadius: _animationRadius.value,
-                                        maxBackRadius: POINTER_BACK_SIZE,
-                                        flgShaKe:
-                                            (_flgBait || (_tension > _drag))
-                                                ? true
-                                                : false,
-                                        flgDispValue: true,
-                                        flgDispMaxValue: true,
-                                      ),
-                                      child: Container(
-//                                  height: 500,
-                                          ),
-                                    )
-                                  ])),
-                          //ドラグスライダー
-                          Container(
-                            margin: EdgeInsets.only(top: 15),
-                            height: 40,
-                            child: SliderTheme(
-                                data: SliderTheme.of(context).copyWith(
-                                  //trackHeight: 1, //全体の縦長
-                                  valueIndicatorColor:
-                                      Colors.black.withOpacity(0.0), //背景の色
-                                  activeTrackColor:
-                                      Colors.black.withOpacity(0.0), //値有りエリアの色
-                                  inactiveTrackColor:
-                                      Colors.black.withOpacity(0.0), //値無しエリアの色
-                                  activeTickMarkColor:
-                                      Colors.black.withOpacity(0.0), //各value値の色
-                                  thumbColor: Colors.red, //値ツマミの色
-                                  thumbShape: RoundSliderThumbShape(
-                                      enabledThumbRadius: 10), //ツマミの大きさ
-                                  overlayColor: Colors.black
-                                      .withOpacity(0.0), //値ツマミフォーカス時の色
-                                ),
-                                child: Slider(
-                                  value: _drag,
-                                  //MAX-MINはテンションと同じ
-                                  min: TENSION_VAL_MIN,
-                                  max: TENSION_VAL_MAX,
-                                  divisions: (TENSION_VAL_MAX - TENSION_VAL_MIN)
-                                      .floor(),
-                                  onChanged: (double value) {
-                                    setState(() {
-                                      _drag = value.roundToDouble();
-                                    });
-                                  },
-                                )),
-                          )
-                        ])),
-                    //ラインHPスライダー
-                    Container(
-                        margin: EdgeInsets.only(left: 10, right: 10, bottom: 5),
-                        height: 5,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              CustomPaint(
-                                painter: new SliderPainter(
-                                  height: 5,
-                                  activeColor:
-                                      clsColor._getColorFromHex("FF3030"),
-                                  inactiveColor: Colors.white,
-                                  value: _nowLineHp,
-                                  maxValue: _maxLineHp,
-                                  backRadius: 0,
-                                  maxBackRadius: 0,
-                                  flgShaKe: false,
-                                  flgDispValue: true,
-                                  flgDispMaxValue: false,
-                                ),
-                                child: Container(),
-                              ),
-                            ])),
-
-                    //巻速度スライダー
-                    Container(
-                        margin: EdgeInsets.only(left: 10, right: 10),
-                        height: 50,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              //Text("SPEED"),
-                              new Image(
-                                image: AssetImage('Assets/Images/SPEED.png'),
-                              ),
-                              CustomPaint(
-                                painter: new SliderPainter(
-                                  height: 20,
-                                  activeColor: _speedActiveTrackColor,
-                                  inactiveColor: Colors.white,
-                                  value: _speed,
-                                  maxValue: SPEED_VAL_MAX,
-                                  backRadius: 0,
-                                  maxBackRadius: 0,
-                                  flgShaKe: false,
-                                  flgDispValue: true,
-                                  flgDispMaxValue: true,
-                                ),
-                                child: Container(),
-                              ),
-                              //可能性のある魚種の速度範囲表示
-                              CustomPaint(
-                                painter: new FishRangeSliderPainter(
-                                  activeColor: _speedActiveTrackColor,
-                                  inactiveColor: Colors.red,
-                                  backRadius: 0,
-                                  maxBackRadius: 0,
-                                  maxSpeed: SPEED_VAL_MAX,
-                                  speedRange: _listSpeedRange,
-                                ),
-                                child: Container(),
-                              )
-                            ])),
-
-                    Stack(children: <Widget>[
-                      Container(
-                        alignment: Alignment.center,
-                        // margin: EdgeInsets.only(
-                        //     top: math.sin(waveController.value * 0.5 * math.pi),
-                        //     left: math.sin(waveController.value * math.pi)),
-                        child: GestureDetector(
-                          onTap: () async {
-                            setState(() {
-                              //_senchoMessage = "わしゃあ忙しいんで！";
-                            });
-                            // var result = await showDialog<int>(
-                            //   context: context,
-                            //   barrierDismissible: false,
-                            //   builder: (_) {
-                            //     return SenchoDialog(
-                            //       depth_change_order: _depthChangeOrder,
-                            //       point: _point,
-                            //     );
-                            //   },
-                            // );
-                            // debugPrint(result.toString());
-                            // setState(() {
-                            //   _depthChangeOrder = result as int;
-                            // });
-                          },
-                          child: Transform.rotate(
-                            //angle: 45 * math.pi / 180,
-                            angle: (405 - (90 * _depthChange)) * math.pi / 180,
-                            child: new Image(
-                              image: AssetImage('Assets/Images/ship.png'),
-                              width: 60,
-                              height: 40,
-                            ),
-                          ),
+                    child: ElevatedButton(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.shopping_cart,
+                          color: Colors.white,
+                          size: 30.0,
                         ),
-                      ),
-                      Container(
-                          height: 40,
-                          child: AnimatedBuilder(
-                            animation: waveController, // waveControllerを設定
-                            builder: (context, child) => Stack(
-                              children: <Widget>[
-                                //？？？iPhoneのsafariで描画できない,androidはOK
-                                // 1つ目の波
-                                ClipPath(
-                                  child: Container(
-                                      color: clsColor
-                                          ._getColorFromHex("02D5F2")
-                                          .withOpacity(1.0)),
-                                  clipper: WaveClipper(
-                                      context, waveController.value, 0),
-                                ),
-                                // 2つ目の波
-                                ClipPath(
-                                  child: Container(
-                                      color: clsColor
-                                          ._getColorFromHex("02D5F2")
-                                          .withOpacity(0.3)),
-                                  clipper: WaveClipper(
-                                      context, waveController.value, 0.5),
-                                ),
-                                // ↑ 追加部分
-                              ],
-                            ),
-                          )),
-                      AnimatedOpacity(
-                          opacity: (_depth > 0.0 || _point <= 0) ? 0.0 : 1.0,
-                          duration: Duration(milliseconds: 200),
-                          child: Container(
-                              margin: EdgeInsets.only(left: 10, right: 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  GestureDetector(
-                                    //タップ開始
-                                    onTapDown: (details) {
-                                      if (_depth <= 0.0) {
-                                        setState(() {
-                                          _moveShipTarget = 0.3;
-                                        });
-                                      }
-                                    },
-                                    //タップ終了
-                                    onTapUp: (details) {
-                                      setState(() {
-                                        _moveShipTarget = 0.5;
-                                      });
-                                    },
-                                    //タップしたままフォーカス外れた時
-                                    onTapCancel: () {
-                                      setState(() {
-                                        _moveShipTarget = 0.5;
-                                      });
-                                    },
-                                    child: new Image(
-                                      image: AssetImage(
-                                          'Assets/Images/arrow_left.png'),
-                                      height: 30,
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    //タップ開始
-                                    onTapDown: (details) {
-                                      if (_depth <= 0.0) {
-                                        setState(() {
-                                          _moveShipTarget = 0.7;
-                                        });
-                                      }
-                                    },
-                                    //タップ終了
-                                    onTapUp: (details) {
-                                      setState(() {
-                                        _moveShipTarget = 0.5;
-                                      });
-                                    },
-                                    //タップしたままフォーカス外れた時
-                                    onTapCancel: () {
-                                      setState(() {
-                                        _moveShipTarget = 0.5;
-                                      });
-                                    },
-                                    child: new Image(
-                                      image: AssetImage(
-                                          'Assets/Images/arrow_right.png'),
-                                      height: 30,
-                                    ),
-                                  ),
-                                ],
-                              ))),
-                    ]),
-                  ]),
-                ),
-                //海中
-                Expanded(
-                    child: Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                                color: clsColor._getColorFromHex("02D5F2")),
-                            //color: clsColor._getColorFromHex("200070"),
-                            gradient: LinearGradient(
-                              begin: FractionalOffset.topCenter,
-                              end: FractionalOffset.bottomCenter,
-                              colors: [
-                                clsColor._getColorFromHex("02D5F2"),
-                                clsColor._getColorFromHex("013367"),
-                                clsColor._getColorFromHex("002142"),
-                                clsColor._getColorFromHex("000000"),
-                              ],
-                              stops: [0.0, _dispDepthLv1, _dispDepthLv2, 1.0],
-                            )),
-                        child: Column(children: <Widget>[
-                          //ソナー画面
-                          Expanded(
-                            //描画エリア
-                            child: Container(
-                              key: globalKeySonar,
-                              child: Stack(children: <Widget>[
-                                //ソナー光点
-                                Container(
-                                  width: size.width,
-                                  margin: EdgeInsets.only(
-                                      top: _lightSpotY, left: _lightSpotX),
-                                  child: CustomPaint(
-                                    painter: LightSpot(
-                                        POINTER_SIZE,
-                                        POINTER_BACK_SIZE,
-                                        _animationRadius.value,
-                                        _pointerColor,
-                                        0,
-                                        0),
-                                  ),
-                                ),
-                                //ジャーク時のテキスト
-                                if (_jerkTextAnimationController.isAnimating)
-                                  Container(
-                                    //width: 30,
-                                    margin: EdgeInsets.only(
-                                        top: _lightSpotY -
-                                            ((_lightSpotY < 18.0)
-                                                ? _lightSpotY
-                                                : (18.0 +
-                                                    _jerkTextLocation.value)),
-                                        left: _lightSpotX +
-                                            (10.0 * _jerkTextLocation.value)),
-                                    child: Text(
-                                      'ｼｬｸﾘ!',
-                                      style: TextStyle(
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-
-                                //魚HPスライダ
-                                Visibility(
-                                  visible: _flgHit,
-                                  child: Container(
-                                    width: 30,
-                                    margin: EdgeInsets.only(
-                                        top: _lightSpotY -
-                                            ((_lightSpotY < 18.0)
-                                                ? _lightSpotY
-                                                : 18.0),
-                                        left: _lightSpotX - 18.0),
-                                    child: CustomPaint(
-                                      painter: new SliderPainter(
-                                        height: 5,
-                                        activeColor: getRaitoColor(_hitScanCnt /
-                                            (FISH_TABLE.fishs[_fishidx].hp +
-                                                (FISH_TABLE.fishs[_fishidx].hp *
-                                                    _fishSize))),
-                                        inactiveColor: Colors.white,
-                                        value: _hitScanCnt.toDouble(),
-                                        maxValue:
-                                            (FISH_TABLE.fishs[_fishidx].hp +
-                                                (FISH_TABLE.fishs[_fishidx].hp *
-                                                    _fishSize)),
-                                        backRadius: 0,
-                                        maxBackRadius: 0,
-                                        flgShaKe: false,
-                                        flgDispValue: false,
-                                        flgDispMaxValue: false,
-                                      ),
-                                      child: Container(),
-                                    ),
-                                  ),
-                                ),
-                              ]),
-                            ),
-                          )
-                        ]))),
-
-                //海底
-                Container(
-                    key: globalKeyBottom,
-                    height: 60,
-                    decoration: BoxDecoration(
-
-                        //color: clsColor._getColorFromHex("200070"),
-                        gradient: LinearGradient(
-                      begin: FractionalOffset.topCenter,
-                      end: FractionalOffset.bottomCenter,
-                      colors: [
-                        clsColor._getColorFromHex("758661"),
-                        clsColor._getColorFromHex("455E42"),
-                        clsColor._getColorFromHex("0A081F"),
-                      ],
-                      stops: [0.0, 0.6, 1.0],
-                    )),
-                    //画面下部
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: size.width / 3,
-                              child: (!_takclePositionLeft)
-                                  ? _tacklePositionChangeButton()
-                                  : Text(''),
-                            ),
-                          ],
+                        Text(
+                          _point.toString() + "ポイント",
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Container(
-                              width: size.width / 3,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    margin:
-                                        EdgeInsets.only(left: 10, right: 10),
-                                    padding: const EdgeInsets.all(5.0),
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Colors.red, width: 3),
-                                        color: Colors.white),
-                                    child: Text(_dispDepth,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        )),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: size.width / 3,
-                              child: (_takclePositionLeft)
-                                  ? _tacklePositionChangeButton()
-                                  : Text(''),
-                            ),
-                          ],
-                        ),
-                      ],
-                    )),
-              ]),
-              //画面全体的に描画するもの
-              Stack(children: <Widget>[
-                //タップ時の光点
-                (tapPointerList.isNotEmpty)
-                    ? Stack(children: tapPointerList)
-                    : Text(""),
-                //反応光点
-                (fishPointerList.isNotEmpty)
-                    ? Stack(children: fishPointerList)
-                    : Text(""),
-                //タックルの描画
-                CustomPaint(
-                  painter: new tacklePainter(
-                    shoreHeight: _shoreHeight,
-                    dispSize: size,
-                    takclePositionLeft: _takclePositionLeft,
-                    tackleCenterX: _tackleCenterX,
-                    rodSizeX: _rodSizeX,
-                    rodSizeY: _rodSizeY,
-                    reelSizeX: _reelSizeX,
-                    reelSizeY: _reelSizeY,
-                    reelCenterY: _reelCenterY,
-                    clutchBackColor:
-                        (_onClutch ? Colors.lightBlue : Colors.red),
-                    rodStandUp: _rodStandUp,
-                    rodTension: _tension / TENSION_VAL_MAX,
-                  ),
-                ),
-                if (_centerTextAnimationController.isAnimating)
+                      ]),
+                  onPressed: () {
+                    //買い物モーダルの表示
+                  },
+                )),
+              ],
+              flexibleSpace:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Column(mainAxisAlignment: MainAxisAlignment.end, children: [
                   Container(
-                      margin: EdgeInsets.only(
-                          left: _centerTextLeft.value, top: size.height / 2),
-                      child: Column(
-                        children: [
-                          Text(
-                            _centerTextMain,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: _centerTextMainColor.withOpacity(0.8),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 100,
-                                fontFamily: 'OpenSans',
-                                fontStyle: FontStyle.italic,
-                                shadows: <Shadow>[
-                                  Shadow(
-                                      offset: Offset(5.0, 10.0),
-                                      blurRadius: 2.0,
-                                      color: Colors.black.withOpacity(0.8))
-                                ]),
-                          ),
-                          Text(
-                            _centerTextSub,
-                            style: TextStyle(
-                                color: _centerTextSubColor.withOpacity(0.8),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 40,
-                                fontFamily: 'OpenSans',
-                                fontStyle: FontStyle.italic,
-                                shadows: <Shadow>[
-                                  Shadow(
-                                      offset: Offset(5.0, 10.0),
-                                      blurRadius: 2.0,
-                                      color: Colors.black.withOpacity(0.8))
-                                ]),
-                          ),
+                    color: Colors.white,
+                    child: Text(
+                      _senchoMessage,
+                      style: TextStyle(
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                  )
+                ]),
+              ]),
+              //automaticallyImplyLeading: true,
+            ),
+            //endDrawer: DrawerItem(),
+
+            // body: SafeArea(
+            //   child: SpriteWidget(
+            //     RootNode(size),
+            //   ),
+            // ),
+
+            body: GestureDetector(
+                //ドラッグ操作が開始された時
+                onPanStart: (DragStartDetails details) {
+                  debugPrint("ドラッグ開始");
+                  _showTacleChangeDialog = false;
+                  _cursorX = details.localPosition.dx;
+                  _cursorY = details.localPosition.dy;
+                  //クラッチOFF時、タップ箇所がクラッチ部分か？
+                  if (!_onClutch &&
+                      // _cursorX > _tackleCenterX - (_reelSizeX) &&
+                      // _cursorX < _tackleCenterX + (_reelSizeX) &&
+                      // _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
+                      // _cursorY < _reelCenterY + _reelSizeY)
+                      //リールをタップで
+                      _cursorX > _tackleCenterX - _reelSizeX &&
+                      _cursorX < _tackleCenterX + _reelSizeX &&
+                      _cursorY > _reelCenterY - _reelSizeY &&
+                      _cursorY < _reelCenterY + _reelSizeY) {
+                    chengeClutch(true);
+                    return;
+                  }
+
+                  chengeClutch(false);
+                  _onTap = true;
+                  //タップ時の画面エフェクト
+                  offset = Offset(
+                      details.globalPosition.dx, details.globalPosition.dy);
+                  generateTapPointer(details);
+
+                  //generateFishPointer(100);
+                  //タップ時はスピードスライダの色替え
+                  _speedActiveTrackColor = SPEED_COLOR_REELING;
+                },
+                //ドラッグ操作で位置が変化した時
+                onPanUpdate: (DragUpdateDetails details) {
+                  if (size.isEmpty) {
+                    return;
+                  }
+                  if (!_onTap) {
+                    return;
+                  }
+                  //現在の座標を取得する
+                  var mX = details.localPosition.dx; //X座標
+                  var mY = details.localPosition.dy; //Y座標
+                  //初期位置から動いた値を取得
+                  var moveX = mX - _cursorX;
+                  var moveY = mY - _cursorY;
+                  //x座標記憶を更新
+                  _cursorX = mX;
+                  _cursorY = mY;
+                  //巻き速度値の計算
+                  var addVal = (moveX / (1000 / 2) * SPEED_VAL_MAX);
+                  var val = _speed + addVal;
+                  if (val > SPEED_VAL_MAX) val = SPEED_VAL_MAX;
+                  if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
+                  _speed = val;
+                  //アワセ値
+                  addVal = (moveY / 100);
+                  //シャクリ音（小）
+                  if (addVal > 0.3) {
+                    soundManagerPool.playSound('Se/lowjerk.mp3');
+                  } else if (addVal > 0.5) {
+                    soundManagerPool.playSound('Se/middlejerk.mp3');
+                  }
+                  val = _rodStandUp + addVal;
+                  if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
+                  if (val < 0) val = 0;
+                  _rodStandUp = val;
+                },
+                //タップ、ドラッグ操作が終了した時
+                onPanEnd: (DragEndDetails details) {
+                  debugPrint("タップはなし");
+                  //chengeClutch(false);
+                  //add_min = -10;
+                  _onTap = false;
+                  //スピードスライダの色を戻す
+                  _speedActiveTrackColor = SPEED_COLOR;
+                },
+                child: new Stack(children: <Widget>[
+                  Column(children: <Widget>[
+                    //海上
+                    Container(
+                      key: globalKeyShore,
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                        begin: FractionalOffset.topCenter,
+                        end: FractionalOffset.bottomCenter,
+                        colors: [
+                          clsColor._getColorFromHex("5495FF"),
+                          clsColor._getColorFromHex("EFFAFF")
+                        ],
+                        stops: const [
+                          0.0,
+                          1.0,
                         ],
                       )),
-                //UI関係
-                Column(
-                  children: [
-                    Expanded(
-                        child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      child: Column(children: <Widget>[
                         Container(
-                          margin: EdgeInsets.only(
-                              top: _shoreHeight + (5 * _tackleMenuAnime.value),
-                              left: 10),
-                          height: 180,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              //竿
-                              GestureDetector(
-                                  onTap: () async {
-                                    if (_depth <= 0.0) {
-                                      setState(() {
-                                        _selectTacleIcon = 'rod';
-                                        _showTacleChangeDialog = true;
-                                      });
-                                    }
-                                  },
-                                  child: tackleIcon(
-                                    tackleIconSize: 40.0,
-                                    imagePath: 'Assets/Images/rod.png',
-                                    flgSelect: false,
-                                  )),
-                              //リール
-                              GestureDetector(
-                                  onTap: () async {
-                                    if (_depth <= 0.0) {
-                                      setState(() {
-                                        _selectTacleIcon = 'reel';
-                                        _showTacleChangeDialog = true;
-                                      });
-                                    }
-                                  },
-                                  child: tackleIcon(
-                                      tackleIconSize: 40.0,
-                                      imagePath: 'Assets/Images/reel.png',
-                                      flgSelect: false)),
-                              //ルアー
-                              GestureDetector(
-                                  onTap: () async {
-                                    if (_depth <= 0.0) {
-                                      setState(() {
-                                        _selectTacleIcon = 'lure';
-                                        _showTacleChangeDialog = true;
-                                      });
-                                    }
-                                  },
-                                  child: tackleIcon(
-                                      tackleIconSize: 40.0,
-                                      imagePath: 'Assets/Images/' +
-                                          lures
-                                              .getLureData(haveTackle
-                                                  .getUseLure()
-                                                  .lureId)
-                                              .image,
-                                      flgSelect: false,
-                                      subText: lures
-                                              .getLureData(haveTackle
-                                                  .getUseLure()
-                                                  .lureId)
-                                              .weight
-                                              .toString() +
-                                          'g',
-                                      hp: haveTackle.getUseLure().lureHp,
-                                      maxHp: lures
-                                          .getLureData(
-                                              haveTackle.getUseLure().lureId)
-                                          .hp)),
-                            ],
+                            //appBarは透過なのでその分の高さを加算
+                            margin: EdgeInsets.only(top: _appBarHeight + 10),
+                            height: 40,
+                            //テンションとドラグレベルのスライダーをstackで重ねて表示
+                            child: new Stack(children: <Widget>[
+                              // //テンションスライダー
+                              Container(
+                                  margin: EdgeInsets.only(left: 10, right: 10),
+                                  //color: Colors.white,
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        //Text("TENSION/DRAG"),
+                                        new Image(
+                                          image: AssetImage(
+                                              'Assets/Images/TENSIONDRAG.png'),
+                                        ),
+                                        CustomPaint(
+                                          painter: new SliderPainter(
+                                            height: 20,
+                                            activeColor:
+                                                _tensionActiveTrackColor,
+                                            inactiveColor: (_flgBait || _flgHit)
+                                                ? Colors.black
+                                                : Colors.white,
+                                            value: _tension,
+                                            maxValue: TENSION_VAL_MAX,
+                                            backRadius: _animationRadius.value,
+                                            maxBackRadius: POINTER_BACK_SIZE,
+                                            flgShaKe:
+                                                (_flgBait || (_tension > _drag))
+                                                    ? true
+                                                    : false,
+                                            flgDispValue: true,
+                                            flgDispMaxValue: true,
+                                          ),
+                                          child: Container(
+//                                  height: 500,
+                                              ),
+                                        )
+                                      ])),
+                              //ドラグスライダー
+                              Container(
+                                margin: EdgeInsets.only(top: 15),
+                                height: 40,
+                                child: SliderTheme(
+                                    data: SliderTheme.of(context).copyWith(
+                                      //trackHeight: 1, //全体の縦長
+                                      valueIndicatorColor:
+                                          Colors.black.withOpacity(0.0), //背景の色
+                                      activeTrackColor: Colors.black
+                                          .withOpacity(0.0), //値有りエリアの色
+                                      inactiveTrackColor: Colors.black
+                                          .withOpacity(0.0), //値無しエリアの色
+                                      activeTickMarkColor: Colors.black
+                                          .withOpacity(0.0), //各value値の色
+                                      thumbColor: Colors.red, //値ツマミの色
+                                      thumbShape: RoundSliderThumbShape(
+                                          enabledThumbRadius: 10), //ツマミの大きさ
+                                      overlayColor: Colors.black
+                                          .withOpacity(0.0), //値ツマミフォーカス時の色
+                                    ),
+                                    child: Slider(
+                                      value: _drag,
+                                      //MAX-MINはテンションと同じ
+                                      min: TENSION_VAL_MIN,
+                                      max: TENSION_VAL_MAX,
+                                      divisions:
+                                          (TENSION_VAL_MAX - TENSION_VAL_MIN)
+                                              .floor(),
+                                      onChanged: (double value) {
+                                        setState(() {
+                                          _drag = value.roundToDouble();
+                                        });
+                                      },
+                                    )),
+                              )
+                            ])),
+                        //ラインHPスライダー
+                        Container(
+                            margin:
+                                EdgeInsets.only(left: 10, right: 10, bottom: 5),
+                            height: 5,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  CustomPaint(
+                                    painter: new SliderPainter(
+                                      height: 5,
+                                      activeColor:
+                                          clsColor._getColorFromHex("FF3030"),
+                                      inactiveColor: Colors.white,
+                                      value: _nowLineHp,
+                                      maxValue: _maxLineHp,
+                                      backRadius: 0,
+                                      maxBackRadius: 0,
+                                      flgShaKe: false,
+                                      flgDispValue: true,
+                                      flgDispMaxValue: false,
+                                    ),
+                                    child: Container(),
+                                  ),
+                                ])),
+
+                        //巻速度スライダー
+                        Container(
+                            margin: EdgeInsets.only(left: 10, right: 10),
+                            height: 50,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  //Text("SPEED"),
+                                  new Image(
+                                    image:
+                                        AssetImage('Assets/Images/SPEED.png'),
+                                  ),
+                                  CustomPaint(
+                                    painter: new SliderPainter(
+                                      height: 20,
+                                      activeColor: _speedActiveTrackColor,
+                                      inactiveColor: Colors.white,
+                                      value: _speed,
+                                      maxValue: SPEED_VAL_MAX,
+                                      backRadius: 0,
+                                      maxBackRadius: 0,
+                                      flgShaKe: false,
+                                      flgDispValue: true,
+                                      flgDispMaxValue: true,
+                                    ),
+                                    child: Container(),
+                                  ),
+                                  //可能性のある魚種の速度範囲表示
+                                  CustomPaint(
+                                    painter: new FishRangeSliderPainter(
+                                      activeColor: _speedActiveTrackColor,
+                                      inactiveColor: Colors.red,
+                                      backRadius: 0,
+                                      maxBackRadius: 0,
+                                      maxSpeed: SPEED_VAL_MAX,
+                                      speedRange: _listSpeedRange,
+                                    ),
+                                    child: Container(),
+                                  )
+                                ])),
+
+                        Stack(children: <Widget>[
+                          Container(
+                            alignment: Alignment.center,
+                            // margin: EdgeInsets.only(
+                            //     top: math.sin(waveController.value * 0.5 * math.pi),
+                            //     left: math.sin(waveController.value * math.pi)),
+                            child: GestureDetector(
+                              onTap: () async {
+                                setState(() {
+                                  //_senchoMessage = "わしゃあ忙しいんで！";
+                                });
+                                // var result = await showDialog<int>(
+                                //   context: context,
+                                //   barrierDismissible: false,
+                                //   builder: (_) {
+                                //     return SenchoDialog(
+                                //       depth_change_order: _depthChangeOrder,
+                                //       point: _point,
+                                //     );
+                                //   },
+                                // );
+                                // debugPrint(result.toString());
+                                // setState(() {
+                                //   _depthChangeOrder = result as int;
+                                // });
+                              },
+                              child: Transform.rotate(
+                                //angle: 45 * math.pi / 180,
+                                angle:
+                                    (405 - (90 * _depthChange)) * math.pi / 180,
+                                child: new Image(
+                                  image: AssetImage('Assets/Images/ship.png'),
+                                  width: 60,
+                                  height: 40,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        //回収ボタン デザインは仮だから
-                        AnimatedOpacity(
-                          opacity:
-                              _depth > 0.0 && !_flgBait && !_flgHit ? 1.0 : 0.0,
-                          duration: Duration(milliseconds: 200),
-                          child: Container(
-                            margin: EdgeInsets.only(
-                                top: _shoreHeight + 20, right: 10),
-                            child: ElevatedButton(
-                                child: const Text('回収'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.amber, //背景色
-                                  onPrimary: Colors.black, //押したときの色
-                                  shape: const StadiumBorder(),
-                                  side: BorderSide(
-                                    color: Colors.black, //枠線の色
-                                    width: 2, //枠線の太さ
+                          Container(
+                              height: 40,
+                              child: AnimatedBuilder(
+                                animation: waveController, // waveControllerを設定
+                                builder: (context, child) => Stack(
+                                  children: <Widget>[
+                                    //？？？iPhoneのsafariで描画できない,androidはOK
+                                    // 1つ目の波
+                                    ClipPath(
+                                      child: Container(
+                                          color: clsColor
+                                              ._getColorFromHex("02D5F2")
+                                              .withOpacity(1.0)),
+                                      clipper: WaveClipper(
+                                          context, waveController.value, 0),
+                                    ),
+                                    // 2つ目の波
+                                    ClipPath(
+                                      child: Container(
+                                          color: clsColor
+                                              ._getColorFromHex("02D5F2")
+                                              .withOpacity(0.3)),
+                                      clipper: WaveClipper(
+                                          context, waveController.value, 0.5),
+                                    ),
+                                    // ↑ 追加部分
+                                  ],
+                                ),
+                              )),
+                          AnimatedOpacity(
+                              opacity:
+                                  (_depth > 0.0 || _point <= 0) ? 0.0 : 1.0,
+                              duration: Duration(milliseconds: 200),
+                              child: Container(
+                                  margin: EdgeInsets.only(left: 10, right: 10),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      GestureDetector(
+                                        //タップ開始
+                                        onTapDown: (details) {
+                                          if (_depth <= 0.0) {
+                                            setState(() {
+                                              _moveShipTarget = 0.3;
+                                            });
+                                          }
+                                        },
+                                        //タップ終了
+                                        onTapUp: (details) {
+                                          setState(() {
+                                            _moveShipTarget = 0.5;
+                                          });
+                                        },
+                                        //タップしたままフォーカス外れた時
+                                        onTapCancel: () {
+                                          setState(() {
+                                            _moveShipTarget = 0.5;
+                                          });
+                                        },
+                                        child: new Image(
+                                          image: AssetImage(
+                                              'Assets/Images/arrow_left.png'),
+                                          height: 30,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        //タップ開始
+                                        onTapDown: (details) {
+                                          if (_depth <= 0.0) {
+                                            setState(() {
+                                              _moveShipTarget = 0.7;
+                                            });
+                                          }
+                                        },
+                                        //タップ終了
+                                        onTapUp: (details) {
+                                          setState(() {
+                                            _moveShipTarget = 0.5;
+                                          });
+                                        },
+                                        //タップしたままフォーカス外れた時
+                                        onTapCancel: () {
+                                          setState(() {
+                                            _moveShipTarget = 0.5;
+                                          });
+                                        },
+                                        child: new Image(
+                                          image: AssetImage(
+                                              'Assets/Images/arrow_right.png'),
+                                          height: 30,
+                                        ),
+                                      ),
+                                    ],
+                                  ))),
+                        ]),
+                      ]),
+                    ),
+                    //海中
+                    Expanded(
+                        child: Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: clsColor._getColorFromHex("02D5F2")),
+                                //color: clsColor._getColorFromHex("200070"),
+                                gradient: LinearGradient(
+                                  begin: FractionalOffset.topCenter,
+                                  end: FractionalOffset.bottomCenter,
+                                  colors: [
+                                    clsColor._getColorFromHex("02D5F2"),
+                                    clsColor._getColorFromHex("013367"),
+                                    clsColor._getColorFromHex("002142"),
+                                    clsColor._getColorFromHex("000000"),
+                                  ],
+                                  stops: [
+                                    0.0,
+                                    _dispDepthLv1,
+                                    _dispDepthLv2,
+                                    1.0
+                                  ],
+                                )),
+                            child: Column(children: <Widget>[
+                              //ソナー画面
+                              Expanded(
+                                //描画エリア
+                                child: Container(
+                                  key: globalKeySonar,
+                                  child: Stack(children: <Widget>[
+                                    //ソナー光点
+                                    Container(
+                                      width: size.width,
+                                      margin: EdgeInsets.only(
+                                          top: _lightSpotY, left: _lightSpotX),
+                                      child: CustomPaint(
+                                        painter: LightSpot(
+                                            POINTER_SIZE,
+                                            POINTER_BACK_SIZE,
+                                            _animationRadius.value,
+                                            _pointerColor,
+                                            0,
+                                            0),
+                                      ),
+                                    ),
+                                    //ジャーク時のテキスト
+                                    if (_jerkTextAnimationController
+                                        .isAnimating)
+                                      Container(
+                                        //width: 30,
+                                        margin: EdgeInsets.only(
+                                            top: _lightSpotY -
+                                                ((_lightSpotY < 18.0)
+                                                    ? _lightSpotY
+                                                    : (18.0 +
+                                                        _jerkTextLocation
+                                                            .value)),
+                                            left: _lightSpotX +
+                                                (10.0 *
+                                                    _jerkTextLocation.value)),
+                                        child: Text(
+                                          'ｼｬｸﾘ!',
+                                          style: TextStyle(
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+
+                                    //魚HPスライダ
+                                    Visibility(
+                                      visible: _flgHit,
+                                      child: Container(
+                                        width: 30,
+                                        margin: EdgeInsets.only(
+                                            top: _lightSpotY -
+                                                ((_lightSpotY < 18.0)
+                                                    ? _lightSpotY
+                                                    : 18.0),
+                                            left: _lightSpotX - 18.0),
+                                        child: CustomPaint(
+                                          painter: new SliderPainter(
+                                            height: 5,
+                                            activeColor: getRaitoColor(
+                                                _hitScanCnt /
+                                                    (FISH_TABLE.fishs[_fishidx]
+                                                            .hp +
+                                                        (FISH_TABLE
+                                                                .fishs[_fishidx]
+                                                                .hp *
+                                                            _fishSize))),
+                                            inactiveColor: Colors.white,
+                                            value: _hitScanCnt.toDouble(),
+                                            maxValue: (FISH_TABLE
+                                                    .fishs[_fishidx].hp +
+                                                (FISH_TABLE.fishs[_fishidx].hp *
+                                                    _fishSize)),
+                                            backRadius: 0,
+                                            maxBackRadius: 0,
+                                            flgShaKe: false,
+                                            flgDispValue: false,
+                                            flgDispMaxValue: false,
+                                          ),
+                                          child: Container(),
+                                        ),
+                                      ),
+                                    ),
+                                  ]),
+                                ),
+                              )
+                            ]))),
+
+                    //海底
+                    Container(
+                        key: globalKeyBottom,
+                        height: 60,
+                        decoration: BoxDecoration(
+
+                            //color: clsColor._getColorFromHex("200070"),
+                            gradient: LinearGradient(
+                          begin: FractionalOffset.topCenter,
+                          end: FractionalOffset.bottomCenter,
+                          colors: [
+                            clsColor._getColorFromHex("758661"),
+                            clsColor._getColorFromHex("455E42"),
+                            clsColor._getColorFromHex("0A081F"),
+                          ],
+                          stops: [0.0, 0.6, 1.0],
+                        )),
+                        //画面下部
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: size.width / 3,
+                                  child: (!_takclePositionLeft)
+                                      ? _tacklePositionChangeButton()
+                                      : Text(''),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  width: size.width / 3,
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            left: 10, right: 10),
+                                        padding: const EdgeInsets.all(5.0),
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.red, width: 3),
+                                            color: Colors.white),
+                                        child: Text(_dispDepth,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            )),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                onPressed: () {
-                                  _collect = true;
-                                  _onClutch = true;
-                                }),
-                          ),
-                        ),
-                      ],
-                    )),
-                  ],
-                ),
-                AnimatedPadding(
-                  //curve: Curves.easeOutExpo,
-                  padding: EdgeInsets.only(
-                    right: _showTacleChangeDialog ? 0.0 : size.width,
-                    top: _shoreHeight,
-                  ),
-                  duration: Duration(milliseconds: 200),
-                  child: GestureDetector(
-                    onTap: () {
-                      //欄外のタップイベントを起こさないための空イベント
-                    },
-                    onPanStart: (DragStartDetails details) {
-                      //欄外のタップイベントを起こさないための空イベント
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: Colors.black.withOpacity(0.3), width: 1)),
-                      //title: Text("タックル変更"),
-                      child: Visibility(
-                          visible: _showTacleChangeDialog,
-                          child: Container(
-                            color: Colors.black.withOpacity(0.3),
-                            child: Column(children: <Widget>[
-                              Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "使用中のタックル",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'OpenSans',
-                                          decoration: TextDecoration.none,
-                                          shadows: <Shadow>[
-                                            Shadow(
-                                                offset: Offset(1.0, 3.0),
-                                                blurRadius: 2.0,
-                                                color: Colors.black
-                                                    .withOpacity(0.8))
-                                          ]),
-                                    )
-                                  ]),
-                              Container(
-                                //margin: EdgeInsets.only(top: 4, bottom: 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    //現在選択中のルアー
-                                    //竿
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectTacleIcon = 'rod';
-                                        });
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: size.width / 3,
+                                  child: (_takclePositionLeft)
+                                      ? _tacklePositionChangeButton()
+                                      : Text(''),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )),
+                  ]),
+                  //画面全体的に描画するもの
+                  Stack(children: <Widget>[
+                    //タップ時の光点
+                    (tapPointerList.isNotEmpty)
+                        ? Stack(children: tapPointerList)
+                        : Text(""),
+                    //反応光点
+                    (fishPointerList.isNotEmpty)
+                        ? Stack(children: fishPointerList)
+                        : Text(""),
+                    //タックルの描画
+                    CustomPaint(
+                      painter: new tacklePainter(
+                        shoreHeight: _shoreHeight,
+                        dispSize: size,
+                        takclePositionLeft: _takclePositionLeft,
+                        tackleCenterX: _tackleCenterX,
+                        rodSizeX: _rodSizeX,
+                        rodSizeY: _rodSizeY,
+                        reelSizeX: _reelSizeX,
+                        reelSizeY: _reelSizeY,
+                        reelCenterY: _reelCenterY,
+                        clutchBackColor:
+                            (_onClutch ? Colors.lightBlue : Colors.red),
+                        rodStandUp: _rodStandUp,
+                        rodTension: _tension / TENSION_VAL_MAX,
+                      ),
+                    ),
+                    if (_centerTextAnimationController.isAnimating)
+                      Container(
+                          margin: EdgeInsets.only(
+                              left: _centerTextLeft.value,
+                              top: size.height / 2),
+                          child: Column(
+                            children: [
+                              Text(
+                                _centerTextMain,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color:
+                                        _centerTextMainColor.withOpacity(0.8),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 100,
+                                    fontFamily: 'OpenSans',
+                                    fontStyle: FontStyle.italic,
+                                    shadows: <Shadow>[
+                                      Shadow(
+                                          offset: Offset(5.0, 10.0),
+                                          blurRadius: 2.0,
+                                          color: Colors.black.withOpacity(0.8))
+                                    ]),
+                              ),
+                              Text(
+                                _centerTextSub,
+                                style: TextStyle(
+                                    color: _centerTextSubColor.withOpacity(0.8),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 40,
+                                    fontFamily: 'OpenSans',
+                                    fontStyle: FontStyle.italic,
+                                    shadows: <Shadow>[
+                                      Shadow(
+                                          offset: Offset(5.0, 10.0),
+                                          blurRadius: 2.0,
+                                          color: Colors.black.withOpacity(0.8))
+                                    ]),
+                              ),
+                            ],
+                          )),
+                    //UI関係
+                    Column(
+                      children: [
+                        Expanded(
+                            child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                  top: _shoreHeight +
+                                      (5 * _tackleMenuAnime.value),
+                                  left: 10),
+                              height: 180,
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  //竿
+                                  GestureDetector(
+                                      onTap: () async {
+                                        if (_depth <= 0.0) {
+                                          setState(() {
+                                            _selectTacleIcon = 'rod';
+                                            _showTacleChangeDialog = true;
+                                          });
+                                        }
                                       },
-                                      child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          child: tackleIcon(
-                                              tackleIconSize: 60.0,
-                                              imagePath:
-                                                  'Assets/Images/rod.png',
-                                              flgSelect:
-                                                  _selectTacleIcon == 'rod'
-                                                      ? true
-                                                      : false)),
-                                    ),
-
-                                    //リール
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectTacleIcon = 'reel';
-                                        });
+                                      child: tackleIcon(
+                                        tackleIconSize: 40.0,
+                                        imagePath: 'Assets/Images/rod.png',
+                                        flgSelect: false,
+                                      )),
+                                  //リール
+                                  GestureDetector(
+                                      onTap: () async {
+                                        if (_depth <= 0.0) {
+                                          setState(() {
+                                            _selectTacleIcon = 'reel';
+                                            _showTacleChangeDialog = true;
+                                          });
+                                        }
                                       },
-                                      child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          child: tackleIcon(
-                                              tackleIconSize: 60.0,
-                                              imagePath:
-                                                  'Assets/Images/reel.png',
-                                              flgSelect:
-                                                  _selectTacleIcon == 'reel'
-                                                      ? true
-                                                      : false)),
-                                    ),
-                                    //ルアー
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectTacleIcon = 'lure';
-                                        });
+                                      child: tackleIcon(
+                                          tackleIconSize: 40.0,
+                                          imagePath: 'Assets/Images/reel.png',
+                                          flgSelect: false)),
+                                  //ルアー
+                                  GestureDetector(
+                                      onTap: () async {
+                                        if (_depth <= 0.0) {
+                                          setState(() {
+                                            _selectTacleIcon = 'lure';
+                                            _showTacleChangeDialog = true;
+                                          });
+                                        }
                                       },
-                                      child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          child: tackleIcon(
-                                              tackleIconSize: 60.0,
-                                              imagePath: 'Assets/Images/' +
-                                                  lures
-                                                      .getLureData(haveTackle
-                                                          .getUseLure()
-                                                          .lureId)
-                                                      .image,
-                                              flgSelect:
-                                                  _selectTacleIcon == 'lure'
-                                                      ? true
-                                                      : false,
-                                              subText: lures
-                                                      .getLureData(haveTackle
-                                                          .getUseLure()
-                                                          .lureId)
-                                                      .weight
-                                                      .toString() +
-                                                  'g',
-                                              hp: haveTackle
-                                                  .getUseLure()
-                                                  .lureHp,
-                                              maxHp: lures
+                                      child: tackleIcon(
+                                          tackleIconSize: 40.0,
+                                          imagePath: 'Assets/Images/' +
+                                              lures
                                                   .getLureData(haveTackle
                                                       .getUseLure()
                                                       .lureId)
-                                                  .hp)),
-                                    ),
-                                  ],
-                                ),
+                                                  .image,
+                                          flgSelect: false,
+                                          subText: lures
+                                                  .getLureData(haveTackle
+                                                      .getUseLure()
+                                                      .lureId)
+                                                  .weight
+                                                  .toString() +
+                                              'g',
+                                          hp: haveTackle.getUseLure().lureHp,
+                                          maxHp: lures
+                                              .getLureData(haveTackle
+                                                  .getUseLure()
+                                                  .lureId)
+                                              .hp)),
+                                ],
                               ),
-                              Container(
-                                  child: Column(
-                                children: [Text("")],
-                              )),
-                              //交換
-                              Container(
-                                margin: EdgeInsets.only(top: 4, bottom: 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Container(
-                                        width: size.width - 60,
-                                        height: 60,
-                                        color: Colors.white.withOpacity(0.6),
-                                        child: ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            return Row(children: [
-                                              GestureDetector(
-                                                onTap: () {
-                                                  setState(() {
-                                                    //タックル替え
-                                                    haveTackle.changeLure(
-                                                        haveTackle
-                                                            .haveLures[index]
-                                                            .id);
-                                                  });
-                                                },
-                                                child: Container(
-                                                    padding: EdgeInsets.all(10),
-                                                    child: tackleIcon(
-                                                        tackleIconSize: 40.0,
-                                                        imagePath: 'Assets/Images/' +
-                                                            lures
-                                                                .getLureData(haveTackle
-                                                                    .haveLures[
-                                                                        index]
-                                                                    .lureId)
-                                                                .image,
-                                                        flgSelect: haveTackle
-                                                                    .haveLures[
-                                                                        index]
-                                                                    .id ==
+                            ),
+                            //回収ボタン デザインは仮だから
+                            AnimatedOpacity(
+                              opacity: _depth > 0.0 && !_flgBait && !_flgHit
+                                  ? 1.0
+                                  : 0.0,
+                              duration: Duration(milliseconds: 200),
+                              child: Container(
+                                margin: EdgeInsets.only(
+                                    top: _shoreHeight + 20, right: 10),
+                                child: ElevatedButton(
+                                    child: const Text('回収'),
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Colors.amber, //背景色
+                                      onPrimary: Colors.black, //押したときの色
+                                      shape: const StadiumBorder(),
+                                      side: BorderSide(
+                                        color: Colors.black, //枠線の色
+                                        width: 2, //枠線の太さ
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      _collect = true;
+                                      _onClutch = true;
+                                    }),
+                              ),
+                            ),
+                          ],
+                        )),
+                      ],
+                    ),
+                    AnimatedPadding(
+                      //curve: Curves.easeOutExpo,
+                      padding: EdgeInsets.only(
+                        right: _showTacleChangeDialog ? 0.0 : size.width,
+                        top: _shoreHeight,
+                      ),
+                      duration: Duration(milliseconds: 200),
+                      child: GestureDetector(
+                        onTap: () {
+                          //欄外のタップイベントを起こさないための空イベント
+                        },
+                        onPanStart: (DragStartDetails details) {
+                          //欄外のタップイベントを起こさないための空イベント
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Colors.black.withOpacity(0.3),
+                                  width: 1)),
+                          //title: Text("タックル変更"),
+                          child: Visibility(
+                              visible: _showTacleChangeDialog,
+                              child: Container(
+                                color: Colors.black.withOpacity(0.3),
+                                child: Column(children: <Widget>[
+                                  Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "使用中のタックル",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                              fontFamily: 'OpenSans',
+                                              decoration: TextDecoration.none,
+                                              shadows: <Shadow>[
+                                                Shadow(
+                                                    offset: Offset(1.0, 3.0),
+                                                    blurRadius: 2.0,
+                                                    color: Colors.black
+                                                        .withOpacity(0.8))
+                                              ]),
+                                        )
+                                      ]),
+                                  Container(
+                                    //margin: EdgeInsets.only(top: 4, bottom: 4),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        //現在選択中のルアー
+                                        //竿
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _selectTacleIcon = 'rod';
+                                            });
+                                          },
+                                          child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              child: tackleIcon(
+                                                  tackleIconSize: 60.0,
+                                                  imagePath:
+                                                      'Assets/Images/rod.png',
+                                                  flgSelect:
+                                                      _selectTacleIcon == 'rod'
+                                                          ? true
+                                                          : false)),
+                                        ),
+
+                                        //リール
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _selectTacleIcon = 'reel';
+                                            });
+                                          },
+                                          child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              child: tackleIcon(
+                                                  tackleIconSize: 60.0,
+                                                  imagePath:
+                                                      'Assets/Images/reel.png',
+                                                  flgSelect:
+                                                      _selectTacleIcon == 'reel'
+                                                          ? true
+                                                          : false)),
+                                        ),
+                                        //ルアー
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _selectTacleIcon = 'lure';
+                                            });
+                                          },
+                                          child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              child: tackleIcon(
+                                                  tackleIconSize: 60.0,
+                                                  imagePath: 'Assets/Images/' +
+                                                      lures
+                                                          .getLureData(
+                                                              haveTackle
+                                                                  .getUseLure()
+                                                                  .lureId)
+                                                          .image,
+                                                  flgSelect:
+                                                      _selectTacleIcon == 'lure'
+                                                          ? true
+                                                          : false,
+                                                  subText: lures
+                                                          .getLureData(
+                                                              haveTackle
+                                                                  .getUseLure()
+                                                                  .lureId)
+                                                          .weight
+                                                          .toString() +
+                                                      'g',
+                                                  hp: haveTackle
+                                                      .getUseLure()
+                                                      .lureHp,
+                                                  maxHp: lures
+                                                      .getLureData(haveTackle
+                                                          .getUseLure()
+                                                          .lureId)
+                                                      .hp)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                      child: Column(
+                                    children: [Text("")],
+                                  )),
+                                  //交換
+                                  Container(
+                                    margin: EdgeInsets.only(top: 4, bottom: 4),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                            width: size.width - 60,
+                                            height: 60,
+                                            color:
+                                                Colors.white.withOpacity(0.6),
+                                            child: ListView.builder(
+                                              scrollDirection: Axis.horizontal,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return Row(children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        //タックル替え
+                                                        haveTackle.changeLure(
+                                                            haveTackle
+                                                                .haveLures[
+                                                                    index]
+                                                                .id);
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                        padding:
+                                                            EdgeInsets.all(10),
+                                                        child: tackleIcon(
+                                                            tackleIconSize:
+                                                                40.0,
+                                                            imagePath: 'Assets/Images/' +
+                                                                lures
+                                                                    .getLureData(haveTackle
+                                                                        .haveLures[
+                                                                            index]
+                                                                        .lureId)
+                                                                    .image,
+                                                            flgSelect: haveTackle
+                                                                        .haveLures[
+                                                                            index]
+                                                                        .id ==
+                                                                    haveTackle
+                                                                        .getUseLure()
+                                                                        .id
+                                                                ? true
+                                                                : false,
+                                                            subText: lures
+                                                                    .getLureData(
+                                                                        haveTackle.haveLures[index].lureId)
+                                                                    .weight
+                                                                    .toString() +
+                                                                'g',
+                                                            hp: haveTackle.haveLures[index].lureHp,
+                                                            maxHp: lures.getLureData(haveTackle.haveLures[index].lureId).hp)),
+                                                  ),
+                                                ]);
+                                              },
+                                              itemCount:
+                                                  haveTackle.haveLures.length,
+                                            ))
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10),
+                                    child: Text(
+                                      lures
+                                          .getLureData(
+                                              haveTackle.getUseLure().lureId)
+                                          .name,
+                                      style: TextStyle(
+                                          color: Colors.yellow,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10, left: 10),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        //ステータス
+                                        new RadarChart(
+                                          key: UniqueKey(),
+                                          items: getLureRadarChartItem(),
+                                          radarColors: [Colors.green],
+                                          fontColor: Colors.white,
+                                        ),
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                              left: 10, right: 10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              //重さ
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    '重さ：',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                  Text(
+                                                    lures
+                                                            .getLureData(
                                                                 haveTackle
                                                                     .getUseLure()
-                                                                    .id
-                                                            ? true
-                                                            : false,
-                                                        subText: lures
-                                                                .getLureData(
-                                                                    haveTackle
-                                                                        .haveLures[index]
-                                                                        .lureId)
-                                                                .weight
-                                                                .toString() +
-                                                            'g',
-                                                        hp: haveTackle.haveLures[index].lureHp,
-                                                        maxHp: lures.getLureData(haveTackle.haveLures[index].lureId).hp)),
+                                                                    .lureId)
+                                                            .weight
+                                                            .toString() +
+                                                        'g',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  )
+                                                ],
                                               ),
-                                            ]);
-                                          },
-                                          itemCount:
-                                              haveTackle.haveLures.length,
-                                        ))
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 10),
-                                child: Text(
-                                  lures
-                                      .getLureData(
-                                          haveTackle.getUseLure().lureId)
-                                      .name,
-                                  style: TextStyle(
-                                      color: Colors.yellow,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 10, left: 10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    //ステータス
-                                    new RadarChart(
-                                      key: UniqueKey(),
-                                      items: getLureRadarChartItem(),
-                                      radarColors: [Colors.green],
-                                      fontColor: Colors.white,
-                                    ),
-                                    Container(
-                                      margin:
-                                          EdgeInsets.only(left: 10, right: 10),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          //重さ
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '重さ：',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              Text(
-                                                lures
+                                              //説明テキスト
+                                              // Expanded(
+                                              //     child:
+                                              Container(
+                                                  height: 100,
+                                                  width: size.width / 2,
+                                                  padding: EdgeInsets.only(
+                                                      left: 10, right: 10),
+                                                  decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.black,
+                                                          width: 3),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  7.0)),
+                                                      color: clsColor
+                                                          ._getColorFromHex(
+                                                              '#DFDFDF')),
+                                                  child: Text(
+                                                    lures
                                                         .getLureData(haveTackle
                                                             .getUseLure()
                                                             .lureId)
-                                                        .weight
-                                                        .toString() +
-                                                    'g',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              )
+                                                        .text,
+                                                    style: TextStyle(
+                                                        color: Colors.black),
+                                                  )),
+                                              //),
                                             ],
                                           ),
-                                          //説明テキスト
-                                          // Expanded(
-                                          //     child:
-                                          Container(
-                                              height: 100,
-                                              width: size.width / 2,
-                                              padding: EdgeInsets.only(
-                                                  left: 10, right: 10),
-                                              decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: Colors.black,
-                                                      width: 3),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(7.0)),
-                                                  color:
-                                                      clsColor._getColorFromHex(
-                                                          '#DFDFDF')),
-                                              child: Text(
-                                                lures
-                                                    .getLureData(haveTackle
-                                                        .getUseLure()
-                                                        .lureId)
-                                                    .text,
-                                                style: TextStyle(
-                                                    color: Colors.black),
-                                              )),
-                                          //),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                              //閉じるボタン
-                              Container(
-                                margin: EdgeInsets.only(top: 10),
-                                child: ElevatedButton.icon(
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
                                   ),
-                                  label: const Text('閉じる'),
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Colors.grey.withOpacity(0.5),
-                                    onPrimary: Colors.white,
+                                  //閉じるボタン
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10),
+                                    child: ElevatedButton.icon(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                      ),
+                                      label: const Text('閉じる'),
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Colors.grey.withOpacity(0.5),
+                                        onPrimary: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _showTacleChangeDialog = false;
+                                        });
+                                      },
+                                    ),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _showTacleChangeDialog = false;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ]),
-                          )),
+                                ]),
+                              )),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ]),
-            ])));
+                  ]),
+                ]))));
   }
 
   //タップ時のエフェクトのリスト

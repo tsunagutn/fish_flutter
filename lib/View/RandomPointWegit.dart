@@ -17,17 +17,7 @@ class _RandomPointWegit extends State<RandomPointWegit>
 
   @override
   void initState() {
-    // //アニメーションコントローラの設定
-    // _animationController = AnimationController(
-    //     duration: Duration(milliseconds: 1500), vsync: this);
-    // //アニメーションの設定
-    // _animationRadius =
-    //     Tween(begin: 0.0, end: _backRadius).animate(_animationController)
-    //       ..addListener(() {
-    //         setState(() {});
-    //       });
-    ////繰り返し、反転無し
-    //_animationController.repeat(reverse: false);
+    //
     ligntSpotAnimation(1500);
     super.initState();
   }

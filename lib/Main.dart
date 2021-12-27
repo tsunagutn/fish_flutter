@@ -6,14 +6,22 @@ import 'package:fish_flutter/View/Settings.dart';
 import 'package:fish_flutter/View/Term.dart';
 import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/View/Test.dart';
+import 'package:provider/provider.dart';
 
 import 'View/LightSpotWegit.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fish_flutter/widget/BgmPlayer.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(Provider(
+    create: (context) => BgmPlayer(),
+    child: MyApp(),
+  ));
 }
+
+// RouteObserverを利用するので、本件ではクラス外にて定義
+var routeObserver = RouteObserver<PageRoute>();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -50,6 +58,9 @@ class MyApp extends StatelessWidget {
         '/lightspot': (_) => LightSpotWegit(),
       },
       //home: MyHomePage(title: 'チェックリスト'),
+      navigatorObservers: [
+        routeObserver,
+      ],
     );
   }
 }

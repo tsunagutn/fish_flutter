@@ -13,7 +13,7 @@ class Test extends StatefulWidget {
 }
 
 class _Test extends State<Test> with SingleTickerProviderStateMixin {
-  late Animation<double> _animationRadius;
+  late Animation<double> _animationValue;
   late AnimationController _animationController;
   late Animation<double> _animationTop;
 
@@ -24,20 +24,11 @@ class _Test extends State<Test> with SingleTickerProviderStateMixin {
   void initState() {
     _animationController =
         AnimationController(duration: const Duration(seconds: 1), vsync: this);
-    _animationRadius =
+    _animationValue =
         Tween(begin: 10.0, end: 100.0).animate(_animationController)
           ..addListener(() {
             setState(() {});
           });
-    // _animationTop =
-    //     Tween(begin: _nowTop, end: _nextTop).animate(_animationController)
-    //       ..addListener(() {
-    //         setState(() {});
-    //       });
-
-    // curvedAnimation =
-    //     CurvedAnimation(parent: animationController, curve: ShakeCurve());
-
     super.initState();
   }
 
@@ -59,18 +50,13 @@ class _Test extends State<Test> with SingleTickerProviderStateMixin {
         onPanDown: (DragDownDetails details) {
           _nowTop = _nextTop;
           _nextTop = details.localPosition.dy; //Y座標
-          // _animationTop =
-          //     Tween(begin: _nowTop, end: _nextTop).animate(_animationController)
-          //       ..addListener(() {
-          //         setState(() {});
-          //       });
         },
 
         child: Column(
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(20.0),
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: Text('Start/Stop'),
                 onPressed: () {
                   if (_animationController.isAnimating) {
@@ -81,19 +67,10 @@ class _Test extends State<Test> with SingleTickerProviderStateMixin {
                 },
               ),
             ),
-            Container(
-              padding: EdgeInsets.all(20.0),
-              child: RaisedButton(
-                child: Text('動かす'),
-                onPressed: () {
-                  //setState(() {});
-                },
-              ),
-            ),
             Opacity(
               opacity: _animationController.isAnimating ? 1.0 : 0.00,
               child: CustomPaint(
-                painter: _CirclePainter(_animationRadius.value, 10),
+                painter: _CirclePainter(_animationValue.value, 10),
               ),
             ),
           ],
