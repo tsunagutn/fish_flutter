@@ -17,6 +17,7 @@ class BgmPlayer {
     // 戻り値のURIはファイル名をキーとしてMap内に保持し、再生時に使用する
     bgmUriMap["bgm_field.mp3"] = await _cache.load("Bgm/bgm_field.mp3");
     bgmUriMap["bgm_fight.mp3"] = await _cache.load("Bgm/bgm_fight.mp3");
+    bgmUriMap["bgm_book.mp3"] = await _cache.load("Bgm/bgm_book.mp3");
   }
 
   void playBgm({required String name, bool isLoop = true}) {
@@ -37,6 +38,14 @@ class BgmPlayer {
     if (nowBgmName == name) {
       await _player?.pause();
     }
+  }
+
+  void pauseBgmAny() async {
+    await _player?.pause();
+  }
+
+  void resumeBgm() async {
+    await _player?.resume();
   }
 
   void stopBgm(String? name) async {

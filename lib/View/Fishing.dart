@@ -62,6 +62,7 @@
 //済・ルアー耐久システム
 //済・スライダーの右下に数値も出す
 //・店
+//・風
 //・陸から何メートルで釣れる魚変わるシステム
 //・雲
 //・時合度が低いのが続かんようにするか、高くできるようにする
@@ -134,11 +135,10 @@ class _FishingState extends BasePageState<Fishing>
       : super(fileName: Fishing.screenBgm); // <-- 親クラスのコンストラクタにファイル名設定
 
   //定数の定義？？？いろいろ環境設定にした方がいいかと
-  //BGM
-  // final AudioCache _bgm = AudioCache(
-  //   fixedPlayer: AudioPlayer(),
-  // );
-  // late AudioPlayer _ap;
+  //モーダル中のBGM
+
+  //late AudioCache _subBgm;
+  late AudioPlayer _ap;
 
   //SE
   late SoundManagerPool soundManagerPool;
@@ -227,6 +227,7 @@ class _FishingState extends BasePageState<Fishing>
   var _drag = 250.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _depth = 0.0; //現在糸出し量(0.1m)
+  var _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
   var _maxDepth = 187.0; //最大水深(0.1m)
   var _dispDepth = '0.0 m'; //深さ表示用
   //var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
@@ -319,8 +320,13 @@ class _FishingState extends BasePageState<Fishing>
 
   @override
   void initState() {
-    // //BGM再生
-    // _ap = new AudioPlayer();
+    //サブBGM再生
+    _ap = new AudioPlayer();
+    // AudioCache _player = AudioCache();
+    // AudioCache _subBgm = AudioCache(
+    //   fixedPlayer: _ap,
+    // );
+
     // this.bgmPlay('Bgm/bgm_field.mp3');
 
     //SE再生 10つまで同時再生
@@ -385,17 +391,41 @@ class _FishingState extends BasePageState<Fishing>
     _tackleMenuAnimationController.dispose();
     _jerkTextAnimationController.dispose();
     fishPointerList.clear();
-    // _ap.stop();
-    // _ap.dispose();
+    _ap.stop();
+    _ap.dispose();
     super.dispose();
   }
 
+  //画面の基本BGM関連
   Future bgmPlay(file) async {
     super.bgm?.playBgm(name: file);
   }
 
+  Future bgmPause() async {
+    super.bgm?.pauseBgmAny();
+  }
+
+  Future bgmResume() async {
+    super.bgm?.resumeBgm();
+  }
+
   Future bgmStop() async {
     super.bgm?.stopBgmAny();
+  }
+
+  //ダイアログ等 一時BGM
+  Future subBgmPlay(file) async {
+    _ap.setReleaseMode(ReleaseMode.RELEASE);
+    await _ap.play('assets/' + file, volume: 0.5);
+  }
+
+  Future subBgmLoop(file) async {
+    _ap.setReleaseMode(ReleaseMode.LOOP);
+    await _ap.play('assets/' + file, volume: 0.5);
+  }
+
+  Future subBgmStop() async {
+    await _ap.stop();
   }
 
   //定周期タイマの起動
@@ -602,38 +632,9 @@ class _FishingState extends BasePageState<Fishing>
         _flgBait = false;
         _flgHit = false;
         soundManagerPool.playSound('Se/linebreak.mp3');
+        bgmPlay(Fishing.screenBgm);
       }
     }
-    // //座礁
-    // debugPrint("座礁");
-    //   _flgGameOver = true;
-    //   gameovertext = "船が座礁しました。\nゲームオーバーです。\nゲームオーバーなのもう何もできません";
-    // }
-    // if (gameovertext != "") {
-    //   //ゲームオーバーモーダル
-    //   var result = showDialog<int>(
-    //       context: context,
-    //       barrierDismissible: false,
-    //       builder: (BuildContext context) {
-    //         return AlertDialog(
-    //           title: Text("あーあ"),
-    //           content: Column(children: <Widget>[
-    //             Text(gameovertext),
-    //             Text("あなたは" + _point.toString() + "ポイント獲得して終わりました"),
-    //           ]),
-    //           actions: <Widget>[
-    //             FlatButton(
-    //               child: Text("メニューに戻ることしかできません"),
-    //               onPressed: () {
-    //                 Navigator.of(context).pop();
-    //               },
-    //             ),
-    //           ],
-    //         );
-    //       });
-    //   return;
-    // }
-
     //ドラグ判定
     var dragVal = _drag;
     //_tensionActiveTrackColor = TENSION_COLOR_SAFE;
@@ -662,11 +663,19 @@ class _FishingState extends BasePageState<Fishing>
     if (_depth <= 0) {
       //深さ0m
       _depth = 0.0;
+      if (_prevDepth > 0.0) {
+        if (_flgHit) {
+          soundManagerPool.playSound('Se/waterupfish.mp3');
+        } else {
+          soundManagerPool.playSound('Se/waterup.mp3');
+        }
+      }
       //ラインHPを回復
       _nowLineHp = _maxLineHp;
       //高速回収中フラグをリセット
       _collect = false;
     }
+    _prevDepth = _depth;
 
     //テンション確定
     _tension = val;
@@ -746,10 +755,11 @@ class _FishingState extends BasePageState<Fishing>
       //釣果リストに登録
       fishesResult.addResult(fish.id, _fishSize);
 
-      soundManagerPool.playSound('Se/jingle01.mp3');
+      //soundManagerPool.playSound('Se/jingle01.mp3');
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
       bgmStop();
+      subBgmPlay('Se/jingle01.mp3');
       var result = await showDialog<int>(
         context: context,
         barrierDismissible: false,
@@ -773,7 +783,8 @@ class _FishingState extends BasePageState<Fishing>
       _point += point;
 
       startTimer(); //定周期タイマ再開
-      bgmPlay(super.fileName);
+      //subBgmStop();
+      bgmPlay(Fishing.screenBgm);
     }
 
     //光点点滅速度関連の変数
@@ -1001,6 +1012,7 @@ class _FishingState extends BasePageState<Fishing>
           _centerTextSubColor = Colors.blue;
           startCenterInfo();
 
+          bgmPlay(Fishing.screenBgm);
           _bareCnt = 0;
         }
       }
@@ -1113,7 +1125,8 @@ class _FishingState extends BasePageState<Fishing>
                     iconSize: 30.0,
                     onPressed: () async {
                       _timer.cancel(); //定周期タイマ停止
-                      bgmStop();
+                      bgmPause();
+                      subBgmLoop('Bgm/bgm_book.mp3');
                       // //図鑑モーダルの表示
                       soundManagerPool.playSound('Se/book.mp3');
                       var result = await showDialog<int>(
@@ -1129,7 +1142,8 @@ class _FishingState extends BasePageState<Fishing>
                       );
                       soundManagerPool.playSound('Se/book.mp3');
                       startTimer(); //定周期タイマ再開
-                      bgmPlay(super.fileName);
+                      subBgmStop();
+                      bgmResume();
 
 //                  debugPrint(result.toString());
                       setState(() {});
@@ -2326,11 +2340,17 @@ class _FishingState extends BasePageState<Fishing>
     if (flg) {
       //クラッチOFF→ONに変更
       _clutchBackColor = Colors.lightBlue;
+      if (_depth <= 0.0) {
+        //着水音
+        soundManagerPool.playSound('Se/waterlanding.mp3');
+      } else {
+        soundManagerPool.playSound('Se/clutch.mp3');
+      }
     } else {
       _clutchBackColor = Colors.red;
+      soundManagerPool.playSound('Se/clutch.mp3');
     }
     _onClutch = flg;
-    soundManagerPool.playSound('Se/clutch.mp3');
   }
 
   bool ligntSpotAnimation(bool initflg, int durationMsec) {
