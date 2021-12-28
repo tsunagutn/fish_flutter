@@ -286,7 +286,7 @@ class _FishingState extends BasePageState<Fishing>
 
   var _ligntSpotAnimationChangeing = false;
 
-  //タックルの描画関連
+  //タックルの描画関連a
   var _tackleCenterX = 0.0;
   var _rodSizeX = 0.0;
   var _rodSizeY = 0.0;
