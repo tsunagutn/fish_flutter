@@ -144,8 +144,8 @@ class _FishingState extends BasePageState<Fishing>
   late SoundManagerPool soundManagerPool;
 
   //デバッグフラグ すぐつれちゃう
-  static const DEBUGFLG = true;
-  //static const DEBUGFLG = false;
+  //static const DEBUGFLG = true;
+  static const DEBUGFLG = false;
 
   //魚種定義
   late FishsModel FISH_TABLE;
@@ -248,6 +248,8 @@ class _FishingState extends BasePageState<Fishing>
   var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
   var _maxLineHp = 50.0; //ラインHP最大値
   var _nowLineHp = 50.0; //現在ラインHP
+
+  var _shipMoveSeScan = 0;
 
   List<SpeedRange> _listSpeedRange = []; //可能性ある魚種毎のスピード範囲
 
@@ -416,12 +418,12 @@ class _FishingState extends BasePageState<Fishing>
   //ダイアログ等 一時BGM
   Future subBgmPlay(file) async {
     _ap.setReleaseMode(ReleaseMode.RELEASE);
-    await _ap.play('assets/' + file, volume: 0.5);
+    await _ap.play('assets/' + file, volume: 0.3);
   }
 
   Future subBgmLoop(file) async {
     _ap.setReleaseMode(ReleaseMode.LOOP);
-    await _ap.play('assets/' + file, volume: 0.5);
+    await _ap.play('assets/' + file, volume: 0.3);
   }
 
   Future subBgmStop() async {
@@ -487,7 +489,8 @@ class _FishingState extends BasePageState<Fishing>
     _jiaiChangeScanCnt++;
     if (_jiaiChangeScanCnt > JIAI_CHANGE_SCAN) {
       _jiaiChangeScanCnt = 0;
-      _jiai = (new math.Random()).nextDouble();
+      //地合値の計算 0.5以下にはしない
+      _jiai = 0.5 + (0.5 * (new math.Random()).nextDouble());
       debugPrint("時合度" + _jiai.toString());
     }
 
@@ -522,6 +525,13 @@ class _FishingState extends BasePageState<Fishing>
         FishPainter obj2 = obj.painter as FishPainter;
         //addxの値を加減算で移動
         obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange - 0.5) * -1;
+
+        _shipMoveSeScan++;
+        if (_shipMoveSeScan >= (800 / TIMER_INTERVAL).floor()) {
+          //船動作音が連続再生しすぎるのを防止
+          soundManagerPool.playSound('Se/shipmove.mp3');
+          _shipMoveSeScan = 0;
+        }
       });
     }
     //船移動の指示中
@@ -647,8 +657,13 @@ class _FishingState extends BasePageState<Fishing>
       val = val - (dragDiff / 25);
       //テンションゲージの色を変える
       _tensionActiveTrackColor = TENSION_COLOR_DRAG;
+
       //ドラグ音再生
-      soundManagerPool.playSound('Se/drag.mp3');
+      if (dragDiff > 15) {
+        soundManagerPool.playSound('Se/drag2_high.mp3');
+      } else {
+        soundManagerPool.playSound('Se/drag2.mp3');
+      }
     } else {
       //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
       //   if (val >= (TENSION_VAL_MAX * 0.9)) {
@@ -705,6 +720,7 @@ class _FishingState extends BasePageState<Fishing>
         _centerTextSub = "ルアーが破壊!";
         _centerTextSubColor = Colors.yellow;
         startCenterInfo();
+        soundManagerPool.playSound('Se/lurebroken.mp3');
       }
     }
 
@@ -831,8 +847,8 @@ class _FishingState extends BasePageState<Fishing>
           hitTanaProb =
               1.0 * ((tanaDiff - _justTanaRange).abs() / _justTanaRange);
         }
-        if (hitTanaProb < 0.2) {
-          hitTanaProb = 0.2; //棚範囲外の最低保証
+        if (hitTanaProb < 0.3) {
+          hitTanaProb = 0.3; //棚範囲外の最低保証
         }
 
         //現在底付近か？
@@ -927,6 +943,8 @@ class _FishingState extends BasePageState<Fishing>
             debugPrint("アタリ");
             //_dispInfo = 'アタリ';
             _infoBackColor = TENSION_COLOR_DANGER;
+
+            soundManagerPool.playSound('Se/bait.mp3');
           }
           if (_flgBait || _flgHit) {
           } else {
@@ -1140,7 +1158,7 @@ class _FishingState extends BasePageState<Fishing>
                           );
                         },
                       );
-                      soundManagerPool.playSound('Se/book.mp3');
+                      soundManagerPool.playSound('Se/bookclose.mp3');
                       startTimer(); //定周期タイマ再開
                       subBgmStop();
                       bgmResume();
@@ -1200,7 +1218,10 @@ class _FishingState extends BasePageState<Fishing>
                 //ドラッグ操作が開始された時
                 onPanStart: (DragStartDetails details) {
                   debugPrint("ドラッグ開始");
-                  _showTacleChangeDialog = false;
+                  if (_showTacleChangeDialog) {
+                    soundManagerPool.playSound('Se/boxclose.mp3');
+                    _showTacleChangeDialog = false;
+                  }
                   _cursorX = details.localPosition.dx;
                   _cursorY = details.localPosition.dy;
                   //クラッチOFF時、タップ箇所がクラッチ部分か？
@@ -1255,7 +1276,7 @@ class _FishingState extends BasePageState<Fishing>
                   //アワセ値
                   addVal = (moveY / 100);
                   //シャクリ音（小）
-                  if (addVal > 0.3) {
+                  if (addVal > 0.2) {
                     soundManagerPool.playSound('Se/lowjerk.mp3');
                   } else if (addVal > 0.5) {
                     soundManagerPool.playSound('Se/middlejerk.mp3');
@@ -1520,6 +1541,8 @@ class _FishingState extends BasePageState<Fishing>
                                       GestureDetector(
                                         //タップ開始
                                         onTapDown: (details) {
+                                          soundManagerPool
+                                              .playSound('Se/engineon.mp3');
                                           if (_depth <= 0.0) {
                                             setState(() {
                                               _moveShipTarget = 0.3;
@@ -1547,6 +1570,8 @@ class _FishingState extends BasePageState<Fishing>
                                       GestureDetector(
                                         //タップ開始
                                         onTapDown: (details) {
+                                          soundManagerPool
+                                              .playSound('Se/engineon.mp3');
                                           if (_depth <= 0.0) {
                                             setState(() {
                                               _moveShipTarget = 0.7;
@@ -1855,6 +1880,8 @@ class _FishingState extends BasePageState<Fishing>
                                           setState(() {
                                             _selectTacleIcon = 'rod';
                                             _showTacleChangeDialog = true;
+                                            soundManagerPool
+                                                .playSound('Se/boxopen.mp3');
                                           });
                                         }
                                       },
@@ -1870,6 +1897,8 @@ class _FishingState extends BasePageState<Fishing>
                                           setState(() {
                                             _selectTacleIcon = 'reel';
                                             _showTacleChangeDialog = true;
+                                            soundManagerPool
+                                                .playSound('Se/boxopen.mp3');
                                           });
                                         }
                                       },
@@ -1884,6 +1913,8 @@ class _FishingState extends BasePageState<Fishing>
                                           setState(() {
                                             _selectTacleIcon = 'lure';
                                             _showTacleChangeDialog = true;
+                                            soundManagerPool
+                                                .playSound('Se/boxopen.mp3');
                                           });
                                         }
                                       },
@@ -2253,6 +2284,8 @@ class _FishingState extends BasePageState<Fishing>
                                         onPrimary: Colors.white,
                                       ),
                                       onPressed: () {
+                                        soundManagerPool
+                                            .playSound('Se/boxclose.mp3');
                                         setState(() {
                                           _showTacleChangeDialog = false;
                                         });
