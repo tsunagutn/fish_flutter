@@ -5,11 +5,15 @@ class WaveClipper extends CustomClipper<Path> {
   // 1
   static const WaveHeight = 4; //波の高さ
   static const WaveHindo = 3; //波の頻度 低いほど多い
+  final BuildContext context;
+  final double waveControllerValue; // waveController.valueの値
+  final double offset; // 波のずれ
+  final List<Offset> coordinateList = []; // 波の座標のリスト
 
   WaveClipper(this.context, this.waveControllerValue, this.offset) {
     final width = MediaQuery.of(context).size.width; // 画面の横幅
     //final height = MediaQuery.of(context).size.height; // 画面の高さ
-    final height = 40; // 画面の高さ
+    final height = 31; //波描画の最低座標
 
     // coordinateListに波の座標を追加
     for (var i = 0; i <= width / WaveHindo; i++) {
@@ -18,17 +22,11 @@ class WaveClipper extends CustomClipper<Path> {
         Offset(
           i.toDouble() * WaveHindo, // X座標
           //math.sin(step * 2 * math.pi - offset) * 45 + height * 0.5, // Y座標
-          math.sin(step * 2 * math.pi - offset) * WaveHeight + 31, // Y座標
+          math.sin(step * 2 * math.pi - offset) * WaveHeight + height, // Y座標
         ),
       );
     }
   }
-
-  final BuildContext context;
-  final double waveControllerValue; // waveController.valueの値
-  final double offset; // 波のずれ
-  final List<Offset> coordinateList = []; // 波の座標のリスト
-
   // 2
   @override
   Path getClip(Size size) {

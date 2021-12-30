@@ -331,8 +331,8 @@ class _FishingState extends BasePageState<Fishing>
 
     // this.bgmPlay('Bgm/bgm_field.mp3');
 
-    //SE再生 10つまで同時再生
-    soundManagerPool = new SoundManagerPool(10);
+    //SE再生 同時再生
+    soundManagerPool = new SoundManagerPool(20);
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
     //釣果リストを初期化
@@ -1068,7 +1068,8 @@ class _FishingState extends BasePageState<Fishing>
 
     //最大深さをランダムで増減
     var depthrnd = (new math.Random()).nextDouble();
-    _maxDepth += 1 * ((_depthChange) - depthrnd);
+    // _maxDepth += 1 * ((_depthChange) - depthrnd);
+    _maxDepth += _depthChange - 0.5;
 
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
@@ -1464,29 +1465,24 @@ class _FishingState extends BasePageState<Fishing>
                         Stack(children: <Widget>[
                           Container(
                             alignment: Alignment.center,
-                            // margin: EdgeInsets.only(
-                            //     top: math.sin(waveController.value * 0.5 * math.pi),
-                            //     left: math.sin(waveController.value * math.pi)),
+                            margin: EdgeInsets.only(
+                              top: 10 -
+                                  //(math.sin(
+                                  // waveController.value * 0.5 * math.pi)),
+
+                                  ((waveController.value < 0.5)
+                                      ? 7 * waveController.value * 2
+                                      : (7 *
+                                              (waveController.value - 0.5) *
+                                              -2) +
+                                          7),
+                              //left: math.sin(waveController.value * math.pi)
+                            ),
                             child: GestureDetector(
                               onTap: () async {
-                                setState(() {
-                                  //_senchoMessage = "わしゃあ忙しいんで！";
-                                });
-                                // var result = await showDialog<int>(
-                                //   context: context,
-                                //   barrierDismissible: false,
-                                //   builder: (_) {
-                                //     return SenchoDialog(
-                                //       depth_change_order: _depthChangeOrder,
-                                //       point: _point,
-                                //     );
-                                //   },
-                                // );
-                                // debugPrint(result.toString());
-                                // setState(() {
-                                //   _depthChangeOrder = result as int;
-                                // });
+                                setState(() {});
                               },
+                              //船の描画
                               child: Transform.rotate(
                                 //angle: 45 * math.pi / 180,
                                 angle:
@@ -1494,7 +1490,7 @@ class _FishingState extends BasePageState<Fishing>
                                 child: new Image(
                                   image: AssetImage('assets/Images/ship.png'),
                                   width: 60,
-                                  height: 40,
+                                  height: 30,
                                 ),
                               ),
                             ),
@@ -1543,6 +1539,7 @@ class _FishingState extends BasePageState<Fishing>
                                         onTapDown: (details) {
                                           soundManagerPool
                                               .playSound('Se/engineon.mp3');
+                                          _shipMoveSeScan = 0;
                                           if (_depth <= 0.0) {
                                             setState(() {
                                               _moveShipTarget = 0.3;
