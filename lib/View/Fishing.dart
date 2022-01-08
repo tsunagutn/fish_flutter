@@ -40,7 +40,7 @@
 //済・魚種毎にバレ条件の設定
 //済・アワセの上手くいきかたで初期バラシレベルが決まるみたいな
 //済・バレシステムを何とかする
-//・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？→しない
+//済・波の下の罫線が気になる、波をBOTTOMで描画すれば解決かも？→しない
 //済・HIT時にHIT宣言とアワセ評価を画面中央に出す目立つ
 //済・魚図鑑画面
 //済・%を表示してる方がおもしろい・・・
@@ -98,6 +98,7 @@ import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/RadarChart.dart';
+import 'package:fish_flutter/widget/ShopDialog.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
@@ -167,9 +168,9 @@ class _FishingState extends BasePageState<Fishing>
   //static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
   static const TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
   //static const TIMER_INTERVAL = 17; //1スキャン時間(msec) 60FPS
-  static const TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
+  //static const TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
   static const TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
-  static const TENSION_LINECUT = 290.0; //糸切れ判定値
+  //static const TENSION_LINECUT = 290.0; //糸切れ判定値
   static const SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
   static const SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   static const HOSEI_MAX = 3;
@@ -224,6 +225,7 @@ class _FishingState extends BasePageState<Fishing>
 
   //ステート変数
   var _tension = 0.0; //テンション値
+  var _tension_val_max = 0.0; //テンション最大値 竿によって可変
   var _drag = 250.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _depth = 0.0; //現在糸出し量(0.1m)
@@ -341,6 +343,7 @@ class _FishingState extends BasePageState<Fishing>
     lures = new LuresModel();
     //所持リストを初期化
     haveTackle = new HaveTackleModel();
+    _tension_val_max = haveTackle.getUseRod().maxTention;
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -451,6 +454,7 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     num addVal = 0;
+    _tension_val_max = haveTackle.getUseRod().maxTention;
     var mx = MAX_RAND_ADD_TENSION;
     var mn = MIN_RAND_ADD_TENSION;
     var weight = 0;
@@ -619,14 +623,14 @@ class _FishingState extends BasePageState<Fishing>
       //addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
       //二次関数 テンション上がるごとに上がりにくくする
       addVal = addVal +
-          (addVal * -1) * (MathPow._getPow(2, (_tension / TENSION_VAL_MAX)));
+          (addVal * -1) * (MathPow._getPow(2, (_tension / _tension_val_max)));
     }
     var val = _tension + addVal;
 
     // //ゲームオーバー判定
     // var gameovertext = "";
     //糸ダメージ判定
-    if (val > TENSION_LINECUT) {
+    if (val > _tension_val_max * 0.9) {
       _nowLineHp--; //ラインHPを減らす
       if (_nowLineHp < 0) {
         //糸切れ
@@ -666,12 +670,12 @@ class _FishingState extends BasePageState<Fishing>
       }
     } else {
       //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
-      //   if (val >= (TENSION_VAL_MAX * 0.9)) {
+      //   if (val >= (_tension_val_max * 0.9)) {
       //     _tensionActiveTrackColor = TENSION_COLOR_DANGER;
       //   }
     }
 
-    if (val > TENSION_VAL_MAX) val = TENSION_VAL_MAX;
+    if (val > _tension_val_max) val = _tension_val_max;
     if (val < TENSION_VAL_MIN) val = TENSION_VAL_MIN;
 
     if (_depth > _maxDepth) _depth = _maxDepth;
@@ -697,7 +701,7 @@ class _FishingState extends BasePageState<Fishing>
 
     //テンションによってテンションバーの色を変える
     _tensionActiveTrackColor = clsColor._getColorRange(
-        TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, TENSION_VAL_MAX);
+        TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, _tension_val_max);
 
     //水深表示
     _dispDepth = ((_depth).round() / 10).toStringAsFixed(1) +
@@ -1006,7 +1010,7 @@ class _FishingState extends BasePageState<Fishing>
 
         //テンションから点滅速度を算出
         duration = durationMax -
-            ((durationMax - durationMin) * (_tension / TENSION_VAL_MAX))
+            ((durationMax - durationMin) * (_tension / _tension_val_max))
                 .floor();
 
         //バレ判定 水深MAXかテンション一定未満で条件成立？？？
@@ -1186,8 +1190,31 @@ class _FishingState extends BasePageState<Fishing>
                           _point.toString() + "ポイント",
                         ),
                       ]),
-                  onPressed: () {
+                  onPressed: () async {
                     //買い物モーダルの表示
+                    _timer.cancel(); //定周期タイマ停止
+                    bgmPause();
+                    subBgmLoop('Bgm/bgm_book.mp3');
+                    soundManagerPool.playSound('Se/book.mp3'); //音は仮
+                    int? result = await showDialog<int>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) {
+                        return ShopDialog(
+                          haveTakcle: haveTackle,
+                          soundManagerPool: soundManagerPool,
+                          originPoint: _point,
+                        );
+                      },
+                    );
+                    _point = result!;
+                    soundManagerPool.playSound('Se/bookclose.mp3'); //音は仮
+                    startTimer(); //定周期タイマ再開
+                    subBgmStop();
+                    bgmResume();
+
+//                  debugPrint(result.toString());
+                    setState(() {});
                   },
                 )),
               ],
@@ -1343,7 +1370,7 @@ class _FishingState extends BasePageState<Fishing>
                                                 ? Colors.black
                                                 : Colors.white,
                                             value: _tension,
-                                            maxValue: TENSION_VAL_MAX,
+                                            maxValue: _tension_val_max,
                                             backRadius: _animationRadius.value,
                                             maxBackRadius: POINTER_BACK_SIZE,
                                             flgShaKe:
@@ -1383,9 +1410,9 @@ class _FishingState extends BasePageState<Fishing>
                                       value: _drag,
                                       //MAX-MINはテンションと同じ
                                       min: TENSION_VAL_MIN,
-                                      max: TENSION_VAL_MAX,
+                                      max: _tension_val_max,
                                       divisions:
-                                          (TENSION_VAL_MAX - TENSION_VAL_MIN)
+                                          (_tension_val_max - TENSION_VAL_MIN)
                                               .floor(),
                                       onChanged: (double value) {
                                         setState(() {
@@ -1680,7 +1707,7 @@ class _FishingState extends BasePageState<Fishing>
                                         child: CustomPaint(
                                           painter: new SliderPainter(
                                             height: 5,
-                                            activeColor: getRaitoColor(
+                                            activeColor: clsColor.getRaitoColor(
                                                 _hitScanCnt /
                                                     (FISH_TABLE.fishs[_fishidx]
                                                             .hp +
@@ -1807,7 +1834,7 @@ class _FishingState extends BasePageState<Fishing>
                         clutchBackColor:
                             (_onClutch ? Colors.lightBlue : Colors.red),
                         rodStandUp: _rodStandUp,
-                        rodTension: _tension / TENSION_VAL_MAX,
+                        rodTension: _tension / _tension_val_max,
                       ),
                     ),
                     if (_centerTextAnimationController.isAnimating)
@@ -1884,8 +1911,10 @@ class _FishingState extends BasePageState<Fishing>
                                       },
                                       child: tackleIcon(
                                         tackleIconSize: 40.0,
-                                        imagePath: 'assets/Images/rod.png',
+                                        imagePath: 'assets/Images/' +
+                                            haveTackle.getUseRod().image,
                                         flgSelect: false,
+                                        opacity: (_depth > 0.0 ? 0.7 : 1.0),
                                       )),
                                   //リール
                                   GestureDetector(
@@ -1900,9 +1929,11 @@ class _FishingState extends BasePageState<Fishing>
                                         }
                                       },
                                       child: tackleIcon(
-                                          tackleIconSize: 40.0,
-                                          imagePath: 'assets/Images/reel.png',
-                                          flgSelect: false)),
+                                        tackleIconSize: 40.0,
+                                        imagePath: 'assets/Images/reel.png',
+                                        flgSelect: false,
+                                        opacity: (_depth > 0.0 ? 0.7 : 1.0),
+                                      )),
                                   //ルアー
                                   GestureDetector(
                                       onTap: () async {
@@ -1924,6 +1955,7 @@ class _FishingState extends BasePageState<Fishing>
                                                       .lureId)
                                                   .image,
                                           flgSelect: false,
+                                          opacity: (_depth > 0.0 ? 0.7 : 1.0),
                                           subText: lures
                                                   .getLureData(haveTackle
                                                       .getUseLure()
@@ -2034,13 +2066,18 @@ class _FishingState extends BasePageState<Fishing>
                                           child: Container(
                                               padding: EdgeInsets.all(10),
                                               child: tackleIcon(
-                                                  tackleIconSize: 60.0,
-                                                  imagePath:
-                                                      'assets/Images/rod.png',
-                                                  flgSelect:
-                                                      _selectTacleIcon == 'rod'
-                                                          ? true
-                                                          : false)),
+                                                tackleIconSize: 60.0,
+                                                imagePath: 'assets/Images/' +
+                                                    haveTackle
+                                                        .getUseRod()
+                                                        .image,
+                                                flgSelect:
+                                                    _selectTacleIcon == 'rod'
+                                                        ? true
+                                                        : false,
+                                                opacity:
+                                                    (_depth > 0.0 ? 0.7 : 1.0),
+                                              )),
                                         ),
 
                                         //リール
@@ -2053,13 +2090,16 @@ class _FishingState extends BasePageState<Fishing>
                                           child: Container(
                                               padding: EdgeInsets.all(10),
                                               child: tackleIcon(
-                                                  tackleIconSize: 60.0,
-                                                  imagePath:
-                                                      'assets/Images/reel.png',
-                                                  flgSelect:
-                                                      _selectTacleIcon == 'reel'
-                                                          ? true
-                                                          : false)),
+                                                tackleIconSize: 60.0,
+                                                imagePath:
+                                                    'assets/Images/reel.png',
+                                                flgSelect:
+                                                    _selectTacleIcon == 'reel'
+                                                        ? true
+                                                        : false,
+                                                opacity:
+                                                    (_depth > 0.0 ? 0.7 : 1.0),
+                                              )),
                                         ),
                                         //ルアー
                                         GestureDetector(
@@ -2083,6 +2123,9 @@ class _FishingState extends BasePageState<Fishing>
                                                       _selectTacleIcon == 'lure'
                                                           ? true
                                                           : false,
+                                                  opacity: (_depth > 0.0
+                                                      ? 0.7
+                                                      : 1.0),
                                                   subText: lures
                                                           .getLureData(
                                                               haveTackle
@@ -2149,18 +2192,20 @@ class _FishingState extends BasePageState<Fishing>
                                                                             index]
                                                                         .lureId)
                                                                     .image,
-                                                            flgSelect: haveTackle
-                                                                        .haveLures[
-                                                                            index]
-                                                                        .id ==
+                                                            flgSelect: haveTackle.haveLures[index].id ==
                                                                     haveTackle
                                                                         .getUseLure()
                                                                         .id
                                                                 ? true
                                                                 : false,
+                                                            opacity:
+                                                                (_depth > 0.0
+                                                                    ? 0.7
+                                                                    : 1.0),
                                                             subText: lures
-                                                                    .getLureData(
-                                                                        haveTackle.haveLures[index].lureId)
+                                                                    .getLureData(haveTackle
+                                                                        .haveLures[index]
+                                                                        .lureId)
                                                                     .weight
                                                                     .toString() +
                                                                 'g',
@@ -2465,67 +2510,6 @@ class _FishingState extends BasePageState<Fishing>
     _jerkTextAnimationController.forward();
   }
 
-  //タックルサムネの表示
-  Widget tackleIcon({
-    required double tackleIconSize,
-    required String imagePath,
-    required bool flgSelect,
-    String subText = '',
-    int hp = 0,
-    int maxHp = 0,
-  }) {
-    //final value = hp / maxHp;
-    return SizedBox(
-      width: tackleIconSize,
-      height: tackleIconSize,
-      child: Container(
-        padding: EdgeInsets.all(0),
-        decoration: BoxDecoration(
-          border: Border.all(
-              color: flgSelect ? Colors.yellow : Colors.black,
-              width: flgSelect ? 3 : 1),
-          image: DecorationImage(
-              image: AssetImage(imagePath),
-              colorFilter: new ColorFilter.mode(
-                  Colors.black.withOpacity((_depth > 0.0 ? 0.7 : 1.0)),
-                  BlendMode.dstATop),
-              fit: BoxFit.contain),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              subText,
-              style: TextStyle(fontSize: 12),
-            ),
-            Visibility(
-              visible: (maxHp > 0),
-              child: Container(
-                margin: EdgeInsets.all(3),
-                child: CustomPaint(
-                  painter: new SliderPainter(
-                    height: 4,
-                    activeColor: getRaitoColor(hp / maxHp),
-                    inactiveColor: Colors.white,
-                    value: hp.toDouble(),
-                    maxValue: maxHp.toDouble(),
-                    backRadius: 0,
-                    maxBackRadius: 0,
-                    flgShaKe: false,
-                    flgDispValue: false,
-                    flgDispMaxValue: false,
-                  ),
-                  child: Container(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   //ルアーの能力チャート描画
   List<RadarChartItemModel> getLureRadarChartItem() {
     List<RadarChartItemModel> ret = [];
@@ -2540,13 +2524,67 @@ class _FishingState extends BasePageState<Fishing>
         value: lures.getLureData(haveTackle.getUseLure().lureId).jerk));
     return ret;
   }
+}
 
-  //割合によって色を返す
-  Color getRaitoColor(double raito) {
-    if (raito > 0.7) return Colors.green;
-    if (raito > 0.3) return Colors.amber;
-    return Colors.red;
-  }
+//タックルサムネの表示
+Widget tackleIcon({
+  required double tackleIconSize,
+  required String imagePath,
+  required bool flgSelect,
+  String subText = '',
+  int hp = 0,
+  int maxHp = 0,
+  double opacity = 1.0,
+}) {
+  //final value = hp / maxHp;
+  return SizedBox(
+    width: tackleIconSize,
+    height: tackleIconSize,
+    child: Container(
+      padding: EdgeInsets.all(0),
+      decoration: BoxDecoration(
+        border: Border.all(
+            color: flgSelect ? Colors.yellow : Colors.black,
+            width: flgSelect ? 3 : 1),
+        image: DecorationImage(
+            image: AssetImage(imagePath),
+            colorFilter: new ColorFilter.mode(
+                Colors.black.withOpacity(opacity), BlendMode.dstATop),
+            fit: BoxFit.contain),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            subText,
+            style: TextStyle(fontSize: 12),
+          ),
+          Visibility(
+            visible: (maxHp > 0),
+            child: Container(
+              margin: EdgeInsets.all(3),
+              child: CustomPaint(
+                painter: new SliderPainter(
+                  height: 4,
+                  activeColor: clsColor.getRaitoColor(hp / maxHp),
+                  inactiveColor: Colors.white,
+                  value: hp.toDouble(),
+                  maxValue: maxHp.toDouble(),
+                  backRadius: 0,
+                  maxBackRadius: 0,
+                  flgShaKe: false,
+                  flgDispValue: false,
+                  flgDispMaxValue: false,
+                ),
+                child: Container(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class ShakeCurve extends Curve {
@@ -2583,6 +2621,13 @@ class clsColor {
     return _getColorFromHex(r.toRadixString(16).padLeft(2, "0") +
         g.toRadixString(16).padLeft(2, "0") +
         b.toRadixString(16).padLeft(2, "0"));
+  }
+
+  //割合によって色を返す
+  static Color getRaitoColor(double raito) {
+    if (raito > 0.7) return Colors.green;
+    if (raito > 0.3) return Colors.amber;
+    return Colors.red;
   }
 }
 

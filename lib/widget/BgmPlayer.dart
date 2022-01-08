@@ -31,7 +31,7 @@ class BgmPlayer {
     } else {
       _player?.setReleaseMode(ReleaseMode.RELEASE);
     }
-    _player?.play(bgmUriMap[name].toString(), volume: 0.3);
+    _player?.play(bgmUriMap[name].toString(), volume: 0.2);
   }
 
   void pauseBgm(String? name) async {

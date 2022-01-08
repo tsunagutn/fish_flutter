@@ -1,13 +1,25 @@
 //装備しているタックルのモデル
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fish_flutter/Model/RodsModel.dart';
 import 'dart:math' as math;
 
 class HaveTackleModel {
+  late int haveRodId = 0;
+  late int haveReelId = 0;
   late List<HaveLureModel> haveLures = [];
+  late RodsModel rods;
 
   //コンストラクタ
   HaveTackleModel() {
+    //ロッドアイテムのリストを初期化
+    rods = new RodsModel();
+
+    //初期所持ロッド
+    haveRodId = 0;
+    //初期所持リール
+    haveRodId = 0;
+
     //テスト用 初期所持ルアーを登録
     haveLures
         .add(new HaveLureModel(id: 0, lureId: 0, lureHp: 0, flgUse: false));
@@ -27,16 +39,31 @@ class HaveTackleModel {
         .add(new HaveLureModel(id: 7, lureId: 6, lureHp: 4000, flgUse: false));
   }
 
-  // //使用中ルアーを返す
-  // HaveLuresModel getUseLure() {
-  //   HaveLuresModel ret;
-  //   Iterable<HaveLuresModel> useLure =
-  //       haveLures.where((HaveLuresModel value) => value.flgUse == true);
-  //   if (useLure.length > 0) {
-  //     ret = haveLures[0];
-  //   }
-  //   return ret;
-  // }
+  //使用中の竿を返す
+  RodModel getUseRod() {
+    return rods.getRodData(haveRodId);
+  }
+
+  //使用中の竿の次のやつを返す
+  RodModel getNextRod() {
+    RodModel next = rods.rods.firstWhere(
+        (element) => element.id == haveRodId + 1,
+        orElse: () => rods.getRodData(-1));
+    return next;
+    // if (!(rods.rods.contains((item) => item.id == haveRodId + 1))) {
+    //   //次の竿がもうないときは空のインスタンスを返す？？？
+    //   debugPrint(haveRodId.toString());
+    //   return new RodModel(
+    //       id: -1, name: '', image: '', text: '', prise: 0, maxTention: 0);
+    // } else {
+    //   return rods.getRodData(haveRodId + 1);
+    // }
+  }
+
+  //使用中のルアーを返す
+  HaveLureModel getUseLure() {
+    return haveLures.firstWhere((item) => item.flgUse);
+  }
 
   //ルアー追加
   addLure(LureModel lure) {
@@ -73,11 +100,6 @@ class HaveTackleModel {
     debugPrint("きれた");
     haveLures.removeAt(
         haveLures.indexOf(haveLures.firstWhere((item) => item.id == id)));
-  }
-
-  //使用中のルアーを返す
-  HaveLureModel getUseLure() {
-    return haveLures.firstWhere((item) => item.flgUse);
   }
 }
 
