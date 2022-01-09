@@ -20,7 +20,7 @@ class ReelsModel {
       image: "reel1.png",
       text: "最初のリール\n一番へぼい",
       prise: 0,
-      maxSpeed: 300,
+      maxSpeed: 100,
     ));
     reels.add(new ReelModel(
       id: 1,
@@ -36,7 +36,7 @@ class ReelsModel {
       image: "reel3.png",
       text: "究極の船用リール\n超すごい",
       prise: 500,
-      maxSpeed: 10000,
+      maxSpeed: 1000,
     ));
   }
 

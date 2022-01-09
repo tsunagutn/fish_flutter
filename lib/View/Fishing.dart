@@ -61,6 +61,8 @@
 //済・ゲームオーバー無しにする
 //済・ルアー耐久システム
 //済・スライダーの右下に数値も出す
+//・沖合何メートルの表示
+//・おさかな図鑑画面で？でも何mでつれるかの表示出す
 //・店
 //・風
 //・陸から何メートルで釣れる魚変わるシステム
@@ -69,6 +71,7 @@
 //・王冠つきじゃないと詳細アンロックしない
 //・魚種毎に実績
 //・設定画面 合わせの強さ調節
+//・設定画面 音ボリューム
 //・音
 //・実績
 //・いけすシステム
@@ -83,7 +86,7 @@
 //・糸切れ判定 勢い度を加味して切れるようにする
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
-//・チュートリアル
+//・チュートリアルか、ヘルプか
 //夢
 //・アワセシステム ARVRモード時はスマホをジャイロで動かす、通常時は下にドラッグでアワセ
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
@@ -222,7 +225,7 @@ class _FishingState extends BasePageState<Fishing>
   //ステート変数
   var _tension = 0.0; //テンション値
   var _tensionValMax = 0.0; //テンション最大値 竿によって可変
-  var _drag = 250.0; //ドラグレベル値
+  var _drag = 0.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _speedValMax = 0.0; //スピード最大値 リールによって可変
   var _depth = 0.0; //現在糸出し量(0.1m)
@@ -288,7 +291,7 @@ class _FishingState extends BasePageState<Fishing>
 
   var _ligntSpotAnimationChangeing = false;
 
-  //タックルの描画関連a
+  //タックルの描画関連
   var _tackleCenterX = 0.0;
   var _rodSizeX = 0.0;
   var _rodSizeY = 0.0;
@@ -340,6 +343,7 @@ class _FishingState extends BasePageState<Fishing>
     haveTackle = new HaveTackleModel();
     _tensionValMax = haveTackle.getUseRod().maxTention;
     _speedValMax = haveTackle.getUseReel().maxSpeed;
+    _drag = _tensionValMax * 0.9;
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -601,7 +605,7 @@ class _FishingState extends BasePageState<Fishing>
         //タップ中は補正を加味する
         addVal += hosei.round();
         //水深減算
-        _depth = _depth - _speed / _speedValMax;
+        _depth = _depth - _speed / 300;
       } else {
         if (!_flgBait && !_flgHit) {
           //巻いていない&釣れていない時はマイナス補正

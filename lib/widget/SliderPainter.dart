@@ -56,7 +56,7 @@ class SliderPainter extends CustomPainter {
       dragShaKeY = 5 - (new math.Random()).nextInt(9);
     }
 
-    double val = this.value / this.maxValue;
+    double val = (value > maxValue ? maxValue : value) / this.maxValue;
     if (val < 0.0) val = 0.0;
     if (val > 1.0) val = 1.0;
 
