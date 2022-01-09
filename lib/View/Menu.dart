@@ -43,10 +43,12 @@ class _menuState extends BasePageState<Menu> {
                   onTap: () async {
                     final result =
                         //await Navigator.of(context).pushNamed('/fishing');
-                        bgm?.loadBgm().then((_) {
+                        bgm.loadBgm().then((_) {
                       // ここでBGMデータの全ロード処理実行
                       debugPrint(Fishing.screenBgm);
-                      bgm?.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                      //効果音managerで無音を再生
+                      bgm.soundManagerPool.SoundManagerPoolInit();
+                      bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
                       Navigator.pushNamed(context, "/fishing"); // 遷移
                     });
                   },

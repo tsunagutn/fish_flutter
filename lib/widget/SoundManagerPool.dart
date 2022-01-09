@@ -11,6 +11,13 @@ class SoundManagerPool {
     }
   }
 
+  SoundManagerPoolInit() {
+    //定義済みの全managerで0.1secの無音を再生 IOSブラウザ対策
+    managers.forEach((element) {
+      element.playSound('Se/muon01.mp3');
+    });
+  }
+
   Future<void> loadSound(List<String> fileNames) async {
     for (var manager in managers) {
       await manager.loadSound(fileNames);

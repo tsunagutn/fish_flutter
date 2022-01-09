@@ -7,12 +7,12 @@ import '../Main.dart';
 
 abstract class BasePageState<T extends StatefulWidget> extends State<T>
     with WidgetsBindingObserver, RouteAware {
-  BgmPlayer? _bgm;
+  late BgmPlayer _bgm;
   // 自身の画面が表に表示されているかのフラグ
   bool isActive = false;
   String? _fileName;
 
-  BgmPlayer? get bgm => _bgm;
+  BgmPlayer get bgm => _bgm;
   String? get fileName => _fileName;
 
   // コンストラクタ --------------------------------------------------
@@ -34,14 +34,14 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
 
   void onBackground() {
     // ホーム画面に切り替わり、バックグラウンド状態のとき、BGMを一時停止する
-    this._bgm?.pauseBgm(_fileName);
+    this._bgm.pauseBgm(_fileName);
   }
 
   void onForeground() {
     if (this.isActive && _fileName != null) {
       // 自分自身の画面がトップに表示されていれば、以降の処理を実施
       // ホーム画面からアプリに戻り、フォアグラウンド状態に戻ったとき、BGMを再生する
-      this._bgm?.playBgm(name: _fileName!);
+      this._bgm.playBgm(name: _fileName!);
     }
   }
 
@@ -66,7 +66,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void dispose() {
     // POP、replace時に画面終了する際、後始末をする
     this.isActive = false;
-    this._bgm?.pauseBgm(_fileName);
+    this._bgm.pauseBgm(_fileName);
     WidgetsBinding.instance?.removeObserver(this);
     routeObserver.unsubscribe(this);
     super.dispose();
@@ -88,7 +88,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
     if (_fileName != null) {
       // 自分自身の画面がトップに表示されていれば、以降の処理を実施
       // ホーム画面からアプリに戻り、フォアグラウンド状態に戻ったとき、BGMを再生する
-      this._bgm?.playBgm(name: _fileName!);
+      this._bgm.playBgm(name: _fileName!);
     }
     super.didPopNext();
   }
@@ -97,7 +97,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void didPushNext() {
     // Pushにて次画面に遷移する際、isActiveをfalseにし、BGMを一時停止させる
     this.isActive = false;
-    this._bgm?.pauseBgm(_fileName);
+    this._bgm.pauseBgm(_fileName);
     super.didPushNext();
   }
 
@@ -117,10 +117,10 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
               // Androidでの戻るボタンでアプリを終了させる場合、
               // POP実行前のタイミングで後始末しないとBGMが止まらなくなる・・・
               this.isActive = false;
-              this._bgm?.pauseBgm(_fileName);
+              this._bgm.pauseBgm(_fileName);
               if (!Navigator.canPop(context)) {
                 // 戻り先が存在しない場合、アプリ終了とみなし、bgmをdisposeする
-                this._bgm?.disposeBgm();
+                this._bgm.disposeBgm();
               }
               return true;
             }));

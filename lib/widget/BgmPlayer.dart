@@ -1,9 +1,13 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audioplayers_api.dart';
 import 'package:flutter/material.dart';
+import 'package:fish_flutter/widget/SoundManagerPool.dart';
 
 class BgmPlayer {
   late AudioCache _cache;
+  //SE
+  SoundManagerPool soundManagerPool = new SoundManagerPool(20);
+
   AudioPlayer? _player = AudioPlayer();
   String nowBgmName = '';
   Map<String, Uri> bgmUriMap = Map<String, Uri>();
