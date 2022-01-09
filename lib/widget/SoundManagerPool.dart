@@ -51,7 +51,7 @@ class SoundManager {
 
   Future<void> playSound(String path) async {
     await audioCache.play(path, mode: PlayerMode.LOW_LATENCY);
-    advancedPlayer.setVolume(0.5);
+    advancedPlayer.setVolume(0.2);
 
     return;
   }

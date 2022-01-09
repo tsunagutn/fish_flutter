@@ -2,6 +2,7 @@
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fish_flutter/Model/RodsModel.dart';
+import 'package:fish_flutter/Model/ReelsModel.dart';
 import 'dart:math' as math;
 
 class HaveTackleModel {
@@ -9,16 +10,19 @@ class HaveTackleModel {
   late int haveReelId = 0;
   late List<HaveLureModel> haveLures = [];
   late RodsModel rods;
+  late ReelsModel reels;
 
   //コンストラクタ
   HaveTackleModel() {
     //ロッドアイテムのリストを初期化
     rods = new RodsModel();
+    //リールアイテムのリストを初期化
+    reels = new ReelsModel();
 
     //初期所持ロッド
     haveRodId = 0;
     //初期所持リール
-    haveRodId = 0;
+    haveReelId = 0;
 
     //テスト用 初期所持ルアーを登録
     haveLures
@@ -50,14 +54,19 @@ class HaveTackleModel {
         (element) => element.id == haveRodId + 1,
         orElse: () => rods.getRodData(-1));
     return next;
-    // if (!(rods.rods.contains((item) => item.id == haveRodId + 1))) {
-    //   //次の竿がもうないときは空のインスタンスを返す？？？
-    //   debugPrint(haveRodId.toString());
-    //   return new RodModel(
-    //       id: -1, name: '', image: '', text: '', prise: 0, maxTention: 0);
-    // } else {
-    //   return rods.getRodData(haveRodId + 1);
-    // }
+  }
+
+  //使用中のリールを返す
+  ReelModel getUseReel() {
+    return reels.getReelData(haveReelId);
+  }
+
+  //使用中のリールの次のやつを返す
+  ReelModel getNextReel() {
+    ReelModel next = reels.reels.firstWhere(
+        (element) => element.id == haveReelId + 1,
+        orElse: () => reels.getReelData(-1));
+    return next;
   }
 
   //使用中のルアーを返す

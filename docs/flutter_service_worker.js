@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "03c2283db2158a778fcc474e78dd5a2e",
+  "assets/AssetManifest.json": "85016625e5dee9d46a2052be2f8cb3e0",
 "assets/assets/Bgm/bgm_book%25E3%2583%2588%25E3%2583%25AA%25E3%2583%25A0%25E5%2589%258D.mp3": "5a2e9396b428d9c2d73515dd0e411401",
 "assets/assets/Bgm/bgm_book.mp3": "aeb1c7d372bece72793057403ea32e51",
 "assets/assets/Bgm/bgm_field%25E3%2583%2588%25E3%2583%25AA%25E3%2583%25A0%25E5%2589%258D.mp3": "9d2a7e0acb3c53868c84e0d2b05bd23c",
@@ -26,6 +26,9 @@ const RESOURCES = {
 "assets/assets/Images/player.png": "bc5c3f756fa13507f2ff00a818c8cec2",
 "assets/assets/Images/point.gif": "36dd1c489c2e45c0aa424577efc3975f",
 "assets/assets/Images/reel.png": "2685cff1e79f0da617a4d6559a041776",
+"assets/assets/Images/reel1.png": "695d809fef06078a95d372b70861bc5b",
+"assets/assets/Images/reel2.png": "3c229f3a40f72793b1effd39c07c33e7",
+"assets/assets/Images/reel3.png": "413664225bda145013795cb411dfb880",
 "assets/assets/Images/rod1.png": "343bdcb6ca5a6d1e5c1e765c46bf5961",
 "assets/assets/Images/rod2.png": "0314f1c2f087c7893f4c9dc7ee0fafb6",
 "assets/assets/Images/rodicon.png": "1ff6e04d95ab394311396234bcf7d49c",
@@ -53,7 +56,7 @@ const RESOURCES = {
 "assets/assets/Se/engineon.mp3": "a7c9028087225d1753d40e6dc9f22603",
 "assets/assets/Se/highjerk.mp3": "4a029842965c678817e470853de6acb8",
 "assets/assets/Se/hit.mp3": "95d2d17d040e77681bea9b6152b7ba5c",
-"assets/assets/Se/jingle01.mp3": "2ad70cbcbd1d76a1afefc4c72e1b947d",
+"assets/assets/Se/jingle01.mp3": "98a9b37ac6088d29d2c404d3a9a9a331",
 "assets/assets/Se/kk_sonar_low.mp3": "851fdb9ba3a25d9fefbf92d753ffae82",
 "assets/assets/Se/linebreak.mp3": "b3063399a764ff4506d8fc1f576a4c69",
 "assets/assets/Se/lowjerk.mp3": "fa7b4d4c640ffd5223cd309ce36468c7",
@@ -73,9 +76,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "4f2475f3519ddeb6d0a2827af76504a6",
-"/": "4f2475f3519ddeb6d0a2827af76504a6",
-"main.dart.js": "8ae85a906cccf72f2a39508f93d18429",
+"index.html": "896b16412c3686d4a0770c4f008495e1",
+"/": "896b16412c3686d4a0770c4f008495e1",
+"main.dart.js": "82b0608d5d630d8108508dba53e19652",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

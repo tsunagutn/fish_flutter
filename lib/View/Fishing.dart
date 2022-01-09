@@ -167,7 +167,7 @@ class _FishingState extends BasePageState<Fishing>
   //static const TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
   static const TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
   //static const TENSION_LINECUT = 290.0; //糸切れ判定値
-  static const SPEED_VAL_MAX = 300.0; //巻き速度スライダーMAX値
+  //static const _speedValMax = 300.0; //巻き速度スライダーMAX値
   static const SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   static const HOSEI_MAX = 3;
   //static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
@@ -221,9 +221,10 @@ class _FishingState extends BasePageState<Fishing>
 
   //ステート変数
   var _tension = 0.0; //テンション値
-  var _tension_val_max = 0.0; //テンション最大値 竿によって可変
+  var _tensionValMax = 0.0; //テンション最大値 竿によって可変
   var _drag = 250.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
+  var _speedValMax = 0.0; //スピード最大値 リールによって可変
   var _depth = 0.0; //現在糸出し量(0.1m)
   var _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
   var _maxDepth = 187.0; //最大水深(0.1m)
@@ -337,7 +338,8 @@ class _FishingState extends BasePageState<Fishing>
     lures = new LuresModel();
     //所持リストを初期化
     haveTackle = new HaveTackleModel();
-    _tension_val_max = haveTackle.getUseRod().maxTention;
+    _tensionValMax = haveTackle.getUseRod().maxTention;
+    _speedValMax = haveTackle.getUseReel().maxSpeed;
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -448,7 +450,8 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     num addVal = 0;
-    _tension_val_max = haveTackle.getUseRod().maxTention;
+    _tensionValMax = haveTackle.getUseRod().maxTention;
+    _speedValMax = haveTackle.getUseReel().maxSpeed;
     var mx = MAX_RAND_ADD_TENSION;
     var mn = MIN_RAND_ADD_TENSION;
     var weight = 0;
@@ -593,12 +596,12 @@ class _FishingState extends BasePageState<Fishing>
     } else {
       if (_onTap) {
         //巻きスピード
-        var hosei = (_speed % SPEED_VAL_MAX) % HOSEI_MAX;
-        //var hosei = (_speed % SPEED_VAL_MAX);
+        var hosei = (_speed % _speedValMax) % HOSEI_MAX;
+        //var hosei = (_speed % _speedValMax);
         //タップ中は補正を加味する
         addVal += hosei.round();
         //水深減算
-        _depth = _depth - _speed / SPEED_VAL_MAX;
+        _depth = _depth - _speed / _speedValMax;
       } else {
         if (!_flgBait && !_flgHit) {
           //巻いていない&釣れていない時はマイナス補正
@@ -617,14 +620,14 @@ class _FishingState extends BasePageState<Fishing>
       //addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
       //二次関数 テンション上がるごとに上がりにくくする
       addVal = addVal +
-          (addVal * -1) * (MathPow._getPow(2, (_tension / _tension_val_max)));
+          (addVal * -1) * (MathPow._getPow(2, (_tension / _tensionValMax)));
     }
     var val = _tension + addVal;
 
     // //ゲームオーバー判定
     // var gameovertext = "";
     //糸ダメージ判定
-    if (val > _tension_val_max * 0.9) {
+    if (val > _tensionValMax * 0.9) {
       _nowLineHp--; //ラインHPを減らす
       if (_nowLineHp < 0) {
         //糸切れ
@@ -664,12 +667,12 @@ class _FishingState extends BasePageState<Fishing>
       }
     } else {
       //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
-      //   if (val >= (_tension_val_max * 0.9)) {
+      //   if (val >= (_tensionValMax * 0.9)) {
       //     _tensionActiveTrackColor = TENSION_COLOR_DANGER;
       //   }
     }
 
-    if (val > _tension_val_max) val = _tension_val_max;
+    if (val > _tensionValMax) val = _tensionValMax;
     if (val < TENSION_VAL_MIN) val = TENSION_VAL_MIN;
 
     if (_depth > _maxDepth) _depth = _maxDepth;
@@ -695,7 +698,7 @@ class _FishingState extends BasePageState<Fishing>
 
     //テンションによってテンションバーの色を変える
     _tensionActiveTrackColor = clsColor._getColorRange(
-        TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, _tension_val_max);
+        TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, _tensionValMax);
 
     //水深表示
     _dispDepth = ((_depth).round() / 10).toStringAsFixed(1) +
@@ -1004,8 +1007,7 @@ class _FishingState extends BasePageState<Fishing>
 
         //テンションから点滅速度を算出
         duration = durationMax -
-            ((durationMax - durationMin) * (_tension / _tension_val_max))
-                .floor();
+            ((durationMax - durationMin) * (_tension / _tensionValMax)).floor();
 
         //バレ判定 水深MAXかテンション一定未満で条件成立？？？
         if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
@@ -1290,9 +1292,9 @@ class _FishingState extends BasePageState<Fishing>
                   _cursorX = mX;
                   _cursorY = mY;
                   //巻き速度値の計算
-                  var addVal = (moveX / (1000 / 2) * SPEED_VAL_MAX);
+                  var addVal = (moveX / (1000 / 2) * _speedValMax);
                   var val = _speed + addVal;
-                  if (val > SPEED_VAL_MAX) val = SPEED_VAL_MAX;
+                  if (val > _speedValMax) val = _speedValMax;
                   if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
                   _speed = val;
                   //アワセ値
@@ -1364,7 +1366,7 @@ class _FishingState extends BasePageState<Fishing>
                                                 ? Colors.black
                                                 : Colors.white,
                                             value: _tension,
-                                            maxValue: _tension_val_max,
+                                            maxValue: _tensionValMax,
                                             backRadius: _animationRadius.value,
                                             maxBackRadius: POINTER_BACK_SIZE,
                                             flgShaKe:
@@ -1404,9 +1406,9 @@ class _FishingState extends BasePageState<Fishing>
                                       value: _drag,
                                       //MAX-MINはテンションと同じ
                                       min: TENSION_VAL_MIN,
-                                      max: _tension_val_max,
+                                      max: _tensionValMax,
                                       divisions:
-                                          (_tension_val_max - TENSION_VAL_MIN)
+                                          (_tensionValMax - TENSION_VAL_MIN)
                                               .floor(),
                                       onChanged: (double value) {
                                         setState(() {
@@ -1460,7 +1462,7 @@ class _FishingState extends BasePageState<Fishing>
                                       activeColor: _speedActiveTrackColor,
                                       inactiveColor: Colors.white,
                                       value: _speed,
-                                      maxValue: SPEED_VAL_MAX,
+                                      maxValue: _speedValMax,
                                       backRadius: 0,
                                       maxBackRadius: 0,
                                       flgShaKe: false,
@@ -1476,7 +1478,7 @@ class _FishingState extends BasePageState<Fishing>
                                       inactiveColor: Colors.red,
                                       backRadius: 0,
                                       maxBackRadius: 0,
-                                      maxSpeed: SPEED_VAL_MAX,
+                                      maxSpeed: _speedValMax,
                                       speedRange: _listSpeedRange,
                                     ),
                                     child: Container(),
@@ -1828,7 +1830,7 @@ class _FishingState extends BasePageState<Fishing>
                         clutchBackColor:
                             (_onClutch ? Colors.lightBlue : Colors.red),
                         rodStandUp: _rodStandUp,
-                        rodTension: _tension / _tension_val_max,
+                        rodTension: _tension / _tensionValMax,
                       ),
                     ),
                     if (_centerTextAnimationController.isAnimating)
@@ -1885,49 +1887,48 @@ class _FishingState extends BasePageState<Fishing>
                                   top: _shoreHeight +
                                       (5 * _tackleMenuAnime.value),
                                   left: 10),
-                              height: 180,
+                              //height: 180,
                               child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  //竿
-                                  GestureDetector(
-                                      onTap: () async {
-                                        if (_depth <= 0.0) {
-                                          setState(() {
-                                            _selectTacleIcon = 'rod';
-                                            _showTacleChangeDialog = true;
-                                            bgm.soundManagerPool
-                                                .playSound('Se/boxopen.mp3');
-                                          });
-                                        }
-                                      },
-                                      child: tackleIcon(
-                                        tackleIconSize: 40.0,
-                                        imagePath: 'assets/Images/' +
-                                            haveTackle.getUseRod().image,
-                                        flgSelect: false,
-                                        opacity: (_depth > 0.0 ? 0.7 : 1.0),
-                                      )),
-                                  //リール
-                                  GestureDetector(
-                                      onTap: () async {
-                                        if (_depth <= 0.0) {
-                                          setState(() {
-                                            _selectTacleIcon = 'reel';
-                                            _showTacleChangeDialog = true;
-                                            bgm.soundManagerPool
-                                                .playSound('Se/boxopen.mp3');
-                                          });
-                                        }
-                                      },
-                                      child: tackleIcon(
-                                        tackleIconSize: 40.0,
-                                        imagePath: 'assets/Images/reel.png',
-                                        flgSelect: false,
-                                        opacity: (_depth > 0.0 ? 0.7 : 1.0),
-                                      )),
+                                  // //竿
+                                  // GestureDetector(
+                                  //     onTap: () async {
+                                  //       if (_depth <= 0.0) {
+                                  //         setState(() {
+                                  //           _selectTacleIcon = 'rod';
+                                  //           _showTacleChangeDialog = true;
+                                  //           bgm.soundManagerPool
+                                  //               .playSound('Se/boxopen.mp3');
+                                  //         });
+                                  //       }
+                                  //     },
+                                  //     child: tackleIcon(
+                                  //       tackleIconSize: 40.0,
+                                  //       imagePath: 'assets/Images/' +
+                                  //           haveTackle.getUseRod().image,
+                                  //       flgSelect: false,
+                                  //       opacity: (_depth > 0.0 ? 0.7 : 1.0),
+                                  //     )),
+                                  // //リール
+                                  // GestureDetector(
+                                  //     onTap: () async {
+                                  //       if (_depth <= 0.0) {
+                                  //         setState(() {
+                                  //           _selectTacleIcon = 'reel';
+                                  //           _showTacleChangeDialog = true;
+                                  //           bgm.soundManagerPool
+                                  //               .playSound('Se/boxopen.mp3');
+                                  //         });
+                                  //       }
+                                  //     },
+                                  //     child: tackleIcon(
+                                  //       tackleIconSize: 40.0,
+                                  //       imagePath: 'assets/Images/reel.png',
+                                  //       flgSelect: false,
+                                  //       opacity: (_depth > 0.0 ? 0.7 : 1.0),
+                                  //     )),
                                   //ルアー
                                   GestureDetector(
                                       onTap: () async {
