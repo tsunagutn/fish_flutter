@@ -16,15 +16,15 @@ class RodsModel {
 
     rods.add(new RodModel(
       id: 0,
-      name: "グラスサンダーA",
+      name: "カンタンロッドA",
       image: "rod1.png",
       text: "最初の竿\n一番へぼい",
       prise: 0,
-      maxTention: 100,
+      maxTention: 200,
     ));
     rods.add(new RodModel(
       id: 1,
-      name: "カーボンファイヤーX",
+      name: "中級ロッドX",
       image: "rod2.png",
       text: "本格的船用ロッド\nカーボン含有率95％",
       prise: 500,
@@ -32,9 +32,9 @@ class RodsModel {
     ));
     rods.add(new RodModel(
       id: 2,
-      name: "アイアンパワーボムZ",
+      name: "上級ロッドZ",
       image: "rod2.png",
-      text: "究極の船用ロッド\n鋼鉄で魚をねじ伏せる",
+      text: "究極の船用ロッド\n魚をねじ伏せる",
       prise: 500,
       maxTention: 1000,
     ));

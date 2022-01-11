@@ -646,6 +646,7 @@ class _FishingState extends BasePageState<Fishing>
         haveTackle.lostLure(haveTackle.getUseLure().id);
         _flgBait = false;
         _flgHit = false;
+        val = 0.0;
         bgm.soundManagerPool.playSound('Se/linebreak.mp3');
         bgmPlay(Fishing.screenBgm);
       }
