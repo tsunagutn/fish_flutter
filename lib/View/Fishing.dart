@@ -230,7 +230,7 @@ class _FishingState extends BasePageState<Fishing>
   var _speedValMax = 0.0; //スピード最大値 リールによって可変
   var _depth = 0.0; //現在糸出し量(0.1m)
   var _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
-  var _maxDepth = 187.0; //最大水深(0.1m)
+  var _maxDepth = 20.0; //最大水深(0.1m)
   var _dispDepth = '0.0 m'; //深さ表示用
   //var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
   var _tensionActiveTrackColor =
@@ -317,6 +317,9 @@ class _FishingState extends BasePageState<Fishing>
   var _moveShipTarget = 0.5;
 
   var _collect = false; //高速回収中フラグ
+
+  //沖合何km
+  var offShore = 0.0;
 
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
@@ -595,8 +598,11 @@ class _FishingState extends BasePageState<Fishing>
       //クラッチON中はマイナス補正を最大化
       addVal = HOSEI_MAX * -1;
       //水深を加算
-      //ルアー重さによってフォール速度に補正をかける 60gの時0.1m/スキャン
-      _depth += (lures.getLureData(haveTackle.getUseLure().lureId).weight / 60);
+      //ルアー重さによってフォール速度に補正をかける 20gの時0.1m/スキャン
+      //_depth += (lures.getLureData(haveTackle.getUseLure().lureId).weight / 20);
+      _depth +=
+          math.sqrt(lures.getLureData(haveTackle.getUseLure().lureId).weight) /
+              20;
     } else {
       if (_onTap) {
         //巻きスピード
@@ -1076,6 +1082,9 @@ class _FishingState extends BasePageState<Fishing>
     // _maxDepth += 1 * ((_depthChange) - depthrnd);
     _maxDepth += _depthChange - 0.5;
 
+    //沖合何kmを計算
+    offShore = _maxDepth * 7 / 1000;
+
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
     if (hannornd > 0.96 && _jiai > depthrnd) {
@@ -1358,9 +1367,20 @@ class _FishingState extends BasePageState<Fishing>
                                           CrossAxisAlignment.start,
                                       children: <Widget>[
                                         //Text("TENSION/DRAG"),
-                                        new Image(
-                                          image: AssetImage(
-                                              'assets/Images/TENSIONDRAG.png'),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            new Image(
+                                              image: AssetImage(
+                                                  'assets/Images/TENSIONDRAG.png'),
+                                            ),
+                                            Text('沖合' +
+                                                offShore.toStringAsFixed(1) +
+                                                'km'),
+                                          ],
                                         ),
                                         CustomPaint(
                                           painter: new SliderPainter(
@@ -1388,7 +1408,7 @@ class _FishingState extends BasePageState<Fishing>
                                       ])),
                               //ドラグスライダー
                               Container(
-                                margin: EdgeInsets.only(top: 15),
+                                margin: EdgeInsets.only(top: 16),
                                 height: 40,
                                 child: SliderTheme(
                                     data: SliderTheme.of(context).copyWith(
@@ -1401,7 +1421,8 @@ class _FishingState extends BasePageState<Fishing>
                                           .withOpacity(0.0), //値無しエリアの色
                                       activeTickMarkColor: Colors.black
                                           .withOpacity(0.0), //各value値の色
-                                      thumbColor: Colors.red, //値ツマミの色
+                                      thumbColor:
+                                          Colors.red.withOpacity(0.5), //値ツマミの色
                                       thumbShape: RoundSliderThumbShape(
                                           enabledThumbRadius: 10), //ツマミの大きさ
                                       overlayColor: Colors.black
@@ -1491,38 +1512,45 @@ class _FishingState extends BasePageState<Fishing>
                                 ])),
 
                         Stack(children: <Widget>[
-                          Container(
-                            alignment: Alignment.center,
-                            margin: EdgeInsets.only(
-                              top: 10 -
-                                  //(math.sin(
-                                  // waveController.value * 0.5 * math.pi)),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  alignment: Alignment.center,
+                                  margin: EdgeInsets.only(
+                                    top: 10 -
+                                        //(math.sin(
+                                        // waveController.value * 0.5 * math.pi)),
 
-                                  ((waveController.value < 0.5)
-                                      ? 7 * waveController.value * 2
-                                      : (7 *
-                                              (waveController.value - 0.5) *
-                                              -2) +
-                                          7),
-                              //left: math.sin(waveController.value * math.pi)
-                            ),
-                            child: GestureDetector(
-                              onTap: () async {
-                                setState(() {});
-                              },
-                              //船の描画
-                              child: Transform.rotate(
-                                //angle: 45 * math.pi / 180,
-                                angle:
-                                    (405 - (90 * _depthChange)) * math.pi / 180,
-                                child: new Image(
-                                  image: AssetImage('assets/Images/ship.png'),
-                                  width: 60,
-                                  height: 30,
+                                        ((waveController.value < 0.5)
+                                            ? 7 * waveController.value * 2
+                                            : (7 *
+                                                    (waveController.value -
+                                                        0.5) *
+                                                    -2) +
+                                                7),
+                                    //left: math.sin(waveController.value * math.pi)
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      setState(() {});
+                                    },
+                                    //船の描画
+                                    child: Transform.rotate(
+                                      //angle: 45 * math.pi / 180,
+                                      angle: (405 - (90 * _depthChange)) *
+                                          math.pi /
+                                          180,
+                                      child: new Image(
+                                        image: AssetImage(
+                                            'assets/Images/ship.png'),
+                                        width: 60,
+                                        height: 30,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
+                              ]),
                           Container(
                               height: 40,
                               child: AnimatedBuilder(
