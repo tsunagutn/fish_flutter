@@ -144,7 +144,7 @@ class FishsModel {
       wariai: 1.0, //HIT率 条件全一致で確定1.0～
       point: 100, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
-      tanaMax: 70, //生息域 下 0.1m単位
+      tanaMax: 100, //生息域 下 0.1m単位
       hitMaki: 0.8,
       hitJerk: 0.5,
       hitFall: 0.7, //フォール志向
@@ -169,8 +169,8 @@ class FishsModel {
       weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.8, //HIT率 条件全一致で確定1.0～
       point: 300, //ポイントの基礎値
-      tanaMin: 0, //生息域 上 0.1m単位
-      tanaMax: 200, //生息域 下 0.1m単位
+      tanaMin: 150, //生息域 上 0.1m単位
+      tanaMax: 450, //生息域 下 0.1m単位
       hitMaki: 0.8,
       hitJerk: 0.6,
       hitFall: 0.9, //フォール志向
@@ -294,7 +294,7 @@ class FishsModel {
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 1.0, //HIT率 条件全一致で確定1.0～
       point: 10, //ポイントの基礎値
-      tanaMin: 10, //生息域 上 0.1m単位
+      tanaMin: 00, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
       hitMaki: 1.0,
       hitJerk: 0.8,
@@ -319,7 +319,7 @@ class FishsModel {
       weight: 3000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.5, //HIT率 条件全一致で確定1.0～
       point: 2300, //ポイントの基礎値
-      tanaMin: 10, //生息域 上 0.1m単位
+      tanaMin: 200, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
       hitMaki: 0.7,
       hitJerk: 1.0,
@@ -344,7 +344,7 @@ class FishsModel {
       weight: 2800, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.4, //HIT率 条件全一致で確定1.0～
       point: 2100, //ポイントの基礎値
-      tanaMin: 10, //生息域 上 0.1m単位
+      tanaMin: 150, //生息域 上 0.1m単位
       tanaMax: 300, //生息域 下 0.1m単位
       hitMaki: 0.6,
       hitJerk: 0.9,
