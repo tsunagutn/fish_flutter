@@ -63,7 +63,9 @@
 //済・スライダーの右下に数値も出す
 //済・沖合何メートルの表示
 //済・最大水深によって釣れる魚の大きさを制限
-//・ルアー大きさによって釣れる魚の大きさを制限
+//済・ルアー大きさによって釣れる魚の大きさを制限
+//・当たった時にアワセ判定ラインを表示
+//・バレるラインを表示
 //・リールタップしていいとき光らすとかの表示
 //・おさかな図鑑画面で？でも何mでつれるかの表示出す
 //・店
@@ -233,7 +235,7 @@ class _FishingState extends BasePageState<Fishing>
   var _speedValMax = 0.0; //スピード最大値 リールによって可変
   var _depth = 0.0; //現在糸出し量(0.1m)
   var _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
-  var _maxDepth = 20.0; //最大水深(0.1m)
+  var _maxDepth = 50.0; //最大水深(0.1m)
   var _dispDepth = '0.0 m'; //深さ表示用
   //var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
   var _tensionActiveTrackColor =
@@ -561,9 +563,9 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
     //座礁判定
-    if (_maxDepth < 1.0) {
+    if (_maxDepth < 3.0) {
       //これ以上浅くいけない
-      _maxDepth = 1.0;
+      _maxDepth = 3.0;
       if (_moveShipTarget < 0.5) _moveShipTarget = 0.5;
     }
 
@@ -640,8 +642,8 @@ class _FishingState extends BasePageState<Fishing>
     // //ゲームオーバー判定
     // var gameovertext = "";
     //糸ダメージ判定
-    if (val > _tensionValMax * 0.9) {
-      _nowLineHp--; //ラインHPを減らす
+    if (val > _tensionValMax * 0.95) {
+      _nowLineHp -= val - _tensionValMax * 0.95; //ラインHPを減らす
       if (_nowLineHp < 0) {
         //糸切れ
         debugPrint("いときれ");
@@ -810,6 +812,7 @@ class _FishingState extends BasePageState<Fishing>
       );
       //モーダル閉じた時
       _depth = 0.0;
+      _tension = 0.0;
       //ポイントを加算
       _point += point;
 
@@ -874,27 +877,49 @@ class _FishingState extends BasePageState<Fishing>
         var maxProb = 0.0;
         _listSpeedRange = []; //速度リスト初期化
         duration = durationMax;
+
         //種毎の判定
         fishs.forEach((fish) {
           var hitSpeedprob = 0.0;
           var hitSpeedprobDisp = 0.0;
           var hitProb = 0.0;
+
+          //棚による大きさ補正値
+          var tanawari =
+              (_maxDepth - fish.tanaMin) / (fish.tanaMax - fish.tanaMin);
+          tanawari = (tanawari < 0.1) ? 0.1 : tanawari;
+          tanawari = (tanawari > 0.9) ? 1.0 : tanawari;
+          //大きさ決定
+          var fishSize = (new math.Random()).nextDouble() * tanawari;
+          //使用中ルアーサイズと魚大きさによる確率 魚サイズの1/4が適正値
+          var lureProb = 0.0;
+          if (lureData.size * 4 > fish.getSize(fishSize)) {
+            lureProb = (lureData.size * 4) / fish.getSize(fishSize);
+          } else {
+            lureProb = fish.getSize(fishSize) / (lureData.size * 4);
+          }
+          var jiaiProb = 0.0;
           if (flgFall) {
             //フォール中のHIT率判定 魚のフォール志向 * ルアーのフォール能力
             hitSpeedprob = fish.hitFall * lureData.fall;
             hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
+            //フォールは時合の影響を半分にする
+            jiaiProb = (1.0 + _jiai) / 2;
             //HIT確率の算出 フォールは時合の影響を半分にする
-            hitProb = (hitTanaProb * hitSpeedprob * ((1.0 + _jiai) / 2)) *
-                fish.wariai /
-                100;
+            // hitProb = (hitTanaProb * hitSpeedprob * ((1.0 + _jiai) / 2)) *
+            //     fish.wariai /
+            //     100;
           } else if (flgJerk) {
             //ジャーク中のHIT率判定 魚のジャーク志向 * ルアーのジャーク能力
             hitSpeedprob = fish.hitJerk * lureData.jerk;
             hitSpeedprobDisp = 0.0; //ジャーク中は巻き速度手本を見せない
-            //HIT確率の算出 ジャークは時合の影響を半分にする
-            hitProb = (hitTanaProb * hitSpeedprob * ((1.0 + _jiai) / 2)) *
-                fish.wariai /
-                100;
+            //ジャークは時合の影響を1/3にする
+            jiaiProb = (2.0 + _jiai) / 3;
+            // //HIT確率の算出 ジャークは時合の影響を半分にする
+            // hitProb = (hitTanaProb * hitSpeedprob * ((1.0 + _jiai) / 2)) *
+            //     fish.wariai /
+            //     100;
+
             //debugPrint("じゃーく" + hitSpeedprob.toString());
             //ジャーク表示
             startJerk();
@@ -910,19 +935,24 @@ class _FishingState extends BasePageState<Fishing>
                   fish.hitMaki *
                   lureData.reeling;
             }
-            if (hitSpeedprob < 0.1) {
-              hitSpeedprob = 0.1; //速度範囲外の最低保証
+            if (hitSpeedprob < 0.01) {
+              hitSpeedprob = 0.01; //速度範囲外の最低保証
             }
             hitSpeedprobDisp = hitSpeedprob;
-            hitProb = (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
+            jiaiProb = _jiai;
           }
-          // //HIT確率の算出
-          // var hitProb =
-          //     (hitTanaProb * hitSpeedprob * _jiai) * fish.wariai / 100;
+          //HIT確率の算出
+          hitProb = (hitTanaProb * hitSpeedprob * jiaiProb * lureProb) *
+              fish.wariai /
+              100;
 
+          if (hitSpeedprob < 0.01) {
+            debugPrint(hitSpeedprob.toString());
+            debugPrint(fish.id.toString());
+          }
           //全魚種で最も高い確率の取得
           if (hitTanaProb * hitSpeedprob > maxProb) {
-            maxProb = hitTanaProb * hitSpeedprob * _jiai * fish.wariai;
+            maxProb = hitTanaProb * hitSpeedprob * jiaiProb * fish.wariai;
           }
           //魚種毎の速度レンジと確率を記憶（描画用）
           _listSpeedRange.add(new SpeedRange(
@@ -941,19 +971,9 @@ class _FishingState extends BasePageState<Fishing>
           if (hitProb > hitrnd) {
             //i 番目HIT
             _fishidx = FISH_TABLE.fishs.indexOf(fish);
-            //棚による大きさ補正値
-            var tanawari =
-                (_maxDepth - fish.tanaMin) / (fish.tanaMax - fish.tanaMin);
-            tanawari = (tanawari < 0.1) ? 0.1 : tanawari;
-            tanawari = (tanawari > 0.9) ? 1.0 : tanawari;
-            //使用中ルアーサイズによる大きさ補正値 魚サイズの1/4が適正値
-            var lurewari = ((lureData.size / 4) - fish.sizeMin) /
-                (fish.sizeMax - fish.sizeMin);
-            lurewari = (lurewari < 0.1) ? 0.1 : lurewari;
-            lurewari = (lurewari > 0.9) ? 1.0 : lurewari;
 
-            //大きさ決定
-            _fishSize = (new math.Random()).nextDouble() * tanawari * lurewari;
+            _fishSize = fishSize;
+
             if (flgFall) {
               //フォール中のみアワセ時間を倍にする
               _baitCnt -= fish.baitCntMax;

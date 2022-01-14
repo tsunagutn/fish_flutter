@@ -292,7 +292,7 @@ class FishsModel {
       addMax: 20,
       addMin: -20, //引きの最小（最大との乖離が暴れ度）
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
-      wariai: 1.0, //HIT率 条件全一致で確定1.0～
+      wariai: 0.7, //HIT率 条件全一致で確定1.0～
       point: 10, //ポイントの基礎値
       tanaMin: 00, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
