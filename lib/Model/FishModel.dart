@@ -9,7 +9,7 @@ class FishsModel {
       name: "アジ",
       image: "fish/aji.png",
       text: "あなたは幸せを感じました",
-      hp: 600,
+      hp: 1200,
       addMax: 3,
       addMin: -2,
       weight: 200,
@@ -35,7 +35,7 @@ class FishsModel {
       name: "タチウオ",
       image: "fish/tachiuo.jpg",
       text: "おおきいぞっ",
-      hp: 500, //このスキャン経過で0になる
+      hp: 1500, //このスキャン経過で0になる
       addMax: 18,
       addMin: -8,
       weight: 500, //重さ
@@ -85,7 +85,7 @@ class FishsModel {
       name: "マダイ",
       image: "fish/madai.png",
       text: "やるなすたべ",
-      hp: 3000,
+      hp: 5000,
       addMax: 23,
       addMin: -15,
       weight: 1000, //重さ
@@ -137,7 +137,7 @@ class FishsModel {
       name: "サバ", //魚種名
       image: "fish/saba.png", //超過画面の画像
       text: "写真は仮です", //釣果画面のコメント
-      hp: 800, //このスキャン経過で0になる
+      hp: 1200, //このスキャン経過で0になる
       addMax: 19, //引きの最大
       addMin: -6, //引きの最小（最大との乖離が暴れ度）
       weight: 600, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
@@ -163,7 +163,7 @@ class FishsModel {
       name: "サゴシ", //魚種名
       image: "fish/sagoshi.png", //超過画面の画像
       text: "この魚は美味です", //釣果画面のコメント
-      hp: 1000, //このスキャン経過で0になる
+      hp: 2000, //このスキャン経過で0になる
       addMax: 15, //引きの最大
       addMin: -10, //引きの最小（最大との乖離が暴れ度）
       weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
@@ -188,7 +188,7 @@ class FishsModel {
       name: "アオハタ", //魚種名
       image: "fish/aohata.png", //超過画面の画像
       text: "底でよく釣れる", //釣果画面のコメント
-      hp: 900, //このスキャン経過で0になる
+      hp: 1800, //このスキャン経過で0になる
       addMax: 16, //引きの最大
       addMin: -7, //引きの最小（最大との乖離が暴れ度）
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
@@ -213,7 +213,7 @@ class FishsModel {
       name: "キジハタ", //魚種名
       image: "fish/kijihata.png", //超過画面の画像
       text: "この魚は贅沢です", //釣果画面のコメント
-      hp: 1500, //このスキャン経過で0になる
+      hp: 2100, //このスキャン経過で0になる
       addMax: 18, //引きの最大
       addMin: -7, //引きの最小（最大との乖離が暴れ度）
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
@@ -263,7 +263,7 @@ class FishsModel {
       name: "アヤメカサゴ",
       image: "fish/ayamekasago.png",
       text: "ちょっと珍しいカサゴ",
-      hp: 1000,
+      hp: 1300,
       addMax: 13,
       addMin: -10, //引きの最小（最大との乖離が暴れ度）
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
@@ -290,9 +290,9 @@ class FishsModel {
       text: "毒が無いらしい",
       hp: 2000,
       addMax: 20,
-      addMin: -20, //引きの最小（最大との乖離が暴れ度）
+      addMin: -10, //引きの最小（最大との乖離が暴れ度）
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
-      wariai: 0.7, //HIT率 条件全一致で確定1.0～
+      wariai: 0.5, //HIT率 条件全一致で確定1.0～
       point: 10, //ポイントの基礎値
       tanaMin: 00, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
@@ -314,7 +314,7 @@ class FishsModel {
       image: "fish/hiramasa.png",
       text: "ヤッターマン",
       hp: 5000,
-      addMax: 86,
+      addMax: 56,
       addMin: -60, //引きの最小（最大との乖離が暴れ度）
       weight: 3000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.5, //HIT率 条件全一致で確定1.0～

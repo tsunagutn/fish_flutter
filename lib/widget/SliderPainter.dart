@@ -15,6 +15,8 @@ class SliderPainter extends CustomPainter {
     required this.flgShaKe,
     required this.flgDispValue,
     required this.flgDispMaxValue,
+    this.value2 = 0.0,
+    this.value2Color = Colors.white,
   });
   final double height;
   final Color activeColor;
@@ -26,6 +28,8 @@ class SliderPainter extends CustomPainter {
   final bool flgShaKe;
   final bool flgDispValue;
   final bool flgDispMaxValue;
+  final double value2;
+  final Color value2Color;
 
   //後光の設定
   static const Map<int, Map<String, double>> lightLayers = {
@@ -59,6 +63,15 @@ class SliderPainter extends CustomPainter {
     double val = (value > maxValue ? maxValue : value) / this.maxValue;
     if (val < 0.0) val = 0.0;
     if (val > 1.0) val = 1.0;
+
+    //値2の判定
+    var flgValue2 = false;
+    double val2 = val;
+    //if (this.value2 > 0.0 && this.value2 > this.value) {
+    if (this.value2 > 0.0) {
+      flgValue2 = true;
+      val2 = (value2 > maxValue ? maxValue : value2) / this.maxValue;
+    }
 
     var paint = Paint();
 
@@ -122,7 +135,7 @@ class SliderPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paint);
 
-    // 四角（塗りつぶし）
+    //値範囲の描画
     path = Path();
     paint = new Paint()
       ..color = this.activeColor
@@ -136,14 +149,44 @@ class SliderPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paint);
 
+    if (flgValue2) {
+      //値２の描画
+      path = Path();
+      paint = new Paint()
+        ..color = this.value2Color
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 2;
+      path.moveTo(leftStart, topStart);
+      path.lineTo(leftStart, topEnd);
+      path.lineTo((leftEnd * val2) - 5, topEnd);
+      path.lineTo((leftEnd * val2) - 5, topStart);
+      path.close();
+      canvas.drawPath(path, paint);
+
+      path = Path();
+      paint = new Paint()
+        ..color = Colors.yellow
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 2;
+      path.moveTo((leftEnd * val2) - 5, topStart);
+      path.lineTo((leftEnd * val2) - 5, topEnd);
+      path.lineTo(leftEnd * val2, topEnd);
+      path.lineTo(leftEnd * val2, topStart);
+      path.close();
+      canvas.drawPath(path, paint);
+    }
+
+    //値範囲外の描画
     path = Path();
     paint = new Paint()
       ..color = inactiveColor
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill;
     //..strokeWidth = 2;
-    path.moveTo((leftEnd * val), topStart);
-    path.lineTo((leftEnd * val), topEnd);
+    path.moveTo((leftEnd * (val > val2 ? val : val2)), topStart);
+    path.lineTo((leftEnd * (val > val2 ? val : val2)), topEnd);
     path.lineTo(leftEnd, topEnd);
     path.lineTo(leftEnd, topStart);
     path.close();

@@ -34,7 +34,7 @@ class LuresModel {
       hp: 3000,
       weight: 60.0,
       size: 15.0,
-      fall: 0.3,
+      fall: 0.2,
       reeling: 0.9,
       jerk: 0.1,
       prise: 700,

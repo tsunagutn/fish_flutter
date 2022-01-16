@@ -1,3 +1,11 @@
+//素材元
+//YouTuberのための素材屋さん
+//https://ytsozaiyasan.com/
+//魔王魂
+//https://maou.audio/
+//効果音ラボ
+//https://soundeffect-lab.info/
+
 //☆基本概要
 //・モード案１：ずっとモード
 //　　　　　　好きなロケ、道具等で好きにできる、状態保存して続きからできる
@@ -80,6 +88,7 @@
 //・音
 //・実績
 //・いけすシステム
+//・中断セーブ機能
 //・赤ポイント緑ポイント青ポイント
 //・光点が横に走る
 //・水流
@@ -230,6 +239,7 @@ class _FishingState extends BasePageState<Fishing>
   //ステート変数
   var _tension = 0.0; //テンション値
   var _tensionValMax = 0.0; //テンション最大値 竿によって可変
+  var _fookingTension = 0.0; //アタリ時のアワセ判定値
   var _drag = 0.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _speedValMax = 0.0; //スピード最大値 リールによって可変
@@ -830,6 +840,8 @@ class _FishingState extends BasePageState<Fishing>
       var flgFall = false;
       var flgMaki = false;
       var flgJerk = false;
+      //アタリ中でない時はアワセ判定値をリセット
+      _fookingTension = 0.0;
       //現在の状態
       if (_depth > 0) {
         if (_jerkCnt > 0) {
@@ -981,6 +993,11 @@ class _FishingState extends BasePageState<Fishing>
               _baitCnt = 0;
             }
             _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
+            //フッキング判定テンション
+            _fookingTension = _tension + fish.fookingTension;
+            _fookingTension = (_fookingTension > _tensionValMax
+                ? _tensionValMax
+                : _fookingTension);
             //アタリと判定
             _flgBait = true;
             //_baitMaxTension = 0.0;
@@ -1008,16 +1025,22 @@ class _FishingState extends BasePageState<Fishing>
       //アタリ中またはHIT中の処理
       var fish = FISH_TABLE.fishs[_fishidx];
       if (_flgBait) {
+        debugPrint(_fookingTension.toString());
+
         //アタリ中の処理
-        if (_tension > fish.fookingTension) {
+        if (_tension > _fookingTension) {
           //バイト中の最大テンションが一定値を超えるとHIT
           _flgBait = false;
           _flgHit = true;
+          //_fookingTension = 0.0;
           debugPrint('HIT!!!!');
           //_dispInfo = "HIT!";
           //フッキングの成功度
-          _fookingLv = _tension - fish.fookingTension;
+          _fookingLv = (_tension - _fookingTension) / 2;
           if (_fookingLv > 100.0) _fookingLv = 100.0;
+          //フッキング成功度によってバレ判定値に補正
+          _fookingTension -= _fookingLv;
+          _fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
           //HITメッセージ
           _centerTextMain = "HIT!";
           _centerTextMainColor = Colors.red;
@@ -1044,37 +1067,40 @@ class _FishingState extends BasePageState<Fishing>
           //点滅速度最大
           duration = durationMin;
         }
-      } else if (_flgHit) {
-        //HIT中の処理
-        _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
+      } else {
+        if (_flgHit) {
+          //HIT中の処理
+          _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
 
-        //テンションから点滅速度を算出
-        duration = durationMax -
-            ((durationMax - durationMin) * (_tension / _tensionValMax)).floor();
+          //テンションから点滅速度を算出
+          duration = durationMax -
+              ((durationMax - durationMin) * (_tension / _tensionValMax))
+                  .floor();
 
-        //バレ判定 水深MAXかテンション一定未満で条件成立？？？
-        if (_depth >= _maxDepth || val <= TENSION_VAL_MIN + 20) {
-          _bareCnt++;
-        } else {
-          //_bareCnt = 0;
-        }
-        if (_bareCnt >= fish.bareMin + _fookingLv.floor()) {
-          //バレ条件成立が一定スキャン保持でバレとする
-          debugPrint("バレ");
-          _flgBait = false;
-          _flgHit = false;
-          //console.log("bare...");
-          //バレのモーダル表示
-          //show_modal_bare();
-          //バレメッセージ
-          _centerTextMain = "";
-          _centerTextMainColor = Colors.blue;
-          _centerTextSub = "バレました";
-          _centerTextSubColor = Colors.blue;
-          startCenterInfo();
+          //バレ判定 水深MAXか、テンションがアワセ値未満で条件成立
+          if (_depth >= _maxDepth || val < _fookingTension) {
+            _bareCnt++;
+          } else {
+            //_bareCnt = 0;
+          }
+          if (_bareCnt >= fish.bareMin + _fookingLv.floor()) {
+            //バレ条件成立が一定スキャン保持でバレとする
+            debugPrint("バレ");
+            _flgBait = false;
+            _flgHit = false;
+            //console.log("bare...");
+            //バレのモーダル表示
+            //show_modal_bare();
+            //バレメッセージ
+            _centerTextMain = "";
+            _centerTextMainColor = Colors.blue;
+            _centerTextSub = "バレました";
+            _centerTextSubColor = Colors.blue;
+            startCenterInfo();
 
-          bgmPlay(Fishing.screenBgm);
-          _bareCnt = 0;
+            bgmPlay(Fishing.screenBgm);
+            _bareCnt = 0;
+          }
         }
       }
     }
@@ -1414,29 +1440,44 @@ class _FishingState extends BasePageState<Fishing>
                                                 'km'),
                                           ],
                                         ),
-                                        CustomPaint(
-                                          painter: new SliderPainter(
-                                            height: 20,
-                                            activeColor:
-                                                _tensionActiveTrackColor,
-                                            inactiveColor: (_flgBait || _flgHit)
-                                                ? Colors.black
-                                                : Colors.white,
-                                            value: _tension,
-                                            maxValue: _tensionValMax,
-                                            backRadius: _animationRadius.value,
-                                            maxBackRadius: POINTER_BACK_SIZE,
-                                            flgShaKe:
-                                                (_flgBait || (_tension > _drag))
-                                                    ? true
-                                                    : false,
-                                            flgDispValue: true,
-                                            flgDispMaxValue: true,
-                                          ),
-                                          child: Container(
+                                        new Stack(children: <Widget>[
+                                          CustomPaint(
+                                            painter: new SliderPainter(
+                                              height: 20,
+                                              activeColor:
+                                                  _tensionActiveTrackColor,
+                                              inactiveColor: (_flgHit)
+                                                  ? Colors.black
+                                                  : Colors.white,
+                                              value: _tension,
+                                              maxValue: _tensionValMax,
+                                              backRadius:
+                                                  _animationRadius.value,
+                                              maxBackRadius: POINTER_BACK_SIZE,
+                                              flgShaKe: (_flgBait ||
+                                                      (_tension > _drag))
+                                                  ? true
+                                                  : false,
+                                              flgDispValue: true,
+                                              flgDispMaxValue: true,
+                                              value2: _fookingTension,
+                                              value2Color:
+                                                  Colors.black.withOpacity(0.5),
+                                            ),
+                                            child: Container(
 //                                  height: 500,
-                                              ),
-                                        )
+                                                ),
+                                          ),
+                                          // Container(
+                                          //   margin:
+                                          //       EdgeInsets.only(left: 10 + 400),
+                                          //   child: new Image(
+                                          //     image: AssetImage(
+                                          //         'assets/Images/denryu.gif'),
+                                          //     height: 30,
+                                          //   ),
+                                          // ),
+                                        ]),
                                       ])),
                               //ドラグスライダー
                               Container(
