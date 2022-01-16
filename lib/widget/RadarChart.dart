@@ -7,10 +7,12 @@ class RadarChart extends StatefulWidget {
   const RadarChart({
     required Key key,
     required this.items,
+    required this.borderColor,
     required this.radarColors,
     required this.fontColor,
   }) : super(key: key);
   final List<RadarChartItemModel> items;
+  final Color borderColor;
   final List<Color> radarColors;
   final Color fontColor;
   @override
@@ -28,6 +30,7 @@ class _RadarChartState extends State<RadarChart> {
       size: Size(150, 150),
       painter: RadarChartPainter(
           items: widget.items,
+          borderColor: widget.borderColor,
           radarColors: widget.radarColors,
           fontColor: widget.fontColor),
     );
@@ -47,10 +50,12 @@ class _RadarChartState extends State<RadarChart> {
 class RadarChartPainter extends CustomPainter {
   RadarChartPainter({
     required this.items,
+    required this.borderColor,
     required this.radarColors,
     required this.fontColor,
   });
   final List<RadarChartItemModel> items;
+  final Color borderColor;
   final List<Color> radarColors;
   final Color fontColor;
 
@@ -63,7 +68,7 @@ class RadarChartPainter extends CustomPainter {
     var centerOffset = Offset(centerX, centerY);
     var radius = centerX * 0.8;
     var outlinePaint = Paint()
-      ..color = Colors.black
+      ..color = borderColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..isAntiAlias = true;
@@ -85,7 +90,7 @@ class RadarChartPainter extends CustomPainter {
     var tickDistance = radius / (tickLength);
     const double tickLabelFontSize = 8;
     var ticksPaint = Paint()
-      ..color = Colors.black
+      ..color = borderColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0
       ..isAntiAlias = true;

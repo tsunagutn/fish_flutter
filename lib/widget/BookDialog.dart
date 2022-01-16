@@ -135,6 +135,7 @@ class _BookDialogState extends State<BookDialog>
                                 new RadarChart(
                                   key: UniqueKey(),
                                   items: getFishRadarChartItem(_showFishData),
+                                  borderColor: Colors.black,
                                   radarColors: [Colors.green],
                                   fontColor: Colors.black,
                                 ),

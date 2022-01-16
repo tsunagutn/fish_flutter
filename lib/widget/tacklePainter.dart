@@ -13,6 +13,7 @@ class tacklePainter extends CustomPainter {
     required this.reelSizeY,
     required this.reelCenterY,
     required this.clutchBackColor,
+    required this.clutchTextSize,
     required this.rodStandUp,
     required this.rodTension,
   });
@@ -26,6 +27,7 @@ class tacklePainter extends CustomPainter {
   final double reelSizeY;
   final double reelCenterY;
   final Color clutchBackColor;
+  final double clutchTextSize;
   final double rodStandUp;
   final double rodTension;
 
@@ -181,6 +183,38 @@ class tacklePainter extends CustomPainter {
     //     tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
     path.close();
     canvas.drawPath(path, paint);
+
+    //クラッチ内のテキスト
+    if (clutchTextSize > 0.0) {
+      final fontsize = (clutchTextSize);
+      final textStyle = TextStyle(
+        color: Colors.black,
+        fontSize: fontsize,
+        fontWeight: FontWeight.w900,
+        fontStyle: FontStyle.italic,
+        // shadows: <Shadow>[
+        //   Shadow(offset: Offset(0.0, 0.0), blurRadius: 0.0, color: Colors.yellow)
+        // ],
+      );
+
+      //テキスト描画用のペインター
+      final textPainter = TextPainter(
+        text: TextSpan(
+            style: textStyle, children: <TextSpan>[TextSpan(text: 'PUSH!')]),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(
+        minWidth: reelSizeX / 2,
+        maxWidth: reelSizeX,
+      );
+
+      // テキストの描画
+      textPainter.paint(
+          canvas,
+          Offset(tackleCenterX - clutchTextSize - 10,
+              (reelCenterY + reelSizeY / 2 + 3) - clutchTextSize + 20));
+    }
   }
 
   @override

@@ -72,9 +72,10 @@
 //済・沖合何メートルの表示
 //済・最大水深によって釣れる魚の大きさを制限
 //済・ルアー大きさによって釣れる魚の大きさを制限
-//・当たった時にアワセ判定ラインを表示
-//・バレるラインを表示
-//・リールタップしていいとき光らすとかの表示
+//済・当たった時にアワセ判定ラインを表示
+//済・バレるラインを表示
+//済・リールタップしていいとき光らすとかの表示
+//・ルアーめげるシステムいらんくね？
 //・おさかな図鑑画面で？でも何mでつれるかの表示出す
 //・店
 //・風
@@ -94,6 +95,7 @@
 //・水流
 //・水中に泡とか
 //・海底に漁礁とか
+//・全体的見た目何とかする、水中にテカリ的なグラデーションとか
 //・通知インフォメーション 今が時合で！みたいな
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
@@ -220,11 +222,12 @@ class _FishingState extends BasePageState<Fishing>
   late Animation<double> _animationRadius;
   late AnimationController _centerTextAnimationController; //画面中央に出すテキストアニメーション
   late Animation<double> _centerTextLeft;
-  late AnimationController
-      _tackleMenuAnimationController; //タックルメニューをフワフワさすアニメーション
-  late Animation<double> _tackleMenuAnime;
+  late AnimationController _commonAnimationController; //共通アニメーション
+  late Animation<double> _commonAnime;
   late AnimationController _jerkTextAnimationController; //ジャーク時のテキストアニメーション
   late Animation<double> _jerkTextLocation;
+  late AnimationController _clutchAnimationController; //クラッチの表示アニメーション
+  late Animation<double> _clutchAnime;
 
   //定周期タイマ
   late Timer _timer;
@@ -389,19 +392,31 @@ class _FishingState extends BasePageState<Fishing>
     _jerkTextAnimationController =
         AnimationController(duration: Duration(milliseconds: 800), vsync: this);
 
-    _tackleMenuAnimationController = AnimationController(
+    _commonAnimationController = AnimationController(
         duration: Duration(milliseconds: 1500), vsync: this);
-
     //アニメーションの定義
-    _tackleMenuAnimationController = AnimationController(
+    _commonAnimationController = AnimationController(
         duration: Duration(milliseconds: 1500), vsync: this);
-    _tackleMenuAnime = Tween(begin: 0.0, end: 1.0)
-        .animate(_tackleMenuAnimationController)
+    _commonAnime = Tween(begin: 0.0, end: 1.0)
+        .animate(_commonAnimationController)
         .drive(CurveTween(curve: Curves.easeInOut))
       ..addListener(() {
         setState(() {});
       });
-    _tackleMenuAnimationController.repeat(reverse: true);
+    _commonAnimationController.repeat(reverse: true);
+
+    //クラッチのアニメーション
+    _clutchAnimationController = AnimationController(
+        duration: Duration(milliseconds: 1500), vsync: this);
+    _clutchAnimationController =
+        AnimationController(duration: Duration(milliseconds: 200), vsync: this);
+    _clutchAnime = Tween(begin: 0.0, end: 1.0)
+        .animate(_clutchAnimationController)
+        .drive(CurveTween(curve: Curves.easeInOut))
+      ..addListener(() {
+        setState(() {});
+      });
+    _clutchAnimationController.repeat(reverse: true);
 
     super.initState();
   }
@@ -411,7 +426,8 @@ class _FishingState extends BasePageState<Fishing>
     _animationController.dispose();
     waveController.dispose(); // AnimationControllerは明示的にdisposeする。
     _centerTextAnimationController.dispose();
-    _tackleMenuAnimationController.dispose();
+    _commonAnimationController.dispose();
+    _clutchAnimationController.dispose();
     _jerkTextAnimationController.dispose();
     fishPointerList.clear();
     _ap.stop();
@@ -1079,11 +1095,13 @@ class _FishingState extends BasePageState<Fishing>
 
           //バレ判定 水深MAXか、テンションがアワセ値未満で条件成立
           if (_depth >= _maxDepth || val < _fookingTension) {
-            _bareCnt++;
+            //_bareCnt++;
+            _fookingTension += 1;
           } else {
             //_bareCnt = 0;
           }
-          if (_bareCnt >= fish.bareMin + _fookingLv.floor()) {
+          //if (_bareCnt >= fish.bareMin + _fookingLv.floor()) {
+          if (_fookingTension > _tensionValMax) {
             //バレ条件成立が一定スキャン保持でバレとする
             debugPrint("バレ");
             _flgBait = false;
@@ -1536,7 +1554,7 @@ class _FishingState extends BasePageState<Fishing>
                                       backRadius: 0,
                                       maxBackRadius: 0,
                                       flgShaKe: false,
-                                      flgDispValue: true,
+                                      flgDispValue: false,
                                       flgDispMaxValue: false,
                                     ),
                                     child: Container(),
@@ -1937,6 +1955,9 @@ class _FishingState extends BasePageState<Fishing>
                             (_onClutch ? Colors.lightBlue : Colors.red),
                         rodStandUp: _rodStandUp,
                         rodTension: _tension / _tensionValMax,
+                        clutchTextSize: (_onClutch
+                            ? 0.0
+                            : 20 * (_clutchAnime.value + 3.0) / 4),
                       ),
                     ),
                     if (_centerTextAnimationController.isAnimating)
@@ -1990,8 +2011,7 @@ class _FishingState extends BasePageState<Fishing>
                           children: [
                             Container(
                               margin: EdgeInsets.only(
-                                  top: _shoreHeight +
-                                      (5 * _tackleMenuAnime.value),
+                                  top: _shoreHeight + (5 * _commonAnime.value),
                                   left: 10),
                               //height: 180,
                               child: Column(
@@ -2346,7 +2366,8 @@ class _FishingState extends BasePageState<Fishing>
                                         new RadarChart(
                                           key: UniqueKey(),
                                           items: getLureRadarChartItem(),
-                                          radarColors: [Colors.green],
+                                          borderColor: Colors.white,
+                                          radarColors: [Colors.orange],
                                           fontColor: Colors.white,
                                         ),
                                         Container(
@@ -2624,6 +2645,14 @@ class _FishingState extends BasePageState<Fishing>
         itemName: 'ｼｬｸﾘ',
         value: lures.getLureData(haveTackle.getUseLure().lureId).jerk));
     return ret;
+  }
+
+  //0.0～1.0のアニメーション値を倍々にする
+  double animeHosei(double val, int multiple) {
+    //return val / (1.0 / multiple);
+    var v = val % (1.0 / multiple);
+    //return (1 / multiple) * math.sin(4 * v);
+    return v;
   }
 }
 
