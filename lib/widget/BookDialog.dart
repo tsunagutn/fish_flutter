@@ -33,6 +33,9 @@ class _BookDialogState extends State<BookDialog>
     widget.fishsTable.fishs.forEach((value) {
       fishList.add(value);
     });
+    //棚が浅い順にソート
+    fishList.sort((a, b) => a.tanaMin.compareTo(b.tanaMin));
+
     _showFishData = widget.fishsTable.fishs[0];
   }
 
@@ -375,6 +378,7 @@ class _BookDialogState extends State<BookDialog>
     Color backgroundColor;
     String image;
     String name;
+    String depth;
     String resultCount;
     String resultMaxSize;
     double max = 0.0;
@@ -399,6 +403,11 @@ class _BookDialogState extends State<BookDialog>
       resultCount = "0匹";
       resultMaxSize = "";
     }
+    depth = (fish.tanaMin / 10).toStringAsFixed(0) +
+        "～" +
+        (fish.tanaMax / 10).toStringAsFixed(0) +
+        'm';
+
     return new Card(
       color: backgroundColor,
       child: new InkWell(
@@ -431,15 +440,37 @@ class _BookDialogState extends State<BookDialog>
                 Column(
                   children: [
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          name,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        Container(
+                          margin: EdgeInsets.only(
+                            left: 10,
+                          ),
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        Text("釣った数：" + resultCount),
                         Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(left: 10),
+                                child: Text("水深：" + depth),
+                              ),
+                            ]),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text("最大サイズ：" + resultMaxSize),
+                            Container(
+                              margin: EdgeInsets.only(left: 10, right: 10),
+                              child: Text("釣った数：" + resultCount),
+                            ),
+                            Container(
+                              child: Text("最大サイズ：" + resultMaxSize),
+                            ),
                             if (max > 0.8 && max < 0.95)
                               Icon(Icons.star, color: Colors.grey),
                             if (max > 0.95)

@@ -30,6 +30,14 @@ class _fishGetDialogState extends State<fishGetDialog>
   late AnimationController _bColorAnimationController;
   late Animation<double> _bColorValue;
 
+  static const Map<int, String> RARE_MESSAGE = {
+    1: 'あなたはうれしい',
+    2: 'あなたは喜びました',
+    3: 'あなたは幸せになった',
+    4: 'あなたは満足を得ました',
+    5: 'あなたは感動しました',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +94,8 @@ class _fishGetDialogState extends State<fishGetDialog>
     int g = (255 * _gColorValue.value).floor();
     int b = (255 * _bColorValue.value).floor();
 
+    String mes = '';
+
     return Stack(children: [
       Opacity(
         //最初に画面全体を光らすために最初は透明にする
@@ -110,7 +120,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                   borderRadius: BorderRadius.all(Radius.circular(20.0))),
               // backgroundColor:
               //     clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
-              title: Text("あなたは満足を得ました",
+              title: Text(RARE_MESSAGE[widget.fish.rare]!,
                   style: TextStyle(
                     //fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -167,6 +177,16 @@ class _fishGetDialogState extends State<fishGetDialog>
                               color: Colors.yellow,
                             ),
                         ]),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var i = 0; i < widget.fish.rare; i++)
+                          Icon(
+                            Icons.star,
+                            color: Colors.yellow,
+                          ),
+                      ],
+                    ),
                     Text(widget.addPoint.toString() + 'ポイント獲得です'),
                     Text(widget.fish.text),
                     if (widget.flgNew)

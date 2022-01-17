@@ -7,6 +7,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 0,
       name: "アジ",
+      rare: 1,
       image: "fish/aji.png",
       text: "あなたは幸せを感じました",
       hp: 1200,
@@ -33,6 +34,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 1,
       name: "タチウオ",
+      rare: 3,
       image: "fish/tachiuo.jpg",
       text: "おおきいぞっ",
       hp: 1500, //このスキャン経過で0になる
@@ -58,6 +60,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 2,
       name: "鯉",
+      rare: 2,
       image: "fish/koi.jpg",
       text: "スーパーレア",
       hp: 6000, //このスキャン経過で0になる
@@ -83,6 +86,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 3,
       name: "マダイ",
+      rare: 3,
       image: "fish/madai.png",
       text: "やるなすたべ",
       hp: 5000,
@@ -109,6 +113,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 4,
       name: "宮澤クン",
+      rare: 5,
       image: "fish/sakana.jpg",
       text: "スー　パー　レア",
       hp: 10000,
@@ -135,6 +140,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 5,
       name: "サバ", //魚種名
+      rare: 1,
       image: "fish/saba.png", //超過画面の画像
       text: "写真は仮です", //釣果画面のコメント
       hp: 1200, //このスキャン経過で0になる
@@ -161,6 +167,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 6,
       name: "サゴシ", //魚種名
+      rare: 2,
       image: "fish/sagoshi.png", //超過画面の画像
       text: "この魚は美味です", //釣果画面のコメント
       hp: 2000, //このスキャン経過で0になる
@@ -186,6 +193,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 7,
       name: "アオハタ", //魚種名
+      rare: 2,
       image: "fish/aohata.png", //超過画面の画像
       text: "底でよく釣れる", //釣果画面のコメント
       hp: 1800, //このスキャン経過で0になる
@@ -211,6 +219,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 8,
       name: "キジハタ", //魚種名
+      rare: 3,
       image: "fish/kijihata.png", //超過画面の画像
       text: "この魚は贅沢です", //釣果画面のコメント
       hp: 2100, //このスキャン経過で0になる
@@ -236,6 +245,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 9,
       name: "アカヤガラ",
+      rare: 4,
       image: "fish/akayagara.png",
       text: "潮が悪いとき釣れる",
       hp: 1000,
@@ -261,6 +271,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 10,
       name: "アヤメカサゴ",
+      rare: 4,
       image: "fish/ayamekasago.png",
       text: "ちょっと珍しいカサゴ",
       hp: 1300,
@@ -286,6 +297,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 11,
       name: "サバフグ",
+      rare: 1,
       image: "fish/sabahugu.png",
       text: "毒が無いらしい",
       hp: 2000,
@@ -311,6 +323,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 12,
       name: "ヒラマサ",
+      rare: 4,
       image: "fish/hiramasa.png",
       text: "ヤッターマン",
       hp: 5000,
@@ -336,6 +349,7 @@ class FishsModel {
     fishs.add(new FishModel(
       id: 13,
       name: "サワラ",
+      rare: 4,
       image: "fish/sawara.png",
       text: "サゴシのでかいやつ",
       hp: 4000,
@@ -383,6 +397,7 @@ class FishsModel {
 class FishModel {
   int id; //一意識別キー
   String name; //魚種名
+  int rare; //レアド
   String image; //画像ファイル名
   String text; //釣果画面のコメント
   int hp; //このスキャン経過で0になる
@@ -409,6 +424,7 @@ class FishModel {
   FishModel({
     required this.id,
     required this.name,
+    required this.rare,
     required this.image,
     required this.text,
     required this.hp,

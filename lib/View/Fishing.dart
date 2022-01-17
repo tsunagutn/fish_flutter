@@ -75,7 +75,7 @@
 //済・当たった時にアワセ判定ラインを表示
 //済・バレるラインを表示
 //済・リールタップしていいとき光らすとかの表示
-//・ルアーめげるシステムいらんくね？
+//済・ルアーめげるシステムいらんくね？
 //・おさかな図鑑画面で？でも何mでつれるかの表示出す
 //・店
 //・風
@@ -748,24 +748,24 @@ class _FishingState extends BasePageState<Fishing>
         ((_maxDepth).round() / 10).toStringAsFixed(1) +
         ' m';
 
-    //使用中ルアーのHP減算
-    HaveLureModel lure = haveTackle.getUseLure();
-    //針は対象外
-    if (lure.lureId != 0) {
-      //テンションに応じたダメージを与える
-      lure.lureHp -= (_tension / 100).floor();
-      if (lure.lureHp < 0.0) {
-        //ルアーがめげた
-        haveTackle.lostLure(lure.id);
-        //メッセージ
-        _centerTextMain = "BROKEN";
-        _centerTextMainColor = Colors.blue;
-        _centerTextSub = "ルアーが破壊!";
-        _centerTextSubColor = Colors.yellow;
-        startCenterInfo();
-        bgm.soundManagerPool.playSound('Se/lurebroken.mp3');
-      }
-    }
+    // //使用中ルアーのHP減算
+    // HaveLureModel lure = haveTackle.getUseLure();
+    // //針は対象外
+    // if (lure.lureId != 0) {
+    //   //テンションに応じたダメージを与える
+    //   lure.lureHp -= (_tension / 100).floor();
+    //   if (lure.lureHp < 0.0) {
+    //     //ルアーがめげた
+    //     haveTackle.lostLure(lure.id);
+    //     //メッセージ
+    //     _centerTextMain = "BROKEN";
+    //     _centerTextMainColor = Colors.blue;
+    //     _centerTextSub = "ルアーが破壊!";
+    //     _centerTextSubColor = Colors.yellow;
+    //     startCenterInfo();
+    //     bgm.soundManagerPool.playSound('Se/lurebroken.mp3');
+    //   }
+    // }
 
     //光点表示位置設定
     if (_takclePositionLeft) {
@@ -2068,28 +2068,29 @@ class _FishingState extends BasePageState<Fishing>
                                         }
                                       },
                                       child: tackleIcon(
-                                          tackleIconSize: 40.0,
-                                          imagePath: 'assets/Images/' +
-                                              lures
-                                                  .getLureData(haveTackle
-                                                      .getUseLure()
-                                                      .lureId)
-                                                  .image,
-                                          flgSelect: false,
-                                          opacity: (_depth > 0.0 ? 0.7 : 1.0),
-                                          subText: lures
-                                                  .getLureData(haveTackle
-                                                      .getUseLure()
-                                                      .lureId)
-                                                  .weight
-                                                  .toString() +
-                                              'g',
-                                          hp: haveTackle.getUseLure().lureHp,
-                                          maxHp: lures
-                                              .getLureData(haveTackle
-                                                  .getUseLure()
-                                                  .lureId)
-                                              .hp)),
+                                        tackleIconSize: 40.0,
+                                        imagePath: 'assets/Images/' +
+                                            lures
+                                                .getLureData(haveTackle
+                                                    .getUseLure()
+                                                    .lureId)
+                                                .image,
+                                        flgSelect: false,
+                                        opacity: (_depth > 0.0 ? 0.7 : 1.0),
+                                        subText: lures
+                                                .getLureData(haveTackle
+                                                    .getUseLure()
+                                                    .lureId)
+                                                .weight
+                                                .toString() +
+                                            'g',
+                                        // hp: haveTackle.getUseLure().lureHp,
+                                        // maxHp: lures
+                                        //     .getLureData(haveTackle
+                                        //         .getUseLure()
+                                        //         .lureId)
+                                        //     .hp
+                                      )),
                                 ],
                               ),
                             ),
@@ -2232,37 +2233,35 @@ class _FishingState extends BasePageState<Fishing>
                                           child: Container(
                                               padding: EdgeInsets.all(10),
                                               child: tackleIcon(
-                                                  tackleIconSize: 60.0,
-                                                  imagePath: 'assets/Images/' +
-                                                      lures
-                                                          .getLureData(
-                                                              haveTackle
-                                                                  .getUseLure()
-                                                                  .lureId)
-                                                          .image,
-                                                  flgSelect:
-                                                      _selectTacleIcon == 'lure'
-                                                          ? true
-                                                          : false,
-                                                  opacity: (_depth > 0.0
-                                                      ? 0.7
-                                                      : 1.0),
-                                                  subText: lures
-                                                          .getLureData(
-                                                              haveTackle
-                                                                  .getUseLure()
-                                                                  .lureId)
-                                                          .weight
-                                                          .toString() +
-                                                      'g',
-                                                  hp: haveTackle
-                                                      .getUseLure()
-                                                      .lureHp,
-                                                  maxHp: lures
-                                                      .getLureData(haveTackle
-                                                          .getUseLure()
-                                                          .lureId)
-                                                      .hp)),
+                                                tackleIconSize: 60.0,
+                                                imagePath: 'assets/Images/' +
+                                                    lures
+                                                        .getLureData(haveTackle
+                                                            .getUseLure()
+                                                            .lureId)
+                                                        .image,
+                                                flgSelect:
+                                                    _selectTacleIcon == 'lure'
+                                                        ? true
+                                                        : false,
+                                                opacity:
+                                                    (_depth > 0.0 ? 0.7 : 1.0),
+                                                subText: lures
+                                                        .getLureData(haveTackle
+                                                            .getUseLure()
+                                                            .lureId)
+                                                        .weight
+                                                        .toString() +
+                                                    'g',
+                                                // hp: haveTackle
+                                                //     .getUseLure()
+                                                //     .lureHp,
+                                                // maxHp: lures
+                                                //     .getLureData(haveTackle
+                                                //         .getUseLure()
+                                                //         .lureId)
+                                                //     .hp
+                                              )),
                                         ),
                                       ],
                                     ),
@@ -2304,34 +2303,37 @@ class _FishingState extends BasePageState<Fishing>
                                                         padding:
                                                             EdgeInsets.all(10),
                                                         child: tackleIcon(
-                                                            tackleIconSize:
-                                                                40.0,
-                                                            imagePath: 'assets/Images/' +
-                                                                lures
-                                                                    .getLureData(haveTackle
-                                                                        .haveLures[
-                                                                            index]
-                                                                        .lureId)
-                                                                    .image,
-                                                            flgSelect: haveTackle.haveLures[index].id ==
-                                                                    haveTackle
-                                                                        .getUseLure()
-                                                                        .id
-                                                                ? true
-                                                                : false,
-                                                            opacity:
-                                                                (_depth > 0.0
-                                                                    ? 0.7
-                                                                    : 1.0),
-                                                            subText: lures
-                                                                    .getLureData(haveTackle
-                                                                        .haveLures[index]
-                                                                        .lureId)
-                                                                    .weight
-                                                                    .toString() +
-                                                                'g',
-                                                            hp: haveTackle.haveLures[index].lureHp,
-                                                            maxHp: lures.getLureData(haveTackle.haveLures[index].lureId).hp)),
+                                                          tackleIconSize: 40.0,
+                                                          imagePath: 'assets/Images/' +
+                                                              lures
+                                                                  .getLureData(haveTackle
+                                                                      .haveLures[
+                                                                          index]
+                                                                      .lureId)
+                                                                  .image,
+                                                          flgSelect: haveTackle
+                                                                      .haveLures[
+                                                                          index]
+                                                                      .id ==
+                                                                  haveTackle
+                                                                      .getUseLure()
+                                                                      .id
+                                                              ? true
+                                                              : false,
+                                                          opacity: (_depth > 0.0
+                                                              ? 0.7
+                                                              : 1.0),
+                                                          subText: lures
+                                                                  .getLureData(haveTackle
+                                                                      .haveLures[
+                                                                          index]
+                                                                      .lureId)
+                                                                  .weight
+                                                                  .toString() +
+                                                              'g',
+                                                          //hp: haveTackle.haveLures[index].lureHp,
+                                                          //maxHp: lures.getLureData(haveTackle.haveLures[index].lureId).hp
+                                                        )),
                                                   ),
                                                 ]);
                                               },
