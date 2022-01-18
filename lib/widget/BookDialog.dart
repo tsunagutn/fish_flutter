@@ -127,6 +127,16 @@ class _BookDialogState extends State<BookDialog>
                                                 Colors.black.withOpacity(0.4))
                                       ],
                                     ))),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (var i = 0; i < _showFishData.rare; i++)
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.yellow,
+                                  ),
+                              ],
+                            ),
                             Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,

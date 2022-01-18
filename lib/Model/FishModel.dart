@@ -9,7 +9,7 @@ class FishsModel {
       name: "アジ",
       rare: 1,
       image: "fish/aji.png",
-      text: "あなたは幸せを感じました",
+      text: "おいしさナンバーワン",
       hp: 1200,
       addMax: 3,
       addMin: -2,
