@@ -180,6 +180,16 @@ class _FishingState extends BasePageState<Fishing>
     5: 2000,
   };
 
+  //最大水深(0.1m)ごとの風の強さ
+  static const Map<int, double> WIND_FOR_DEPTH = {
+    0: 0.5,
+    200: 0.6, //0～20mまでは微風で進む
+    500: 0.5, //20～50mまでは無風
+    1000: 0.4,
+    2000: 0.3,
+    9999: 0.0,
+  };
+
   //static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
   static const TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
   //static const TIMER_INTERVAL = 17; //1スキャン時間(msec) 60FPS
@@ -286,11 +296,14 @@ class _FishingState extends BasePageState<Fishing>
   var _hitScanCnt = 0; //HITしてからのスキャン数
   var _bareCnt = 0; //バレ判定カウント
 
+  var _shipMove = 0.5; //船の動き 1.0～0,0 +なら深くなる、-なら浅くなる
   var _depthChange = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
-  var _depthChangeScanCnt = 0; //深さの変化傾向スキャンカウント数
-  var _depthChangeOrder = 0; //変化傾向 初期値は現状維持
+  //var _depthChangeScanCnt = 0; //深さの変化傾向スキャンカウント数
+  //var _depthChangeOrder = 0; //変化傾向 初期値は現状維持
   var _dispDepthLv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
   var _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
+
+  var _windLevel = 0.5; //風レベル 0.0～1.0 0.5で無風
 
   var _nowDurationLv; //光点点滅レベル
   var _shoreHeight = 0.0;
@@ -518,7 +531,14 @@ class _FishingState extends BasePageState<Fishing>
     //現在使用中のルアーデータ
     LureModel lureData = lures.getLureData(haveTackle.getUseLure().lureId);
 
-    // //深さの変化傾向判定
+    //風レベル判定
+    for (int key in WIND_FOR_DEPTH.keys) {
+      if (_maxDepth.toInt() < key) {
+        _windLevel = WIND_FOR_DEPTH[key] as double;
+        break;
+      }
+    }
+
     // _depthChangeScanCnt++;
     // if (_depthChangeScanCnt > DEPTH_CHANGE_SCAN) {
     //   _depthChangeScanCnt = 0;
@@ -551,30 +571,11 @@ class _FishingState extends BasePageState<Fishing>
     }
 
     //船移動
-    if (_moveShipTarget > _depthChange) {
-      _depthChange += 0.01;
+    if (_moveShipTarget > _shipMove) {
+      _shipMove += 0.01;
     }
-    if (_moveShipTarget < _depthChange) {
-      _depthChange -= 0.01;
-    }
-    //船移動中
-    if (_depthChange != 0.5) {
-      //魚反応を移動させる
-      fishPointerList.forEach((element) {
-        //描画ごとにglovalkeyを付けているのでそれにアクセス
-        RenderCustomPaint obj = element.painterKey.currentContext
-            ?.findRenderObject() as RenderCustomPaint;
-        FishPainter obj2 = obj.painter as FishPainter;
-        //addxの値を加減算で移動
-        obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange - 0.5) * -1;
-
-        _shipMoveSeScan++;
-        if (_shipMoveSeScan >= (800 / TIMER_INTERVAL).floor()) {
-          //船動作音が連続再生しすぎるのを防止
-          bgm.soundManagerPool.playSound('Se/shipmove.mp3');
-          _shipMoveSeScan = 0;
-        }
-      });
+    if (_moveShipTarget < _shipMove) {
+      _shipMove -= 0.01;
     }
     //船移動の指示中
     if (_moveShipTarget != 0.5) {
@@ -588,6 +589,32 @@ class _FishingState extends BasePageState<Fishing>
         _moveShipTarget = 0.5;
       }
     }
+    //深さ変化度合の決定
+    _depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
+
+    //深さ決定 船移動分と風分
+    _maxDepth += _depthChange;
+
+    //深さ変化中
+    if (_depthChange != 0.0) {
+      //魚反応を移動させる
+      fishPointerList.forEach((element) {
+        //描画ごとにglovalkeyを付けているのでそれにアクセス
+        RenderCustomPaint obj = element.painterKey.currentContext
+            ?.findRenderObject() as RenderCustomPaint;
+        FishPainter obj2 = obj.painter as FishPainter;
+        //addxの値を加減算で移動
+        obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange) * -1;
+
+        _shipMoveSeScan++;
+        if (_shipMoveSeScan >= (800 / TIMER_INTERVAL).floor()) {
+          //船動作音が連続再生しすぎるのを防止
+          bgm.soundManagerPool.playSound('Se/shipmove.mp3');
+          _shipMoveSeScan = 0;
+        }
+      });
+    }
+
     //座礁判定
     if (_maxDepth < 3.0) {
       //これ以上浅くいけない
@@ -1153,21 +1180,17 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
 
-    //最大深さをランダムで増減
-    var depthrnd = (new math.Random()).nextDouble();
-    // _maxDepth += 1 * ((_depthChange) - depthrnd);
-    _maxDepth += _depthChange - 0.5;
-
     //沖合何kmを計算
     offShore = _maxDepth * 7 / 1000;
 
+    var tanarnd = (new math.Random()).nextDouble();
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
-    if (hannornd > 0.96 && _jiai > depthrnd) {
+    if (hannornd > 0.96 && _jiai > tanarnd) {
       var fishy = sonarTop + (sonarHeight * _justTana);
       //レンジ分バラケ
       var barakeLevel = 4; //バラケ度
-      var barake = (_justTanaRange * ((0.5 - depthrnd) * barakeLevel));
+      var barake = (_justTanaRange * ((0.5 - tanarnd) * barakeLevel));
       fishy = fishy + barake;
       fishy = (fishy < _shoreHeight) ? _shoreHeight : fishy;
       fishy = (fishy > _shoreHeight + sonarHeight)
@@ -1629,7 +1652,7 @@ class _FishingState extends BasePageState<Fishing>
                                     //船の描画
                                     child: Transform.rotate(
                                       //angle: 45 * math.pi / 180,
-                                      angle: (405 - (90 * _depthChange)) *
+                                      angle: (405 - (90 * _shipMove)) *
                                           math.pi /
                                           180,
                                       child: new Image(
