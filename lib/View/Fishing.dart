@@ -182,12 +182,12 @@ class _FishingState extends BasePageState<Fishing>
 
   //最大水深(0.1m)ごとの風の強さ
   static const Map<int, double> WIND_FOR_DEPTH = {
-    0: 0.5,
-    200: 0.6, //0～20mまでは微風で進む
-    500: 0.5, //20～50mまでは無風
-    1000: 0.4,
-    2000: 0.3,
-    9999: 0.0,
+    // 0: 0.5,
+    // 200: 0.6, //0～20mまでは微風で進む
+    // 500: 0.5, //20～50mまでは無風
+    // 1000: 0.4,
+    // 2000: 0.3,
+    9999: 0.7,
   };
 
   //static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
@@ -588,6 +588,12 @@ class _FishingState extends BasePageState<Fishing>
         _point = 0;
         _moveShipTarget = 0.5;
       }
+      _shipMoveSeScan++;
+      if (_shipMoveSeScan >= (800 / TIMER_INTERVAL).floor()) {
+        //船動作音が連続再生しすぎるのを防止
+        bgm.soundManagerPool.playSound('Se/shipmove.mp3');
+        _shipMoveSeScan = 0;
+      }
     }
     //深さ変化度合の決定
     _depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
@@ -605,13 +611,6 @@ class _FishingState extends BasePageState<Fishing>
         FishPainter obj2 = obj.painter as FishPainter;
         //addxの値を加減算で移動
         obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange) * -1;
-
-        _shipMoveSeScan++;
-        if (_shipMoveSeScan >= (800 / TIMER_INTERVAL).floor()) {
-          //船動作音が連続再生しすぎるのを防止
-          bgm.soundManagerPool.playSound('Se/shipmove.mp3');
-          _shipMoveSeScan = 0;
-        }
       });
     }
 
@@ -1283,6 +1282,12 @@ class _FishingState extends BasePageState<Fishing>
                   ),
                 ],
               ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('沖合' + offShore.toStringAsFixed(1) + 'km'),
+                ],
+              ),
               //右上（複数可）
               actions: [
                 Container(
@@ -1476,9 +1481,6 @@ class _FishingState extends BasePageState<Fishing>
                                               image: AssetImage(
                                                   'assets/Images/TENSIONDRAG.png'),
                                             ),
-                                            Text('沖合' +
-                                                offShore.toStringAsFixed(1) +
-                                                'km'),
                                           ],
                                         ),
                                         new Stack(children: <Widget>[
