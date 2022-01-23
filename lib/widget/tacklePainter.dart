@@ -1,4 +1,6 @@
+import 'package:fish_flutter/View/Fishing.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class tacklePainter extends CustomPainter {
   const tacklePainter({
@@ -39,12 +41,6 @@ class tacklePainter extends CustomPainter {
 
     paint.color = Colors.deepOrange;
     var path = Path();
-    //var tackleCenterX = 80.0;
-
-    // ロッド
-    //var rodSizeX = 20.0;
-    //var rodSizeY = dispSize.height - shoreHeight;
-
     final Shader _linearGradient = LinearGradient(
         begin: FractionalOffset.topCenter,
         end: FractionalOffset.bottomCenter,
@@ -72,7 +68,6 @@ class tacklePainter extends CustomPainter {
 
     path = Path();
     paint = new Paint()
-      //..color = Colors.amber
       ..shader = _linearGradient
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
@@ -83,51 +78,91 @@ class tacklePainter extends CustomPainter {
     if (!takclePositionLeft) {
       position = -1;
     }
-    //描画原点 竿元左側
-    // var gentenX = tackleCenterX;
-    // var gentenY = shoreHeight + rodSizeY;
-    const sides = 5; //竿描画の分割数
-    const maxZurashiX = 80; //ナナメ表示するための横軸ズラシ
+    const sides = 50; //竿描画の分割数
+    const magari = 40; //どこまで曲げるか
+    const angle = 0.3; //テンションMAX時の傾き
     const maxZurashiXBottom = 10; //竿元の横軸ズラシ
 
     //竿先端
-    // path.moveTo(tackleCenterX + ((maxZurashiX - maxZurashiXBottom) * position),
-    //     shoreHeight + (rodSizeY * rodTension)); //テンション最大なら竿元まで下がる
+    List<Offset> rodPath = [];
 
-    // for (var i = 1; i <= sides; i++) {
-    //   var zurashiX = ((maxZurashiX / sides) * (sides - i)) - maxZurashiXBottom;
-    //   var tensionY = rodSizeY * (rodTension * (i / sides));
+    rodPath.add(new Offset(tackleCenterX, shoreHeight));
+    for (var i = 1; i <= sides; i++) {
+      rodPath.add(new Offset(tackleCenterX - (maxZurashiXBottom * (i / sides)),
+          shoreHeight + (rodSizeY * (i / sides))));
+    }
+    for (var i = sides; i > 0; i--) {
+      rodPath.add(new Offset(tackleCenterX + (maxZurashiXBottom * (i / sides)),
+          shoreHeight + (rodSizeY * (i / sides))));
+    }
+    rodPath.add(new Offset(tackleCenterX, shoreHeight));
 
-    //   path.lineTo(
-    //       tackleCenterX + (zurashiX) - (rodSizeX / (sides / i)),
-    //       //shoreHeight + (rodSizeY / ((maxZurashiX / sides) * i)) + tensionY);
-    //       shoreHeight + tensionY);
-    // }
+    //テンション分傾け
+    rodPath = rodPath
+        .map((o) => _rotate(
+            o, angle * rodTension * position, tackleCenterX, reelCenterY))
+        .toList();
 
-    path.moveTo(tackleCenterX + (70 * position) + (30 * position * rodTension),
-        shoreHeight + (rodSizeY * rodTension));
+    var cnt = 0;
+    List<Offset> rodPath2 = [];
+    rodPath.forEach((item) {
+      Offset ofset;
+      if (cnt == 0 || cnt == rodPath.length - 1) {
+        //頂点
+        ofset = new Offset(
+            item.dx, item.dy + (rodSizeY * rodTension)); //テンション最大なら竿元まで下がる
+      } else if (cnt < magari) {
+        ofset = new Offset(
+            item.dx,
+            item.dy +
+                ((shoreHeight + rodSizeY) - item.dy) *
+                    (rodTension * math.pow((1.0 - (cnt / magari)), 2)));
+      } else if (cnt >= rodPath.length - 1 - magari) {
+        ofset = new Offset(
+            item.dx,
+            item.dy +
+                ((shoreHeight + rodSizeY) - item.dy) *
+                    (rodTension *
+                        math.pow(
+                            (1.0 - ((rodPath.length - 1) - cnt) / magari), 2)));
+      } else {
+        ofset = new Offset(item.dx, item.dy);
+      }
+      rodPath2.add(ofset);
+      cnt++;
+    });
 
-    path.lineTo(tackleCenterX + (50 * position) - (rodSizeX / 6),
-        shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
-    path.lineTo(tackleCenterX + (30 * position) - (rodSizeX / 3),
-        shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
-    path.lineTo(tackleCenterX + (-10 * position) - (rodSizeX / 2),
-        shoreHeight + rodSizeY);
-
-    path.lineTo(tackleCenterX + (-10 * position) + (rodSizeX / 2),
-        shoreHeight + rodSizeY);
-    path.lineTo(tackleCenterX + (30 * position) + (rodSizeX / 3),
-        shoreHeight + (rodSizeY / 2) + (rodSizeY / 10 * rodTension));
-    path.lineTo(tackleCenterX + (50 * position) + (rodSizeX / 6),
-        shoreHeight + (rodSizeY / 4) + (rodSizeY / 3 * rodTension));
-
+    path.addPolygon(rodPath2, true);
     path.close();
     canvas.drawPath(path, paint);
 
     //リール（仮で6角形)
-    // var reelSizeX = 60;
-    // var reelSizeY = 60;
-    // var reelCenterY = dispSize.height - reelSizeY - 20;
+    List<Offset> reelPath = [];
+    reelPath.add(
+        new Offset(tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY));
+    reelPath.add(
+        new Offset(tackleCenterX - reelSizeX, reelCenterY - (reelSizeY / 2)));
+    reelPath.add(
+        new Offset(tackleCenterX - reelSizeX, reelCenterY + (reelSizeY / 2)));
+    reelPath.add(
+        new Offset(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY));
+    reelPath
+        .add(new Offset(tackleCenterX - (reelSizeX), reelCenterY + reelSizeY));
+    reelPath
+        .add(new Offset(tackleCenterX + (reelSizeX), reelCenterY + reelSizeY));
+    reelPath.add(
+        new Offset(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY));
+    reelPath.add(
+        new Offset(tackleCenterX + reelSizeX, reelCenterY + (reelSizeY / 2)));
+    reelPath.add(
+        new Offset(tackleCenterX + reelSizeX, reelCenterY - (reelSizeY / 2)));
+    reelPath.add(
+        new Offset(tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY));
+    //テンション分傾け
+    reelPath = reelPath
+        .map((o) => _rotate(
+            o, angle * rodTension * position, tackleCenterX, reelCenterY))
+        .toList();
 
     path = Path();
     paint = new Paint()
@@ -135,52 +170,58 @@ class tacklePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
-    path.moveTo(tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY);
-    path.lineTo(tackleCenterX - reelSizeX, reelCenterY - (reelSizeY / 2));
-    path.lineTo(tackleCenterX - reelSizeX, reelCenterY + (reelSizeY / 2));
-    path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX - (reelSizeX), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX + (reelSizeX), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX + reelSizeX, reelCenterY + (reelSizeY / 2));
-    path.lineTo(tackleCenterX + reelSizeX, reelCenterY - (reelSizeY / 2));
-    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY);
+    path.addPolygon(reelPath, false);
     path.close();
     canvas.drawPath(path, paint);
 
     //糸巻部分
+    List<Offset> linePath = [];
+    linePath.add(new Offset(
+        tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY / 2));
+    linePath.add(new Offset(
+        tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2));
+    linePath.add(new Offset(
+        tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2));
+    linePath.add(new Offset(
+        tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY / 2));
+    //テンション分傾け
+    linePath = linePath
+        .map((o) => _rotate(
+            o, angle * rodTension * position, tackleCenterX, reelCenterY))
+        .toList();
+
     path = Path();
     paint = new Paint()
       ..color = Colors.white.withOpacity(0.6)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
-    path.moveTo(tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY / 2);
-    path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2);
-    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2);
-    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY / 2);
+    path.addPolygon(linePath, false);
     path.close();
     canvas.drawPath(path, paint);
 
     //クラッチ
+    List<Offset> clutchPath = [];
+    clutchPath.add(new Offset(
+        tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3));
+    clutchPath.add(
+        new Offset(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY));
+    clutchPath.add(
+        new Offset(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY));
+    clutchPath.add(new Offset(
+        tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3));
+    //テンション分傾け
+    clutchPath = clutchPath
+        .map((o) => _rotate(
+            o, angle * rodTension * position, tackleCenterX, reelCenterY))
+        .toList();
     path = Path();
     paint = new Paint()
       ..color = clutchBackColor
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
-    path.moveTo(
-        tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
-    path.lineTo(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY);
-    path.lineTo(tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY);
-    path.lineTo(
-        tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2 + 3);
-    // path.moveTo(
-    //     tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
-    // path.lineTo(tackleCenterX - (reelSizeX - 10), reelCenterY + reelSizeY);
-    // path.lineTo(tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY);
-    // path.lineTo(
-    //     tackleCenterX + (reelSizeX - 10), reelCenterY + reelSizeY / 2 + 3);
+    path.addPolygon(clutchPath, false);
     path.close();
     canvas.drawPath(path, paint);
 
@@ -212,9 +253,26 @@ class tacklePainter extends CustomPainter {
       // テキストの描画
       textPainter.paint(
           canvas,
-          Offset(tackleCenterX - clutchTextSize - 10,
-              (reelCenterY + reelSizeY / 2 + 3) - clutchTextSize + 20));
+          _rotate(
+              Offset(tackleCenterX - clutchTextSize - 10,
+                  (reelCenterY + reelSizeY / 2 + 3) - clutchTextSize + 20),
+              angle * rodTension * position,
+              tackleCenterX,
+              reelCenterY));
     }
+  }
+
+  /// 回転の公式を利用し、指定したラジアンで回転させた場合のOffsetを返す
+  /// Q((−)cos−(−)sin+, (−)sin+(−)cos+)
+  Offset _rotate(
+      Offset old, double radians, double centerWidth, double centerHeight) {
+    final dx = (old.dx * math.cos(radians) - centerWidth * math.cos(radians)) -
+        (old.dy * math.sin(radians) - centerHeight * math.sin(radians)) +
+        centerWidth;
+    final dy = (old.dx * math.sin(radians) - centerWidth * math.sin(radians)) +
+        (old.dy * math.cos(radians) - centerHeight * math.cos(radians)) +
+        centerHeight;
+    return Offset(dx, dy);
   }
 
   @override
