@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "3ffada7054a1de61c06237a781e53734",
+  "assets/AssetManifest.json": "b5b48f4326f226a9f8304b98e81d37bd",
 "assets/assets/Bgm/bgm_book%25E3%2583%2588%25E3%2583%25AA%25E3%2583%25A0%25E5%2589%258D.mp3": "5a2e9396b428d9c2d73515dd0e411401",
 "assets/assets/Bgm/bgm_book.mp3": "aeb1c7d372bece72793057403ea32e51",
 "assets/assets/Bgm/bgm_field%25E3%2583%2588%25E3%2583%25AA%25E3%2583%25A0%25E5%2589%258D.mp3": "9d2a7e0acb3c53868c84e0d2b05bd23c",
@@ -50,6 +50,7 @@ const RESOURCES = {
 "assets/assets/Images/sonar.png": "bd1e718d8d43076d2b19fc29907ad215",
 "assets/assets/Images/SPEED.png": "09df87b2c38a04f298c26da7d01cc750",
 "assets/assets/Images/tairaba.png": "03544e4d91db131025e9981892fa8365",
+"assets/assets/Images/teibou.png": "f7964c49bda2ab446abca2697fc2377e",
 "assets/assets/Images/TENSIONDRAG.png": "dea693a59acb1a40525ff3efcebe7a90",
 "assets/assets/Images/unknownfish.png": "215db669697114a97c663c498cb4f64e",
 "assets/assets/Images/white.png": "a6420dd4a339ca12cf90768ae5934ea1",
@@ -85,9 +86,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "3e13113a83fe639bfd1d1c129211b5a9",
-"/": "3e13113a83fe639bfd1d1c129211b5a9",
-"main.dart.js": "cbc97e099fdf6443df4f104188655916",
+"index.html": "427a95a857434dda528c283b512c2e6a",
+"/": "427a95a857434dda528c283b512c2e6a",
+"main.dart.js": "cd6275857cb910a3e4df5ed3f5d13836",
 "manifest.json": "e47fc872923be81230833286bf30a0aa",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };
