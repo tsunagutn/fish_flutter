@@ -306,6 +306,7 @@ class _FishingState extends BasePageState<Fishing>
   var _windLevel = 0.5; //風レベル 0.0～1.0 0.5で無風
 
   var _nowDurationLv; //光点点滅レベル
+  var _sonarTop = 0.0;
   var _shoreHeight = 0.0;
   var _bottomHeight = 0.0;
 
@@ -513,7 +514,7 @@ class _FishingState extends BasePageState<Fishing>
     var sonarWidget =
         globalKeySonar.currentContext?.findRenderObject() as RenderBox;
     var sonarHeight = sonarWidget.size.height;
-    var sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
+    _sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
 
     //海上部の高さ
     var shoreWidget =
@@ -1186,7 +1187,7 @@ class _FishingState extends BasePageState<Fishing>
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
     if (hannornd > 0.96 && _jiai > tanarnd) {
-      var fishy = sonarTop + (sonarHeight * _justTana);
+      var fishy = _sonarTop + (sonarHeight * _justTana);
       //レンジ分バラケ
       var barakeLevel = 4; //バラケ度
       var barake = (_justTanaRange * ((0.5 - tanarnd) * barakeLevel));
@@ -1442,6 +1443,7 @@ class _FishingState extends BasePageState<Fishing>
                     //海上
                     Container(
                       key: globalKeyShore,
+                      //margin: EdgeInsets.only(bottom: 50),
                       decoration: BoxDecoration(
                           gradient: LinearGradient(
                         begin: FractionalOffset.topCenter,
@@ -1507,9 +1509,7 @@ class _FishingState extends BasePageState<Fishing>
                                               value2Color:
                                                   Colors.black.withOpacity(0.5),
                                             ),
-                                            child: Container(
-//                                  height: 500,
-                                                ),
+                                            child: Container(),
                                           ),
                                           // Container(
                                           //   margin:
@@ -1626,153 +1626,12 @@ class _FishingState extends BasePageState<Fishing>
                                     child: Container(),
                                   )
                                 ])),
-
-                        Stack(children: <Widget>[
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  alignment: Alignment.center,
-                                  margin: EdgeInsets.only(
-                                    top: 10 -
-                                        //(math.sin(
-                                        // waveController.value * 0.5 * math.pi)),
-
-                                        ((waveController.value < 0.5)
-                                            ? 7 * waveController.value * 2
-                                            : (7 *
-                                                    (waveController.value -
-                                                        0.5) *
-                                                    -2) +
-                                                7),
-                                    //left: math.sin(waveController.value * math.pi)
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: () async {
-                                      setState(() {});
-                                    },
-                                    //船の描画
-                                    child: Transform.rotate(
-                                      //angle: 45 * math.pi / 180,
-                                      angle: (405 - (90 * _shipMove)) *
-                                          math.pi /
-                                          180,
-                                      child: new Image(
-                                        image: AssetImage(
-                                            'assets/Images/ship.png'),
-                                        width: 60,
-                                        height: 30,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ]),
-                          Container(
-                              height: 40,
-                              child: AnimatedBuilder(
-                                animation: waveController, // waveControllerを設定
-                                builder: (context, child) => Stack(
-                                  children: <Widget>[
-                                    //？？？iPhoneのsafariで描画できない,androidはOK
-                                    // 1つ目の波
-                                    ClipPath(
-                                      child: Container(
-                                          color: clsColor
-                                              ._getColorFromHex("02D5F2")
-                                              .withOpacity(1.0)),
-                                      clipper: WaveClipper(
-                                          context, waveController.value, 0),
-                                    ),
-                                    // 2つ目の波
-                                    ClipPath(
-                                      child: Container(
-                                          color: clsColor
-                                              ._getColorFromHex("02D5F2")
-                                              .withOpacity(0.3)),
-                                      clipper: WaveClipper(
-                                          context, waveController.value, 0.5),
-                                    ),
-                                    // ↑ 追加部分
-                                  ],
-                                ),
-                              )),
-                          AnimatedOpacity(
-                              opacity:
-                                  (_depth > 0.0 || _point <= 0) ? 0.0 : 1.0,
-                              duration: Duration(milliseconds: 200),
-                              child: Container(
-                                  margin: EdgeInsets.only(left: 10, right: 10),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      GestureDetector(
-                                        //タップ開始
-                                        onTapDown: (details) {
-                                          bgm.soundManagerPool
-                                              .playSound('Se/engineon.mp3');
-                                          _shipMoveSeScan = 0;
-                                          if (_depth <= 0.0) {
-                                            setState(() {
-                                              _moveShipTarget = 0.3;
-                                            });
-                                          }
-                                        },
-                                        //タップ終了
-                                        onTapUp: (details) {
-                                          setState(() {
-                                            _moveShipTarget = 0.5;
-                                          });
-                                        },
-                                        //タップしたままフォーカス外れた時
-                                        onTapCancel: () {
-                                          setState(() {
-                                            _moveShipTarget = 0.5;
-                                          });
-                                        },
-                                        child: new Image(
-                                          image: AssetImage(
-                                              'assets/Images/arrow_left.png'),
-                                          height: 30,
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        //タップ開始
-                                        onTapDown: (details) {
-                                          bgm.soundManagerPool
-                                              .playSound('Se/engineon.mp3');
-                                          if (_depth <= 0.0) {
-                                            setState(() {
-                                              _moveShipTarget = 0.7;
-                                            });
-                                          }
-                                        },
-                                        //タップ終了
-                                        onTapUp: (details) {
-                                          setState(() {
-                                            _moveShipTarget = 0.5;
-                                          });
-                                        },
-                                        //タップしたままフォーカス外れた時
-                                        onTapCancel: () {
-                                          setState(() {
-                                            _moveShipTarget = 0.5;
-                                          });
-                                        },
-                                        child: new Image(
-                                          image: AssetImage(
-                                              'assets/Images/arrow_right.png'),
-                                          height: 30,
-                                        ),
-                                      ),
-                                    ],
-                                  ))),
-                        ]),
                       ]),
                     ),
                     //海中
                     Expanded(
                         child: Container(
+                            margin: EdgeInsets.only(top: 50),
                             decoration: BoxDecoration(
                                 border: Border.all(
                                     color: clsColor._getColorFromHex("02D5F2")),
@@ -1956,6 +1815,157 @@ class _FishingState extends BasePageState<Fishing>
                   ]),
                   //画面全体的に描画するもの
                   Stack(children: <Widget>[
+                    //Stack(children: <Widget>[
+                    // Row(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     crossAxisAlignment: CrossAxisAlignment.end,
+                    //     children: [
+                    //       Container(
+                    //         margin: EdgeInsets.only(
+                    //           top: (_shoreHeight),
+                    //         ),
+                    //         child: new Image(
+                    //           image: AssetImage('assets/Images/teibou.png'),
+                    //           //width: 60,
+                    //           height: 50,
+                    //         ),
+                    //       ),
+                    //     ]),
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Container(
+                        margin: EdgeInsets.only(
+                          top: _shoreHeight +
+                              20 -
+                              //(math.sin(
+                              // waveController.value * 0.5 * math.pi)),
+
+                              ((waveController.value < 0.5)
+                                  ? 7 * waveController.value * 2
+                                  : (7 * (waveController.value - 0.5) * -2) +
+                                      7),
+                          //left: math.sin(waveController.value * math.pi)
+                        ),
+                        child: GestureDetector(
+                          onTap: () async {
+                            setState(() {});
+                          },
+                          //船の描画
+                          child: Transform.rotate(
+                            //angle: 45 * math.pi / 180,
+                            angle: (405 - (90 * _shipMove)) * math.pi / 180,
+                            child: new Image(
+                              image: AssetImage('assets/Images/ship.png'),
+                              width: 60,
+                              height: 30,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+                    Container(
+                        height: 40,
+                        margin: EdgeInsets.only(
+                          top: (_shoreHeight + 10),
+                        ),
+                        child: AnimatedBuilder(
+                          animation: waveController, // waveControllerを設定
+                          builder: (context, child) => Stack(
+                            children: <Widget>[
+                              //？？？iPhoneのsafariで描画できない,androidはOK
+                              // 1つ目の波
+                              ClipPath(
+                                child: Container(
+                                    color: clsColor
+                                        ._getColorFromHex("02D5F2")
+                                        .withOpacity(1.0)),
+                                clipper: WaveClipper(
+                                    context, waveController.value, 0),
+                              ),
+                              // 2つ目の波
+                              ClipPath(
+                                child: Container(
+                                    color: clsColor
+                                        ._getColorFromHex("02D5F2")
+                                        .withOpacity(0.3)),
+                                clipper: WaveClipper(
+                                    context, waveController.value, 0.5),
+                              ),
+                              // ↑ 追加部分
+                            ],
+                          ),
+                        )),
+                    AnimatedOpacity(
+                        opacity: (_depth > 0.0 || _point <= 0) ? 0.0 : 1.0,
+                        duration: Duration(milliseconds: 200),
+                        child: Container(
+                            margin: EdgeInsets.only(
+                                top: _shoreHeight, left: 10, right: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                GestureDetector(
+                                  //タップ開始
+                                  onTapDown: (details) {
+                                    bgm.soundManagerPool
+                                        .playSound('Se/engineon.mp3');
+                                    _shipMoveSeScan = 0;
+                                    if (_depth <= 0.0) {
+                                      setState(() {
+                                        _moveShipTarget = 0.3;
+                                      });
+                                    }
+                                  },
+                                  //タップ終了
+                                  onTapUp: (details) {
+                                    setState(() {
+                                      _moveShipTarget = 0.5;
+                                    });
+                                  },
+                                  //タップしたままフォーカス外れた時
+                                  onTapCancel: () {
+                                    setState(() {
+                                      _moveShipTarget = 0.5;
+                                    });
+                                  },
+                                  child: new Image(
+                                    image: AssetImage(
+                                        'assets/Images/arrow_left.png'),
+                                    height: 30,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  //タップ開始
+                                  onTapDown: (details) {
+                                    bgm.soundManagerPool
+                                        .playSound('Se/engineon.mp3');
+                                    if (_depth <= 0.0) {
+                                      setState(() {
+                                        _moveShipTarget = 0.7;
+                                      });
+                                    }
+                                  },
+                                  //タップ終了
+                                  onTapUp: (details) {
+                                    setState(() {
+                                      _moveShipTarget = 0.5;
+                                    });
+                                  },
+                                  //タップしたままフォーカス外れた時
+                                  onTapCancel: () {
+                                    setState(() {
+                                      _moveShipTarget = 0.5;
+                                    });
+                                  },
+                                  child: new Image(
+                                    image: AssetImage(
+                                        'assets/Images/arrow_right.png'),
+                                    height: 30,
+                                  ),
+                                ),
+                              ],
+                            ))),
+                    //]),
+
                     //タップ時の光点
                     (tapPointerList.isNotEmpty)
                         ? Stack(children: tapPointerList)
@@ -2036,7 +2046,9 @@ class _FishingState extends BasePageState<Fishing>
                           children: [
                             Container(
                               margin: EdgeInsets.only(
-                                  top: _shoreHeight + (5 * _commonAnime.value),
+                                  top: _shoreHeight +
+                                      50 +
+                                      (5 * _commonAnime.value),
                                   left: 10),
                               //height: 180,
                               child: Column(
@@ -2127,7 +2139,7 @@ class _FishingState extends BasePageState<Fishing>
                               duration: Duration(milliseconds: 200),
                               child: Container(
                                 margin: EdgeInsets.only(
-                                    top: _shoreHeight + 20, right: 10),
+                                    top: _shoreHeight + 70, right: 10),
                                 child: ElevatedButton(
                                     child: const Text('回収'),
                                     style: ElevatedButton.styleFrom(
