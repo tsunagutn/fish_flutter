@@ -124,12 +124,16 @@ import 'package:fish_flutter/widget/WaveClipper.dart';
 import 'package:fish_flutter/widget/SenchoDialog.dart';
 import 'package:fish_flutter/widget/SliderPainter.dart';
 import 'package:fish_flutter/widget/fishGetDialog.dart';
+import 'package:fish_flutter/widget/imagePainter.dart';
 import 'package:fish_flutter/widget/tacklePainter.dart';
 
 import 'package:flutter/material.dart';
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart';
 
@@ -353,6 +357,9 @@ class _FishingState extends BasePageState<Fishing>
   //沖合何km
   var offShore = 0.0;
 
+  late ui.Image imageTeibou;
+  var getImageTeibou = false;
+
   //ドラグ音
   // var url = "./static/sound/drag.mp3";
   // var audio = new Audio(url);
@@ -384,6 +391,8 @@ class _FishingState extends BasePageState<Fishing>
     // addPostFrameCallbackメソッドを実行
     // null safety対応で?（null以外の時のみアクセス）をつける
     WidgetsBinding.instance?.addPostFrameCallback((cb) {
+      createImage();
+
       //AppBarの高さを取得
       _appBarHeight = AppBar().preferredSize.height;
 
@@ -433,6 +442,13 @@ class _FishingState extends BasePageState<Fishing>
     _clutchAnimationController.repeat(reverse: true);
 
     super.initState();
+  }
+
+  void createImage() async {
+    final rawData = await rootBundle.load('assets/Images/teibou.png');
+    final imgList = Uint8List.view(rawData.buffer);
+    imageTeibou = await decodeImageFromList(imgList);
+    getImageTeibou = true;
   }
 
   void dispose() {
@@ -1815,22 +1831,43 @@ class _FishingState extends BasePageState<Fishing>
                   ]),
                   //画面全体的に描画するもの
                   Stack(children: <Widget>[
-                    //Stack(children: <Widget>[
-                    // Row(
-                    //     mainAxisAlignment: MainAxisAlignment.center,
-                    //     crossAxisAlignment: CrossAxisAlignment.end,
-                    //     children: [
-                    //       Container(
-                    //         margin: EdgeInsets.only(
-                    //           top: (_shoreHeight),
+                    // Stack(children: <Widget>[
+                    //   Row(
+                    //       //mainAxisAlignment: MainAxisAlignment.center,
+                    //       crossAxisAlignment: CrossAxisAlignment.end,
+                    //       children: [
+                    //         // if (!size.isEmpty && !_maxDepth.isNaN)
+                    //         //   if (_maxDepth < 100.0)
+                    //         Container(
+                    //           margin: EdgeInsets.only(
+                    //             // left: size.width -
+                    //             //     (size.width * (100.0 / _maxDepth)),
+                    //             left: size.width - size.width - 1,
+                    //             top: (_shoreHeight),
+                    //           ),
+                    //           child: new Image(
+                    //             image: AssetImage('assets/Images/teibou.png'),
+                    //             //width: 60,
+                    //             height: 50,
+                    //           ),
                     //         ),
-                    //         child: new Image(
-                    //           image: AssetImage('assets/Images/teibou.png'),
-                    //           //width: 60,
-                    //           height: 50,
-                    //         ),
-                    //       ),
-                    //     ]),
+                    //       ]),
+                    // ]),
+                    if (getImageTeibou)
+                      SizedBox(
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: CustomPaint(
+                          painter: new imagePainter(
+                              dispSize: size,
+                              //imagePath: 'assets/Images/teibou.png',
+                              image: imageTeibou,
+                              top: _shoreHeight,
+                              left: size.width - (_maxDepth * 10),
+                              width: size.width,
+                              height: imageTeibou.height.toDouble() * 2),
+                        ),
+                      ),
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Container(
                         margin: EdgeInsets.only(
