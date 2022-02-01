@@ -81,7 +81,7 @@ class tacklePainter extends CustomPainter {
     const sides = 50; //竿描画の分割数
     const magari = 40; //どこまで曲げるか
     const angle = 0.3; //テンションMAX時の傾き
-    const maxZurashiXBottom = 10; //竿元の横軸ズラシ
+    const maxZurashiXBottom = 10; //竿の太さ
 
     //竿先端
     List<Offset> rodPath = [];

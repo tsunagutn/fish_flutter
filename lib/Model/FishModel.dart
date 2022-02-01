@@ -382,7 +382,7 @@ class FishsModel {
 
   //水深から可能性のある魚種のみ抽出して返す
   List<FishModel> extractDepth({required double depth, required bool bottom}) {
-    //Mapを値コピー
+    //ディープコピー
     List<FishModel> extractFishs = [...fishs];
     //深さから可能性のある魚種のみ抽出
     extractFishs.removeWhere((value) => depth < value.tanaMin);
