@@ -18,6 +18,8 @@ class FishsModel {
       point: 100,
       tanaMin: 0,
       tanaMax: 100,
+      hereTanaMin: 0,
+      hereTanaMax: 100,
       hitMaki: 1.0,
       hitJerk: 0.5,
       hitFall: 0.4,
@@ -45,6 +47,8 @@ class FishsModel {
       point: 200, //ポイントの基礎値
       tanaMin: 100, //生息域 上 0.1m単位
       tanaMax: 300, //生息域 下 0.1m単位
+      hereTanaMin: 100,
+      hereTanaMax: 300,
       hitMaki: 0.7,
       hitJerk: 0.7,
       hitFall: 0.5,
@@ -71,6 +75,8 @@ class FishsModel {
       point: 200, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
       tanaMax: 300, //生息域 下 0.1m単位
+      hereTanaMin: 0,
+      hereTanaMax: 100,
       hitMaki: 0.9,
       hitJerk: 0.1,
       hitFall: 0.1,
@@ -97,6 +103,8 @@ class FishsModel {
       point: 300, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
       tanaMax: 1000, //生息域 下 0.1m単位
+      hereTanaMin: 500,
+      hereTanaMax: 2000,
       hitMaki: 1.0,
       hitJerk: 0.1,
       hitFall: 0.2,
@@ -124,6 +132,8 @@ class FishsModel {
       point: 99999, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
       tanaMax: 5000, //生息域 下 0.1m単位
+      hereTanaMin: 1000,
+      hereTanaMax: 5000,
       hitMaki: 0.3,
       hitJerk: 0.8,
       hitFall: 0.6,
@@ -151,6 +161,8 @@ class FishsModel {
       point: 100, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
       tanaMax: 100, //生息域 下 0.1m単位
+      hereTanaMin: 0,
+      hereTanaMax: 400,
       hitMaki: 0.8,
       hitJerk: 0.5,
       hitFall: 0.7, //フォール志向
@@ -176,8 +188,10 @@ class FishsModel {
       weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.8, //HIT率 条件全一致で確定1.0～
       point: 300, //ポイントの基礎値
-      tanaMin: 150, //生息域 上 0.1m単位
+      tanaMin: 80, //生息域 上 0.1m単位
       tanaMax: 450, //生息域 下 0.1m単位
+      hereTanaMin: 0,
+      hereTanaMax: 450,
       hitMaki: 0.8,
       hitJerk: 0.6,
       hitFall: 0.9, //フォール志向
@@ -204,6 +218,8 @@ class FishsModel {
       point: 400, //ポイントの基礎値
       tanaMin: 80, //生息域 上 0.1m単位
       tanaMax: 850, //生息域 下 0.1m単位
+      hereTanaMin: 80,
+      hereTanaMax: 1000,
       hitMaki: 0.9,
       hitJerk: 0.8,
       hitFall: 1.0, //フォール志向
@@ -230,6 +246,8 @@ class FishsModel {
       point: 800, //ポイントの基礎値
       tanaMin: 50, //生息域 上 0.1m単位
       tanaMax: 700, //生息域 下 0.1m単位
+      hereTanaMin: 50,
+      hereTanaMax: 700,
       hitMaki: 0.8,
       hitJerk: 0.8,
       hitFall: 1.0, //フォール志向
@@ -256,6 +274,8 @@ class FishsModel {
       point: 500, //ポイントの基礎値
       tanaMin: 400, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
+      hereTanaMin: 400,
+      hereTanaMax: 2000,
       hitMaki: 1.0,
       hitJerk: 0.5,
       hitFall: 0.6,
@@ -275,13 +295,15 @@ class FishsModel {
       image: "fish/ayamekasago.png",
       text: "ちょっと珍しいカサゴ",
       hp: 1300,
-      addMax: 13,
-      addMin: -10, //引きの最小（最大との乖離が暴れ度）
+      addMax: 26,
+      addMin: -20, //引きの最小（最大との乖離が暴れ度）
       weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.2, //HIT率 条件全一致で確定1.0～
       point: 1200, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
+      hereTanaMin: 500,
+      hereTanaMax: 1500,
       hitMaki: 0.9,
       hitJerk: 0.5,
       hitFall: 0.8,
@@ -307,7 +329,9 @@ class FishsModel {
       wariai: 0.5, //HIT率 条件全一致で確定1.0～
       point: 10, //ポイントの基礎値
       tanaMin: 00, //生息域 上 0.1m単位
-      tanaMax: 1500, //生息域 下 0.1m単位
+      tanaMax: 150, //生息域 下 0.1m単位
+      hereTanaMin: 0,
+      hereTanaMax: 150,
       hitMaki: 1.0,
       hitJerk: 0.8,
       hitFall: 0.8,
@@ -327,13 +351,15 @@ class FishsModel {
       image: "fish/hiramasa.png",
       text: "ヤッターマン",
       hp: 5000,
-      addMax: 56,
-      addMin: -60, //引きの最小（最大との乖離が暴れ度）
+      addMax: 40,
+      addMin: -40, //引きの最小（最大との乖離が暴れ度）
       weight: 3000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.5, //HIT率 条件全一致で確定1.0～
       point: 2300, //ポイントの基礎値
       tanaMin: 200, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
+      hereTanaMin: 200,
+      hereTanaMax: 5000,
       hitMaki: 0.7,
       hitJerk: 1.0,
       hitFall: 0.8,
@@ -353,13 +379,15 @@ class FishsModel {
       image: "fish/sawara.png",
       text: "サゴシのでかいやつ",
       hp: 4000,
-      addMax: 86,
-      addMin: -80, //引きの最小（最大との乖離が暴れ度）
+      addMax: 46,
+      addMin: -40, //引きの最小（最大との乖離が暴れ度）
       weight: 2800, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.4, //HIT率 条件全一致で確定1.0～
       point: 2100, //ポイントの基礎値
-      tanaMin: 150, //生息域 上 0.1m単位
+      tanaMin: 50, //生息域 上 0.1m単位
       tanaMax: 300, //生息域 下 0.1m単位
+      hereTanaMin: 200,
+      hereTanaMax: 5000,
       hitMaki: 0.6,
       hitJerk: 0.9,
       hitFall: 1.0,
@@ -381,12 +409,16 @@ class FishsModel {
   }
 
   //水深から可能性のある魚種のみ抽出して返す
-  List<FishModel> extractDepth({required double depth, required bool bottom}) {
+  List<FishModel> extractDepth(
+      {required double depth, required double maxDepth, required bool bottom}) {
     //ディープコピー
     List<FishModel> extractFishs = [...fishs];
     //深さから可能性のある魚種のみ抽出
     extractFishs.removeWhere((value) => depth < value.tanaMin);
     extractFishs.removeWhere((value) => depth > value.tanaMax);
+    extractFishs.removeWhere((value) => maxDepth < value.hereTanaMin);
+    extractFishs.removeWhere((value) => maxDepth > value.hereTanaMax);
+
     if (!bottom) {
       extractFishs.removeWhere((value) => value.flgBottom);
     }
@@ -406,8 +438,10 @@ class FishModel {
   int weight; //重さ g単位（HP0時の最低重量、これが無いとバレ判定にひっかかる）
   double wariai; //HIT率 条件全一致で確定1.0～
   int point; //ポイントの基礎値
-  int tanaMin; //生息域 上 0.1m単位
-  int tanaMax; //生息域 下 0.1m単位
+  int tanaMin; //生息タナ 上 0.1m単位
+  int tanaMax; //生息タナ 下 0.1m単位
+  int hereTanaMin; //生息域 水深これより深くない場所にはいない 0.1m単位
+  int hereTanaMax; //生息域 水深これより深い場所にはいない 0.1m単位
   double hitMaki; //巻き志向 0.0～1.0
   double hitJerk; //ジャーク志向 0.0～1.0
   double hitFall; //フォール志向 0.0～1.0
@@ -416,7 +450,7 @@ class FishModel {
   double sizeMin; //大きさ範囲最小
   double sizeMax; //大きさ範囲最大
   int baitCntMax; //アタリ発生からアワセまでの猶予スキャン
-  int fookingTension; //アワセ成功テンション
+  double fookingTension; //アワセ成功テンション
   int bareMin; //HIT後のバレ判定スキャン数（これプラスアワセレベル）
   bool flgBottom; //底生
 
@@ -435,6 +469,8 @@ class FishModel {
     required this.point,
     required this.tanaMin,
     required this.tanaMax,
+    required this.hereTanaMin,
+    required this.hereTanaMax,
     required this.hitFall,
     required this.hitMaki,
     required this.hitJerk,

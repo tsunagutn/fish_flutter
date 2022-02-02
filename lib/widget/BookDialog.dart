@@ -479,7 +479,7 @@ class _BookDialogState extends State<BookDialog>
                               child: Text("釣った数：" + resultCount),
                             ),
                             Container(
-                              child: Text("最大サイズ：" + resultMaxSize),
+                              child: Text("MAX：" + resultMaxSize),
                             ),
                             if (max > 0.8 && max < 0.95)
                               Icon(Icons.star, color: Colors.grey),

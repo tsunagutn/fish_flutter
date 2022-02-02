@@ -677,8 +677,8 @@ class _FishingState extends BasePageState<Fishing>
       addVal = -100;
       //水深を加算
       //ルアー重さによってフォール速度に補正をかける 20gの時0.1m/スキャン
-      //_depth += (lureData.weight / 20);
-      _depth += math.sqrt(lureData.weight) / 20;
+      _depth += (lureData.weight / 20);
+      //_depth += math.sqrt(lureData.weight) / 20;
     } else {
       if (_onTap) {
         //巻きスピード
@@ -945,7 +945,8 @@ class _FishingState extends BasePageState<Fishing>
         //現在底付近か？
         var bottom = (_depth > (_maxDepth * 0.8)) ? true : false;
         // //深さから可能性のある種を抽出
-        var fishs = FISH_TABLE.extractDepth(depth: _depth, bottom: bottom);
+        var fishs = FISH_TABLE.extractDepth(
+            depth: _depth, maxDepth: _maxDepth, bottom: bottom);
 
         var maxProb = 0.0;
         _listSpeedRange = []; //速度リスト初期化
@@ -957,13 +958,14 @@ class _FishingState extends BasePageState<Fishing>
           var hitSpeedprobDisp = 0.0;
           var hitProb = 0.0;
 
-          //棚による大きさ補正値
-          var tanawari =
-              (_maxDepth - fish.tanaMin) / (fish.tanaMax - fish.tanaMin);
-          tanawari = (tanawari < 0.1) ? 0.1 : tanawari;
-          tanawari = (tanawari > 0.9) ? 1.0 : tanawari;
-          //大きさ決定
-          var fishSize = (new math.Random()).nextDouble() * tanawari;
+          // //棚による大きさ補正値
+          // var tanawari =
+          //     (_maxDepth - fish.tanaMin) / (fish.tanaMax - fish.tanaMin);
+          // tanawari = (tanawari < 0.1) ? 0.1 : tanawari;
+          // tanawari = (tanawari > 0.9) ? 1.0 : tanawari;
+          // //大きさ決定
+          // var fishSize = (new math.Random()).nextDouble() * tanawari;
+          var fishSize = (new math.Random()).nextDouble();
           //使用中ルアーサイズと魚大きさによる確率 魚サイズの1/4が適正値
           var lureProb = 0.0;
           if (lureData.size * 4 > fish.getSize(fishSize)) {
@@ -1055,7 +1057,7 @@ class _FishingState extends BasePageState<Fishing>
             }
             _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
             //フッキング判定テンション
-            _fookingTension = _tension + fish.fookingTension;
+            _fookingTension = fish.fookingTension;
             _fookingTension = (_fookingTension > _tensionValMax
                 ? _tensionValMax
                 : _fookingTension);
@@ -1138,10 +1140,12 @@ class _FishingState extends BasePageState<Fishing>
               ((durationMax - durationMin) * (_tension / _tensionValMax))
                   .floor();
 
+          //バレ値 時間経過で徐々にバレる
+          _fookingTension += 0.1;
           //バレ判定 水深MAXか、テンションがアワセ値未満で条件成立
           if (_depth >= _maxDepth || val < _fookingTension) {
             //_bareCnt++;
-            _fookingTension += 1;
+            _fookingTension += 5;
           } else {
             //_bareCnt = 0;
           }
@@ -1566,7 +1570,7 @@ class _FishingState extends BasePageState<Fishing>
                                                   flgDispMaxValue: true,
                                                   value2: _fookingTension,
                                                   value2Color: Colors.black
-                                                      .withOpacity(0.5),
+                                                      .withOpacity(0.3),
                                                 ),
                                                 child: Container(),
                                               ),
