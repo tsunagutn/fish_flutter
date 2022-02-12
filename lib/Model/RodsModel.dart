@@ -20,7 +20,7 @@ class RodsModel {
       image: "rod1.png",
       text: "最初の竿\n一番へぼい",
       prise: 0,
-      maxTention: 200,
+      maxTention: 1000,
     ));
     rods.add(new RodModel(
       id: 1,
@@ -28,7 +28,7 @@ class RodsModel {
       image: "rod2.png",
       text: "本格的船用ロッド\nカーボン含有率95％",
       prise: 500,
-      maxTention: 500,
+      maxTention: 5000,
     ));
     rods.add(new RodModel(
       id: 2,
@@ -36,7 +36,7 @@ class RodsModel {
       image: "rod2.png",
       text: "究極の船用ロッド\n魚をねじ伏せる",
       prise: 500,
-      maxTention: 1000,
+      maxTention: 10000,
     ));
   }
 

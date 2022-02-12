@@ -518,7 +518,7 @@ class _BookDialogState extends State<BookDialog>
     if (lvHp == -1.0) lvHp = 1.0;
     //ﾊﾟﾜｰのレベル取得
     for (var idx = 1; idx < lv['addMax']!.length; idx++) {
-      if (fish.addMax < lv['addMax']![idx]) {
+      if ((fish.weightMin + fish.weightMax) < lv['addMax']![idx]) {
         lvAddMax = idx / lv['addMax']!.length;
         break;
       }
@@ -526,7 +526,7 @@ class _BookDialogState extends State<BookDialog>
     if (lvAddMax == -1.0) lvAddMax = 1.0;
     //暴れのレベル取得
     for (var idx = 1; idx < lv['abare']!.length; idx++) {
-      if (fish.addMax + fish.addMin < lv['abare']![idx]) {
+      if (fish.abareLv < lv['abare']![idx]) {
         lvAbare = idx / lv['abare']!.length;
         break;
       }

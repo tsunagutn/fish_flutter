@@ -11,9 +11,8 @@ class FishsModel {
       image: "fish/aji.png",
       text: "おいしさナンバーワン",
       hp: 1200,
-      addMax: 3,
-      addMin: -2,
-      weight: 200,
+      // addMax: 3,
+      // addMin: -2,
       wariai: 1.0,
       point: 100,
       tanaMin: 0,
@@ -27,8 +26,11 @@ class FishsModel {
       hitSpeedRange: 40,
       sizeMin: 7.6,
       sizeMax: 51.3,
+      weightMin: 100,
+      weightMax: 1000,
+      abareLv: 5,
       baitCntMax: 20,
-      fookingTension: 30,
+      fookingTension: 200,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -40,9 +42,6 @@ class FishsModel {
       image: "fish/tachiuo.jpg",
       text: "おおきいぞっ",
       hp: 1500, //このスキャン経過で0になる
-      addMax: 18,
-      addMin: -8,
-      weight: 500, //重さ
       wariai: 0.7,
       point: 200, //ポイントの基礎値
       tanaMin: 100, //生息域 上 0.1m単位
@@ -56,8 +55,11 @@ class FishsModel {
       hitSpeedRange: 50,
       sizeMin: 64.0,
       sizeMax: 150.5,
+      weightMin: 400,
+      weightMax: 2000,
+      abareLv: 5,
       baitCntMax: 20,
-      fookingTension: 60,
+      fookingTension: 200,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -68,9 +70,9 @@ class FishsModel {
       image: "fish/koi.jpg",
       text: "スーパーレア",
       hp: 6000, //このスキャン経過で0になる
-      addMax: 15,
-      addMin: -4,
-      weight: 1000, //重さ
+      // addMax: 15,
+      // addMin: -4,
+      // weight: 1000, //重さ
       wariai: 0.2,
       point: 200, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
@@ -84,8 +86,11 @@ class FishsModel {
       hitSpeedRange: 50,
       sizeMin: 34.4,
       sizeMax: 114.8,
+      weightMin: 800,
+      weightMax: 4000,
+      abareLv: 2,
       baitCntMax: 40,
-      fookingTension: 100,
+      fookingTension: 200,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -96,9 +101,9 @@ class FishsModel {
       image: "fish/madai.png",
       text: "やるなすたべ",
       hp: 5000,
-      addMax: 23,
-      addMin: -15,
-      weight: 1000, //重さ
+      // addMax: 23,
+      // addMin: -15,
+      // weight: 1000, //重さ
       wariai: 0.5,
       point: 300, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
@@ -112,8 +117,11 @@ class FishsModel {
       hitSpeedRange: 50,
       sizeMin: 26.3,
       sizeMax: 86.8,
+      weightMin: 500,
+      weightMax: 5000,
+      abareLv: 4,
       baitCntMax: 30,
-      fookingTension: 150,
+      fookingTension: 1000,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -125,9 +133,9 @@ class FishsModel {
       image: "fish/sakana.jpg",
       text: "スー　パー　レア",
       hp: 10000,
-      addMax: 30,
-      addMin: -10,
-      weight: 4000, //重さ
+      // addMax: 30,
+      // addMin: -10,
+      // weight: 4000, //重さ
       wariai: 0.05,
       point: 99999, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
@@ -141,8 +149,11 @@ class FishsModel {
       hitSpeedRange: 50,
       sizeMin: 9999.9,
       sizeMax: 19999.9,
+      weightMin: 50000,
+      weightMax: 60000,
+      abareLv: 10,
       baitCntMax: 10,
-      fookingTension: 150,
+      fookingTension: 1000,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -154,9 +165,9 @@ class FishsModel {
       image: "fish/saba.png", //超過画面の画像
       text: "写真は仮です", //釣果画面のコメント
       hp: 1200, //このスキャン経過で0になる
-      addMax: 19, //引きの最大
-      addMin: -6, //引きの最小（最大との乖離が暴れ度）
-      weight: 600, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 19, //引きの最大
+      // addMin: -6, //引きの最小（最大との乖離が暴れ度）
+      // weight: 600, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 1.0, //HIT率 条件全一致で確定1.0～
       point: 100, //ポイントの基礎値
       tanaMin: 0, //生息域 上 0.1m単位
@@ -170,8 +181,11 @@ class FishsModel {
       hitSpeedRange: 30, //スピード志向範囲+-
       sizeMin: 14.3,
       sizeMax: 67.2,
+      weightMin: 200,
+      weightMax: 1200,
+      abareLv: 5,
       baitCntMax: 15,
-      fookingTension: 80,
+      fookingTension: 150,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -183,9 +197,9 @@ class FishsModel {
       image: "fish/sagoshi.png", //超過画面の画像
       text: "この魚は美味です", //釣果画面のコメント
       hp: 2000, //このスキャン経過で0になる
-      addMax: 15, //引きの最大
-      addMin: -10, //引きの最小（最大との乖離が暴れ度）
-      weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 15, //引きの最大
+      // addMin: -10, //引きの最小（最大との乖離が暴れ度）
+      // weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.8, //HIT率 条件全一致で確定1.0～
       point: 300, //ポイントの基礎値
       tanaMin: 80, //生息域 上 0.1m単位
@@ -199,8 +213,11 @@ class FishsModel {
       hitSpeedRange: 100, //スピード志向範囲+-
       sizeMin: 18.3,
       sizeMax: 69.9,
+      weightMin: 200,
+      weightMax: 1000,
+      abareLv: 6,
       baitCntMax: 15,
-      fookingTension: 120,
+      fookingTension: 100,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -211,9 +228,9 @@ class FishsModel {
       image: "fish/aohata.png", //超過画面の画像
       text: "底でよく釣れる", //釣果画面のコメント
       hp: 1800, //このスキャン経過で0になる
-      addMax: 16, //引きの最大
-      addMin: -7, //引きの最小（最大との乖離が暴れ度）
-      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 16, //引きの最大
+      // addMin: -7, //引きの最小（最大との乖離が暴れ度）
+      // weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.8, //HIT率 条件全一致で確定1.0～
       point: 400, //ポイントの基礎値
       tanaMin: 80, //生息域 上 0.1m単位
@@ -227,8 +244,11 @@ class FishsModel {
       hitSpeedRange: 60, //スピード志向範囲+-
       sizeMin: 20.6,
       sizeMax: 63.2,
+      weightMin: 400,
+      weightMax: 1500,
+      abareLv: 3,
       baitCntMax: 25,
-      fookingTension: 70,
+      fookingTension: 400,
       bareMin: 35,
       flgBottom: true,
     ));
@@ -239,9 +259,9 @@ class FishsModel {
       image: "fish/kijihata.png", //超過画面の画像
       text: "この魚は贅沢です", //釣果画面のコメント
       hp: 2100, //このスキャン経過で0になる
-      addMax: 18, //引きの最大
-      addMin: -7, //引きの最小（最大との乖離が暴れ度）
-      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 18, //引きの最大
+      // addMin: -7, //引きの最小（最大との乖離が暴れ度）
+      // weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.4, //HIT率 条件全一致で確定1.0～
       point: 800, //ポイントの基礎値
       tanaMin: 50, //生息域 上 0.1m単位
@@ -255,8 +275,11 @@ class FishsModel {
       hitSpeedRange: 60, //スピード志向範囲+-
       sizeMin: 20.6,
       sizeMax: 63.2,
+      weightMin: 400,
+      weightMax: 1700,
+      abareLv: 3,
       baitCntMax: 25,
-      fookingTension: 70,
+      fookingTension: 500,
       bareMin: 35,
       flgBottom: true,
     ));
@@ -267,9 +290,9 @@ class FishsModel {
       image: "fish/akayagara.png",
       text: "潮が悪いとき釣れる",
       hp: 1000,
-      addMax: 18,
-      addMin: -7, //引きの最小（最大との乖離が暴れ度）
-      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 18,
+      // addMin: -7, //引きの最小（最大との乖離が暴れ度）
+      // weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.3, //HIT率 条件全一致で確定1.0～
       point: 500, //ポイントの基礎値
       tanaMin: 400, //生息域 上 0.1m単位
@@ -283,8 +306,11 @@ class FishsModel {
       hitSpeedRange: 80,
       sizeMin: 60.6,
       sizeMax: 154.3,
+      weightMin: 500,
+      weightMax: 1800,
+      abareLv: 2,
       baitCntMax: 25,
-      fookingTension: 70,
+      fookingTension: 700,
       bareMin: 20,
       flgBottom: false,
     ));
@@ -295,9 +321,9 @@ class FishsModel {
       image: "fish/ayamekasago.png",
       text: "ちょっと珍しいカサゴ",
       hp: 1300,
-      addMax: 26,
-      addMin: -20, //引きの最小（最大との乖離が暴れ度）
-      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 26,
+      // addMin: -20, //引きの最小（最大との乖離が暴れ度）
+      // weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.2, //HIT率 条件全一致で確定1.0～
       point: 1200, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
@@ -311,8 +337,11 @@ class FishsModel {
       hitSpeedRange: 40,
       sizeMin: 20.7,
       sizeMax: 44.2,
+      weightMin: 600,
+      weightMax: 1200,
+      abareLv: 3,
       baitCntMax: 40,
-      fookingTension: 60,
+      fookingTension: 600,
       bareMin: 35,
       flgBottom: true,
     ));
@@ -323,9 +352,9 @@ class FishsModel {
       image: "fish/sabahugu.png",
       text: "毒が無いらしい",
       hp: 2000,
-      addMax: 20,
-      addMin: -10, //引きの最小（最大との乖離が暴れ度）
-      weight: 1000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 20,
+      // addMin: -10, //引きの最小（最大との乖離が暴れ度）
+      // weight: 500, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.5, //HIT率 条件全一致で確定1.0～
       point: 10, //ポイントの基礎値
       tanaMin: 00, //生息域 上 0.1m単位
@@ -339,6 +368,9 @@ class FishsModel {
       hitSpeedRange: 60,
       sizeMin: 13.4,
       sizeMax: 53.9,
+      weightMin: 170,
+      weightMax: 1500,
+      abareLv: 4,
       baitCntMax: 40,
       fookingTension: 60,
       bareMin: 35,
@@ -351,9 +383,9 @@ class FishsModel {
       image: "fish/hiramasa.png",
       text: "ヤッターマン",
       hp: 5000,
-      addMax: 40,
-      addMin: -40, //引きの最小（最大との乖離が暴れ度）
-      weight: 3000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 40,
+      // addMin: -40, //引きの最小（最大との乖離が暴れ度）
+      // weight: 3000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.5, //HIT率 条件全一致で確定1.0～
       point: 2300, //ポイントの基礎値
       tanaMin: 200, //生息域 上 0.1m単位
@@ -367,6 +399,9 @@ class FishsModel {
       hitSpeedRange: 100,
       sizeMin: 35.0,
       sizeMax: 120.1,
+      weightMin: 700,
+      weightMax: 4000,
+      abareLv: 8,
       baitCntMax: 40,
       fookingTension: 130,
       bareMin: 35,
@@ -379,9 +414,9 @@ class FishsModel {
       image: "fish/sawara.png",
       text: "サゴシのでかいやつ",
       hp: 4000,
-      addMax: 46,
-      addMin: -40, //引きの最小（最大との乖離が暴れ度）
-      weight: 2800, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+      // addMax: 46,
+      // addMin: -40, //引きの最小（最大との乖離が暴れ度）
+      // weight: 2800, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.4, //HIT率 条件全一致で確定1.0～
       point: 2100, //ポイントの基礎値
       tanaMin: 50, //生息域 上 0.1m単位
@@ -395,6 +430,9 @@ class FishsModel {
       hitSpeedRange: 100,
       sizeMin: 70.0,
       sizeMax: 111.2,
+      weightMin: 1000,
+      weightMax: 2600,
+      abareLv: 7,
       baitCntMax: 40,
       fookingTension: 70,
       bareMin: 20,
@@ -433,9 +471,8 @@ class FishModel {
   String image; //画像ファイル名
   String text; //釣果画面のコメント
   int hp; //このスキャン経過で0になる
-  int addMax; //引きの最大
-  int addMin; //引きの最小（最大との乖離が暴れ度）
-  int weight; //重さ g単位（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+  // int addMax; //引きの最大
+  // int addMin; //引きの最小（最大との乖離が暴れ度）
   double wariai; //HIT率 条件全一致で確定1.0～
   int point; //ポイントの基礎値
   int tanaMin; //生息タナ 上 0.1m単位
@@ -449,6 +486,9 @@ class FishModel {
   int hitSpeedRange; //スピード志向範囲+-
   double sizeMin; //大きさ範囲最小
   double sizeMax; //大きさ範囲最大
+  double weightMin; //重さ g単位（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+  double weightMax; //重さ g単位（HP0時の最低重量、これが無いとバレ判定にひっかかる）
+  int abareLv; //自重の何倍まで暴れるか
   int baitCntMax; //アタリ発生からアワセまでの猶予スキャン
   double fookingTension; //アワセ成功テンション
   int bareMin; //HIT後のバレ判定スキャン数（これプラスアワセレベル）
@@ -462,9 +502,8 @@ class FishModel {
     required this.image,
     required this.text,
     required this.hp,
-    required this.addMax,
-    required this.addMin,
-    required this.weight,
+    // required this.addMax,
+    // required this.addMin,
     required this.wariai,
     required this.point,
     required this.tanaMin,
@@ -478,6 +517,9 @@ class FishModel {
     required this.hitSpeedRange,
     required this.sizeMin,
     required this.sizeMax,
+    required this.weightMax,
+    required this.weightMin,
+    required this.abareLv,
     required this.baitCntMax,
     required this.fookingTension,
     required this.bareMin,
@@ -487,6 +529,11 @@ class FishModel {
   //サイズ割合（0.0～1.0）を元に実サイズを返す
   double getSize(size) {
     return ((sizeMax - sizeMin) * size + sizeMin);
+  }
+
+  //サイズ割合（0.0～1.0）を元に実重さを返す
+  double getWeight(size) {
+    return ((weightMax - weightMin) * size + weightMin);
   }
 
   Map<String, List<double>> getPrmLevels() {

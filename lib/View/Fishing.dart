@@ -300,6 +300,7 @@ class _FishingState extends BasePageState<Fishing>
   var _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
   var _hitScanCnt = 0; //HITしてからのスキャン数
   var _bareCnt = 0; //バレ判定カウント
+  var _abareLv = 0;
 
   var _shipMove = 0.5; //船の動き 1.0～0,0 +なら深くなる、-なら浅くなる
   var _depthChange = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
@@ -518,12 +519,8 @@ class _FishingState extends BasePageState<Fishing>
     //   return;
     // }
 
-    num addVal = 0;
     _tensionValMax = haveTackle.getUseRod().maxTention;
     _speedValMax = haveTackle.getUseReel().maxSpeed;
-    var mx = MAX_RAND_ADD_TENSION;
-    var mn = MIN_RAND_ADD_TENSION;
-    var weight = 0;
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
 
@@ -639,64 +636,96 @@ class _FishingState extends BasePageState<Fishing>
       if (_moveShipTarget < 0.5) _moveShipTarget = 0.5;
     }
 
-    //ルアー重さ
-    var lureWeight = lureData.weight.floor();
-    if (_flgBait || _flgHit) {
-      //debugPrint("HIT中1");
-      //魚残HPの計算
-      if (_hitScanCnt > 0) {
-        var minusHp = 1;
-        //テンションが200以上
-        if (_tension > 200.0) {
-          //200との差分の10分の1を補正として加算
-          minusHp += ((_tension - 200.0) / 10).floor();
-        }
-        //テンションが強いほどマイナス値を上げる
-        _hitScanCnt -= minusHp;
-        if (_hitScanCnt < 0) _hitScanCnt = 0;
+    //魚の残HP
+    if (_flgHit) {
+      //HIT中
+      //暴れレベル変化判定
+      if (rand < 0.01) {
+        _abareLv =
+            (new math.Random()).nextInt(FISH_TABLE.fishs[_fishidx].abareLv) + 1;
+        debugPrint(_abareLv.toString());
       }
+      //残HP減算 暴れLv分減算
+      _hitScanCnt -= _abareLv;
+      // //魚残HPの計算
+      // if (_hitScanCnt > 0) {
+      //   var minusHp = 1;
+      //   //テンションが200以上
+      //   if (_tension > 200.0) {
+      //     //最大テンションとの差分の10分の1を補正として加算
+      //     minusHp += ((_tension - _tensionValMax) / 10).floor();
+      //   }
+      //   //テンションが強いほどマイナス値を上げる
+      //   //_hitScanCnt -= minusHp;
+      // }
+      if (_hitScanCnt < 0) _hitScanCnt = 0;
+    }
+
+    //テンションの処理
+    num addVal = 0;
+    var weight = 0.0;
+    var mx = MAX_RAND_ADD_TENSION;
+    var mn = MIN_RAND_ADD_TENSION;
+    //ルアー重さ
+    weight = lureData.weight;
+    if (_collect) {
+      //高速回収中
+      weight -= 1000;
+      _onClutch = false;
+    }
+    if (_onClutch) {
+      //クラッチON中
+      weight -= 1000;
+    }
+    if (_flgBait || _flgHit) {
+      //アタリかHIT中
       //アタリ中 or HIT中 テンション増減にHIT中補正をかける
       var fish = FISH_TABLE.fishs[_fishidx];
-      mx += fish.addMax * (_hitScanCnt / fish.hp * _fishSize).round();
-      mn += fish.addMin * (_hitScanCnt / fish.hp * _fishSize).round();
-      weight = fish.weight + lureWeight;
-    } else {
-      //HIT中でない時はルアー重さで補正をかける
-      weight = lureWeight;
-    }
-    addVal = (rand * (mx + 1 - (mn))).floor() + (mn) + (weight / 200);
+      // mx += fish.addMax * (_hitScanCnt / fish.hp * _fishSize).round();
+      // mn += fish.addMin * (_hitScanCnt / fish.hp * _fishSize).round();
 
+      //魚重量
+      var fishWeight = fish.getWeight(_fishSize);
+      //weight += (fish.abareWeight * (0.3 - rand) * (_hitScanCnt / fish.hp) * _fishSize;
+      //暴れ重量 ((魚重量 * 暴れレベル) * rnd値 * 残HP割合
+      var abareWeight =
+          ((fishWeight * _abareLv) * rand) * (_hitScanCnt / fish.hp);
+
+      weight += fishWeight + abareWeight;
+    }
+    //シャクリによるテンション増加？？？竿長さによって係数を可変にする
+    weight += _rodStandUp * 1000;
+
+    //巻き中の時、重量に巻速度を加味
+    if (_onTap) {
+      weight = weight + (weight * (_speed / _speedValMax));
+    }
+    //浮力分調整（てきとーに２で割る）
+    weight = weight / 2;
+    //addVal = ((mx + 1 - mn) * rand).floor() + (mn) + (weight / 200);
+    var tensionDiff = ((weight - _tension) * rand / 10).floor();
+    addVal = tensionDiff;
+
+    //現在深さの処理
     if (_collect) {
       //高速回収中
       _depth -= _maxDepth / 10;
-      _onClutch = false;
-      addVal = HOSEI_MAX * -1;
     } else if (_onClutch) {
-      //クラッチON中はマイナス補正を最大化
-      //addVal = HOSEI_MAX * -1;
-      addVal = -100;
+      //クラッチON中は強制的にテンション減算
       //水深を加算
       //ルアー重さによってフォール速度に補正をかける 20gの時0.1m/スキャン
       _depth += (lureData.weight / 20);
-      //_depth += math.sqrt(lureData.weight) / 20;
     } else {
       if (_onTap) {
-        //巻きスピード
-        var hosei = (_speed % _speedValMax) % HOSEI_MAX;
-        //var hosei = (_speed % _speedValMax);
-        //タップ中は補正を加味する
-        addVal += hosei.round();
         //水深減算
         _depth = _depth - _speed / 300;
       } else {
-        if (!_flgBait && !_flgHit) {
-          //巻いていない&釣れていない時はマイナス補正
-          addVal -= HOSEI_MAX;
-        }
+        // if (!_flgBait && !_flgHit) {
+        //   //巻いていない&釣れていない時はマイナス補正
+        //   addVal -= HOSEI_MAX;
+        //}
       }
       //debugPrint(_rodStandUp.toString());
-      //シャクリによるテンション増加？？？竿長さによって係数を可変にする
-      addVal += _rodStandUp * 35;
       //シャクリによる水深減算
       _depth -= _rodStandUp * 2;
     }
@@ -1056,6 +1085,8 @@ class _FishingState extends BasePageState<Fishing>
               _baitCnt = 0;
             }
             _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
+
+            _abareLv = (new math.Random()).nextInt(fish.abareLv) + 1;
             //フッキング判定テンション
             _fookingTension = fish.fookingTension;
             _fookingTension = (_fookingTension > _tensionValMax
