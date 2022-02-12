@@ -18,6 +18,7 @@ class tacklePainter extends CustomPainter {
     required this.clutchTextSize,
     required this.rodStandUp,
     required this.rodTension,
+    required this.handleRoll,
   });
   final double shoreHeight;
   final Size dispSize;
@@ -32,6 +33,7 @@ class tacklePainter extends CustomPainter {
   final double clutchTextSize;
   final double rodStandUp;
   final double rodTension;
+  final double handleRoll;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -222,6 +224,45 @@ class tacklePainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
     path.addPolygon(clutchPath, false);
+    path.close();
+    canvas.drawPath(path, paint);
+    //リールのハンドル部分
+    List<Offset> handlePath = [];
+    const handleMargin = 10;
+    final handleSizeX = reelSizeX / 2;
+    final handleSizeY = reelSizeY / 1.5;
+    var rool = handleRoll * 2;
+    //いったりきたりさせる
+    if (rool < 1.0) {
+      rool = math.pow(rool, 2) as double;
+    } else {
+      rool = math.pow(rool - 1.0, 2) as double;
+      rool = 1.0 - rool;
+    }
+    rool = (reelSizeY * 2 * rool) - reelSizeY / 3;
+    //ハンドルの基本X
+    var handlePositionX = tackleCenterX + reelSizeX + handleMargin;
+    //ハンドルの基本Y
+    var handlePositionY = reelCenterY - reelSizeY + rool;
+
+    handlePath.add(new Offset(handlePositionX, handlePositionY));
+    handlePath.add(new Offset(handlePositionX, handlePositionY + handleSizeY));
+    handlePath.add(new Offset(
+        handlePositionX + handleSizeX, handlePositionY + handleSizeY));
+    handlePath.add(new Offset(handlePositionX + handleSizeX, handlePositionY));
+    //テンション分傾け
+    handlePath = handlePath
+        .map((o) => _rotate(
+            o, angle * rodTension * position, tackleCenterX, reelCenterY))
+        .toList();
+
+    path = Path();
+    paint = new Paint()
+      ..color = Colors.black
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
+    path.addPolygon(handlePath, false);
     path.close();
     canvas.drawPath(path, paint);
 

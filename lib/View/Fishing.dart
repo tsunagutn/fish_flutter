@@ -281,7 +281,7 @@ class _FishingState extends BasePageState<Fishing>
   var _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
   var _jiai = 0.9; //時合度 0.0～0.9999...
   var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
-  var _maxLineHp = 50.0; //ラインHP最大値
+  var _maxLineHp = 200.0; //ラインHP最大値
   var _nowLineHp = 50.0; //現在ラインHP
 
   var _shipMoveSeScan = 0;
@@ -339,6 +339,7 @@ class _FishingState extends BasePageState<Fishing>
   var _takclePositionLeft = true;
   var _takcleChangeButtonPosition = MainAxisAlignment.end;
   var _rodStandUp = 0.0;
+  var _handleRoll = 0.0;
 
   //タックル変更モーダル表示非表示
   var _showTacleChangeDialog = false;
@@ -640,7 +641,7 @@ class _FishingState extends BasePageState<Fishing>
     if (_flgHit) {
       //HIT中
       //暴れレベル変化判定
-      if (rand < 0.01) {
+      if (rand < 0.05) {
         _abareLv =
             (new math.Random()).nextInt(FISH_TABLE.fishs[_fishidx].abareLv) + 1;
         debugPrint(_abareLv.toString());
@@ -699,6 +700,9 @@ class _FishingState extends BasePageState<Fishing>
     //巻き中の時、重量に巻速度を加味
     if (_onTap) {
       weight = weight + (weight * (_speed / _speedValMax));
+      //ハンドル回転の描画用
+      _handleRoll += (_speed / _speedValMax) / 10;
+      _handleRoll = (_handleRoll > 1.0) ? 0.0 : _handleRoll;
     }
     //浮力分調整（てきとーに２で割る）
     weight = weight / 2;
@@ -735,7 +739,7 @@ class _FishingState extends BasePageState<Fishing>
       //addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
       //二次関数 テンション上がるごとに上がりにくくする
       addVal = addVal +
-          (addVal * -1) * (MathPow._getPow(2, (_tension / _tensionValMax)));
+          (addVal * -1) * (MathPow._getPow(3, (_tension / _tensionValMax)));
     }
     var val = _tension + addVal;
 
@@ -769,9 +773,9 @@ class _FishingState extends BasePageState<Fishing>
       //テンションとドラグレベルの差分
       var dragDiff = val - dragVal;
       //ドラグ出た分深さを増やす？？？出すぎ？
-      _depth = _depth + dragDiff / 30;
+      _depth = _depth + dragDiff / 50;
       //ドラグ出た分テンションを減らす？？？減らなすぎ？
-      val = val - (dragDiff / 25);
+      val = val - (dragDiff / 15);
       //テンションゲージの色を変える
       _tensionActiveTrackColor = TENSION_COLOR_DRAG;
 
@@ -2088,6 +2092,7 @@ class _FishingState extends BasePageState<Fishing>
                             clutchTextSize: (_onClutch
                                 ? 0.0
                                 : 20 * (_clutchAnime.value + 3.0) / 4),
+                            handleRoll: _handleRoll,
                           ),
                         ),
                         if (_centerTextAnimationController.isAnimating)

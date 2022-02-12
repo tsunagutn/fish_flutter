@@ -28,7 +28,7 @@ class FishsModel {
       sizeMax: 51.3,
       weightMin: 100,
       weightMax: 1000,
-      abareLv: 5,
+      abareLv: 2,
       baitCntMax: 20,
       fookingTension: 200,
       bareMin: 20,
