@@ -118,6 +118,7 @@ import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/RadarChart.dart';
 import 'package:fish_flutter/widget/ShopDialog.dart';
+import 'package:fish_flutter/widget/SettingDialog.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
@@ -1347,33 +1348,72 @@ class _FishingState extends BasePageState<Fishing>
                   Text('沖合' + offShore.toStringAsFixed(1) + 'km'),
                 ],
               ),
-              //右上（複数可）
-              actions: [
+              //右（複数可）
+              actions: <Widget>[
+                Container(
+                    margin: EdgeInsets.only(right: 10),
+                    child: ElevatedButton(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(
+                              Icons.shopping_cart,
+                              color: Colors.white,
+                              size: 30.0,
+                            ),
+                            Text(
+                              _point.toString() + "ポイント",
+                            ),
+                          ]),
+                      onPressed: () async {
+                        //買い物モーダルの表示
+                        _timer.cancel(); //定周期タイマ停止
+                        bgmPause();
+                        subBgmLoop('Bgm/bgm_book.mp3');
+                        bgm.soundManagerPool.playSound('Se/book.mp3'); //音は仮
+                        int? result = await showDialog<int>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) {
+                            return ShopDialog(
+                              haveTakcle: haveTackle,
+                              soundManagerPool: bgm.soundManagerPool,
+                              originPoint: _point,
+                            );
+                          },
+                        );
+                        _point = result!;
+                        bgm.soundManagerPool
+                            .playSound('Se/bookclose.mp3'); //音は仮
+                        startTimer(); //定周期タイマ再開
+                        subBgmStop();
+                        bgmResume();
+                        setState(() {});
+                      },
+                    )),
                 Container(
                     child: ElevatedButton(
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Icon(
-                          Icons.shopping_cart,
+                          Icons.settings,
                           color: Colors.white,
                           size: 30.0,
                         ),
-                        Text(
-                          _point.toString() + "ポイント",
-                        ),
+                        Text("設定"),
                       ]),
                   onPressed: () async {
                     //買い物モーダルの表示
                     _timer.cancel(); //定周期タイマ停止
                     bgmPause();
-                    subBgmLoop('Bgm/bgm_book.mp3');
-                    bgm.soundManagerPool.playSound('Se/book.mp3'); //音は仮
+                    //subBgmLoop('Bgm/bgm_book.mp3');
+                    //bgm.soundManagerPool.playSound('Se/book.mp3'); //音は仮
                     int? result = await showDialog<int>(
                       context: context,
                       barrierDismissible: false,
                       builder: (_) {
-                        return ShopDialog(
+                        return SettingDialog(
                           haveTakcle: haveTackle,
                           soundManagerPool: bgm.soundManagerPool,
                           originPoint: _point,
@@ -1381,12 +1421,10 @@ class _FishingState extends BasePageState<Fishing>
                       },
                     );
                     _point = result!;
-                    bgm.soundManagerPool.playSound('Se/bookclose.mp3'); //音は仮
+                    //bgm.soundManagerPool.playSound('Se/bookclose.mp3'); //音は仮
                     startTimer(); //定周期タイマ再開
                     subBgmStop();
                     bgmResume();
-
-//                  debugPrint(result.toString());
                     setState(() {});
                   },
                 )),
