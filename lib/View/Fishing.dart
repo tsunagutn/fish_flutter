@@ -388,7 +388,7 @@ class _FishingState extends BasePageState<Fishing>
     haveTackle = new HaveTackleModel();
     _tensionValMax = haveTackle.getUseRod().maxTention;
     _speedValMax = haveTackle.getUseReel().maxSpeed;
-    _drag = _tensionValMax * 0.9;
+    _drag = _tensionValMax * 0.8;
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -773,7 +773,7 @@ class _FishingState extends BasePageState<Fishing>
       //テンションとドラグレベルの差分
       var dragDiff = val - dragVal;
       //ドラグ出た分深さを増やす？？？出すぎ？
-      _depth = _depth + dragDiff / 50;
+      _depth = _depth + dragDiff / 100;
       //ドラグ出た分テンションを減らす？？？減らなすぎ？
       val = val - (dragDiff / 15);
       //テンションゲージの色を変える
@@ -1090,9 +1090,9 @@ class _FishingState extends BasePageState<Fishing>
             }
             _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
 
-            _abareLv = (new math.Random()).nextInt(fish.abareLv) + 1;
+            _abareLv = 0;
             //フッキング判定テンション
-            _fookingTension = fish.fookingTension;
+            _fookingTension = _tension + fish.fookingTension;
             _fookingTension = (_fookingTension > _tensionValMax
                 ? _tensionValMax
                 : _fookingTension);

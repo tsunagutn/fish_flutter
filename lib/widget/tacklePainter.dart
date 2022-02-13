@@ -226,6 +226,7 @@ class tacklePainter extends CustomPainter {
     path.addPolygon(clutchPath, false);
     path.close();
     canvas.drawPath(path, paint);
+
     //リールのハンドル部分
     List<Offset> handlePath = [];
     const handleMargin = 10;
@@ -241,15 +242,17 @@ class tacklePainter extends CustomPainter {
     }
     rool = (reelSizeY * 2 * rool) - reelSizeY / 3;
     //ハンドルの基本X
-    var handlePositionX = tackleCenterX + reelSizeX + handleMargin;
+    var handlePositionX =
+        tackleCenterX + ((reelSizeX + handleMargin) * position);
     //ハンドルの基本Y
     var handlePositionY = reelCenterY - reelSizeY + rool;
 
     handlePath.add(new Offset(handlePositionX, handlePositionY));
     handlePath.add(new Offset(handlePositionX, handlePositionY + handleSizeY));
-    handlePath.add(new Offset(
-        handlePositionX + handleSizeX, handlePositionY + handleSizeY));
-    handlePath.add(new Offset(handlePositionX + handleSizeX, handlePositionY));
+    handlePath.add(new Offset(handlePositionX + handleSizeX * position,
+        handlePositionY + handleSizeY));
+    handlePath.add(
+        new Offset(handlePositionX + handleSizeX * position, handlePositionY));
     //テンション分傾け
     handlePath = handlePath
         .map((o) => _rotate(
