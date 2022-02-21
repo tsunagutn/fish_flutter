@@ -227,13 +227,39 @@ class tacklePainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paint);
 
-    //リールのハンドル部分
-    List<Offset> handlePath = [];
-    const handleMargin = 10;
-    final handleSizeX = reelSizeX / 2;
-    final handleSizeY = reelSizeY / 1.5;
+    //リールのハンドル根本部分
+    List<Offset> handleRootPath = [];
+    final handleRootSizeX = reelSizeX / 3;
+    final handleRootSizeY = reelSizeY / 1.5;
+    //ハンドル根本の基本X
+    var handleRootPositionX = tackleCenterX + ((reelSizeX + 1) * position);
+    //ハンドルの基本Y
+    var handleRootPositionY = reelCenterY - (handleRootSizeY / 2);
+    handleRootPath.add(new Offset(handleRootPositionX, handleRootPositionY));
+    handleRootPath.add(
+        new Offset(handleRootPositionX, handleRootPositionY + handleRootSizeY));
+    handleRootPath.add(new Offset(
+        handleRootPositionX + handleRootSizeX * position,
+        handleRootPositionY + handleRootSizeY));
+    handleRootPath.add(new Offset(
+        handleRootPositionX + handleRootSizeX * position, handleRootPositionY));
+    //テンション分傾け
+    handleRootPath = handleRootPath
+        .map((o) => _rotate(
+            o, angle * rodTension * position, tackleCenterX, reelCenterY))
+        .toList();
+    path = Path();
+    paint = new Paint()
+      ..color = Colors.black.withOpacity(0.6)
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
+    path.addPolygon(handleRootPath, false);
+    path.close();
+    canvas.drawPath(path, paint);
+
     var rool = handleRoll * 2;
-    //いったりきたりさせる
+    //リール回転でいったりきたりさせる為の値
     if (rool < 1.0) {
       rool = math.pow(rool, 2) as double;
     } else {
@@ -241,9 +267,16 @@ class tacklePainter extends CustomPainter {
       rool = 1.0 - rool;
     }
     rool = (reelSizeY * 2 * rool) - reelSizeY / 3;
+
+    //リールのハンドル部分
+    List<Offset> handlePath = [];
+    final handleMargin = 16.0;
+    final handleSizeX = reelSizeX / 2;
+    final handleSizeY = reelSizeY / 1.5;
+
     //ハンドルの基本X
-    var handlePositionX =
-        tackleCenterX + ((reelSizeX + handleMargin) * position);
+    var handlePositionX = tackleCenterX +
+        ((reelSizeX + handleRootSizeX + handleMargin) * position);
     //ハンドルの基本Y
     var handlePositionY = reelCenterY - reelSizeY + rool;
 
@@ -261,13 +294,81 @@ class tacklePainter extends CustomPainter {
 
     path = Path();
     paint = new Paint()
-      ..color = Colors.black
+      ..color = Colors.black.withOpacity(0.6)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
     path.addPolygon(handlePath, false);
     path.close();
     canvas.drawPath(path, paint);
+
+    // paint = new Paint()
+    //   ..color = Colors.black
+    //   ..strokeCap = StrokeCap.round
+    //   ..style = PaintingStyle.fill
+    //   ..strokeWidth = 2;
+    // canvas.rotate(rool);
+    // canvas.drawRRect(
+    //   RRect.fromLTRBR(
+    //     handlePositionX,
+    //     handlePositionY,
+    //     handlePositionX + handleSizeX * position,
+    //     handlePositionY + handleSizeY,
+    //     Radius.circular(10),
+    //   ),
+    //   paint,
+    // );
+
+    //リールのハンドル金具部分
+    List<Offset> handleJointPath = [];
+    final handleJointSizeY = 4; //金具の太さ
+    //ハンドル金具の基本X
+    var handleJointPositionX =
+        handleRootPositionX + (handleRootSizeX * position);
+    var handleJointPositionY = reelCenterY - handleJointSizeY;
+    handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    // handleJointPositionX += ((handleMargin / 2) - handleJointSizeY) * position;
+    // handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    handleJointPositionY = handlePositionY + (handleSizeY / 2);
+    handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    handleJointPositionX += handleMargin + handleJointSizeY * position;
+    handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    handleJointPositionY += handleJointSizeY;
+    handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    handleJointPositionX -= (handleMargin - handleJointSizeY) * position;
+    handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    handleJointPositionY = reelCenterY - handleJointSizeY + handleJointSizeY;
+    handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    handleJointPositionX = handleJointPositionX =
+        handleRootPositionX + (handleRootSizeX * position);
+    handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
+
+    //テンション分傾け
+    handleJointPath = handleJointPath
+        .map((o) => _rotate(
+            o, angle * rodTension * position, tackleCenterX, reelCenterY))
+        .toList();
+
+    path = Path();
+    paint = new Paint()
+      ..color = Colors.black.withOpacity(0.6)
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
+    path.addPolygon(handleJointPath, false);
+
+    path.close();
+    canvas.drawPath(
+      path,
+      paint,
+    );
 
     //クラッチ内のテキスト
     if (clutchTextSize > 0.0) {
