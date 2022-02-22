@@ -282,7 +282,7 @@ class _FishingState extends BasePageState<Fishing>
   var _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
   var _jiai = 0.9; //時合度 0.0～0.9999...
   var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
-  var _maxLineHp = 200.0; //ラインHP最大値
+  var _maxLineHp = 500.0; //ラインHP最大値
   var _nowLineHp = 50.0; //現在ラインHP
 
   var _shipMoveSeScan = 0;

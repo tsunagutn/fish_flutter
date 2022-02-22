@@ -80,8 +80,8 @@ class tacklePainter extends CustomPainter {
     if (!takclePositionLeft) {
       position = -1;
     }
-    const sides = 50; //竿描画の分割数
-    const magari = 40; //どこまで曲げるか
+    const sides = 30; //竿描画の分割数
+    const magari = 20; //どこまで曲げるか
     const angle = 0.3; //テンションMAX時の傾き
     const maxZurashiXBottom = 10; //竿の太さ
 
@@ -273,6 +273,7 @@ class tacklePainter extends CustomPainter {
     final handleMargin = 16.0;
     final handleSizeX = reelSizeX / 2;
     final handleSizeY = reelSizeY / 1.5;
+    final handleRadius = 10;
 
     //ハンドルの基本X
     var handlePositionX = tackleCenterX +
@@ -307,7 +308,9 @@ class tacklePainter extends CustomPainter {
     //   ..strokeCap = StrokeCap.round
     //   ..style = PaintingStyle.fill
     //   ..strokeWidth = 2;
-    // canvas.rotate(rool);
+    // //canvas.rotate(rool);
+    // //canvas.translate(dx, dy)
+    // canvas.rotate(5 * math.pi / 180);
     // canvas.drawRRect(
     //   RRect.fromLTRBR(
     //     handlePositionX,
