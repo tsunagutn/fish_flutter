@@ -628,6 +628,7 @@ class _FishingState extends BasePageState<Fishing>
         FishPainter obj2 = obj.painter as FishPainter;
         //addxの値を加減算で移動
         obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange) * -1;
+        obj2.addX += 0.5 - element.randMove;
       });
     }
 
@@ -2718,6 +2719,7 @@ class _FishingState extends BasePageState<Fishing>
       fishPointerSize: fishPointerSize,
       takclePositionLeft: _takclePositionLeft,
       painterKey: GlobalKey(),
+      randMove: (new math.Random()).nextDouble(),
     );
     setState(() {
       fishPointerList.add(fishPointer);

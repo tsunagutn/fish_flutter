@@ -13,6 +13,7 @@ class FishPointer extends StatefulWidget {
     required this.fishPointerSize,
     required this.takclePositionLeft,
     required this.painterKey,
+    required this.randMove,
   }) : super(key: key);
   final double dispSizeX;
   final double offsetX;
@@ -21,6 +22,7 @@ class FishPointer extends StatefulWidget {
   final double fishPointerSize;
   final bool takclePositionLeft;
   final GlobalKey painterKey;
+  final double randMove;
 
   @override
   _FishPointerState createState() => _FishPointerState();
@@ -37,7 +39,8 @@ class _FishPointerState extends State<FishPointer>
           offsetX: widget.offsetX,
           offsetY: widget.offsetY,
           dispSizeX: widget.dispSizeX,
-          fishPointerSize: widget.fishPointerSize),
+          fishPointerSize: widget.fishPointerSize,
+          randMove: widget.randMove),
     );
   }
 
@@ -59,17 +62,19 @@ class _FishPointerState extends State<FishPointer>
 }
 
 class FishPainter extends CustomPainter {
-  FishPainter(
-      {required this.controller,
-      required this.offsetX,
-      required this.offsetY,
-      required this.dispSizeX,
-      required this.fishPointerSize})
-      : super(repaint: controller); // repaint に controller を渡さないと再描画されない
+  FishPainter({
+    required this.controller,
+    required this.offsetX,
+    required this.offsetY,
+    required this.dispSizeX,
+    required this.fishPointerSize,
+    required this.randMove,
+  }) : super(repaint: controller); // repaint に controller を渡さないと再描画されない
   final double offsetX;
   final double offsetY;
   final double dispSizeX;
   final Animation<double> controller;
+  final double randMove;
 
   final fishPointerSize; //サカナ大きさ？？？可変にするべき
 
