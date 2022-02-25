@@ -337,7 +337,7 @@ class tacklePainter extends CustomPainter {
     handleJointPositionY = handlePositionY + (handleSizeY / 2);
     handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
 
-    handleJointPositionX += handleMargin + handleJointSizeY * position;
+    handleJointPositionX += (handleMargin + handleJointSizeY) * position;
     handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
 
     handleJointPositionY += handleJointSizeY;
@@ -349,8 +349,7 @@ class tacklePainter extends CustomPainter {
     handleJointPositionY = reelCenterY - handleJointSizeY + handleJointSizeY;
     handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
 
-    handleJointPositionX = handleJointPositionX =
-        handleRootPositionX + (handleRootSizeX * position);
+    handleJointPositionX = handleRootPositionX + (handleRootSizeX * position);
     handleJointPath.add(new Offset(handleJointPositionX, handleJointPositionY));
 
     //テンション分傾け
