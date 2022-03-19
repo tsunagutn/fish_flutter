@@ -853,8 +853,10 @@ class _FishingState extends BasePageState<Fishing>
     } else {
       _lightSpotX = size.width * (1 / 3);
     }
-    _lightSpotY =
-        ((_depth / _maxDepth) * (size.height - _shoreHeight - _bottomHeight));
+    // _lightSpotY =
+    //     ((_depth / _maxDepth) * (size.height - _shoreHeight - _bottomHeight));
+    _lightSpotY = ((_depth / _maxDepth) *
+        (size.height - (_shoreHeight + 50) - _bottomHeight));
 
     //背景色
     if (_maxDepth < 100) {
@@ -1802,18 +1804,6 @@ class _FishingState extends BasePageState<Fishing>
                                         //ソナー光点
                                         Container(
                                           width: size.width,
-                                          margin: EdgeInsets.only(
-                                              top: _lightSpotY,
-                                              left: _lightSpotX),
-                                          child: CustomPaint(
-                                            painter: LightSpot(
-                                                POINTER_SIZE,
-                                                POINTER_BACK_SIZE,
-                                                _animationRadius.value,
-                                                _pointerColor,
-                                                0,
-                                                0),
-                                          ),
                                         ),
                                         //ジャーク時のテキスト
                                         if (_jerkTextAnimationController
@@ -2104,6 +2094,17 @@ class _FishingState extends BasePageState<Fishing>
                                 ))),
                         //]),
 
+                        //ソナー光点
+                        Container(
+                          width: size.width,
+                          margin: EdgeInsets.only(
+                              top: _shoreHeight + 50 + _lightSpotY,
+                              left: _lightSpotX),
+                          child: CustomPaint(
+                            painter: LightSpot(POINTER_SIZE, POINTER_BACK_SIZE,
+                                _animationRadius.value, _pointerColor, 0, 0),
+                          ),
+                        ),
                         //タップ時の光点
                         (tapPointerList.isNotEmpty)
                             ? Stack(children: tapPointerList)
