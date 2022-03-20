@@ -1,3 +1,4 @@
+import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/CheckListTestModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
@@ -24,8 +25,6 @@ class SettingDialog extends StatefulWidget {
   _SettingDialogState createState() => _SettingDialogState();
 }
 
-enum bgmSetting { On, Off }
-
 class _SettingDialogState extends State<SettingDialog>
     with SingleTickerProviderStateMixin {
   List<FishModel> fishList = [];
@@ -43,10 +42,15 @@ class _SettingDialogState extends State<SettingDialog>
     // ),
   ];
 
-  var _type = bgmSetting.Off;
+  var _bgm = false; //音再生の有フラグ
+  var _controlLeft = false; //スマホを持つ手が左手フラグ
 
-  void _handleRadio(bgmSetting? e) => setState(() {
-        _type = e!;
+  void _changeBgm(bool? e) => setState(() {
+        _bgm = e!;
+      });
+
+  void _changeControl(bool? e) => setState(() {
+        _controlLeft = e!;
       });
 
   @override
@@ -86,39 +90,44 @@ class _SettingDialogState extends State<SettingDialog>
                     ),
                     body: TabBarView(
                       children: <Widget>[
-                        //タックル
                         Container(
                           child: Column(children: [
-                            Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "BGMの設定",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                ]),
-                            Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    children: <Widget>[
-                                      RadioListTile(
-                                          title: Text('OFF'),
-                                          value: bgmSetting.Off,
-                                          groupValue: _type,
-                                          onChanged: _handleRadio),
-                                      RadioListTile(
-                                          title: Text('ON'),
-                                          value: bgmSetting.On,
-                                          groupValue: _type,
-                                          onChanged: _handleRadio),
-                                    ],
-                                  ),
-                                ]),
+                            new SwitchListTile(
+                              value: _controlLeft,
+                              activeColor: Colors.orange,
+                              activeTrackColor: Colors.grey,
+                              inactiveThumbColor: Colors.blue,
+                              inactiveTrackColor: Colors.grey,
+                              secondary: new Icon(
+                                Icons.pan_tool_rounded,
+                                color: _controlLeft
+                                    ? Colors.orange[700]
+                                    : Colors.grey[500],
+                                size: 50.0,
+                              ),
+                              title: Text('操作'),
+                              subtitle: Text(_controlLeft ? '左手' : '右手'),
+                              onChanged: _changeControl,
+                            ),
+                            new SwitchListTile(
+                              value: _bgm,
+                              activeColor: Colors.orange,
+                              activeTrackColor: Colors.grey,
+                              inactiveThumbColor: Colors.white,
+                              inactiveTrackColor: Colors.grey,
+                              secondary: new Icon(
+                                Icons.volume_up,
+                                color: _bgm
+                                    ? Colors.orange[700]
+                                    : Colors.grey[500],
+                                size: 50.0,
+                              ),
+                              title: Text('音再生'),
+                              subtitle: Text(_bgm ? 'ON' : 'OFF'),
+                              onChanged: _changeBgm,
+                            )
                           ]),
                         ),
-
                         SecondPage(),
                       ],
                     ),
