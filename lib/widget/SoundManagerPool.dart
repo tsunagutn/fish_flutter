@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:fish_flutter/Main.dart';
 
 class SoundManagerPool {
   int playIndex = 0;
@@ -50,9 +51,10 @@ class SoundManager {
   }
 
   Future<void> playSound(String path) async {
-    await audioCache.play(path, mode: PlayerMode.LOW_LATENCY);
-    advancedPlayer.setVolume(0.2);
-
+    if (settings.flgBgm) {
+      await audioCache.play(path, mode: PlayerMode.LOW_LATENCY);
+      advancedPlayer.setVolume(0.2);
+    }
     return;
   }
 }

@@ -74,11 +74,11 @@ class _SettingsState extends State<Settings> {
                       () {
                         // 何かしらの入力があるときだけ実行
                         if (_settingsInputController.text.length > 0) {
-                          // 配列に入力値を追加
-                          settingsList.add(SettingsModel(
-                              text: _settingsInputController.text));
-                          // テキストボックスを初期化
-                          _settingsInputController.clear();
+                          // // 配列に入力値を追加
+                          // settingsList.add(SettingsModel(
+                          //     text: _settingsInputController.text));
+                          // // テキストボックスを初期化
+                          // _settingsInputController.clear();
                         }
                       },
                     );
@@ -94,18 +94,18 @@ class _SettingsState extends State<Settings> {
                   margin: EdgeInsets.only(
                       top: 1.0, right: 0.0, bottom: 0.0, left: 0.0),
                   color: Colors.cyan[600],
-                  child: ListTile(
-                    leading: Icon(Icons.star),
-                    title: Text(
-                      // リストに表示する文字列を設定
-                      ("$index : ${settingsList[index].text}"),
-                      style: TextStyle(
-                        fontFamily: 'OpenSans',
-                        fontSize: 24,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                  // child: ListTile(
+                  //   leading: Icon(Icons.star),
+                  //   title: Text(
+                  //     // リストに表示する文字列を設定
+                  //     ("$index : ${settingsList[index].text}"),
+                  //     style: TextStyle(
+                  //       fontFamily: 'OpenSans',
+                  //       fontSize: 24,
+                  //       color: Colors.white,
+                  //     ),
+                  //   ),
+                  // ),
                 );
               },
             ),

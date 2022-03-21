@@ -1,7 +1,9 @@
 class SettingsModel {
-  String text;
-  //コンストラクタあ
+  bool flgBgm;
+  bool flgControlLeft;
+  //コンストラクタ
   SettingsModel({
-    required this.text,
+    required this.flgBgm,
+    required this.flgControlLeft,
   });
 }

@@ -1,5 +1,6 @@
 //flutter run -d chrome でchrome動作
 
+import 'package:fish_flutter/Model/SettingsModel.dart';
 import 'package:flutter/material.dart';
 import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/View/Settings.dart';
@@ -22,6 +23,9 @@ void main() {
 
 // RouteObserverを利用するので、本件ではクラス外にて定義
 var routeObserver = RouteObserver<PageRoute>();
+
+//環境設定のインスタンス
+var settings = new SettingsModel(flgBgm: false, flgControlLeft: true);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

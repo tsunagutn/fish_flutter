@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audioplayers_api.dart';
+import 'package:fish_flutter/Main.dart';
 import 'package:flutter/material.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 
@@ -35,7 +36,10 @@ class BgmPlayer {
     } else {
       _player?.setReleaseMode(ReleaseMode.RELEASE);
     }
-    _player?.play(bgmUriMap[name].toString(), volume: 0.1);
+    if (settings.flgBgm) {
+      //設定でBGM有効の時のみ
+      _player?.play(bgmUriMap[name].toString(), volume: 0.1);
+    }
   }
 
   void pauseBgm(String? name) async {
@@ -49,7 +53,13 @@ class BgmPlayer {
   }
 
   void resumeBgm() async {
-    await _player?.resume();
+    if (settings.flgBgm) {
+      //設定でBGM有効の時のみ再生再開
+      await _player?.resume();
+    } else {
+      //有効で無ければ再生を止める
+      await _player?.stop();
+    }
   }
 
   void stopBgm(String? name) async {

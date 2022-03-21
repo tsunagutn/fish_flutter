@@ -108,6 +108,7 @@
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
 
+import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
@@ -337,7 +338,7 @@ class _FishingState extends BasePageState<Fishing>
   var _reelSizeX = 0.0;
   var _reelSizeY = 0.0;
   var _reelCenterY = 0.0;
-  var _takclePositionLeft = true;
+  //var _takclePositionLeft = true;
   var _takcleChangeButtonPosition = MainAxisAlignment.end;
   var _rodStandUp = 0.0;
   var _handleRoll = 0.0;
@@ -488,13 +489,17 @@ class _FishingState extends BasePageState<Fishing>
 
   //ダイアログ等 一時BGM
   Future subBgmPlay(file) async {
-    _ap.setReleaseMode(ReleaseMode.RELEASE);
-    await _ap.play('assets/' + file, volume: 0.3);
+    if (settings.flgBgm) {
+      _ap.setReleaseMode(ReleaseMode.RELEASE);
+      await _ap.play('assets/' + file, volume: 0.3);
+    }
   }
 
   Future subBgmLoop(file) async {
-    _ap.setReleaseMode(ReleaseMode.LOOP);
-    await _ap.play('assets/' + file, volume: 0.3);
+    if (settings.flgBgm) {
+      _ap.setReleaseMode(ReleaseMode.LOOP);
+      await _ap.play('assets/' + file, volume: 0.3);
+    }
   }
 
   Future subBgmStop() async {
@@ -848,7 +853,7 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     //光点表示位置設定
-    if (_takclePositionLeft) {
+    if (settings.flgControlLeft) {
       _lightSpotX = size.width * (2 / 3);
     } else {
       _lightSpotX = size.width * (1 / 3);
@@ -1261,7 +1266,7 @@ class _FishingState extends BasePageState<Fishing>
     }
 
     //タックルの描画
-    if (_takclePositionLeft) {
+    if (settings.flgControlLeft) {
       _tackleCenterX = 80.0;
       _takcleChangeButtonPosition = MainAxisAlignment.end;
     } else {
@@ -1409,7 +1414,7 @@ class _FishingState extends BasePageState<Fishing>
                   onPressed: () async {
                     //買い物モーダルの表示
                     _timer.cancel(); //定周期タイマ停止
-                    bgmPause();
+                    bgmStop();
                     //subBgmLoop('Bgm/bgm_book.mp3');
                     //bgm.soundManagerPool.playSound('Se/book.mp3'); //音は仮
                     int? result = await showDialog<int>(
@@ -1417,9 +1422,7 @@ class _FishingState extends BasePageState<Fishing>
                       barrierDismissible: false,
                       builder: (_) {
                         return SettingDialog(
-                          haveTakcle: haveTackle,
                           soundManagerPool: bgm.soundManagerPool,
-                          originPoint: _point,
                         );
                       },
                     );
@@ -1427,7 +1430,7 @@ class _FishingState extends BasePageState<Fishing>
                     //bgm.soundManagerPool.playSound('Se/bookclose.mp3'); //音は仮
                     startTimer(); //定周期タイマ再開
                     subBgmStop();
-                    bgmResume();
+                    bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
                     setState(() {});
                   },
                 )),
@@ -1901,7 +1904,7 @@ class _FishingState extends BasePageState<Fishing>
                                   children: [
                                     Container(
                                       width: size.width / 3,
-                                      child: (!_takclePositionLeft)
+                                      child: (!settings.flgControlLeft)
                                           ? _tacklePositionChangeButton()
                                           : Text(''),
                                     ),
@@ -1940,7 +1943,7 @@ class _FishingState extends BasePageState<Fishing>
                                   children: [
                                     Container(
                                       width: size.width / 3,
-                                      child: (_takclePositionLeft)
+                                      child: (settings.flgControlLeft)
                                           ? _tacklePositionChangeButton()
                                           : Text(''),
                                     ),
@@ -2118,7 +2121,7 @@ class _FishingState extends BasePageState<Fishing>
                           painter: new tacklePainter(
                             shoreHeight: _shoreHeight,
                             dispSize: size,
-                            takclePositionLeft: _takclePositionLeft,
+                            takclePositionLeft: settings.flgControlLeft,
                             tackleCenterX: _tackleCenterX,
                             rodSizeX: _rodSizeX,
                             rodSizeY: _rodSizeY,
@@ -2703,7 +2706,7 @@ class _FishingState extends BasePageState<Fishing>
     var rnd = (new math.Random()).nextDouble();
     var offsetX =
         (size.width / 4) + (size.width / 2) * (rnd * rnd); //真ん中に集約するように累乗する
-    if (_takclePositionLeft) {
+    if (settings.flgControlLeft) {
       offsetX += size.width / 4;
     } else {
       offsetX -= size.width / 4;
@@ -2718,7 +2721,7 @@ class _FishingState extends BasePageState<Fishing>
       offsetX: offsetX,
       duration: duration,
       fishPointerSize: fishPointerSize,
-      takclePositionLeft: _takclePositionLeft,
+      takclePositionLeft: settings.flgControlLeft,
       painterKey: GlobalKey(),
       randMove: (new math.Random()).nextDouble(),
     );
@@ -2792,24 +2795,24 @@ class _FishingState extends BasePageState<Fishing>
               //     mainAxisAlignment: MainAxisAlignment.center,
               //     children: <Widget>[
 
-              ElevatedButton(
-                  child: const Text('持替'),
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.amber, //背景色
-                    onPrimary: Colors.black, //押したときの色
-                    shape: const StadiumBorder(),
-                    side: BorderSide(
-                      color: Colors.black, //枠線の色
-                      width: 2, //枠線の太さ
-                    ),
-                  ),
-                  onPressed: () {
-                    if (_takclePositionLeft) {
-                      _takclePositionLeft = false;
-                    } else {
-                      _takclePositionLeft = true;
-                    }
-                  }),
+              // ElevatedButton(
+              //     child: const Text('持替'),
+              //     style: ElevatedButton.styleFrom(
+              //       primary: Colors.amber, //背景色
+              //       onPrimary: Colors.black, //押したときの色
+              //       shape: const StadiumBorder(),
+              //       side: BorderSide(
+              //         color: Colors.black, //枠線の色
+              //         width: 2, //枠線の太さ
+              //       ),
+              //     ),
+              //     onPressed: () {
+              //       if (_takclePositionLeft) {
+              //         _takclePositionLeft = false;
+              //       } else {
+              //         _takclePositionLeft = true;
+              //       }
+              //     }),
             ]));
   }
 

@@ -15,13 +15,9 @@ import 'SliderPainter.dart';
 class SettingDialog extends StatefulWidget {
   @override
   const SettingDialog({
-    required this.haveTakcle,
     required this.soundManagerPool,
-    required this.originPoint,
   });
-  final HaveTackleModel haveTakcle;
   final SoundManagerPool soundManagerPool;
-  final int originPoint;
   _SettingDialogState createState() => _SettingDialogState();
 }
 
@@ -47,16 +43,23 @@ class _SettingDialogState extends State<SettingDialog>
 
   void _changeBgm(bool? e) => setState(() {
         _bgm = e!;
+        settings.flgBgm = _bgm;
+        //効果音managerで無音を再生
+        widget.soundManagerPool.SoundManagerPoolInit();
       });
 
   void _changeControl(bool? e) => setState(() {
         _controlLeft = e!;
+        settings.flgControlLeft = _controlLeft;
       });
 
   @override
   void initState() {
     super.initState();
-    retPoint = widget.originPoint;
+
+    //環境設定の読込
+    _bgm = settings.flgBgm;
+    _controlLeft = settings.flgControlLeft;
   }
 
   @override
@@ -125,7 +128,7 @@ class _SettingDialogState extends State<SettingDialog>
                               title: Text('音再生'),
                               subtitle: Text(_bgm ? 'ON' : 'OFF'),
                               onChanged: _changeBgm,
-                            )
+                            ),
                           ]),
                         ),
                         SecondPage(),
