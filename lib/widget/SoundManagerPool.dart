@@ -38,6 +38,9 @@ class SoundManagerPool {
 }
 
 class SoundManager {
+  //ボリュームの最大値
+  static const maxVolume = 0.5;
+
   late AudioPlayer advancedPlayer;
   late AudioCache audioCache;
   SoundManager() {
@@ -53,7 +56,7 @@ class SoundManager {
   Future<void> playSound(String path) async {
     if (settings.flgBgm) {
       await audioCache.play(path, mode: PlayerMode.LOW_LATENCY);
-      advancedPlayer.setVolume(0.2);
+      advancedPlayer.setVolume(maxVolume * settings.volumeSe);
     }
     return;
   }

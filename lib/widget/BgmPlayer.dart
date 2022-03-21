@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 
 class BgmPlayer {
+  //ボリュームの最大値
+  static const maxVolume = 0.5;
+
   late AudioCache _cache;
   //SE
   SoundManagerPool soundManagerPool = new SoundManagerPool(20);
@@ -38,7 +41,8 @@ class BgmPlayer {
     }
     if (settings.flgBgm) {
       //設定でBGM有効の時のみ
-      _player?.play(bgmUriMap[name].toString(), volume: 0.1);
+      _player?.play(bgmUriMap[name].toString(),
+          volume: maxVolume * settings.volumeBgm);
     }
   }
 

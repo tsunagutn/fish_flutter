@@ -25,7 +25,12 @@ void main() {
 var routeObserver = RouteObserver<PageRoute>();
 
 //環境設定のインスタンス
-var settings = new SettingsModel(flgBgm: false, flgControlLeft: true);
+var settings = new SettingsModel(
+    //？？？ここは本当は環境設定のファイルかDBから読むように
+    flgBgm: false,
+    flgControlLeft: true,
+    volumeBgm: 0.5,
+    volumeSe: 0.5);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

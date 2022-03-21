@@ -1,16 +1,7 @@
 import 'package:fish_flutter/Main.dart';
-import 'package:fish_flutter/Model/CheckListTestModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
-import 'package:fish_flutter/Model/FishResultsModel.dart';
-import 'package:fish_flutter/Model/RodsModel.dart';
-import 'package:fish_flutter/Model/ReelsModel.dart';
-import 'package:fish_flutter/View/Fishing.dart';
-import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
-
-import 'RadarChart.dart';
-import 'SliderPainter.dart';
 
 class SettingDialog extends StatefulWidget {
   @override
@@ -40,6 +31,8 @@ class _SettingDialogState extends State<SettingDialog>
 
   var _bgm = false; //音再生の有フラグ
   var _controlLeft = false; //スマホを持つ手が左手フラグ
+  var _volumeBgm = 0.8; //BGM音量
+  var _volumeSe = 0.8; //SE音量
 
   void _changeBgm(bool? e) => setState(() {
         _bgm = e!;
@@ -52,6 +45,14 @@ class _SettingDialogState extends State<SettingDialog>
         _controlLeft = e!;
         settings.flgControlLeft = _controlLeft;
       });
+  void _changeVolumeBgm(double? e) => setState(() {
+        _volumeBgm = e!;
+        settings.volumeBgm = _volumeBgm;
+      });
+  void _changeVolumeSe(double? e) => setState(() {
+        _volumeSe = e!;
+        settings.volumeSe = _volumeSe;
+      });
 
   @override
   void initState() {
@@ -60,6 +61,8 @@ class _SettingDialogState extends State<SettingDialog>
     //環境設定の読込
     _bgm = settings.flgBgm;
     _controlLeft = settings.flgControlLeft;
+    _volumeBgm = settings.volumeBgm;
+    _volumeSe = settings.volumeSe;
   }
 
   @override
@@ -129,6 +132,30 @@ class _SettingDialogState extends State<SettingDialog>
                               subtitle: Text(_bgm ? 'ON' : 'OFF'),
                               onChanged: _changeBgm,
                             ),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text("BGM"),
+                                  Slider(
+                                    value: _volumeBgm,
+                                    //MAX-MINはテンションと同じ
+                                    min: 0.0,
+                                    max: 1.0,
+                                    onChanged: _changeVolumeBgm,
+                                  ),
+                                ]),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text("SE"),
+                                  Slider(
+                                    value: _volumeSe,
+                                    //MAX-MINはテンションと同じ
+                                    min: 0.0,
+                                    max: 1.0,
+                                    onChanged: _changeVolumeSe,
+                                  ),
+                                ]),
                           ]),
                         ),
                         SecondPage(),
