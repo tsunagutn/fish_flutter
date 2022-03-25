@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
@@ -7,8 +8,10 @@ class SettingDialog extends StatefulWidget {
   @override
   const SettingDialog({
     required this.soundManagerPool,
+    required this.ap,
   });
   final SoundManagerPool soundManagerPool;
+  final AudioPlayer ap;
   _SettingDialogState createState() => _SettingDialogState();
 }
 
@@ -34,11 +37,30 @@ class _SettingDialogState extends State<SettingDialog>
   var _volumeBgm = 0.8; //BGM音量
   var _volumeSe = 0.8; //SE音量
 
+  Future subBgmLoop(file) async {
+    if (settings.flgBgm) {
+      widget.ap.setReleaseMode(ReleaseMode.LOOP);
+      await widget.ap.play('assets/' + file, volume: settings.volumeBgm);
+    }
+  }
+
+  Future subBgmStop() async {
+    await widget.ap.stop();
+  }
+
   void _changeBgm(bool? e) => setState(() {
         _bgm = e!;
         settings.flgBgm = _bgm;
         //効果音managerで無音を再生
         widget.soundManagerPool.SoundManagerPoolInit();
+        //BGN再生
+        if (e) {
+          //BGM ONなら再生
+          subBgmLoop('Bgm/bgm_book.mp3');
+        } else {
+          //OFFなら停止
+          subBgmStop();
+        }
       });
 
   void _changeControl(bool? e) => setState(() {
@@ -48,10 +70,15 @@ class _SettingDialogState extends State<SettingDialog>
   void _changeVolumeBgm(double? e) => setState(() {
         _volumeBgm = e!;
         settings.volumeBgm = _volumeBgm;
+        widget.ap.setVolume(_volumeBgm); //デフォルトは1.0
       });
   void _changeVolumeSe(double? e) => setState(() {
         _volumeSe = e!;
         settings.volumeSe = _volumeSe;
+      });
+  void _changeEndVolumeSe(double? e) => setState(() {
+        //適当な音を再生
+        widget.soundManagerPool.playSound('Se/linebreak.mp3');
       });
 
   @override
@@ -63,6 +90,9 @@ class _SettingDialogState extends State<SettingDialog>
     _controlLeft = settings.flgControlLeft;
     _volumeBgm = settings.volumeBgm;
     _volumeSe = settings.volumeSe;
+
+    //設定画面BCM再生
+    subBgmLoop('Bgm/bgm_book.mp3');
   }
 
   @override
@@ -153,6 +183,7 @@ class _SettingDialogState extends State<SettingDialog>
                                     //MAX-MINはテンションと同じ
                                     min: 0.0,
                                     max: 1.0,
+                                    onChangeEnd: _changeEndVolumeSe,
                                     onChanged: _changeVolumeSe,
                                   ),
                                 ]),

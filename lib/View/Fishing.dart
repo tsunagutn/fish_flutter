@@ -491,14 +491,14 @@ class _FishingState extends BasePageState<Fishing>
   Future subBgmPlay(file) async {
     if (settings.flgBgm) {
       _ap.setReleaseMode(ReleaseMode.RELEASE);
-      await _ap.play('assets/' + file, volume: 0.3);
+      await _ap.play('assets/' + file, volume: settings.volumeBgm);
     }
   }
 
   Future subBgmLoop(file) async {
     if (settings.flgBgm) {
       _ap.setReleaseMode(ReleaseMode.LOOP);
-      await _ap.play('assets/' + file, volume: 0.3);
+      await _ap.play('assets/' + file, volume: settings.volumeBgm);
     }
   }
 
@@ -761,7 +761,7 @@ class _FishingState extends BasePageState<Fishing>
         //メッセージ
         _centerTextMain = "BREAK";
         _centerTextMainColor = Colors.red;
-        _centerTextSub = "糸が切れちまった!";
+        _centerTextSub = "糸が切れた!";
         _centerTextSubColor = Colors.yellow;
         startCenterInfo();
         //使用中のルアーを削除
@@ -1423,6 +1423,7 @@ class _FishingState extends BasePageState<Fishing>
                       builder: (_) {
                         return SettingDialog(
                           soundManagerPool: bgm.soundManagerPool,
+                          ap: _ap,
                         );
                       },
                     );
