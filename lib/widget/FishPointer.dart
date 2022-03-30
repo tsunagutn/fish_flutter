@@ -11,7 +11,7 @@ class FishPointer extends StatefulWidget {
     required this.offsetY,
     required this.duration,
     required this.fishPointerSize,
-    required this.takclePositionLeft,
+    required this.takclePositionRight,
     required this.painterKey,
     required this.randMove,
   }) : super(key: key);
@@ -20,7 +20,7 @@ class FishPointer extends StatefulWidget {
   final double offsetY;
   final Duration duration;
   final double fishPointerSize;
-  final bool takclePositionLeft;
+  final bool takclePositionRight;
   final GlobalKey painterKey;
   final double randMove;
 

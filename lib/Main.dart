@@ -28,7 +28,7 @@ var routeObserver = RouteObserver<PageRoute>();
 var settings = new SettingsModel(
     //？？？ここは本当は環境設定のファイルかDBから読むように
     flgBgm: false,
-    flgControlLeft: true,
+    flgControlRight: true,
     volumeBgm: 0.5,
     volumeSe: 0.5);
 

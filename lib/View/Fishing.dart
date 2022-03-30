@@ -338,7 +338,6 @@ class _FishingState extends BasePageState<Fishing>
   var _reelSizeX = 0.0;
   var _reelSizeY = 0.0;
   var _reelCenterY = 0.0;
-  //var _takclePositionLeft = true;
   var _takcleChangeButtonPosition = MainAxisAlignment.end;
   var _rodStandUp = 0.0;
   var _handleRoll = 0.0;
@@ -853,7 +852,7 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     //光点表示位置設定
-    if (settings.flgControlLeft) {
+    if (settings.flgControlRight) {
       _lightSpotX = size.width * (2 / 3);
     } else {
       _lightSpotX = size.width * (1 / 3);
@@ -1266,7 +1265,7 @@ class _FishingState extends BasePageState<Fishing>
     }
 
     //タックルの描画
-    if (settings.flgControlLeft) {
+    if (!settings.flgControlRight) {
       _tackleCenterX = 80.0;
       _takcleChangeButtonPosition = MainAxisAlignment.end;
     } else {
@@ -1905,7 +1904,7 @@ class _FishingState extends BasePageState<Fishing>
                                   children: [
                                     Container(
                                       width: size.width / 3,
-                                      child: (!settings.flgControlLeft)
+                                      child: (settings.flgControlRight)
                                           ? _tacklePositionChangeButton()
                                           : Text(''),
                                     ),
@@ -1944,7 +1943,7 @@ class _FishingState extends BasePageState<Fishing>
                                   children: [
                                     Container(
                                       width: size.width / 3,
-                                      child: (settings.flgControlLeft)
+                                      child: (!settings.flgControlRight)
                                           ? _tacklePositionChangeButton()
                                           : Text(''),
                                     ),
@@ -2122,7 +2121,7 @@ class _FishingState extends BasePageState<Fishing>
                           painter: new tacklePainter(
                             shoreHeight: _shoreHeight,
                             dispSize: size,
-                            takclePositionLeft: settings.flgControlLeft,
+                            takclePositionRight: settings.flgControlRight,
                             tackleCenterX: _tackleCenterX,
                             rodSizeX: _rodSizeX,
                             rodSizeY: _rodSizeY,
@@ -2707,7 +2706,7 @@ class _FishingState extends BasePageState<Fishing>
     var rnd = (new math.Random()).nextDouble();
     var offsetX =
         (size.width / 4) + (size.width / 2) * (rnd * rnd); //真ん中に集約するように累乗する
-    if (settings.flgControlLeft) {
+    if (settings.flgControlRight) {
       offsetX += size.width / 4;
     } else {
       offsetX -= size.width / 4;
@@ -2722,7 +2721,7 @@ class _FishingState extends BasePageState<Fishing>
       offsetX: offsetX,
       duration: duration,
       fishPointerSize: fishPointerSize,
-      takclePositionLeft: settings.flgControlLeft,
+      takclePositionRight: settings.flgControlRight,
       painterKey: GlobalKey(),
       randMove: (new math.Random()).nextDouble(),
     );

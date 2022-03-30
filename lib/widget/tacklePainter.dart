@@ -7,7 +7,7 @@ class tacklePainter extends CustomPainter {
     //required this.activeColor,
     required this.shoreHeight,
     required this.dispSize,
-    required this.takclePositionLeft,
+    required this.takclePositionRight,
     required this.tackleCenterX,
     required this.rodSizeX,
     required this.rodSizeY,
@@ -22,7 +22,7 @@ class tacklePainter extends CustomPainter {
   });
   final double shoreHeight;
   final Size dispSize;
-  final bool takclePositionLeft;
+  final bool takclePositionRight;
   final double tackleCenterX;
   final double rodSizeX;
   final double rodSizeY;
@@ -77,7 +77,7 @@ class tacklePainter extends CustomPainter {
     path = Path();
 
     var position = 1;
-    if (!takclePositionLeft) {
+    if (takclePositionRight) {
       position = -1;
     }
     const sides = 30; //竿描画の分割数

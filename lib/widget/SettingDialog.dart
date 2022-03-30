@@ -33,7 +33,7 @@ class _SettingDialogState extends State<SettingDialog>
   ];
 
   var _bgm = false; //音再生の有フラグ
-  var _controlLeft = false; //スマホを持つ手が左手フラグ
+  var _controlRight = false; //スマホを持つ手が右手フラグ
   var _volumeBgm = 0.8; //BGM音量
   var _volumeSe = 0.8; //SE音量
 
@@ -64,8 +64,8 @@ class _SettingDialogState extends State<SettingDialog>
       });
 
   void _changeControl(bool? e) => setState(() {
-        _controlLeft = e!;
-        settings.flgControlLeft = _controlLeft;
+        _controlRight = e!;
+        settings.flgControlRight = _controlRight;
       });
   void _changeVolumeBgm(double? e) => setState(() {
         _volumeBgm = e!;
@@ -87,7 +87,7 @@ class _SettingDialogState extends State<SettingDialog>
 
     //環境設定の読込
     _bgm = settings.flgBgm;
-    _controlLeft = settings.flgControlLeft;
+    _controlRight = settings.flgControlRight;
     _volumeBgm = settings.volumeBgm;
     _volumeSe = settings.volumeSe;
 
@@ -129,20 +129,20 @@ class _SettingDialogState extends State<SettingDialog>
                         Container(
                           child: Column(children: [
                             new SwitchListTile(
-                              value: _controlLeft,
+                              value: _controlRight,
                               activeColor: Colors.orange,
                               activeTrackColor: Colors.grey,
                               inactiveThumbColor: Colors.blue,
                               inactiveTrackColor: Colors.grey,
                               secondary: new Icon(
                                 Icons.pan_tool_rounded,
-                                color: _controlLeft
+                                color: _controlRight
                                     ? Colors.orange[700]
                                     : Colors.grey[500],
                                 size: 50.0,
                               ),
                               title: Text('操作'),
-                              subtitle: Text(_controlLeft ? '左手' : '右手'),
+                              subtitle: Text(_controlRight ? '右手' : '左手'),
                               onChanged: _changeControl,
                             ),
                             new SwitchListTile(

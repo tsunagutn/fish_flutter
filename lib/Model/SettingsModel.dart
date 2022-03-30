@@ -1,12 +1,12 @@
 class SettingsModel {
   bool flgBgm;
-  bool flgControlLeft;
+  bool flgControlRight;
   double volumeBgm;
   double volumeSe;
   //コンストラクタ
   SettingsModel({
     required this.flgBgm,
-    required this.flgControlLeft,
+    required this.flgControlRight,
     required this.volumeBgm,
     required this.volumeSe,
   });
