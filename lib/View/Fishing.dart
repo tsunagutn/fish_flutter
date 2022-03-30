@@ -779,9 +779,9 @@ class _FishingState extends BasePageState<Fishing>
       //テンションとドラグレベルの差分
       var dragDiff = val - dragVal;
       //ドラグ出た分深さを増やす？？？出すぎ？
-      _depth = _depth + dragDiff / 100;
+      _depth = _depth + dragDiff / 300;
       //ドラグ出た分テンションを減らす？？？減らなすぎ？
-      val = val - (dragDiff / 15);
+      val = val - (dragDiff / 10);
       //テンションゲージの色を変える
       _tensionActiveTrackColor = TENSION_COLOR_DRAG;
 
@@ -852,7 +852,7 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     //光点表示位置設定
-    if (settings.flgControlRight) {
+    if (!settings.flgControlRight) {
       _lightSpotX = size.width * (2 / 3);
     } else {
       _lightSpotX = size.width * (1 / 3);
