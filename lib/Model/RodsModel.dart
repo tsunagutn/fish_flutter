@@ -20,7 +20,7 @@ class RodsModel {
       image: "rod1.png",
       text: "最初の竿\n一番へぼい",
       prise: 0,
-      maxTention: 1000,
+      maxTention: 2000,
     ));
     rods.add(new RodModel(
       id: 1,

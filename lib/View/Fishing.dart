@@ -115,6 +115,7 @@ import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
+import 'package:fish_flutter/widget/FIshCard.dart';
 import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/RadarChart.dart';
@@ -350,6 +351,9 @@ class _FishingState extends BasePageState<Fishing>
   //釣果リスト
   late FishesResultModel fishesResult;
 
+  //今釣れる可能性のある魚種リスト
+  List<FishModel> _fishCardItem = [];
+
   //船移動
   // var _MoveLeft = false;
   // var _MoveRight = false;
@@ -385,6 +389,7 @@ class _FishingState extends BasePageState<Fishing>
     fishesResult = new FishesResultModel();
     //ルアーリストを初期化？？？本当はDBマスタから全取得
     lures = new LuresModel();
+
     //所持リストを初期化
     haveTackle = new HaveTackleModel();
     _tensionValMax = haveTackle.getUseRod().maxTention;
@@ -551,6 +556,8 @@ class _FishingState extends BasePageState<Fishing>
 
     //現在使用中のルアーデータ
     LureModel lureData = lures.getLureData(haveTackle.getUseLure().lureId);
+    //魚リスト初期化
+    _fishCardItem = [];
 
     //風レベル判定
     for (int key in WIND_FOR_DEPTH.keys) {
@@ -938,6 +945,16 @@ class _FishingState extends BasePageState<Fishing>
     final durationMin = POINT_DURATION_MSEC[0]!;
     var duration = POINT_DURATION_MSEC[_nowDurationLv]!;
 
+    //現在底付近か？
+    var bottom = (_depth > (_maxDepth * 0.8)) ? true : false;
+    // //深さから可能性のある種を抽出
+    _fishCardItem = FISH_TABLE.extractDepth(
+        depth: _depth, maxDepth: _maxDepth, bottom: bottom);
+    //debugPrint(_fishCardItem.length.toString());
+    var maxProb = 0.0;
+    _listSpeedRange = []; //速度リスト初期化
+    duration = durationMax;
+
     if (!(_flgBait || _flgHit || _collect)) {
       var flgFall = false;
       var flgMaki = false;
@@ -983,18 +1000,8 @@ class _FishingState extends BasePageState<Fishing>
           hitTanaProb = 0.3; //棚範囲外の最低保証
         }
 
-        //現在底付近か？
-        var bottom = (_depth > (_maxDepth * 0.8)) ? true : false;
-        // //深さから可能性のある種を抽出
-        var fishs = FISH_TABLE.extractDepth(
-            depth: _depth, maxDepth: _maxDepth, bottom: bottom);
-
-        var maxProb = 0.0;
-        _listSpeedRange = []; //速度リスト初期化
-        duration = durationMax;
-
         //種毎の判定
-        fishs.forEach((fish) {
+        _fishCardItem.forEach((fish) {
           var hitSpeedprob = 0.0;
           var hitSpeedprobDisp = 0.0;
           var hitProb = 0.0;
@@ -1905,7 +1912,29 @@ class _FishingState extends BasePageState<Fishing>
                                     Container(
                                       width: size.width / 3,
                                       child: (settings.flgControlRight)
-                                          ? _tacklePositionChangeButton()
+                                          ? //_tacklePositionChangeButton()
+                                          Row(
+                                              children: [
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      left: 10, right: 10),
+                                                  padding:
+                                                      const EdgeInsets.all(5.0),
+                                                  decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.red,
+                                                          width: 3),
+                                                      color: Colors.white),
+                                                  child: Text(_dispDepth,
+                                                      style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14,
+                                                      )),
+                                                ),
+                                              ],
+                                            )
                                           : Text(''),
                                     ),
                                   ],
@@ -1914,28 +1943,28 @@ class _FishingState extends BasePageState<Fishing>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     Container(
-                                      width: size.width / 3,
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10, right: 10),
-                                            padding: const EdgeInsets.all(5.0),
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Colors.red,
-                                                    width: 3),
-                                                color: Colors.white),
-                                            child: Text(_dispDepth,
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                )),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                        width: size.width / 3, child: Text("")
+                                        // Row(
+                                        //   children: [
+                                        //     Container(
+                                        //       margin: EdgeInsets.only(
+                                        //           left: 10, right: 10),
+                                        //       padding: const EdgeInsets.all(5.0),
+                                        //       decoration: BoxDecoration(
+                                        //           border: Border.all(
+                                        //               color: Colors.red,
+                                        //               width: 3),
+                                        //           color: Colors.white),
+                                        //       child: Text(_dispDepth,
+                                        //           style: TextStyle(
+                                        //             color: Colors.black,
+                                        //             fontWeight: FontWeight.bold,
+                                        //             fontSize: 14,
+                                        //           )),
+                                        //     ),
+                                        //   ],
+                                        // ),
+                                        ),
                                   ],
                                 ),
                                 Column(
@@ -1944,7 +1973,29 @@ class _FishingState extends BasePageState<Fishing>
                                     Container(
                                       width: size.width / 3,
                                       child: (!settings.flgControlRight)
-                                          ? _tacklePositionChangeButton()
+                                          ? //_tacklePositionChangeButton()
+                                          Row(
+                                              children: [
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      left: 10, right: 10),
+                                                  padding:
+                                                      const EdgeInsets.all(5.0),
+                                                  decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.red,
+                                                          width: 3),
+                                                      color: Colors.white),
+                                                  child: Text(_dispDepth,
+                                                      style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14,
+                                                      )),
+                                                ),
+                                              ],
+                                            )
                                           : Text(''),
                                     ),
                                   ],
@@ -2202,43 +2253,6 @@ class _FishingState extends BasePageState<Fishing>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // //竿
-                                      // GestureDetector(
-                                      //     onTap: () async {
-                                      //       if (_depth <= 0.0) {
-                                      //         setState(() {
-                                      //           _selectTacleIcon = 'rod';
-                                      //           _showTacleChangeDialog = true;
-                                      //           bgm.soundManagerPool
-                                      //               .playSound('Se/boxopen.mp3');
-                                      //         });
-                                      //       }
-                                      //     },
-                                      //     child: tackleIcon(
-                                      //       tackleIconSize: 40.0,
-                                      //       imagePath: 'assets/Images/' +
-                                      //           haveTackle.getUseRod().image,
-                                      //       flgSelect: false,
-                                      //       opacity: (_depth > 0.0 ? 0.7 : 1.0),
-                                      //     )),
-                                      // //リール
-                                      // GestureDetector(
-                                      //     onTap: () async {
-                                      //       if (_depth <= 0.0) {
-                                      //         setState(() {
-                                      //           _selectTacleIcon = 'reel';
-                                      //           _showTacleChangeDialog = true;
-                                      //           bgm.soundManagerPool
-                                      //               .playSound('Se/boxopen.mp3');
-                                      //         });
-                                      //       }
-                                      //     },
-                                      //     child: tackleIcon(
-                                      //       tackleIconSize: 40.0,
-                                      //       imagePath: 'assets/Images/reel.png',
-                                      //       flgSelect: false,
-                                      //       opacity: (_depth > 0.0 ? 0.7 : 1.0),
-                                      //     )),
                                       //ルアー
                                       GestureDetector(
                                           onTap: () async {
@@ -2275,6 +2289,47 @@ class _FishingState extends BasePageState<Fishing>
                                             //         .lureId)
                                             //     .hp
                                           )),
+
+//？？？今釣れる可能性のあるサカンをカードで表示
+                                      // Card(
+                                      //     margin: const EdgeInsets.only(
+                                      //         top: 5, bottom: 5),
+                                      //     color: Color(0xffffffe0),
+                                      //     elevation: 10,
+                                      //     shadowColor: Color(0xff555555),
+                                      //     // shape: RoundedRectangleBorder(
+                                      //     //   borderRadius:
+                                      //     //       BorderRadius.circular(30),
+                                      //     // ),
+                                      //     child: InkWell(
+                                      //         splashColor:
+                                      //             Colors.blue.withAlpha(30),
+                                      //         //borderRadius: BorderRadius.circular(30),
+                                      //         onTap: () async {
+                                      //           //タップ時 ？？？なにするかまだ未定
+                                      //         },
+                                      //         child: Container(
+                                      //             margin:
+                                      //                 const EdgeInsets.all(3.0),
+                                      //             // width: 400,
+                                      //             // height: 100,
+                                      //             child: Row(
+                                      //                 mainAxisAlignment:
+                                      //                     MainAxisAlignment
+                                      //                         .spaceAround,
+                                      //                 children: [
+                                      //                   Text(
+                                      //                     "設定を変更する",
+                                      //                     style: TextStyle(
+                                      //                         //fontSize: 32,
+                                      //                         color:
+                                      //                             Colors.black),
+                                      //                   ),
+                                      //                 ])))),
+
+                                      new FishCardList(
+                                        fishsTable: _fishCardItem,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -2706,7 +2761,7 @@ class _FishingState extends BasePageState<Fishing>
     var rnd = (new math.Random()).nextDouble();
     var offsetX =
         (size.width / 4) + (size.width / 2) * (rnd * rnd); //真ん中に集約するように累乗する
-    if (settings.flgControlRight) {
+    if (!settings.flgControlRight) {
       offsetX += size.width / 4;
     } else {
       offsetX -= size.width / 4;
@@ -2784,37 +2839,37 @@ class _FishingState extends BasePageState<Fishing>
     }
   }
 
-  //持ち替えボタン
-  Widget _tacklePositionChangeButton() {
-    return Container(
-        margin: EdgeInsets.only(left: 10, right: 10),
-        child: Row(
-            mainAxisAlignment: _takcleChangeButtonPosition,
-            children: <Widget>[
-              // Column(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: <Widget>[
+  // //持ち替えボタン
+  // Widget _tacklePositionChangeButton() {
+  //   return Container(
+  //       margin: EdgeInsets.only(left: 10, right: 10),
+  //       child: Row(
+  //           mainAxisAlignment: _takcleChangeButtonPosition,
+  //           children: <Widget>[
+  // Column(
+  //     mainAxisAlignment: MainAxisAlignment.center,
+  //     children: <Widget>[
 
-              // ElevatedButton(
-              //     child: const Text('持替'),
-              //     style: ElevatedButton.styleFrom(
-              //       primary: Colors.amber, //背景色
-              //       onPrimary: Colors.black, //押したときの色
-              //       shape: const StadiumBorder(),
-              //       side: BorderSide(
-              //         color: Colors.black, //枠線の色
-              //         width: 2, //枠線の太さ
-              //       ),
-              //     ),
-              //     onPressed: () {
-              //       if (_takclePositionLeft) {
-              //         _takclePositionLeft = false;
-              //       } else {
-              //         _takclePositionLeft = true;
-              //       }
-              //     }),
-            ]));
-  }
+  // ElevatedButton(
+  //     child: const Text('持替'),
+  //     style: ElevatedButton.styleFrom(
+  //       primary: Colors.amber, //背景色
+  //       onPrimary: Colors.black, //押したときの色
+  //       shape: const StadiumBorder(),
+  //       side: BorderSide(
+  //         color: Colors.black, //枠線の色
+  //         width: 2, //枠線の太さ
+  //       ),
+  //     ),
+  //     onPressed: () {
+  //       if (_takclePositionLeft) {
+  //         _takclePositionLeft = false;
+  //       } else {
+  //         _takclePositionLeft = true;
+  //       }
+  //     }),
+  //           ]));
+  // }
 
   //画面中央のメッセージ
   startCenterInfo() {
