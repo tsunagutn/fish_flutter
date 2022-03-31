@@ -9,70 +9,85 @@ import 'SliderPainter.dart';
 
 class FishCardList extends StatefulWidget {
   @override
-  const FishCardList({
-    required this.fishsTable,
-  });
-//？？？引数追加 fishresulut、画面の幅高さ
+  const FishCardList(
+      {required this.fishsTable,
+      required this.fishesResult,
+      required this.width,
+      required this.height});
 
   final List<FishModel> fishsTable;
+  final FishesResultModel fishesResult;
+  final double width; //表示エリアの幅
+  final double height; //表示エリアの高さ
   _FishCardListState createState() => _FishCardListState();
 }
 
 class _FishCardListState extends State<FishCardList>
     with SingleTickerProviderStateMixin {
-  //List<FishModel> fishList = [];
-  //late FishModel _showFishData;
+  List<FishModel> fishList = [];
+  late FishModel _showFishData;
 
   @override
   void initState() {
     super.initState();
-
-    // widget.fishsTable.forEach((value) {
-    //   fishList.add(value);
-    // });
-    // //棚が浅い順にソート
-    // fishList.sort((a, b) => a.tanaMin.compareTo(b.tanaMin));
-
-    // _showFishData = widget.fishsTable[0];
   }
 
   @override
   Widget build(BuildContext context) {
+    fishList = [];
+    widget.fishsTable.forEach((value) {
+      fishList.add(value);
+    });
+    //リストソート レア度→棚
+    fishList.sort((a, b) {
+      int result = a.rare.compareTo(b.rare);
+      if (result != 0) return result;
+      return a.tanaMax.compareTo(b.tanaMax);
+    });
+
     return Container(
-        // width: double.maxFinite,
-        // height: MediaQuery.of(context).size.height / 2,
-        // margin: EdgeInsets.only(bottom: 10),
-        width: 150,
-        height: 300,
-        child: ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                makeFishCard(
-                  fish: widget.fishsTable[index],
-                ),
-              ],
-            );
-          },
-          itemCount: widget.fishsTable.length,
-        ));
+      decoration: BoxDecoration(
+          //border: Border.all(color: Colors.red),
+          ),
+      width: widget.width,
+      height: widget.height,
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        itemBuilder: (BuildContext context, int index) {
+          return Column(
+            //mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              makeFishCard(
+                  fish: fishList[index],
+                  fishResult: widget.fishesResult.listFishResult.where(
+                      (FishResultModel value) =>
+                          value.fishId == fishList[index].id)),
+            ],
+          );
+        },
+        itemCount: fishList.length,
+      ),
+    );
   }
 
   //魚のリストアイテム
-  Widget makeFishCard({required FishModel fish}) {
+  Widget makeFishCard(
+      {required FishModel fish,
+      required Iterable<FishResultModel> fishResult}) {
     Color backgroundColor;
-    String image;
     String name;
-    String depth;
-    String resultCount;
-    String resultMaxSize;
-    double max = 0.0;
 
-    name = fish.name;
-    backgroundColor = Color(0xffffffe0);
+    if (fishResult.length > 0) {
+      //釣果有り
+      name = fish.name;
+      backgroundColor = Color(0xffffffe0);
+    } else {
+      //釣果なし
+      name = "";
+      for (var i = 0; i < fish.name.length; i++) name += "？";
+      backgroundColor = Color(0xffc0c0c0);
+    }
 
-    //debugPrint(widget.fishsTable.length.toString());
     return new Card(
       color: backgroundColor,
       child: new InkWell(
@@ -80,21 +95,17 @@ class _FishCardListState extends State<FishCardList>
           //borderRadius: BorderRadius.circular(30),
           onTap: () async {
             //タップ時 ？？？なにするかまだ未定
+            //？？？ヒント出す機能
           },
           child: Container(
-              margin: const EdgeInsets.all(3.0),
-              // width: 400,
-              // height: 100,
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                          //fontSize: 32,
-                          color: Colors.black),
-                    ),
-                  ]))),
+              margin: EdgeInsets.only(bottom: 3),
+              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Text(
+                  name,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(color: Colors.black),
+                ),
+              ]))),
     );
   }
 }

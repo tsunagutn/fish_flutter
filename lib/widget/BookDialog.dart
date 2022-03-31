@@ -409,7 +409,8 @@ class _BookDialogState extends State<BookDialog>
       //釣ったことがない
       backgroundColor = Colors.grey;
       image = "unknownfish.png";
-      name = "?????";
+      name = "";
+      for (var i = 0; i < fish.name.length; i++) name += "？";
       resultCount = "0匹";
       resultMaxSize = "";
     }

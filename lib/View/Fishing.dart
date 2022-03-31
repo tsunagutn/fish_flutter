@@ -7,10 +7,6 @@
 //https://soundeffect-lab.info/
 
 //☆基本概要
-//・モード案１：ずっとモード
-//　　　　　　好きなロケ、道具等で好きにできる、状態保存して続きからできる
-//・モード案２：だんだん条件が厳しくなる
-//・モード案３：水深500mにいるボスを倒す
 
 //☆残タス
 //済・ソナー光点をアニメーション光るにする
@@ -77,32 +73,36 @@
 //済・リールタップしていいとき光らすとかの表示
 //済・ルアーめげるシステムいらんくね？
 //済・おさかな図鑑画面で？でも何mでつれるかの表示出す
-//・今釣れる可能性のある魚をリスト表示
-//・店
-//・風
-//・陸から何メートルで釣れる魚変わるシステム
-//・雲
+//済・陸から何メートルで釣れる魚変わるシステム
+//中・音？なんかばぐがある
+//中・今釣れる可能性のある魚をリスト表示
+//中・店
+//・風の描画？？？いる？
+//・雲の描画
 //・時合度が低いのが続かんようにするか、高くできるようにする
-//・王冠つきじゃないと詳細アンロックしない
+//・王冠つきじゃないと詳細アンロックしない？
 //・魚種毎に実績
 //・設定画面 合わせの強さ調節
 //・設定画面 音ボリューム
-//・音
 //・実績
 //・中断セーブ機能
-//・赤ポイント緑ポイント青ポイント
+
 //・光点が横に走る
 //・水流
 //・水中に泡とか
 //・海底に漁礁とか
 //・全体的見た目何とかする、水中にテカリ的なグラデーションとか
 //・通知インフォメーション 今が時合で！みたいな
-//・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
 //・HIT時につっこみモード、おとなしいモードつけて勢い度
-//・糸切れ判定 勢い度を加味して切れるようにする
 //・魚種データをDB化して登録画面実装
 //・エリア選択 エリアによって魚種、深さ等変える
 //・チュートリアルか、ヘルプか
+
+//ボツ
+//・赤ポイント緑ポイント青ポイント
+//・糸切れ判定 勢い度を加味して切れるようにする
+//・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
+
 //夢
 //・アワセシステム ARVRモード時はスマホをジャイロで動かす、通常時は下にドラッグでアワセ
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
@@ -351,7 +351,7 @@ class _FishingState extends BasePageState<Fishing>
   //釣果リスト
   late FishesResultModel fishesResult;
 
-  //今釣れる可能性のある魚種リスト
+  //今の場所で釣れる可能性のある魚種リスト
   List<FishModel> _fishCardItem = [];
 
   //船移動
@@ -556,9 +556,8 @@ class _FishingState extends BasePageState<Fishing>
 
     //現在使用中のルアーデータ
     LureModel lureData = lures.getLureData(haveTackle.getUseLure().lureId);
-    //魚リスト初期化
-    _fishCardItem = [];
-
+    //現在の最大深さから可能性のある種を抽出
+    _fishCardItem = FISH_TABLE.extractMaxDepth(maxDepth: _maxDepth);
     //風レベル判定
     for (int key in WIND_FOR_DEPTH.keys) {
       if (_maxDepth.toInt() < key) {
@@ -859,11 +858,12 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     //光点表示位置設定
-    if (!settings.flgControlRight) {
-      _lightSpotX = size.width * (2 / 3);
-    } else {
-      _lightSpotX = size.width * (1 / 3);
-    }
+    // if (!settings.flgControlRight) {
+    //   _lightSpotX = size.width * (2 / 3);
+    // } else {
+    //   _lightSpotX = size.width * (1 / 3);
+    // }
+    _lightSpotX = size.width / 2;
     // _lightSpotY =
     //     ((_depth / _maxDepth) * (size.height - _shoreHeight - _bottomHeight));
     _lightSpotY = ((_depth / _maxDepth) *
@@ -947,10 +947,9 @@ class _FishingState extends BasePageState<Fishing>
 
     //現在底付近か？
     var bottom = (_depth > (_maxDepth * 0.8)) ? true : false;
-    // //深さから可能性のある種を抽出
-    _fishCardItem = FISH_TABLE.extractDepth(
+    //深さから可能性のある種を抽出
+    var fishs = FISH_TABLE.extractDepth(
         depth: _depth, maxDepth: _maxDepth, bottom: bottom);
-    //debugPrint(_fishCardItem.length.toString());
     var maxProb = 0.0;
     _listSpeedRange = []; //速度リスト初期化
     duration = durationMax;
@@ -1001,7 +1000,7 @@ class _FishingState extends BasePageState<Fishing>
         }
 
         //種毎の判定
-        _fishCardItem.forEach((fish) {
+        fishs.forEach((fish) {
           var hitSpeedprob = 0.0;
           var hitSpeedprobDisp = 0.0;
           var hitProb = 0.0;
@@ -2241,126 +2240,174 @@ class _FishingState extends BasePageState<Fishing>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  margin: EdgeInsets.only(
-                                      top: _shoreHeight +
-                                          50 +
-                                          (5 * _commonAnime.value),
-                                      left: 10),
-                                  //height: 180,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      //ルアー
-                                      GestureDetector(
-                                          onTap: () async {
-                                            if (_depth <= 0.0) {
-                                              setState(() {
-                                                _selectTacleIcon = 'lure';
-                                                _showTacleChangeDialog = true;
-                                                bgm.soundManagerPool.playSound(
-                                                    'Se/boxopen.mp3');
-                                              });
-                                            }
-                                          },
-                                          child: tackleIcon(
-                                            tackleIconSize: 40.0,
-                                            imagePath: 'assets/Images/' +
-                                                lures
-                                                    .getLureData(haveTackle
-                                                        .getUseLure()
-                                                        .lureId)
-                                                    .image,
-                                            flgSelect: false,
-                                            opacity: (_depth > 0.0 ? 0.7 : 1.0),
-                                            subText: lures
-                                                    .getLureData(haveTackle
-                                                        .getUseLure()
-                                                        .lureId)
-                                                    .weight
-                                                    .toString() +
-                                                'g',
-                                            // hp: haveTackle.getUseLure().lureHp,
-                                            // maxHp: lures
-                                            //     .getLureData(haveTackle
-                                            //         .getUseLure()
-                                            //         .lureId)
-                                            //     .hp
-                                          )),
-
-//？？？今釣れる可能性のあるサカンをカードで表示
-                                      // Card(
-                                      //     margin: const EdgeInsets.only(
-                                      //         top: 5, bottom: 5),
-                                      //     color: Color(0xffffffe0),
-                                      //     elevation: 10,
-                                      //     shadowColor: Color(0xff555555),
-                                      //     // shape: RoundedRectangleBorder(
-                                      //     //   borderRadius:
-                                      //     //       BorderRadius.circular(30),
-                                      //     // ),
-                                      //     child: InkWell(
-                                      //         splashColor:
-                                      //             Colors.blue.withAlpha(30),
-                                      //         //borderRadius: BorderRadius.circular(30),
-                                      //         onTap: () async {
-                                      //           //タップ時 ？？？なにするかまだ未定
-                                      //         },
-                                      //         child: Container(
-                                      //             margin:
-                                      //                 const EdgeInsets.all(3.0),
-                                      //             // width: 400,
-                                      //             // height: 100,
-                                      //             child: Row(
-                                      //                 mainAxisAlignment:
-                                      //                     MainAxisAlignment
-                                      //                         .spaceAround,
-                                      //                 children: [
-                                      //                   Text(
-                                      //                     "設定を変更する",
-                                      //                     style: TextStyle(
-                                      //                         //fontSize: 32,
-                                      //                         color:
-                                      //                             Colors.black),
-                                      //                   ),
-                                      //                 ])))),
-
-                                      new FishCardList(
-                                        fishsTable: _fishCardItem,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                //回収ボタン デザインは仮だから
-                                AnimatedOpacity(
-                                  opacity: _depth > 0.0 && !_flgBait && !_flgHit
-                                      ? 1.0
-                                      : 0.0,
-                                  duration: Duration(milliseconds: 200),
-                                  child: Container(
-                                    margin: EdgeInsets.only(
-                                        top: _shoreHeight + 70, right: 10),
-                                    child: ElevatedButton(
-                                        child: const Text('回収'),
-                                        style: ElevatedButton.styleFrom(
-                                          primary: Colors.amber, //背景色
-                                          onPrimary: Colors.black, //押したときの色
-                                          shape: const StadiumBorder(),
-                                          side: BorderSide(
-                                            color: Colors.black, //枠線の色
-                                            width: 2, //枠線の太さ
-                                          ),
+                                (!settings.flgControlRight)
+                                    ?
+                                    //回収ボタン ？？？デザインは仮だから
+                                    AnimatedOpacity(
+                                        opacity: _depth > 0.0 &&
+                                                !_flgBait &&
+                                                !_flgHit
+                                            ? 1.0
+                                            : 0.0,
+                                        duration: Duration(milliseconds: 200),
+                                        child: Container(
+                                          margin: EdgeInsets.only(
+                                              top: _shoreHeight + 70, left: 10),
+                                          child: ElevatedButton(
+                                              child: const Text('回収'),
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Colors.amber, //背景色
+                                                onPrimary:
+                                                    Colors.black, //押したときの色
+                                                shape: const StadiumBorder(),
+                                                side: BorderSide(
+                                                  color: Colors.black, //枠線の色
+                                                  width: 2, //枠線の太さ
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                _collect = true;
+                                                _onClutch = true;
+                                              }),
                                         ),
-                                        onPressed: () {
-                                          _collect = true;
-                                          _onClutch = true;
-                                        }),
-                                  ),
-                                ),
+                                      )
+                                    : Container(
+                                        margin: EdgeInsets.only(
+                                            top: _shoreHeight +
+                                                50 +
+                                                (5 * _commonAnime.value),
+                                            left: 10),
+                                        child:
+                                            //ルアー
+                                            GestureDetector(
+                                                onTap: () async {
+                                                  if (_depth <= 0.0) {
+                                                    setState(() {
+                                                      _selectTacleIcon = 'lure';
+                                                      _showTacleChangeDialog =
+                                                          true;
+                                                      bgm.soundManagerPool
+                                                          .playSound(
+                                                              'Se/boxopen.mp3');
+                                                    });
+                                                  }
+                                                },
+                                                child: tackleIcon(
+                                                  tackleIconSize: 40.0,
+                                                  imagePath: 'assets/Images/' +
+                                                      lures
+                                                          .getLureData(
+                                                              haveTackle
+                                                                  .getUseLure()
+                                                                  .lureId)
+                                                          .image,
+                                                  flgSelect: false,
+                                                  opacity: (_depth > 0.0
+                                                      ? 0.7
+                                                      : 1.0),
+                                                  subText: lures
+                                                          .getLureData(
+                                                              haveTackle
+                                                                  .getUseLure()
+                                                                  .lureId)
+                                                          .weight
+                                                          .toString() +
+                                                      'g',
+                                                )),
+                                      ),
+                                (settings.flgControlRight)
+                                    ?
+                                    //回収ボタン ？？？デザインは仮だから
+                                    AnimatedOpacity(
+                                        opacity: _depth > 0.0 &&
+                                                !_flgBait &&
+                                                !_flgHit
+                                            ? 1.0
+                                            : 0.0,
+                                        duration: Duration(milliseconds: 200),
+                                        child: Container(
+                                          margin: EdgeInsets.only(
+                                              top: _shoreHeight + 70,
+                                              right: 10),
+                                          child: ElevatedButton(
+                                              child: const Text('回収'),
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Colors.amber, //背景色
+                                                onPrimary:
+                                                    Colors.black, //押したときの色
+                                                shape: const StadiumBorder(),
+                                                side: BorderSide(
+                                                  color: Colors.black, //枠線の色
+                                                  width: 2, //枠線の太さ
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                _collect = true;
+                                                _onClutch = true;
+                                              }),
+                                        ),
+                                      )
+                                    : Container(
+                                        margin: EdgeInsets.only(
+                                            top: _shoreHeight +
+                                                50 +
+                                                (5 * _commonAnime.value),
+                                            right: 10),
+                                        child:
+                                            //ルアー
+                                            GestureDetector(
+                                                onTap: () async {
+                                                  if (_depth <= 0.0) {
+                                                    setState(() {
+                                                      _selectTacleIcon = 'lure';
+                                                      _showTacleChangeDialog =
+                                                          true;
+                                                      bgm.soundManagerPool
+                                                          .playSound(
+                                                              'Se/boxopen.mp3');
+                                                    });
+                                                  }
+                                                },
+                                                child: tackleIcon(
+                                                  tackleIconSize: 40.0,
+                                                  imagePath: 'assets/Images/' +
+                                                      lures
+                                                          .getLureData(
+                                                              haveTackle
+                                                                  .getUseLure()
+                                                                  .lureId)
+                                                          .image,
+                                                  flgSelect: false,
+                                                  opacity: (_depth > 0.0
+                                                      ? 0.7
+                                                      : 1.0),
+                                                  subText: lures
+                                                          .getLureData(
+                                                              haveTackle
+                                                                  .getUseLure()
+                                                                  .lureId)
+                                                          .weight
+                                                          .toString() +
+                                                      'g',
+                                                )),
+                                      ),
                               ],
                             )),
+                            Row(
+                                mainAxisAlignment: (settings.flgControlRight)
+                                    ? MainAxisAlignment.start
+                                    : MainAxisAlignment.end,
+                                children: [
+                                  new FishCardList(
+                                    fishsTable: _fishCardItem,
+                                    fishesResult: fishesResult,
+                                    width: 120,
+                                    height: size.height -
+                                        _shoreHeight -
+                                        _bottomHeight -
+                                        40,
+                                  ),
+                                ])
                           ],
                         ),
                         AnimatedPadding(
@@ -2957,27 +3004,27 @@ Widget tackleIcon({
             subText,
             style: TextStyle(fontSize: 12),
           ),
-          Visibility(
-            visible: (maxHp > 0),
-            child: Container(
-              margin: EdgeInsets.all(3),
-              child: CustomPaint(
-                painter: new SliderPainter(
-                  height: 4,
-                  activeColor: clsColor.getRaitoColor(hp / maxHp),
-                  inactiveColor: Colors.white,
-                  value: hp.toDouble(),
-                  maxValue: maxHp.toDouble(),
-                  backRadius: 0,
-                  maxBackRadius: 0,
-                  flgShaKe: false,
-                  flgDispValue: false,
-                  flgDispMaxValue: false,
-                ),
-                child: Container(),
-              ),
-            ),
-          ),
+          // Visibility(
+          //   visible: (maxHp > 0),
+          //   child: Container(
+          //     margin: EdgeInsets.all(3),
+          //     child: CustomPaint(
+          //       painter: new SliderPainter(
+          //         height: 4,
+          //         activeColor: clsColor.getRaitoColor(hp / maxHp),
+          //         inactiveColor: Colors.white,
+          //         value: hp.toDouble(),
+          //         maxValue: maxHp.toDouble(),
+          //         backRadius: 0,
+          //         maxBackRadius: 0,
+          //         flgShaKe: false,
+          //         flgDispValue: false,
+          //         flgDispMaxValue: false,
+          //       ),
+          //       child: Container(),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     ),

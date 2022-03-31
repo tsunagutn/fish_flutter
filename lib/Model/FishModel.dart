@@ -462,6 +462,17 @@ class FishsModel {
     }
     return extractFishs;
   }
+
+  //現在の最大水深から可能性のある魚種のみ抽出して返す
+  List<FishModel> extractMaxDepth({required double maxDepth}) {
+    //ディープコピー
+    List<FishModel> extractFishs = [...fishs];
+    //深さから可能性のある魚種のみ抽出
+    extractFishs.removeWhere((value) => maxDepth < value.hereTanaMin);
+    extractFishs.removeWhere((value) => maxDepth > value.hereTanaMax);
+
+    return extractFishs;
+  }
 }
 
 class FishModel {
