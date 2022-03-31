@@ -1,6 +1,7 @@
 import 'package:fish_flutter/Model/CheckListTestModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
+import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
 
@@ -9,27 +10,48 @@ import 'SliderPainter.dart';
 
 class FishCardList extends StatefulWidget {
   @override
-  const FishCardList(
-      {required this.fishsTable,
-      required this.fishesResult,
-      required this.width,
-      required this.height});
+  const FishCardList({
+    required this.fishsTable,
+    required this.fishesResult,
+    required this.width,
+    required this.height,
+    required this.hitFishId,
+    required this.pointerColor,
+    required this.borderWidth,
+  });
 
   final List<FishModel> fishsTable;
   final FishesResultModel fishesResult;
   final double width; //表示エリアの幅
   final double height; //表示エリアの高さ
+  final int hitFishId; //HITorアタリ中の魚ID 非HIT中は-1
+  final Color pointerColor; //光点の色
+  final double borderWidth; //枠線の幅
   _FishCardListState createState() => _FishCardListState();
 }
 
 class _FishCardListState extends State<FishCardList>
     with SingleTickerProviderStateMixin {
   List<FishModel> fishList = [];
-  late FishModel _showFishData;
 
+  // late AnimationController animController;
+  // late Animation<double> animValue;
   @override
   void initState() {
     super.initState();
+    // animController =
+    //     AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    // animValue = Tween(begin: 0.0, end: 1.0).animate(animController)
+    //   ..addListener(() {
+    //     setState(() {});
+    //   });
+    // animController.repeat(); // アニメーションをスタート
+  }
+
+  @override
+  void dispose() {
+    //animController.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,6 +97,7 @@ class _FishCardListState extends State<FishCardList>
       {required FishModel fish,
       required Iterable<FishResultModel> fishResult}) {
     Color backgroundColor;
+    bool flgBorder = false;
     String name;
 
     if (fishResult.length > 0) {
@@ -85,11 +108,22 @@ class _FishCardListState extends State<FishCardList>
       //釣果なし
       name = "";
       for (var i = 0; i < fish.name.length; i++) name += "？";
-      backgroundColor = Color(0xffc0c0c0);
+      if (fish.id == widget.hitFishId) {
+        flgBorder = true;
+        backgroundColor = Color(0xffffffff);
+      } else {
+        backgroundColor = Color(0xffc0c0c0).withOpacity(0.8);
+      }
     }
 
     return new Card(
       color: backgroundColor,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          width: (flgBorder ? widget.borderWidth : 0),
+          color: widget.pointerColor,
+        ),
+      ),
       child: new InkWell(
           splashColor: Colors.blue.withAlpha(30),
           //borderRadius: BorderRadius.circular(30),

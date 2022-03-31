@@ -74,8 +74,8 @@
 //済・ルアーめげるシステムいらんくね？
 //済・おさかな図鑑画面で？でも何mでつれるかの表示出す
 //済・陸から何メートルで釣れる魚変わるシステム
+//済・今釣れる可能性のある魚をリスト表示
 //中・音？なんかばぐがある
-//中・今釣れる可能性のある魚をリスト表示
 //中・店
 //・風の描画？？？いる？
 //・雲の描画
@@ -556,8 +556,6 @@ class _FishingState extends BasePageState<Fishing>
 
     //現在使用中のルアーデータ
     LureModel lureData = lures.getLureData(haveTackle.getUseLure().lureId);
-    //現在の最大深さから可能性のある種を抽出
-    _fishCardItem = FISH_TABLE.extractMaxDepth(maxDepth: _maxDepth);
     //風レベル判定
     for (int key in WIND_FOR_DEPTH.keys) {
       if (_maxDepth.toInt() < key) {
@@ -649,9 +647,8 @@ class _FishingState extends BasePageState<Fishing>
       if (_moveShipTarget < 0.5) _moveShipTarget = 0.5;
     }
 
-    //魚の残HP
+    //HIT中
     if (_flgHit) {
-      //HIT中
       //暴れレベル変化判定
       if (rand < 0.05) {
         _abareLv =
@@ -659,7 +656,7 @@ class _FishingState extends BasePageState<Fishing>
         debugPrint(_abareLv.toString());
       }
       //残HP減算 暴れLv分減算
-      _hitScanCnt -= _abareLv;
+      _hitScanCnt -= _abareLv * 2;
       // //魚残HPの計算
       // if (_hitScanCnt > 0) {
       //   var minusHp = 1;
@@ -705,6 +702,9 @@ class _FishingState extends BasePageState<Fishing>
           ((fishWeight * _abareLv) * rand) * (_hitScanCnt / fish.hp);
 
       weight += fishWeight + abareWeight;
+    } else {
+      //アタリ中、HIT中でない時は現在の最大深さから可能性のある種を抽出
+      _fishCardItem = FISH_TABLE.extractMaxDepth(maxDepth: _maxDepth);
     }
     //シャクリによるテンション増加？？？竿長さによって係数を可変にする
     weight += _rodStandUp * 1000;
@@ -2406,6 +2406,11 @@ class _FishingState extends BasePageState<Fishing>
                                         _shoreHeight -
                                         _bottomHeight -
                                         40,
+                                    hitFishId: (_flgHit || _flgBait)
+                                        ? FISH_TABLE.fishs[_fishidx].id
+                                        : -1,
+                                    pointerColor: _pointerColor,
+                                    borderWidth: _animationRadius.value,
                                   ),
                                 ])
                           ],
