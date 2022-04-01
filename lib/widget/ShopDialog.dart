@@ -124,7 +124,7 @@ class _ShopDialogState extends State<ShopDialog>
                                       tackleIcon(
                                         tackleIconSize: 40.0,
                                         imagePath:
-                                            'assets/Images/' + nowRod.image,
+                                            'assets/images/' + nowRod.image,
                                         flgSelect: false,
                                         opacity: 1.0,
                                       ),
@@ -142,7 +142,7 @@ class _ShopDialogState extends State<ShopDialog>
                                       tackleIcon(
                                         tackleIconSize: 40.0,
                                         imagePath:
-                                            'assets/Images/' + nextRod.image,
+                                            'assets/images/' + nextRod.image,
                                         flgSelect: false,
                                         opacity: 1.0,
                                       ),
@@ -202,7 +202,7 @@ class _ShopDialogState extends State<ShopDialog>
                                                     //効果音
                                                     widget.soundManagerPool
                                                         .playSound(
-                                                            'Se/shop.mp3');
+                                                            'se/shop.mp3');
                                                   }),
                                       ),
                                     ],
@@ -232,7 +232,7 @@ class _ShopDialogState extends State<ShopDialog>
                                       tackleIcon(
                                         tackleIconSize: 40.0,
                                         imagePath:
-                                            'assets/Images/' + nowReel.image,
+                                            'assets/images/' + nowReel.image,
                                         flgSelect: false,
                                         opacity: 1.0,
                                       ),
@@ -250,7 +250,7 @@ class _ShopDialogState extends State<ShopDialog>
                                       tackleIcon(
                                         tackleIconSize: 40.0,
                                         imagePath:
-                                            'assets/Images/' + nextReel.image,
+                                            'assets/images/' + nextReel.image,
                                         flgSelect: false,
                                         opacity: 1.0,
                                       ),
@@ -312,7 +312,7 @@ class _ShopDialogState extends State<ShopDialog>
                                                     //効果音
                                                     widget.soundManagerPool
                                                         .playSound(
-                                                            'Se/shop.mp3');
+                                                            'se/shop.mp3');
                                                   }),
                                       ),
                                     ],

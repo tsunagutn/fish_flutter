@@ -15,7 +15,7 @@ class SoundManagerPool {
   SoundManagerPoolInit() {
     //定義済みの全managerで0.1secの無音を再生 IOSブラウザ対策
     managers.forEach((element) {
-      element.playSound('Se/muon01.mp3');
+      element.playSound('se/muon01.mp3');
     });
   }
 

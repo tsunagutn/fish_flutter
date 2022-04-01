@@ -14,7 +14,7 @@ class DispObjectsModel {
     //シーダーみたいなやつ
     obj.add(new DispObjectModel(
       id: 0,
-      imagePath: 'assets/Images/teibou.png',
+      imagePath: 'assets/images/teibou.png',
       positon: dispPosition.sky,
       dispDepth: 0.0,
       top: 20,

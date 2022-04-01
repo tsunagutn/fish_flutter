@@ -54,10 +54,11 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   assets:
-    - assets/Images/
-    - assets/Images/fish/
-    - assets/Bgm/
-    - assets/Se/
+    - assets/
+    - assets/images/
+    - assets/images/fish/
+    - assets/bgm/
+    - assets/se/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

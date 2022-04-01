@@ -91,7 +91,7 @@ class _BookDialogState extends State<BookDialog>
                     width: double.maxFinite,
                     decoration: BoxDecoration(
                         image: new DecorationImage(
-                          image: new AssetImage("assets/Images/fishback.jpg"),
+                          image: new AssetImage("assets/images/fishback.jpg"),
                           fit: BoxFit.cover,
                         ),
                         border: Border.all(
@@ -107,7 +107,7 @@ class _BookDialogState extends State<BookDialog>
                               margin: EdgeInsets.only(top: 20, bottom: 10),
                               child: new Image(
                                 image: AssetImage(
-                                    'assets/Images/' + _showFishData.image),
+                                    'assets/images/' + _showFishData.image),
                                 width: 180,
                               ),
                             ),
@@ -365,7 +365,7 @@ class _BookDialogState extends State<BookDialog>
                                 ),
                                 onPressed: () {
                                   widget.soundManagerPool
-                                      .playSound('Se/book.mp3');
+                                      .playSound('se/book.mp3');
 
                                   setState(() {
                                     _showFishDetail = false;
@@ -425,7 +425,7 @@ class _BookDialogState extends State<BookDialog>
         onTap: () {
           if (fishResult.length > 0) {
             //釣果有り
-            widget.soundManagerPool.playSound('Se/book.mp3');
+            widget.soundManagerPool.playSound('se/book.mp3');
             //カードタップで詳細画面を表示
             setState(() {
               _showFishData = fish;
@@ -442,7 +442,7 @@ class _BookDialogState extends State<BookDialog>
                 Column(
                   children: [
                     new Image(
-                      image: AssetImage('assets/Images/' + image),
+                      image: AssetImage('assets/images/' + image),
                       width: 50,
                       height: 50,
                     ),

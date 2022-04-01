@@ -23,9 +23,9 @@ class BgmPlayer {
   Future<void> loadBgm() async {
     // 本件ではあらかじめBGMをバッファに保持させておく、
     // 戻り値のURIはファイル名をキーとしてMap内に保持し、再生時に使用する
-    bgmUriMap["bgm_field.mp3"] = await _cache.load("Bgm/bgm_field.mp3");
-    bgmUriMap["bgm_fight.mp3"] = await _cache.load("Bgm/bgm_fight.mp3");
-    bgmUriMap["bgm_book.mp3"] = await _cache.load("Bgm/bgm_book.mp3");
+    bgmUriMap["bgm_field.mp3"] = await _cache.load("bgm/bgm_field.mp3");
+    bgmUriMap["bgm_fight.mp3"] = await _cache.load("bgm/bgm_fight.mp3");
+    bgmUriMap["bgm_book.mp3"] = await _cache.load("bgm/bgm_book.mp3");
   }
 
   void playBgm({required String name, bool isLoop = true}) {

@@ -56,7 +56,7 @@ class _SettingDialogState extends State<SettingDialog>
         //BGN再生
         if (e) {
           //BGM ONなら再生
-          subBgmLoop('Bgm/bgm_book.mp3');
+          subBgmLoop('bgm/bgm_book.mp3');
         } else {
           //OFFなら停止
           subBgmStop();
@@ -78,7 +78,7 @@ class _SettingDialogState extends State<SettingDialog>
       });
   void _changeEndVolumeSe(double? e) => setState(() {
         //適当な音を再生
-        widget.soundManagerPool.playSound('Se/linebreak.mp3');
+        widget.soundManagerPool.playSound('se/linebreak.mp3');
       });
 
   @override
@@ -92,7 +92,7 @@ class _SettingDialogState extends State<SettingDialog>
     _volumeSe = settings.volumeSe;
 
     //設定画面BCM再生
-    subBgmLoop('Bgm/bgm_book.mp3');
+    subBgmLoop('bgm/bgm_book.mp3');
   }
 
   @override

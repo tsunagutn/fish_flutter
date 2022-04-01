@@ -103,7 +103,7 @@ class _fishGetDialogState extends State<fishGetDialog>
         child: Container(
             decoration: new BoxDecoration(
                 image: new DecorationImage(
-              image: new AssetImage("assets/Images/fishback.jpg"),
+              image: new AssetImage("assets/images/fishback.jpg"),
               fit: BoxFit.cover,
             )),
             child: AlertDialog(
@@ -136,12 +136,12 @@ class _fishGetDialogState extends State<fishGetDialog>
                   height: widget.dispSize.height / 2,
                   // decoration: new BoxDecoration(
                   //     image: new DecorationImage(
-                  //   image: new AssetImage("assets/Images/fishback.jpg"),
+                  //   image: new AssetImage("assets/images/fishback.jpg"),
                   //   fit: BoxFit.cover,
                   // )),
                   child: Column(children: <Widget>[
                     new Image(
-                      image: AssetImage('assets/Images/' + widget.fish.image),
+                      image: AssetImage('assets/images/' + widget.fish.image),
                       // width: 150,
                       // height: 150,
                     ),

@@ -375,14 +375,14 @@ class _FishingState extends BasePageState<Fishing>
 
   @override
   void initState() {
-    //サブBGM再生
-    _ap = new AudioPlayer();
     // AudioCache _player = AudioCache();
     // AudioCache _subBgm = AudioCache(
     //   fixedPlayer: _ap,
     // );
 
-    // this.bgmPlay('Bgm/bgm_field.mp3');
+    //サブBGM再生
+    _ap = new AudioPlayer();
+    // this.bgmPlay('bgm/bgm_field.mp3');
 
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
@@ -455,7 +455,7 @@ class _FishingState extends BasePageState<Fishing>
   }
 
   void createImage() async {
-    final rawData = await rootBundle.load('assets/Images/teibou.png');
+    final rawData = await rootBundle.load('assets/images/teibou.png');
     final imgList = Uint8List.view(rawData.buffer);
     imageTeibou = await decodeImageFromList(imgList);
     getImageTeibou = true;
@@ -617,7 +617,7 @@ class _FishingState extends BasePageState<Fishing>
       _shipMoveSeScan++;
       if (_shipMoveSeScan >= (800 / TIMER_INTERVAL).floor()) {
         //船動作音が連続再生しすぎるのを防止
-        bgm.soundManagerPool.playSound('Se/shipmove.mp3');
+        bgm.soundManagerPool.playSound('se/shipmove.mp3');
         _shipMoveSeScan = 0;
       }
     }
@@ -631,13 +631,18 @@ class _FishingState extends BasePageState<Fishing>
     if (_depthChange != 0.0) {
       //魚反応を移動させる
       fishPointerList.forEach((element) {
+
         //描画ごとにglovalkeyを付けているのでそれにアクセス
-        RenderCustomPaint obj = element.painterKey.currentContext
-            ?.findRenderObject() as RenderCustomPaint;
-        FishPainter obj2 = obj.painter as FishPainter;
-        //addxの値を加減算で移動
-        obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange) * -1;
-        obj2.addX += 0.5 - element.randMove;
+        try {
+          RenderCustomPaint obj = element.painterKey.currentContext
+              ?.findRenderObject() as RenderCustomPaint;
+          FishPainter obj2 = obj.painter as FishPainter;
+          //addxの値を加減算で移動
+          obj2.addX += MOVE_FISHPOINTER_MAX * (_depthChange) * -1;
+          obj2.addX += 0.5 - element.randMove;
+        }
+        catch(e){
+        }
       });
     }
 
@@ -771,7 +776,7 @@ class _FishingState extends BasePageState<Fishing>
         //使用中のルアーを削除
         haveTackle.lostLure(haveTackle.getUseLure().id);
         val = 0.0;
-        bgm.soundManagerPool.playSound('Se/linebreak.mp3');
+        bgm.soundManagerPool.playSound('se/linebreak.mp3');
         bgmPlay(Fishing.screenBgm);
 
         _flgBait = false;
@@ -796,9 +801,9 @@ class _FishingState extends BasePageState<Fishing>
 
       //ドラグ音再生
       if (dragDiff > 15) {
-        bgm.soundManagerPool.playSound('Se/drag2_high.mp3');
+        bgm.soundManagerPool.playSound('se/drag2_high.mp3');
       } else {
-        bgm.soundManagerPool.playSound('Se/drag2.mp3');
+        bgm.soundManagerPool.playSound('se/drag2.mp3');
       }
     } else {
       //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
@@ -816,9 +821,9 @@ class _FishingState extends BasePageState<Fishing>
       _depth = 0.0;
       if (_prevDepth > 0.0) {
         if (_flgHit) {
-          bgm.soundManagerPool.playSound('Se/waterupfish.mp3');
+          bgm.soundManagerPool.playSound('se/waterupfish.mp3');
         } else {
-          bgm.soundManagerPool.playSound('Se/waterup.mp3');
+          bgm.soundManagerPool.playSound('se/waterup.mp3');
         }
       }
       //ラインHPを回復
@@ -856,7 +861,7 @@ class _FishingState extends BasePageState<Fishing>
     //     _centerTextSub = "ルアーが破壊!";
     //     _centerTextSubColor = Colors.yellow;
     //     startCenterInfo();
-    //     bgm.soundManagerPool.playSound('Se/lurebroken.mp3');
+    //     bgm.soundManagerPool.playSound('se/lurebroken.mp3');
     //   }
     // }
 
@@ -908,11 +913,11 @@ class _FishingState extends BasePageState<Fishing>
         }
       });
 
-      //bgm.soundManagerPool.playSound('Se/jingle01.mp3');
+      //bgm.soundManagerPool.playSound('se/jingle01.mp3');
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
       bgmStop();
-      subBgmPlay('Se/jingle01.mp3');
+      subBgmPlay('se/jingle01.mp3');
       var result = await showDialog<int>(
         context: context,
         barrierDismissible: false,
@@ -1120,7 +1125,7 @@ class _FishingState extends BasePageState<Fishing>
             //_dispInfo = 'アタリ';
             _infoBackColor = TENSION_COLOR_DANGER;
 
-            bgm.soundManagerPool.playSound('Se/bait.mp3');
+            bgm.soundManagerPool.playSound('se/bait.mp3');
           }
           if (_flgBait || _flgHit) {
           } else {
@@ -1163,7 +1168,7 @@ class _FishingState extends BasePageState<Fishing>
           _centerTextSubColor = Colors.yellow;
           startCenterInfo();
 
-          bgm.soundManagerPool.playSound('Se/hit.mp3');
+          bgm.soundManagerPool.playSound('se/hit.mp3');
           bgmPlay('bgm_fight.mp3');
         } else {
           //当たってからのスキャン数加算
@@ -1333,9 +1338,9 @@ class _FishingState extends BasePageState<Fishing>
                     onPressed: () async {
                       _timer.cancel(); //定周期タイマ停止
                       bgmPause();
-                      subBgmLoop('Bgm/bgm_book.mp3');
+                      subBgmLoop('bgm/bgm_book.mp3');
                       // //図鑑モーダルの表示
-                      bgm.soundManagerPool.playSound('Se/book.mp3');
+                      bgm.soundManagerPool.playSound('se/book.mp3');
                       var result = await showDialog<int>(
                         context: context,
                         barrierDismissible: false,
@@ -1347,7 +1352,7 @@ class _FishingState extends BasePageState<Fishing>
                           );
                         },
                       );
-                      bgm.soundManagerPool.playSound('Se/bookclose.mp3');
+                      bgm.soundManagerPool.playSound('se/bookclose.mp3');
                       startTimer(); //定周期タイマ再開
                       subBgmStop();
                       bgmResume();
@@ -1385,8 +1390,8 @@ class _FishingState extends BasePageState<Fishing>
                         //買い物モーダルの表示
                         _timer.cancel(); //定周期タイマ停止
                         bgmPause();
-                        subBgmLoop('Bgm/bgm_book.mp3');
-                        bgm.soundManagerPool.playSound('Se/book.mp3'); //音は仮
+                        subBgmLoop('bgm/bgm_book.mp3');
+                        bgm.soundManagerPool.playSound('se/book.mp3'); //音は仮
                         int? result = await showDialog<int>(
                           context: context,
                           barrierDismissible: false,
@@ -1400,7 +1405,7 @@ class _FishingState extends BasePageState<Fishing>
                         );
                         _point = result!;
                         bgm.soundManagerPool
-                            .playSound('Se/bookclose.mp3'); //音は仮
+                            .playSound('se/bookclose.mp3'); //音は仮
                         startTimer(); //定周期タイマ再開
                         subBgmStop();
                         bgmResume();
@@ -1423,8 +1428,8 @@ class _FishingState extends BasePageState<Fishing>
                     //買い物モーダルの表示
                     _timer.cancel(); //定周期タイマ停止
                     bgmStop();
-                    //subBgmLoop('Bgm/bgm_book.mp3');
-                    //bgm.soundManagerPool.playSound('Se/book.mp3'); //音は仮
+                    //subBgmLoop('bgm/bgm_book.mp3');
+                    //bgm.soundManagerPool.playSound('se/book.mp3'); //音は仮
                     int? result = await showDialog<int>(
                       context: context,
                       barrierDismissible: false,
@@ -1435,8 +1440,7 @@ class _FishingState extends BasePageState<Fishing>
                         );
                       },
                     );
-                    _point = result!;
-                    //bgm.soundManagerPool.playSound('Se/bookclose.mp3'); //音は仮
+                    //bgm.soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
                     startTimer(); //定周期タイマ再開
                     subBgmStop();
                     bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
@@ -1473,7 +1477,7 @@ class _FishingState extends BasePageState<Fishing>
                 onPanStart: (DragStartDetails details) {
                   debugPrint("ドラッグ開始");
                   if (_showTacleChangeDialog) {
-                    bgm.soundManagerPool.playSound('Se/boxclose.mp3');
+                    bgm.soundManagerPool.playSound('se/boxclose.mp3');
                     _showTacleChangeDialog = false;
                   }
                   _cursorX = details.localPosition.dx;
@@ -1531,9 +1535,9 @@ class _FishingState extends BasePageState<Fishing>
                   addVal = (moveY / 100);
                   //シャクリ音（小）
                   if (addVal > 0.2) {
-                    bgm.soundManagerPool.playSound('Se/lowjerk.mp3');
+                    bgm.soundManagerPool.playSound('se/lowjerk.mp3');
                   } else if (addVal > 0.5) {
-                    bgm.soundManagerPool.playSound('Se/middlejerk.mp3');
+                    bgm.soundManagerPool.playSound('se/middlejerk.mp3');
                   }
                   val = _rodStandUp + addVal;
                   if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
@@ -1576,7 +1580,7 @@ class _FishingState extends BasePageState<Fishing>
                               child: CustomPaint(
                                 painter: new imagePainter(
                                     dispSize: size,
-                                    //imagePath: 'assets/Images/teibou.png',
+                                    //imagePath: 'assets/images/teibou.png',
                                     image: imageTeibou,
                                     top: _shoreHeight + 10,
                                     left: imageTeibou.width - (_maxDepth * 10),
@@ -1631,7 +1635,7 @@ class _FishingState extends BasePageState<Fishing>
                                               children: [
                                                 new Image(
                                                   image: AssetImage(
-                                                      'assets/Images/TENSIONDRAG.png'),
+                                                      'assets/images/TENSIONDRAG.png'),
                                                 ),
                                               ],
                                             ),
@@ -1667,7 +1671,7 @@ class _FishingState extends BasePageState<Fishing>
                                               //       EdgeInsets.only(left: 10 + 400),
                                               //   child: new Image(
                                               //     image: AssetImage(
-                                              //         'assets/Images/denryu.gif'),
+                                              //         'assets/images/denryu.gif'),
                                               //     height: 30,
                                               //   ),
                                               // ),
@@ -1749,7 +1753,7 @@ class _FishingState extends BasePageState<Fishing>
                                       //Text("SPEED"),
                                       new Image(
                                         image: AssetImage(
-                                            'assets/Images/SPEED.png'),
+                                            'assets/images/SPEED.png'),
                                       ),
                                       CustomPaint(
                                         painter: new SliderPainter(
@@ -2037,7 +2041,7 @@ class _FishingState extends BasePageState<Fishing>
                                         180,
                                     child: new Image(
                                       image:
-                                          AssetImage('assets/Images/ship.png'),
+                                          AssetImage('assets/images/ship.png'),
                                       width: 60,
                                       height: 30,
                                     ),
@@ -2091,7 +2095,7 @@ class _FishingState extends BasePageState<Fishing>
                                       //タップ開始
                                       onTapDown: (details) {
                                         bgm.soundManagerPool
-                                            .playSound('Se/engineon.mp3');
+                                            .playSound('se/engineon.mp3');
                                         _shipMoveSeScan = 0;
                                         if (_depth <= 0.0) {
                                           setState(() {
@@ -2113,7 +2117,7 @@ class _FishingState extends BasePageState<Fishing>
                                       },
                                       child: new Image(
                                         image: AssetImage(
-                                            'assets/Images/arrow_left.png'),
+                                            'assets/images/arrow_left.png'),
                                         height: 30,
                                       ),
                                     ),
@@ -2121,7 +2125,7 @@ class _FishingState extends BasePageState<Fishing>
                                       //タップ開始
                                       onTapDown: (details) {
                                         bgm.soundManagerPool
-                                            .playSound('Se/engineon.mp3');
+                                            .playSound('se/engineon.mp3');
                                         if (_depth <= 0.0) {
                                           setState(() {
                                             _moveShipTarget = 0.7;
@@ -2142,7 +2146,7 @@ class _FishingState extends BasePageState<Fishing>
                                       },
                                       child: new Image(
                                         image: AssetImage(
-                                            'assets/Images/arrow_right.png'),
+                                            'assets/images/arrow_right.png'),
                                         height: 30,
                                       ),
                                     ),
@@ -2291,13 +2295,13 @@ class _FishingState extends BasePageState<Fishing>
                                                           true;
                                                       bgm.soundManagerPool
                                                           .playSound(
-                                                              'Se/boxopen.mp3');
+                                                              'se/boxopen.mp3');
                                                     });
                                                   }
                                                 },
                                                 child: tackleIcon(
                                                   tackleIconSize: 40.0,
-                                                  imagePath: 'assets/Images/' +
+                                                  imagePath: 'assets/images/' +
                                                       lures
                                                           .getLureData(
                                                               haveTackle
@@ -2367,13 +2371,13 @@ class _FishingState extends BasePageState<Fishing>
                                                           true;
                                                       bgm.soundManagerPool
                                                           .playSound(
-                                                              'Se/boxopen.mp3');
+                                                              'se/boxopen.mp3');
                                                     });
                                                   }
                                                 },
                                                 child: tackleIcon(
                                                   tackleIconSize: 40.0,
-                                                  imagePath: 'assets/Images/' +
+                                                  imagePath: 'assets/images/' +
                                                       lures
                                                           .getLureData(
                                                               haveTackle
@@ -2486,7 +2490,7 @@ class _FishingState extends BasePageState<Fishing>
                                                   child: tackleIcon(
                                                     tackleIconSize: 60.0,
                                                     imagePath:
-                                                        'assets/Images/' +
+                                                        'assets/images/' +
                                                             haveTackle
                                                                 .getUseRod()
                                                                 .image,
@@ -2513,7 +2517,7 @@ class _FishingState extends BasePageState<Fishing>
                                                   child: tackleIcon(
                                                     tackleIconSize: 60.0,
                                                     imagePath:
-                                                        'assets/Images/reel.png',
+                                                        'assets/images/reel.png',
                                                     flgSelect:
                                                         _selectTacleIcon ==
                                                                 'reel'
@@ -2535,7 +2539,7 @@ class _FishingState extends BasePageState<Fishing>
                                                   padding: EdgeInsets.all(10),
                                                   child: tackleIcon(
                                                     tackleIconSize: 60.0,
-                                                    imagePath: 'assets/Images/' +
+                                                    imagePath: 'assets/images/' +
                                                         lures
                                                             .getLureData(
                                                                 haveTackle
@@ -2613,7 +2617,7 @@ class _FishingState extends BasePageState<Fishing>
                                                             child: tackleIcon(
                                                               tackleIconSize:
                                                                   40.0,
-                                                              imagePath: 'assets/Images/' +
+                                                              imagePath: 'assets/images/' +
                                                                   lures
                                                                       .getLureData(haveTackle
                                                                           .haveLures[
@@ -2770,7 +2774,7 @@ class _FishingState extends BasePageState<Fishing>
                                           ),
                                           onPressed: () {
                                             bgm.soundManagerPool
-                                                .playSound('Se/boxclose.mp3');
+                                                .playSound('se/boxclose.mp3');
                                             setState(() {
                                               _showTacleChangeDialog = false;
                                             });
@@ -2838,10 +2842,13 @@ class _FishingState extends BasePageState<Fishing>
     setState(() {
       fishPointerList.add(fishPointer);
     });
-    //_cache.play('Se/kk_sonar_low.mp3');
-    //play('assets/Se/kk_sonar_low.mp3');
-    if (!_flgHit) bgm.soundManagerPool.playSound('Se/kk_sonar_low.mp3');
+    //_cache.play('se/kk_sonar_low.mp3');
+    //play('assets/se/kk_sonar_low.mp3');
+    if (!_flgHit) bgm.soundManagerPool.playSound('se/kk_sonar_low.mp3');
     await Future<void>.delayed(duration);
+    if (!mounted) {
+      return;
+    }
     setState(() {
       fishPointerList.removeAt(0);
     });
@@ -2861,13 +2868,13 @@ class _FishingState extends BasePageState<Fishing>
       _clutchBackColor = Colors.lightBlue;
       if (_depth <= 0.0) {
         //着水音
-        bgm.soundManagerPool.playSound('Se/waterlanding.mp3');
+        bgm.soundManagerPool.playSound('se/waterlanding.mp3');
       } else {
-        bgm.soundManagerPool.playSound('Se/clutch.mp3');
+        bgm.soundManagerPool.playSound('se/clutch.mp3');
       }
     } else {
       _clutchBackColor = Colors.red;
-      bgm.soundManagerPool.playSound('Se/clutch.mp3');
+      bgm.soundManagerPool.playSound('se/clutch.mp3');
     }
     _onClutch = flg;
   }

@@ -58,7 +58,7 @@ class _SenchoDialogState extends State<SenchoDialog> {
           height: MediaQuery.of(context).size.height / 2,
           child: Column(children: <Widget>[
             new Image(
-              image: AssetImage('assets/Images/sencho.png'),
+              image: AssetImage('assets/images/sencho.png'),
               width: 150,
               height: 150,
             ),
