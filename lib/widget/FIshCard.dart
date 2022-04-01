@@ -34,23 +34,13 @@ class _FishCardListState extends State<FishCardList>
     with SingleTickerProviderStateMixin {
   List<FishModel> fishList = [];
 
-  // late AnimationController animController;
-  // late Animation<double> animValue;
   @override
   void initState() {
     super.initState();
-    // animController =
-    //     AnimationController(vsync: this, duration: const Duration(seconds: 2));
-    // animValue = Tween(begin: 0.0, end: 1.0).animate(animController)
-    //   ..addListener(() {
-    //     setState(() {});
-    //   });
-    // animController.repeat(); // アニメーションをスタート
   }
 
   @override
   void dispose() {
-    //animController.dispose();
     super.dispose();
   }
 

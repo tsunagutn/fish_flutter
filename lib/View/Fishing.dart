@@ -77,6 +77,7 @@
 //済・今釣れる可能性のある魚をリスト表示
 //中・音？なんかばぐがある
 //中・店
+//・ドラグ使いにくいの何とかする
 //・風の描画？？？いる？
 //・雲の描画
 //・時合度が低いのが続かんようにするか、高くできるようにする
@@ -755,8 +756,6 @@ class _FishingState extends BasePageState<Fishing>
     }
     var val = _tension + addVal;
 
-    // //ゲームオーバー判定
-    // var gameovertext = "";
     //糸ダメージ判定
     if (val > _tensionValMax * 0.95) {
       _nowLineHp -= val - _tensionValMax * 0.95; //ラインHPを減らす
@@ -771,11 +770,15 @@ class _FishingState extends BasePageState<Fishing>
         startCenterInfo();
         //使用中のルアーを削除
         haveTackle.lostLure(haveTackle.getUseLure().id);
-        _flgBait = false;
-        _flgHit = false;
         val = 0.0;
         bgm.soundManagerPool.playSound('Se/linebreak.mp3');
         bgmPlay(Fishing.screenBgm);
+
+        _flgBait = false;
+        _flgHit = false;
+        _pointerColor = clsColor._getColorFromHex("ffd900");
+        _nowDurationLv = POINT_DURATION_MSEC.length - 1;
+        _depth = 0.0;
       }
     }
     //ドラグ判定
@@ -904,8 +907,6 @@ class _FishingState extends BasePageState<Fishing>
           return;
         }
       });
-      //釣果リストに登録
-      fishesResult.addResult(fish.id, _fishSize);
 
       //bgm.soundManagerPool.playSound('Se/jingle01.mp3');
       //釣りあげ時のモーダル
@@ -934,6 +935,8 @@ class _FishingState extends BasePageState<Fishing>
       _tension = 0.0;
       //ポイントを加算
       _point += point;
+      //釣果リストに登録
+      fishesResult.addResult(fish.id, _fishSize);
 
       startTimer(); //定周期タイマ再開
       //subBgmStop();
@@ -2813,11 +2816,11 @@ class _FishingState extends BasePageState<Fishing>
     var rnd = (new math.Random()).nextDouble();
     var offsetX =
         (size.width / 4) + (size.width / 2) * (rnd * rnd); //真ん中に集約するように累乗する
-    if (!settings.flgControlRight) {
-      offsetX += size.width / 4;
-    } else {
-      offsetX -= size.width / 4;
-    }
+    // if (!settings.flgControlRight) {
+    //   offsetX += size.width / 4;
+    // } else {
+    //   offsetX -= size.width / 4;
+    // }
     offsetX = (offsetX < 0) ? 0 : offsetX;
     offsetX = (offsetX > size.width) ? size.width : offsetX;
 
