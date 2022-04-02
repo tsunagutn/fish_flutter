@@ -9,8 +9,6 @@ class BgmPlayer {
   static const maxVolume = 0.5;
 
   late AudioCache _cache;
-  //SE
-  SoundManagerPool soundManagerPool = new SoundManagerPool(20);
 
   AudioPlayer? _player = AudioPlayer();
   String nowBgmName = '';

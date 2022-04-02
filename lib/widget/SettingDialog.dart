@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 class SettingDialog extends StatefulWidget {
   @override
   const SettingDialog({
-    required this.soundManagerPool,
+    //required this.soundManagerPool,
     required this.ap,
   });
-  final SoundManagerPool soundManagerPool;
+  //final SoundManagerPool soundManagerPool;
   final AudioPlayer ap;
   _SettingDialogState createState() => _SettingDialogState();
 }
@@ -51,10 +51,10 @@ class _SettingDialogState extends State<SettingDialog>
   void _changeBgm(bool? e) => setState(() {
         _bgm = e!;
         settings.flgBgm = _bgm;
-        //効果音managerで無音を再生
-        widget.soundManagerPool.SoundManagerPoolInit();
         //BGN再生
         if (e) {
+          //効果音managerで無音を再生
+          soundManagerPool.SoundManagerPoolInit();
           //BGM ONなら再生
           subBgmLoop('bgm/bgm_book.mp3');
         } else {
@@ -78,7 +78,7 @@ class _SettingDialogState extends State<SettingDialog>
       });
   void _changeEndVolumeSe(double? e) => setState(() {
         //適当な音を再生
-        widget.soundManagerPool.playSound('se/linebreak.mp3');
+        soundManagerPool.playSound('se/linebreak.mp3');
       });
 
   @override
@@ -109,91 +109,101 @@ class _SettingDialogState extends State<SettingDialog>
         //height: MediaQuery.of(context).size.height / 2,
         child: Stack(children: [
           Column(children: <Widget>[
-            Container(
-                width: double.maxFinite,
-                height: MediaQuery.of(context).size.height / 1.5,
-                margin: EdgeInsets.only(bottom: 10),
-                child: DefaultTabController(
-                  length: _tab.length,
-                  child: Scaffold(
-                    appBar: AppBar(
-                      //title: Text("Tab Page"),
-                      automaticallyImplyLeading: false,
+            Expanded(
+              child: Container(
+                  width: double.maxFinite,
+                  // height: MediaQuery.of(context).size.height / 1.5,
+                  margin: EdgeInsets.only(bottom: 10),
+                  child: DefaultTabController(
+                    length: _tab.length,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        //title: Text("Tab Page"),
+                        automaticallyImplyLeading: false,
 
-                      title: TabBar(
-                        tabs: _tab,
+                        title: TabBar(
+                          tabs: _tab,
+                        ),
+                      ),
+                      body: TabBarView(
+                        children: <Widget>[
+                          Container(
+                            child: Column(children: [
+                              new SwitchListTile(
+                                value: _controlRight,
+                                activeColor: Colors.orange,
+                                activeTrackColor: Colors.grey,
+                                inactiveThumbColor: Colors.blue,
+                                inactiveTrackColor: Colors.grey,
+                                secondary: new Icon(
+                                  Icons.pan_tool_rounded,
+                                  color: _controlRight
+                                      ? Colors.orange[700]
+                                      : Colors.grey[500],
+                                  size: 50.0,
+                                ),
+                                title: Text('操作'),
+                                subtitle: Text(_controlRight ? '右手' : '左手'),
+                                onChanged: _changeControl,
+                              ),
+                              new SwitchListTile(
+                                value: _bgm,
+                                activeColor: Colors.orange,
+                                activeTrackColor: Colors.grey,
+                                inactiveThumbColor: Colors.white,
+                                inactiveTrackColor: Colors.grey,
+                                secondary: new Icon(
+                                  Icons.volume_up,
+                                  color: _bgm
+                                      ? Colors.orange[700]
+                                      : Colors.grey[500],
+                                  size: 50.0,
+                                ),
+                                title: Text('音再生'),
+                                subtitle: Text(_bgm ? 'ON' : 'OFF'),
+                                onChanged: _changeBgm,
+                              ),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: <Widget>[
+                                    Container(
+                                      width: 50,
+                                      child: Text("BGM"),
+                                    ),
+                                    Slider(
+                                      value: _volumeBgm,
+                                      //MAX-MINはテンションと同じ
+                                      min: 0.0,
+                                      max: 1.0,
+                                      onChanged: _changeVolumeBgm,
+                                    ),
+                                  ]),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: <Widget>[
+                                    Container(
+                                      width: 50,
+                                      child: Text("効果音"),
+                                    ),
+                                    Container(
+                                      child: Slider(
+                                        value: _volumeSe,
+                                        //MAX-MINはテンションと同じ
+                                        min: 0.0,
+                                        max: 1.0,
+                                        onChangeEnd: _changeEndVolumeSe,
+                                        onChanged: _changeVolumeSe,
+                                      ),
+                                    ),
+                                  ]),
+                            ]),
+                          ),
+                          SecondPage(),
+                        ],
                       ),
                     ),
-                    body: TabBarView(
-                      children: <Widget>[
-                        Container(
-                          child: Column(children: [
-                            new SwitchListTile(
-                              value: _controlRight,
-                              activeColor: Colors.orange,
-                              activeTrackColor: Colors.grey,
-                              inactiveThumbColor: Colors.blue,
-                              inactiveTrackColor: Colors.grey,
-                              secondary: new Icon(
-                                Icons.pan_tool_rounded,
-                                color: _controlRight
-                                    ? Colors.orange[700]
-                                    : Colors.grey[500],
-                                size: 50.0,
-                              ),
-                              title: Text('操作'),
-                              subtitle: Text(_controlRight ? '右手' : '左手'),
-                              onChanged: _changeControl,
-                            ),
-                            new SwitchListTile(
-                              value: _bgm,
-                              activeColor: Colors.orange,
-                              activeTrackColor: Colors.grey,
-                              inactiveThumbColor: Colors.white,
-                              inactiveTrackColor: Colors.grey,
-                              secondary: new Icon(
-                                Icons.volume_up,
-                                color: _bgm
-                                    ? Colors.orange[700]
-                                    : Colors.grey[500],
-                                size: 50.0,
-                              ),
-                              title: Text('音再生'),
-                              subtitle: Text(_bgm ? 'ON' : 'OFF'),
-                              onChanged: _changeBgm,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Text("BGM"),
-                                  Slider(
-                                    value: _volumeBgm,
-                                    //MAX-MINはテンションと同じ
-                                    min: 0.0,
-                                    max: 1.0,
-                                    onChanged: _changeVolumeBgm,
-                                  ),
-                                ]),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Text("SE"),
-                                  Slider(
-                                    value: _volumeSe,
-                                    //MAX-MINはテンションと同じ
-                                    min: 0.0,
-                                    max: 1.0,
-                                    onChangeEnd: _changeEndVolumeSe,
-                                    onChanged: _changeVolumeSe,
-                                  ),
-                                ]),
-                          ]),
-                        ),
-                        SecondPage(),
-                      ],
-                    ),
-                  ),
-                )),
+                  )),
+            ),
             ElevatedButton.icon(
               icon: const Icon(
                 Icons.close,

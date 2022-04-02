@@ -4,6 +4,8 @@ import 'package:fish_flutter/View/DrawerItem.dart';
 import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 
+import '../Main.dart';
+
 class Menu extends StatefulWidget {
   @override
   _menuState createState() {
@@ -47,7 +49,7 @@ class _menuState extends BasePageState<Menu> {
                       // ここでBGMデータの全ロード処理実行
                       debugPrint(Fishing.screenBgm);
                       //効果音managerで無音を再生
-                      bgm.soundManagerPool.SoundManagerPoolInit();
+                      soundManagerPool.SoundManagerPoolInit();
                       bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
                       Navigator.pushNamed(context, "/fishing"); // 遷移
                     });

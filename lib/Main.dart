@@ -1,6 +1,7 @@
 //flutter run -d chrome でchrome動作
 
 import 'package:fish_flutter/Model/SettingsModel.dart';
+import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
 import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/View/Settings.dart';
@@ -31,6 +32,9 @@ var settings = new SettingsModel(
     flgControlRight: true,
     volumeBgm: 0.5,
     volumeSe: 0.5);
+
+//SEプール
+SoundManagerPool soundManagerPool = new SoundManagerPool(10);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

@@ -13,8 +13,6 @@ class FishCardList extends StatefulWidget {
   const FishCardList({
     required this.fishsTable,
     required this.fishesResult,
-    required this.width,
-    required this.height,
     required this.hitFishId,
     required this.pointerColor,
     required this.borderWidth,
@@ -22,8 +20,6 @@ class FishCardList extends StatefulWidget {
 
   final List<FishModel> fishsTable;
   final FishesResultModel fishesResult;
-  final double width; //表示エリアの幅
-  final double height; //表示エリアの高さ
   final int hitFishId; //HITorアタリ中の魚ID 非HIT中は-1
   final Color pointerColor; //光点の色
   final double borderWidth; //枠線の幅
@@ -33,6 +29,9 @@ class FishCardList extends StatefulWidget {
 class _FishCardListState extends State<FishCardList>
     with SingleTickerProviderStateMixin {
   List<FishModel> fishList = [];
+
+  static const double cardWidth = 90.0;
+  static const double cardHeight = 19.0;
 
   @override
   void initState() {
@@ -56,18 +55,19 @@ class _FishCardListState extends State<FishCardList>
       if (result != 0) return result;
       return a.tanaMax.compareTo(b.tanaMax);
     });
+    //リストビューの高さを算出
+    double listHeight = cardHeight * fishList.length + (8 * fishList.length);
 
     return Container(
-      decoration: BoxDecoration(
-          //border: Border.all(color: Colors.red),
-          ),
-      width: widget.width,
-      height: widget.height,
+      // decoration: BoxDecoration(
+      //   border: Border.all(color: Colors.red),
+      // ),
+      width: cardWidth,
+      height: listHeight,
       child: ListView.builder(
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.only(top: 0, bottom: 0),
         itemBuilder: (BuildContext context, int index) {
           return Column(
-            //mainAxisAlignment: MainAxisAlignment.start,
             children: [
               makeFishCard(
                   fish: fishList[index],
@@ -114,22 +114,27 @@ class _FishCardListState extends State<FishCardList>
           color: widget.pointerColor,
         ),
       ),
-      child: new InkWell(
-          splashColor: Colors.blue.withAlpha(30),
+      // child:
+      // new InkWell(
+      //     splashColor: Colors.blue.withAlpha(30),
           //borderRadius: BorderRadius.circular(30),
-          onTap: () async {
-            //タップ時 ？？？なにするかまだ未定
-            //？？？ヒント出す機能
-          },
+          //onTap: () async {
+          //タップ時 ？？？なにするかまだ未定
+          //？？？ヒント出す？図鑑のページ出す？
+          //？？？誤タップになるので何もし無い方がよいかも
+          //},
           child: Container(
-              margin: EdgeInsets.only(bottom: 3),
+            height: cardHeight,
+              margin: EdgeInsets.only(left:3,right: 3),
               child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 Text(
                   name,
                   textAlign: TextAlign.left,
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black,fontSize: 12),
                 ),
-              ]))),
+              ]),
+          ),
+      //),
     );
   }
 }

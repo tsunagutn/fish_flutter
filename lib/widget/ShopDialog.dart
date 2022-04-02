@@ -72,7 +72,7 @@ class _ShopDialogState extends State<ShopDialog>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text("お店"),
-          Text("ポイント：" + retPoint.toString()),
+          Text("円：" + retPoint.toString()),
         ],
       ),
       content: Container(
