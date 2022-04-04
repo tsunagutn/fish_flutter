@@ -31,7 +31,9 @@ var settings = new SettingsModel(
     flgBgm: false,
     flgControlRight: true,
     volumeBgm: 0.5,
-    volumeSe: 0.5);
+    volumeSe: 0.5,
+    jerkSense: 0.5,
+);
 
 //SEプール
 SoundManagerPool soundManagerPool = new SoundManagerPool(10);

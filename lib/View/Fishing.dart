@@ -76,9 +76,12 @@
 //済・おさかな図鑑画面で？でも何mでつれるかの表示出す
 //済・陸から何メートルで釣れる魚変わるシステム
 //済・今釣れる可能性のある魚をリスト表示
-//中・効果音なんかばぐがある、重い、さいせいすればするほど重くなる？最初にプリロードした方が良いかも
-//中・BGMなんかばぐがある、重い、さいせいすればするほど重くなる？
+//済・BGMなんかばぐがある、重い、さいせいすればするほど重くなる？
+//済・効果音なんかばぐがある、重い、さいせいすればするほど重くなる？最初にプリロードした方が良いかも
+//・pagesで音がでんくなった（asset小文字大文字変えたせい）
 //・店をもっとましにする
+//・ジャーク感度の調整機能
+//・サカナ反応が空に浮くのをなおす
 //・ドラグ使いにくいの何とかする
 //・風の描画？？？いる？
 //・雲の描画
@@ -156,6 +159,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/widget/BgmPlayer.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Model/DispObjectModel.dart';
+import 'package:fish_flutter/Class/clsColor.dart';
 
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
@@ -222,11 +226,11 @@ class _FishingState extends BasePageState<Fishing>
   //static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
   static const MAX_RAND_ADD_TENSION = 2; //何もしてない時テンションがウロウロするののMAX値
   static const MIN_RAND_ADD_TENSION = -11; //〃 MIN値
-  final TENSION_COLOR_SAFE = clsColor._getColorFromHex("4CFF00");
-  final TENSION_COLOR_DRAG = clsColor._getColorFromHex("FFD800");
-  final TENSION_COLOR_DANGER = clsColor._getColorFromHex("DD0000");
-  final SPEED_COLOR = clsColor._getColorFromHex("83BBE2");
-  final SPEED_COLOR_REELING = clsColor._getColorFromHex("0026FF");
+  final TENSION_COLOR_SAFE = clsColor.getColorFromHex("4CFF00");
+  final TENSION_COLOR_DRAG = clsColor.getColorFromHex("FFD800");
+  final TENSION_COLOR_DANGER = clsColor.getColorFromHex("DD0000");
+  final SPEED_COLOR = clsColor.getColorFromHex("83BBE2");
+  final SPEED_COLOR_REELING = clsColor.getColorFromHex("0026FF");
   static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
   static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
   static const TANA_CHANGE_SCAN = 3000; //このスキャン毎にタナが変わる
@@ -282,9 +286,9 @@ class _FishingState extends BasePageState<Fishing>
   var _dispDepth = '0.0 m'; //深さ表示用
   //var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
   var _tensionActiveTrackColor =
-      clsColor._getColorFromHex("4CFF00"); //テンションゲージの色
+      clsColor.getColorFromHex("4CFF00"); //テンションゲージの色
   var _flgShaKe = false; //ドラグスライダーを揺らす用
-  var _speedActiveTrackColor = clsColor._getColorFromHex("0094FF"); //スピードゲージの色
+  var _speedActiveTrackColor = clsColor.getColorFromHex("0094FF"); //スピードゲージの色
   var _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
   var _clutchBackColor = Colors.red; //クラッチボタンの背景色
   Color _pointerColor = Colors.yellow; //ソナー部光点の色
@@ -722,7 +726,7 @@ class _FishingState extends BasePageState<Fishing>
       _fishCardItem = FISH_TABLE.extractMaxDepth(maxDepth: _maxDepth);
     }
     //シャクリによるテンション増加？？？竿長さによって係数を可変にする
-    weight += _rodStandUp * 1000;
+    weight += _rodStandUp * 3000;
 
     //巻き中の時、重量に巻速度を加味
     if (_onTap) {
@@ -758,7 +762,7 @@ class _FishingState extends BasePageState<Fishing>
       }
       //debugPrint(_rodStandUp.toString());
       //シャクリによる水深減算
-      _depth -= _rodStandUp * 2;
+      _depth -= _rodStandUp;
     }
 
     if (addVal > 0) {
@@ -790,7 +794,7 @@ class _FishingState extends BasePageState<Fishing>
 
         _flgBait = false;
         _flgHit = false;
-        _pointerColor = clsColor._getColorFromHex("ffd900");
+        _pointerColor = clsColor.getColorFromHex("ffd900");
         _nowDurationLv = POINT_DURATION_MSEC.length - 1;
         _depth = 0.0;
       }
@@ -810,9 +814,11 @@ class _FishingState extends BasePageState<Fishing>
 
       //ドラグ音再生
       if (dragDiff > 15) {
-        soundManagerPool.playSoundDisableContain('se/drag2_high.mp3',enumDisableContainPlay.drag);
+        soundManagerPool.playSoundDisableContain(
+            'se/drag2_high.mp3', enumDisableContainPlay.drag);
       } else {
-        soundManagerPool.playSoundDisableContain('se/drag2.mp3',enumDisableContainPlay.drag);
+        soundManagerPool.playSoundDisableContain(
+            'se/drag2.mp3', enumDisableContainPlay.drag);
       }
     } else {
       //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
@@ -846,7 +852,7 @@ class _FishingState extends BasePageState<Fishing>
     _tension = val;
 
     //テンションによってテンションバーの色を変える
-    _tensionActiveTrackColor = clsColor._getColorRange(
+    _tensionActiveTrackColor = clsColor.getColorRange(
         TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, _tensionValMax);
 
     //水深表示
@@ -907,7 +913,7 @@ class _FishingState extends BasePageState<Fishing>
     if (_flgHit && _depth <= 0) {
       _flgBait = false;
       _flgHit = false;
-      _pointerColor = clsColor._getColorFromHex("ffd900");
+      _pointerColor = clsColor.getColorFromHex("ffd900");
       _nowDurationLv = POINT_DURATION_MSEC.length - 1;
       debugPrint("つりあげ");
       var fish = FISH_TABLE.fishs[_fishidx];
@@ -1147,7 +1153,7 @@ class _FishingState extends BasePageState<Fishing>
             //_dispInfo = (maxProb * 100).toStringAsFixed(0) + ' %';
             _infoBackColor = Colors.white;
             //HIT率に伴いポインタの色を変える？
-            _pointerColor = clsColor._getColorFromHex("ffd900"); //？？？とりあえず黄色固定
+            _pointerColor = clsColor.getColorFromHex("ffd900"); //？？？とりあえず黄色固定
           }
         });
         //debugPrint(maxProb.toString());
@@ -1194,14 +1200,14 @@ class _FishingState extends BasePageState<Fishing>
           //   //バイト中の最大テンションを記憶
           //   //_baitMaxTension = _tension;
           // }
-          _pointerColor = clsColor._getColorFromHex("FF6A00"); //アタリ中はオレンジ
+          _pointerColor = clsColor.getColorFromHex("FF6A00"); //アタリ中はオレンジ
           //点滅速度最大
           duration = durationMin;
         }
       } else {
         if (_flgHit) {
           //HIT中の処理
-          _pointerColor = clsColor._getColorFromHex("ff0000"); //HIT中は赤固定表示
+          _pointerColor = clsColor.getColorFromHex("ff0000"); //HIT中は赤固定表示
 
           //テンションから点滅速度を算出
           duration = durationMax -
@@ -1336,7 +1342,7 @@ class _FishingState extends BasePageState<Fishing>
               //   Text("環境設定"),
               // ]),
               backgroundColor:
-                  clsColor._getColorFromHex("FFFFFF").withOpacity(0.1),
+                  clsColor.getColorFromHex("FFFFFF").withOpacity(0.1),
               //title: Text(_senchoMessage),
               //左上
               leading: Row(
@@ -1415,8 +1421,9 @@ class _FishingState extends BasePageState<Fishing>
                           },
                         );
                         _point = result!;
-                        soundManagerPool
-                            .playSound('se/bookclose.mp3'); //音は仮
+                        //？？？仮 ロッド変更時のみに変えること
+                        _drag = _tensionValMax * 0.8;
+                        soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
                         startTimer(); //定周期タイマ再開
                         subBgmStop();
                         bgmResume();
@@ -1494,10 +1501,6 @@ class _FishingState extends BasePageState<Fishing>
                   _cursorY = details.localPosition.dy;
                   //クラッチOFF時、タップ箇所がクラッチ部分か？
                   if (!_onClutch &&
-                      // _cursorX > _tackleCenterX - (_reelSizeX) &&
-                      // _cursorX < _tackleCenterX + (_reelSizeX) &&
-                      // _cursorY > _reelCenterY + _reelSizeY / 2 + 3 &&
-                      // _cursorY < _reelCenterY + _reelSizeY)
                       //リールをタップで
                       _cursorX > _tackleCenterX - _reelSizeX &&
                       _cursorX < _tackleCenterX + _reelSizeX &&
@@ -1514,7 +1517,6 @@ class _FishingState extends BasePageState<Fishing>
                       details.globalPosition.dx, details.globalPosition.dy);
                   generateTapPointer(details);
 
-                  //generateFishPointer(100);
                   //タップ時はスピードスライダの色替え
                   _speedActiveTrackColor = SPEED_COLOR_REELING;
                 },
@@ -1542,13 +1544,16 @@ class _FishingState extends BasePageState<Fishing>
                   if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
                   _speed = val;
                   //アワセ値
-                  addVal = (moveY / 100);
+                  //addVal = (moveY / 100);
+                  addVal = (moveY / (50 + (100 * (1.0 - settings.jerkSense))));
                   if (addVal > 0.5) {
                     //シャクリ音（大）
-                    soundManagerPool.playSoundDisableContain('se/middlejerk.mp3',enumDisableContainPlay.jerk);
+                    soundManagerPool.playSoundDisableContain(
+                        'se/middlejerk.mp3', enumDisableContainPlay.jerk);
                   } else if (addVal > 0.2) {
                     //シャクリ音（小）
-                    soundManagerPool.playSoundDisableContain('se/lowjerk.mp3',enumDisableContainPlay.jerk);
+                    soundManagerPool.playSoundDisableContain(
+                        'se/lowjerk.mp3', enumDisableContainPlay.jerk);
                   }
                   val = _rodStandUp + addVal;
                   if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
@@ -1558,8 +1563,6 @@ class _FishingState extends BasePageState<Fishing>
                 //タップ、ドラッグ操作が終了した時
                 onPanEnd: (DragEndDetails details) {
                   debugPrint("タップはなし");
-                  //chengeClutch(false);
-                  //add_min = -10;
                   _onTap = false;
                   //スピードスライダの色を戻す
                   _speedActiveTrackColor = SPEED_COLOR;
@@ -1572,8 +1575,8 @@ class _FishingState extends BasePageState<Fishing>
                       begin: FractionalOffset.topCenter,
                       end: FractionalOffset.bottomCenter,
                       colors: [
-                        clsColor._getColorFromHex("5495FF"),
-                        clsColor._getColorFromHex("EFFAFF")
+                        clsColor.getColorFromHex("5495FF"),
+                        clsColor.getColorFromHex("EFFAFF")
                       ],
                       stops: const [
                         0.0,
@@ -1611,8 +1614,8 @@ class _FishingState extends BasePageState<Fishing>
                           //   begin: FractionalOffset.topCenter,
                           //   end: FractionalOffset.bottomCenter,
                           //   colors: [
-                          //     clsColor._getColorFromHex("5495FF"),
-                          //     clsColor._getColorFromHex("EFFAFF")
+                          //     clsColor.getColorFromHex("5495FF"),
+                          //     clsColor.getColorFromHex("EFFAFF")
                           //   ],
                           //   stops: const [
                           //     0.0,
@@ -1748,7 +1751,7 @@ class _FishingState extends BasePageState<Fishing>
                                         painter: new SliderPainter(
                                           height: 5,
                                           activeColor: clsColor
-                                              ._getColorFromHex("FF3030"),
+                                              .getColorFromHex("FF3030"),
                                           inactiveColor: Colors.white,
                                           value: _nowLineHp,
                                           maxValue: _maxLineHp,
@@ -1776,25 +1779,27 @@ class _FishingState extends BasePageState<Fishing>
                                             'assets/images/SPEED.png'),
                                       ),
                                       Container(
-                                          margin: EdgeInsets.only(left: 8),
-                                          child: Transform(
-                                              transform: Matrix4.skewX(-0.3),
-                                              child:
-                                      CustomPaint(
-                                        painter: new SliderPainter(
-                                          height: 20,
-                                          activeColor: _speedActiveTrackColor,
-                                          inactiveColor: Colors.white,
-                                          value: _speed,
-                                          maxValue: _speedValMax,
-                                          backRadius: 0,
-                                          maxBackRadius: 0,
-                                          flgShaKe: false,
-                                          flgDispValue: true,
-                                          flgDispMaxValue: true,
+                                        margin: EdgeInsets.only(left: 8),
+                                        child: Transform(
+                                          transform: Matrix4.skewX(-0.3),
+                                          child: CustomPaint(
+                                            painter: new SliderPainter(
+                                              height: 20,
+                                              activeColor:
+                                                  _speedActiveTrackColor,
+                                              inactiveColor: Colors.white,
+                                              value: _speed,
+                                              maxValue: _speedValMax,
+                                              backRadius: 0,
+                                              maxBackRadius: 0,
+                                              flgShaKe: false,
+                                              flgDispValue: true,
+                                              flgDispMaxValue: true,
+                                            ),
+                                            child: Container(),
+                                          ),
                                         ),
-                                        child: Container(),
-                                      ),),),
+                                      ),
                                       //可能性のある魚種の速度範囲表示
                                       CustomPaint(
                                         painter: new FishRangeSliderPainter(
@@ -1816,17 +1821,17 @@ class _FishingState extends BasePageState<Fishing>
                                 margin: EdgeInsets.only(top: 50),
                                 decoration: BoxDecoration(
                                     border: Border.all(
-                                        color: clsColor
-                                            ._getColorFromHex("02D5F2")),
-                                    //color: clsColor._getColorFromHex("200070"),
+                                        color:
+                                            clsColor.getColorFromHex("02D5F2")),
+                                    //color: clsColor.getColorFromHex("200070"),
                                     gradient: LinearGradient(
                                       begin: FractionalOffset.topCenter,
                                       end: FractionalOffset.bottomCenter,
                                       colors: [
-                                        clsColor._getColorFromHex("02D5F2"),
-                                        clsColor._getColorFromHex("013367"),
-                                        clsColor._getColorFromHex("002142"),
-                                        clsColor._getColorFromHex("000000"),
+                                        clsColor.getColorFromHex("02D5F2"),
+                                        clsColor.getColorFromHex("013367"),
+                                        clsColor.getColorFromHex("002142"),
+                                        clsColor.getColorFromHex("000000"),
                                       ],
                                       stops: [
                                         0.0,
@@ -1922,14 +1927,14 @@ class _FishingState extends BasePageState<Fishing>
                             height: 60,
                             decoration: BoxDecoration(
 
-                                //color: clsColor._getColorFromHex("200070"),
+                                //color: clsColor.getColorFromHex("200070"),
                                 gradient: LinearGradient(
                               begin: FractionalOffset.topCenter,
                               end: FractionalOffset.bottomCenter,
                               colors: [
-                                clsColor._getColorFromHex("758661"),
-                                clsColor._getColorFromHex("455E42"),
-                                clsColor._getColorFromHex("0A081F"),
+                                clsColor.getColorFromHex("758661"),
+                                clsColor.getColorFromHex("455E42"),
+                                clsColor.getColorFromHex("0A081F"),
                               ],
                               stops: [0.0, 0.6, 1.0],
                             )),
@@ -2088,7 +2093,7 @@ class _FishingState extends BasePageState<Fishing>
                                   ClipPath(
                                     child: Container(
                                         color: clsColor
-                                            ._getColorFromHex("02D5F2")
+                                            .getColorFromHex("02D5F2")
                                             .withOpacity(1.0)),
                                     clipper: WaveClipper(
                                         context, waveController.value, 0),
@@ -2097,7 +2102,7 @@ class _FishingState extends BasePageState<Fishing>
                                   ClipPath(
                                     child: Container(
                                         color: clsColor
-                                            ._getColorFromHex("02D5F2")
+                                            .getColorFromHex("02D5F2")
                                             .withOpacity(0.3)),
                                     clipper: WaveClipper(
                                         context, waveController.value, 0.5),
@@ -2268,7 +2273,7 @@ class _FishingState extends BasePageState<Fishing>
                         Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                                Row(
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -2758,7 +2763,7 @@ class _FishingState extends BasePageState<Fishing>
                                                                       .circular(
                                                                           7.0)),
                                                           color: clsColor
-                                                              ._getColorFromHex(
+                                                              .getColorFromHex(
                                                                   '#DFDFDF')),
                                                       child: Text(
                                                         lures
@@ -2921,38 +2926,6 @@ class _FishingState extends BasePageState<Fishing>
     }
   }
 
-  // //持ち替えボタン
-  // Widget _tacklePositionChangeButton() {
-  //   return Container(
-  //       margin: EdgeInsets.only(left: 10, right: 10),
-  //       child: Row(
-  //           mainAxisAlignment: _takcleChangeButtonPosition,
-  //           children: <Widget>[
-  // Column(
-  //     mainAxisAlignment: MainAxisAlignment.center,
-  //     children: <Widget>[
-
-  // ElevatedButton(
-  //     child: const Text('持替'),
-  //     style: ElevatedButton.styleFrom(
-  //       primary: Colors.amber, //背景色
-  //       onPrimary: Colors.black, //押したときの色
-  //       shape: const StadiumBorder(),
-  //       side: BorderSide(
-  //         color: Colors.black, //枠線の色
-  //         width: 2, //枠線の太さ
-  //       ),
-  //     ),
-  //     onPressed: () {
-  //       if (_takclePositionLeft) {
-  //         _takclePositionLeft = false;
-  //       } else {
-  //         _takclePositionLeft = true;
-  //       }
-  //     }),
-  //           ]));
-  // }
-
   //画面中央のメッセージ
   startCenterInfo() {
     //HIT時のアニメーションの定義
@@ -3070,43 +3043,6 @@ class ShakeCurve extends Curve {
   @override
   double transform(double t) {
     return 64 * math.sin(2 * math.pi * t);
-  }
-}
-
-//色コード関連操作クラス
-class clsColor {
-  //色を色コード文字列で指定する
-  static Color _getColorFromHex(String hexColor) {
-    hexColor = hexColor.toUpperCase().replaceAll('#', '');
-    if (hexColor.length == 6) {
-      hexColor = 'FF' + hexColor;
-    }
-    return Color(int.parse(hexColor, radix: 16));
-  }
-
-  //色を値範囲によって可変にする
-  static Color _getColorRange(
-      Color startColor, Color endColor, double val, double maxVal) {
-    var diffVal = (val / maxVal);
-    //R
-    var r =
-        startColor.red + ((endColor.red - startColor.red) * diffVal).floor();
-    //G
-    var g = startColor.green +
-        ((endColor.green - startColor.green) * diffVal).floor();
-    //B
-    var b =
-        startColor.blue + ((endColor.blue - startColor.blue) * diffVal).floor();
-    return _getColorFromHex(r.toRadixString(16).padLeft(2, "0") +
-        g.toRadixString(16).padLeft(2, "0") +
-        b.toRadixString(16).padLeft(2, "0"));
-  }
-
-  //割合によって色を返す
-  static Color getRaitoColor(double raito) {
-    if (raito > 0.7) return Colors.green;
-    if (raito > 0.3) return Colors.amber;
-    return Colors.red;
   }
 }
 
