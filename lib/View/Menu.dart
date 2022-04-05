@@ -5,6 +5,7 @@ import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 
 import '../Main.dart';
+import '../widget/SettingDialog.dart';
 
 class Menu extends StatefulWidget {
   @override
@@ -85,12 +86,23 @@ class _menuState extends BasePageState<Menu> {
                   splashColor: Colors.blue.withAlpha(30),
                   borderRadius: BorderRadius.circular(30),
                   onTap: () async {
-                    final result =
-                        await Navigator.of(context).pushNamed('/settings');
+                    // final result =
+                    //     await Navigator.of(context).pushNamed('/settings');
                     // if (result != null) {
                     //   setState(() {
                     //     todoList.add(result);
                     //   });
+                    super.bgm.stopBgmAny();
+                    int? result = await showDialog<int>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) {
+                        return SettingDialog(
+                          bgm: super.bgm,
+                        );
+                      },
+                    );
+                    bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
                   },
                   child: Container(
                       margin: const EdgeInsets.all(10.0),

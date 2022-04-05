@@ -1,18 +1,15 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
-import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
-import 'package:fish_flutter/Class/clsColor.dart';
+
+import 'BgmPlayer.dart';
 
 class SettingDialog extends StatefulWidget {
   @override
   const SettingDialog({
-    //required this.soundManagerPool,
-    required this.ap,
+    required this.bgm,
   });
-  //final SoundManagerPool soundManagerPool;
-  final AudioPlayer ap;
+  final BgmPlayer bgm;
   _SettingDialogState createState() => _SettingDialogState();
 }
 
@@ -41,13 +38,12 @@ class _SettingDialogState extends State<SettingDialog>
 
   Future subBgmLoop(file) async {
     if (settings.flgBgm) {
-      widget.ap.setReleaseMode(ReleaseMode.LOOP);
-      await widget.ap.play('assets/' + file, volume: settings.volumeBgm);
+      widget.bgm.playBgm(name: file);
     }
   }
 
   Future subBgmStop() async {
-    await widget.ap.stop();
+    widget.bgm.stopBgmAny();
   }
 
   void _changeBgm(bool? e) => setState(() {
@@ -58,7 +54,7 @@ class _SettingDialogState extends State<SettingDialog>
           //効果音managerで無音を再生
           soundManagerPool.SoundManagerPoolInit();
           //BGM ONなら再生
-          subBgmLoop('bgm/bgm_book.mp3');
+          subBgmLoop('bgm_book.mp3');
         } else {
           //OFFなら停止
           subBgmStop();
@@ -72,12 +68,14 @@ class _SettingDialogState extends State<SettingDialog>
   void _changeVolumeBgm(double? e) => setState(() {
         _volumeBgm = e!;
         settings.volumeBgm = _volumeBgm;
-        widget.ap.setVolume(_volumeBgm); //デフォルトは1.0
       });
   void _changeVolumeSe(double? e) => setState(() {
         _volumeSe = e!;
         settings.volumeSe = _volumeSe;
       });
+  void _changeEndVolumeBgm(double? e) => setState(() {
+    widget.bgm.volumeBgm();
+  });
   void _changeEndVolumeSe(double? e) => setState(() {
         //適当な音を再生
         soundManagerPool.playSound('se/linebreak.mp3');
@@ -100,7 +98,7 @@ class _SettingDialogState extends State<SettingDialog>
     _jerkSense = settings.jerkSense;
 
     //設定画面BCM再生
-    subBgmLoop('bgm/bgm_book.mp3');
+    subBgmLoop('bgm_book.mp3');
   }
 
   @override
@@ -183,6 +181,7 @@ class _SettingDialogState extends State<SettingDialog>
                                       //MAX-MINはテンションと同じ
                                       min: 0.0,
                                       max: 1.0,
+                                      onChangeEnd: _changeEndVolumeBgm,
                                       onChanged: _changeVolumeBgm,
                                     ),
                                   ]),

@@ -78,7 +78,7 @@
 //済・今釣れる可能性のある魚をリスト表示
 //済・BGMなんかばぐがある、重い、さいせいすればするほど重くなる？
 //済・効果音なんかばぐがある、重い、さいせいすればするほど重くなる？最初にプリロードした方が良いかも
-//・pagesで音がでんくなった（asset小文字大文字変えたせい）
+//済・pagesで音がでんくなった（asset小文字大文字変えたせい）
 //・店をもっとましにする
 //・ジャーク感度の調整機能
 //・サカナ反応が空に浮くのをなおす
@@ -139,7 +139,6 @@ import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
-import 'package:fish_flutter/widget/SenchoDialog.dart';
 import 'package:fish_flutter/widget/SliderPainter.dart';
 import 'package:fish_flutter/widget/fishGetDialog.dart';
 import 'package:fish_flutter/widget/imagePainter.dart';
@@ -156,9 +155,7 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:fish_flutter/widget/BgmPlayer.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
-import 'package:fish_flutter/Model/DispObjectModel.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
 
 class Fishing extends StatefulWidget {
@@ -374,6 +371,8 @@ class _FishingState extends BasePageState<Fishing>
   var dragSeIdx = 0;
   //ジャーク音の再生IDX記憶（連続防止）
   var jerkSeIdx = 0;
+  //現在再生中のBGMファイル名
+  var nowBgm = "";
 
   //船移動
   // var _MoveLeft = false;
@@ -391,22 +390,14 @@ class _FishingState extends BasePageState<Fishing>
 
   @override
   void initState() {
-    // AudioCache _player = AudioCache();
-    // AudioCache _subBgm = AudioCache(
-    //   fixedPlayer: _ap,
-    // );
-
-    //サブBGM再生
-    _ap = new AudioPlayer();
-    // this.bgmPlay('bgm/bgm_field.mp3');
-
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
     //釣果リストを初期化
     fishesResult = new FishesResultModel();
     //ルアーリストを初期化？？？本当はDBマスタから全取得
     lures = new LuresModel();
-
+    //基本BGM
+    nowBgm = Fishing.screenBgm;
     //所持リストを初期化
     haveTackle = new HaveTackleModel();
     _tensionValMax = haveTackle.getUseRod().maxTention;
@@ -486,8 +477,6 @@ class _FishingState extends BasePageState<Fishing>
     _clutchAnimationController.dispose();
     _jerkTextAnimationController.dispose();
     fishPointerList.clear();
-    _ap.stop();
-    _ap.dispose();
     super.dispose();
   }
 
@@ -506,25 +495,6 @@ class _FishingState extends BasePageState<Fishing>
 
   Future bgmStop() async {
     super.bgm.stopBgmAny();
-  }
-
-  //ダイアログ等 一時BGM
-  Future subBgmPlay(file) async {
-    if (settings.flgBgm) {
-      _ap.setReleaseMode(ReleaseMode.RELEASE);
-      await _ap.play('assets/' + file, volume: settings.volumeBgm);
-    }
-  }
-
-  Future subBgmLoop(file) async {
-    if (settings.flgBgm) {
-      _ap.setReleaseMode(ReleaseMode.LOOP);
-      await _ap.play('assets/' + file, volume: settings.volumeBgm);
-    }
-  }
-
-  Future subBgmStop() async {
-    await _ap.stop();
   }
 
   //定周期タイマの起動
@@ -790,7 +760,8 @@ class _FishingState extends BasePageState<Fishing>
         haveTackle.lostLure(haveTackle.getUseLure().id);
         val = 0.0;
         soundManagerPool.playSound('se/linebreak.mp3');
-        bgmPlay(Fishing.screenBgm);
+        nowBgm = Fishing.screenBgm;
+        bgmPlay(nowBgm);
 
         _flgBait = false;
         _flgHit = false;
@@ -931,7 +902,6 @@ class _FishingState extends BasePageState<Fishing>
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
       bgmStop();
-      //subBgmPlay('se/jingle01.mp3');
       //ジングル鳴らす
       soundManagerPool.playSound('se/jingle01.mp3');
 
@@ -961,8 +931,8 @@ class _FishingState extends BasePageState<Fishing>
       fishesResult.addResult(fish.id, _fishSize);
 
       startTimer(); //定周期タイマ再開
-      //subBgmStop();
-      bgmPlay(Fishing.screenBgm);
+      nowBgm = Fishing.screenBgm;
+      bgmPlay(nowBgm);
     }
 
     //光点点滅速度関連の変数
@@ -1186,7 +1156,8 @@ class _FishingState extends BasePageState<Fishing>
           startCenterInfo();
 
           soundManagerPool.playSound('se/hit.mp3');
-          bgmPlay('bgm_fight.mp3');
+          nowBgm = 'bgm_fight.mp3';
+          bgmPlay(nowBgm);
         } else {
           //当たってからのスキャン数加算
           _baitCnt++;
@@ -1239,7 +1210,8 @@ class _FishingState extends BasePageState<Fishing>
             _centerTextSubColor = Colors.blue;
             startCenterInfo();
 
-            bgmPlay(Fishing.screenBgm);
+            nowBgm = Fishing.screenBgm;
+            bgmPlay(nowBgm);
             _bareCnt = 0;
           }
         }
@@ -1354,8 +1326,6 @@ class _FishingState extends BasePageState<Fishing>
                     iconSize: 30.0,
                     onPressed: () async {
                       _timer.cancel(); //定周期タイマ停止
-                      bgmPause();
-                      subBgmLoop('bgm/bgm_book.mp3');
                       // //図鑑モーダルの表示
                       soundManagerPool.playSound('se/book.mp3');
                       var result = await showDialog<int>(
@@ -1365,16 +1335,14 @@ class _FishingState extends BasePageState<Fishing>
                           return BookDialog(
                             fishsTable: FISH_TABLE,
                             fishesResult: fishesResult,
-                            soundManagerPool: soundManagerPool,
+                            bgm: super.bgm,
                           );
                         },
                       );
                       soundManagerPool.playSound('se/bookclose.mp3');
                       startTimer(); //定周期タイマ再開
-                      subBgmStop();
-                      bgmResume();
+                      bgmPlay(nowBgm);
 
-//                  debugPrint(result.toString());
                       setState(() {});
                     },
                   ),
@@ -1406,8 +1374,6 @@ class _FishingState extends BasePageState<Fishing>
                       onPressed: () async {
                         //買い物モーダルの表示
                         _timer.cancel(); //定周期タイマ停止
-                        bgmPause();
-                        subBgmLoop('bgm/bgm_book.mp3');
                         soundManagerPool.playSound('se/book.mp3'); //音は仮
                         int? result = await showDialog<int>(
                           context: context,
@@ -1415,8 +1381,8 @@ class _FishingState extends BasePageState<Fishing>
                           builder: (_) {
                             return ShopDialog(
                               haveTakcle: haveTackle,
-                              soundManagerPool: soundManagerPool,
                               originPoint: _point,
+                              bgm: super.bgm,
                             );
                           },
                         );
@@ -1425,8 +1391,7 @@ class _FishingState extends BasePageState<Fishing>
                         _drag = _tensionValMax * 0.8;
                         soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
                         startTimer(); //定周期タイマ再開
-                        subBgmStop();
-                        bgmResume();
+                        bgmPlay(nowBgm);
                         setState(() {});
                       },
                     )),
@@ -1453,14 +1418,13 @@ class _FishingState extends BasePageState<Fishing>
                       barrierDismissible: false,
                       builder: (_) {
                         return SettingDialog(
-                          ap: _ap,
+                            bgm: super.bgm,
                         );
                       },
                     );
                     //soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
                     startTimer(); //定周期タイマ再開
-                    subBgmStop();
-                    bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                    bgmPlay(nowBgm);
                     setState(() {});
                   },
                 )),

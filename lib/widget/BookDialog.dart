@@ -1,9 +1,9 @@
-import 'package:fish_flutter/Model/CheckListTestModel.dart';
+import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
-import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
 
+import 'BgmPlayer.dart';
 import 'RadarChart.dart';
 import 'SliderPainter.dart';
 
@@ -12,11 +12,11 @@ class BookDialog extends StatefulWidget {
   const BookDialog({
     required this.fishsTable,
     required this.fishesResult,
-    required this.soundManagerPool,
+    required this.bgm,
   });
   final FishsModel fishsTable;
   final FishesResultModel fishesResult;
-  final SoundManagerPool soundManagerPool;
+  final BgmPlayer bgm;
   _BookDialogState createState() => _BookDialogState();
 }
 
@@ -37,6 +37,9 @@ class _BookDialogState extends State<BookDialog>
     fishList.sort((a, b) => a.tanaMin.compareTo(b.tanaMin));
 
     _showFishData = widget.fishsTable.fishs[0];
+
+    //設定画面BGM再生
+    widget.bgm.playBgm(name: 'bgm_book.mp3');
   }
 
   @override
@@ -364,7 +367,7 @@ class _BookDialogState extends State<BookDialog>
                                   onPrimary: Colors.white,
                                 ),
                                 onPressed: () {
-                                  widget.soundManagerPool
+                                  soundManagerPool
                                       .playSound('se/book.mp3');
 
                                   setState(() {
@@ -425,7 +428,7 @@ class _BookDialogState extends State<BookDialog>
         onTap: () {
           if (fishResult.length > 0) {
             //釣果有り
-            widget.soundManagerPool.playSound('se/book.mp3');
+            soundManagerPool.playSound('se/book.mp3');
             //カードタップで詳細画面を表示
             setState(() {
               _showFishData = fish;

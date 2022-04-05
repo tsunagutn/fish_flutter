@@ -1,26 +1,23 @@
-import 'package:fish_flutter/Model/CheckListTestModel.dart';
+import '../Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
-import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/Model/RodsModel.dart';
 import 'package:fish_flutter/Model/ReelsModel.dart';
 import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/Model/HaveTackleModel.dart';
-import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
 
-import 'RadarChart.dart';
-import 'SliderPainter.dart';
+import 'BgmPlayer.dart';
 
 class ShopDialog extends StatefulWidget {
   @override
   const ShopDialog({
     required this.haveTakcle,
-    required this.soundManagerPool,
     required this.originPoint,
+    required this.bgm,
   });
   final HaveTackleModel haveTakcle;
-  final SoundManagerPool soundManagerPool;
   final int originPoint;
+  final BgmPlayer bgm;
   _ShopDialogState createState() => _ShopDialogState();
 }
 
@@ -45,6 +42,8 @@ class _ShopDialogState extends State<ShopDialog>
   void initState() {
     super.initState();
     retPoint = widget.originPoint;
+    //店画面BGM再生
+    widget.bgm.playBgm(name: 'bgm_book.mp3');
   }
 
   //ポイントを使うときの処理
@@ -72,7 +71,7 @@ class _ShopDialogState extends State<ShopDialog>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text("お店"),
-          Text("円：" + retPoint.toString()),
+          Text(retPoint.toString() + "円"),
         ],
       ),
       content: Container(
@@ -200,7 +199,7 @@ class _ShopDialogState extends State<ShopDialog>
                                                     widget.haveTakcle
                                                         .haveRodId = nextRod.id;
                                                     //効果音
-                                                    widget.soundManagerPool
+                                                    soundManagerPool
                                                         .playSound(
                                                             'se/shop.mp3');
                                                   }),
@@ -310,7 +309,7 @@ class _ShopDialogState extends State<ShopDialog>
                                                             .haveReelId =
                                                         nextReel.id;
                                                     //効果音
-                                                    widget.soundManagerPool
+                                                    soundManagerPool
                                                         .playSound(
                                                             'se/shop.mp3');
                                                   }),

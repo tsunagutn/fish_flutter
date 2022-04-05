@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/Main.dart';
-import 'package:fish_flutter/Model/LuresModel.dart';
-import 'package:flutter/cupertino.dart';
 
 //連続再生を禁止する区分
 enum enumDisableContainPlay {
@@ -28,6 +26,7 @@ class SoundManagerPool {
 
   SoundManagerPoolInit() {
     List<String> lstSeFileName = [];
+    //？？？これはあまりにもひどくないか・・・？
     lstSeFileName.add("bgm/muon01.mp3");
     lstSeFileName.add("se/bait.mp3");
     lstSeFileName.add("se/book.mp3");
@@ -76,8 +75,6 @@ class SoundManagerPool {
       //同じ区分の効果音がまだ再生中でない時のみ再生する
       lstDisableContainIdx[kbn.index] = playIndex;
       playSound(path);
-    } else {
-      var aaa = 1;
     }
   }
 
@@ -112,13 +109,8 @@ class SoundManager {
 
   Future<void> playSound(String path) async {
     if (settings.flgBgm) {
-      //if (advancedPlayer.state != PlayerState.PLAYING) {
       await audioCache.play(path, mode: PlayerMode.LOW_LATENCY);
       advancedPlayer.setVolume(maxVolume * settings.volumeSe);
-      // } else {
-      //   debugPrint(advancedPlayer.state.toString());
-      //   var aa = 1;
-      // }
     }
     return;
   }

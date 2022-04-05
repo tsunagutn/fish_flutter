@@ -1,8 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audioplayers_api.dart';
 import 'package:fish_flutter/Main.dart';
-import 'package:flutter/material.dart';
-import 'package:fish_flutter/widget/SoundManagerPool.dart';
 
 class BgmPlayer {
   //ボリュームの最大値
@@ -31,14 +29,14 @@ class BgmPlayer {
     //現在何か再生中なら止める
     stopBgmAny();
     //}
-    nowBgmName = name;
-    if (isLoop) {
-      _player?.setReleaseMode(ReleaseMode.LOOP);
-    } else {
-      _player?.setReleaseMode(ReleaseMode.RELEASE);
-    }
+    //設定でBGM有効の時のみ
     if (settings.flgBgm) {
-      //設定でBGM有効の時のみ
+      nowBgmName = name;
+      if (isLoop) {
+        _player?.setReleaseMode(ReleaseMode.LOOP);
+      } else {
+        _player?.setReleaseMode(ReleaseMode.RELEASE);
+      }
       _player?.play(bgmUriMap[name].toString(),
           volume: maxVolume * settings.volumeBgm);
     }
@@ -72,6 +70,10 @@ class BgmPlayer {
 
   void stopBgmAny() async {
     await _player?.stop();
+  }
+
+  void volumeBgm() async {
+    await _player?.setVolume(settings.volumeBgm);
   }
 
   Future<void> disposeBgm() async {

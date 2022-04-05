@@ -1,12 +1,6 @@
-import 'package:fish_flutter/Model/CheckListTestModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
-import 'package:fish_flutter/View/Fishing.dart';
-import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
-
-import 'RadarChart.dart';
-import 'SliderPainter.dart';
 
 class FishCardList extends StatefulWidget {
   @override

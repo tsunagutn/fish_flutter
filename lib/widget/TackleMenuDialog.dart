@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:flutter/material.dart';
