@@ -36,7 +36,7 @@ var settings = new SettingsModel(
 );
 
 //SEプール
-SoundManagerPool soundManagerPool = new SoundManagerPool(5);
+SoundManagerPool soundManagerPool = new SoundManagerPool(7);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

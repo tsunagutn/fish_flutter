@@ -47,7 +47,7 @@ const RESOURCES = {
 "assets/assets/images/slowjig.png": "d7f4aaf84455407eb4558adc6de78309",
 "assets/assets/images/sonar.png": "bd1e718d8d43076d2b19fc29907ad215",
 "assets/assets/images/SPEED.png": "09df87b2c38a04f298c26da7d01cc750",
-"assets/assets/images/tairaba.png": "03544e4d91db131025e9981892fa8365",
+"assets/assets/images/tairaba.png": "680be271651384a72abaa9e0aee73cfd",
 "assets/assets/images/teibou.png": "f7964c49bda2ab446abca2697fc2377e",
 "assets/assets/images/TENSIONDRAG.png": "dea693a59acb1a40525ff3efcebe7a90",
 "assets/assets/images/unknownfish.png": "215db669697114a97c663c498cb4f64e",
@@ -84,9 +84,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "3297471c9fa06897d9cc860c93572f08",
-"/": "3297471c9fa06897d9cc860c93572f08",
-"main.dart.js": "a7d01bee1301c24228dddec6b72834e7",
+"index.html": "4775469fc3c4d5e1cfb758897a318d8e",
+"/": "4775469fc3c4d5e1cfb758897a318d8e",
+"main.dart.js": "20b9434cc3a31c9ee040ed220634b6f0",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

@@ -1,6 +1,8 @@
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:flutter/material.dart';
 
+import '../Main.dart';
+
 class fishGetDialog extends StatefulWidget {
   @override
   const fishGetDialog({
@@ -78,6 +80,9 @@ class _fishGetDialogState extends State<fishGetDialog>
             setState(() {});
           });
     _bColorAnimationController.repeat(reverse: true);
+
+    //ジングル鳴らす
+    soundManagerPool.playSound('se/jingle01.mp3');
   }
 
   @override
