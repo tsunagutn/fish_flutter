@@ -1,3 +1,12 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+enum enumFishType {
+  blue, //青物
+  bream,  //鯛系
+  bottom, //底物
+}
+
 class FishsModel {
   late List<FishModel> fishs = [];
 
@@ -32,7 +41,8 @@ class FishsModel {
       baitCntMax: 20,
       fookingTension: 200,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.blue,
     ));
 
     fishs.add(new FishModel(
@@ -61,7 +71,8 @@ class FishsModel {
       baitCntMax: 20,
       fookingTension: 200,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.blue,
     ));
     fishs.add(new FishModel(
       id: 2,
@@ -92,7 +103,8 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 200,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.bream, //？？？鯉はテスト用データなので適当にタイにする
     ));
     fishs.add(new FishModel(
       id: 3,
@@ -123,7 +135,8 @@ class FishsModel {
       baitCntMax: 30,
       fookingTension: 1000,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.bream,
     ));
 
     fishs.add(new FishModel(
@@ -155,7 +168,8 @@ class FishsModel {
       baitCntMax: 10,
       fookingTension: 1000,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.bream, //？？？テスト用データなので適当にタイニする
     ));
 
     fishs.add(new FishModel(
@@ -187,7 +201,8 @@ class FishsModel {
       baitCntMax: 15,
       fookingTension: 150,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.blue,
     ));
 
     fishs.add(new FishModel(
@@ -219,7 +234,8 @@ class FishsModel {
       baitCntMax: 15,
       fookingTension: 100,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.blue,
     ));
     fishs.add(new FishModel(
       id: 7,
@@ -250,7 +266,8 @@ class FishsModel {
       baitCntMax: 25,
       fookingTension: 400,
       bareMin: 35,
-      flgBottom: true,
+      //flgBottom: true,
+      type: enumFishType.bottom,
     ));
     fishs.add(new FishModel(
       id: 8,
@@ -281,7 +298,8 @@ class FishsModel {
       baitCntMax: 25,
       fookingTension: 500,
       bareMin: 35,
-      flgBottom: true,
+      //flgBottom: true,
+      type: enumFishType.bottom,
     ));
     fishs.add(new FishModel(
       id: 9,
@@ -312,7 +330,8 @@ class FishsModel {
       baitCntMax: 25,
       fookingTension: 700,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.bream,
     ));
     fishs.add(new FishModel(
       id: 10,
@@ -343,7 +362,8 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 600,
       bareMin: 35,
-      flgBottom: true,
+      //flgBottom: true,
+      type: enumFishType.bottom,
     ));
     fishs.add(new FishModel(
       id: 11,
@@ -374,7 +394,8 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 60,
       bareMin: 35,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.bream,
     ));
     fishs.add(new FishModel(
       id: 12,
@@ -405,7 +426,8 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 130,
       bareMin: 35,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.blue,
     ));
     fishs.add(new FishModel(
       id: 13,
@@ -436,7 +458,8 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 70,
       bareMin: 20,
-      flgBottom: false,
+      //flgBottom: false,
+      type: enumFishType.blue,
     ));
   }
 
@@ -458,7 +481,8 @@ class FishsModel {
     extractFishs.removeWhere((value) => maxDepth > value.hereTanaMax);
 
     if (!bottom) {
-      extractFishs.removeWhere((value) => value.flgBottom);
+      //現在底付近でなければ底物を除外
+      extractFishs.removeWhere((value) => value.type == enumFishType.bottom);
     }
     return extractFishs;
   }
@@ -503,7 +527,8 @@ class FishModel {
   int baitCntMax; //アタリ発生からアワセまでの猶予スキャン
   double fookingTension; //アワセ成功テンション
   int bareMin; //HIT後のバレ判定スキャン数（これプラスアワセレベル）
-  bool flgBottom; //底生
+  //bool flgBottom; //底生
+  enumFishType type; //魚タイプ
 
   //コンストラクタ
   FishModel({
@@ -534,7 +559,8 @@ class FishModel {
     required this.baitCntMax,
     required this.fookingTension,
     required this.bareMin,
-    required this.flgBottom,
+    //required this.flgBottom,
+    required this.type,
   });
 
   //サイズ割合（0.0～1.0）を元に実サイズを返す
@@ -545,6 +571,52 @@ class FishModel {
   //サイズ割合（0.0～1.0）を元に実重さを返す
   double getWeight(size) {
     return ((weightMax - weightMin) * size + weightMin);
+  }
+
+  //魚種類名の表示を返す
+  Widget getNameContainer(enumFishType type, double fontSize) {
+    String name;
+    var borderColor;
+    var boxColor;
+
+    switch(type) {
+      case enumFishType.blue:
+        name = "青物";
+        borderColor = Colors.indigo[500];
+        boxColor = Colors.cyan[500];
+        break;
+      case enumFishType.bream:
+        name = "鯛他";
+        borderColor = Colors.red[700];
+        boxColor = Colors.red[200];
+        break;
+      case enumFishType.bottom:
+        name = "底物";
+        borderColor = Colors.green[700];
+        boxColor = Colors.green[200];
+        break;
+      default:
+        return Container();
+    }
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.only(
+          left: 5, right: 5),
+      decoration: BoxDecoration(
+          border: Border.all(
+              color: borderColor,
+              width: 3),
+          borderRadius: BorderRadius.all(
+              Radius.circular(7.0)),
+          color: boxColor),
+      child: Text(name,
+          style: TextStyle(
+            color: Colors.black,
+            //fontWeight: FontWeight.bold,
+            fontSize: fontSize,
+          )),
+    );
   }
 
   Map<String, List<double>> getPrmLevels() {

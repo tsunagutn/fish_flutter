@@ -153,21 +153,8 @@ class _fishGetDialogState extends State<fishGetDialog>
                     Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          if (widget.flgNew)
-                            Container(
-                              margin: EdgeInsets.only(right: 3),
-                              padding: const EdgeInsets.all(2.0),
-                              decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.black, width: 1),
-                                  color: Colors.black),
-                              child: Text("NEW!",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                  )),
-                            ),
+Container(margin: EdgeInsets.only(top: 5, right: 5),child:
+                          widget.fish.getNameContainer(widget.fish.type, 14),),
                           Text(widget.fish.name +
                               "　" +
                               widget.fish
@@ -182,6 +169,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                               color: Colors.yellow,
                             ),
                         ]),
+                    Container(margin: EdgeInsets.only(top:5, bottom: 5),child:
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -191,9 +179,24 @@ class _fishGetDialogState extends State<fishGetDialog>
                             color: Colors.yellow,
                           ),
                       ],
-                    ),
+                    ),),
                     Text(widget.addPoint.toString() + 'ポイント獲得です'),
                     Text(widget.fish.text),
+                    if (widget.flgNew)
+                        Container(
+                          margin: EdgeInsets.only(right: 3, top:5),
+                          padding: const EdgeInsets.all(2.0),
+                          decoration: BoxDecoration(
+                            border:
+                            Border.all(color: Colors.black, width: 1),
+                            color: Color.fromRGBO(r, g, b, 1.0),),
+                          child: Text("NEW!",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              )),
+                        ),
                     if (widget.flgNew)
                       Container(
                         margin: EdgeInsets.only(top: 5),

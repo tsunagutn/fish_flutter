@@ -115,9 +115,13 @@ class _BookDialogState extends State<BookDialog>
                               ),
                             ),
 
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            _showFishData.getNameContainer(_showFishData.type, 18),
                             //名前
                             Container(
-                                margin: EdgeInsets.only(bottom: 10),
+                                margin: EdgeInsets.only(left: 10,bottom: 10),
                                 child: Text(_showFishData.name,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -130,6 +134,7 @@ class _BookDialogState extends State<BookDialog>
                                                 Colors.black.withOpacity(0.4))
                                       ],
                                     ))),
+]),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -178,25 +183,6 @@ class _BookDialogState extends State<BookDialog>
                                                   .toString() +
                                               "m",
                                         ),
-                                        if (_showFishData.flgBottom)
-                                          Container(
-                                            margin: EdgeInsets.only(bottom: 5),
-                                            padding: const EdgeInsets.only(
-                                                left: 5, right: 5),
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Colors.red,
-                                                    width: 3),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(7.0)),
-                                                color: Colors.yellow),
-                                            child: Text("根魚",
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                )),
-                                          ),
                                         Text(
                                           "【志向】",
                                           textAlign: TextAlign.left,
@@ -460,12 +446,24 @@ class _BookDialogState extends State<BookDialog>
                           margin: EdgeInsets.only(
                             left: 10,
                           ),
-                          child: Text(
+                          child:
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              fish.getNameContainer(fish.type, 12),
+                          Container(
+                              margin: EdgeInsets.only(
+                                left: 7,
+                              ),
+                              child:
+                          Text(
                             name,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          ),
+                          ]),
                         ),
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
