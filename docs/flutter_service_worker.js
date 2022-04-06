@@ -26,7 +26,7 @@ const RESOURCES = {
 "assets/assets/images/fish/sagoshi.png": "f7194a4bd64f09a80be3ec60e111acf8",
 "assets/assets/images/fish/sakana.jpg": "197270149d9a9320dff38ed13fa30b18",
 "assets/assets/images/fish/sawara.png": "6d48a88cebc19a0274c56fb83645da13",
-"assets/assets/images/fish/tachiuo.jpg": "b9ea3c93162502641c65b4c9d821d9ca",
+"assets/assets/images/fish/tachiuo.jpg": "9f377da927535b09c2ce8ef4b19d8ab5",
 "assets/assets/images/fish.png": "2690dcdef769464d5a04f57529ab8737",
 "assets/assets/images/fishback.jpg": "cccd1f3d68e9ff004efb15bfbde56ed4",
 "assets/assets/images/hari.png": "4c6f2b13241cd99063741beda3b2e2e3",
@@ -84,9 +84,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "4775469fc3c4d5e1cfb758897a318d8e",
-"/": "4775469fc3c4d5e1cfb758897a318d8e",
-"main.dart.js": "20b9434cc3a31c9ee040ed220634b6f0",
+"index.html": "c0adc6d1b2ca39828cc225ee6e643168",
+"/": "c0adc6d1b2ca39828cc225ee6e643168",
+"main.dart.js": "e0abbe5251fec789bc8d84c44858be2a",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };
