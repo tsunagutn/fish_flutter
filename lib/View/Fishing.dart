@@ -5,6 +5,8 @@
 //https://maou.audio/
 //効果音ラボ
 //https://soundeffect-lab.info/
+//フリーイラスト素材集ジャパクリップ
+//https://japaclip.com/terms-ja/
 
 //☆基本概要
 
@@ -79,19 +81,22 @@
 //済・BGMなんかばぐがある、重い、さいせいすればするほど重くなる？
 //済・効果音なんかばぐがある、重い、さいせいすればするほど重くなる？最初にプリロードした方が良いかも
 //済・pagesで音がでんくなった（asset小文字大文字変えたせい）
+//済・設定画面 音ボリューム
+//済・設定画面 合わせの強さ調節
 //済・ジャーク感度の調整機能
+//済・合わせシステムマシニする
+//・竿のMAXテンションによってジャーク強さかえる
+//・魚種を３種類に分けるやつ
 //・店をもっとましにする
+//・タックル変更をもっとましにする
 //・サカナ反応が空に浮くのをなおす
 //・ドラグ使いにくいの何とかする
 //・風の描画？？？いる？
 //・雲の描画
 //・海底に漁礁とか
+//・実績
 //・時合度が低いのが続かんようにするか、高くできるようにする
 //・王冠つきじゃないと詳細アンロックしない？
-//・魚種毎に実績
-//・設定画面 合わせの強さ調節
-//・設定画面 音ボリューム
-//・実績
 //・中断セーブ機能
 
 //・ジャークをリズムで
@@ -106,6 +111,7 @@
 //・チュートリアルか、ヘルプか
 
 //リリース前作業
+//・全体的に重いのをなんとかする、画像圧縮とか余計な処理消しとか
 //・魚種データ登録
 //・面データ登録
 //・アイコン作り
@@ -212,8 +218,8 @@ class _FishingState extends BasePageState<Fishing>
     9999: 0.7,
   };
 
-  //static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
-  static const TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
+  static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
+  //static const TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
   //static const TIMER_INTERVAL = 17; //1スキャン時間(msec) 60FPS
   //static const TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
   static const TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
@@ -269,12 +275,14 @@ class _FishingState extends BasePageState<Fishing>
   var _onClutch = false; //現在クラッチ状態
   var _flgBait = false; //現在アタリ中フラグ
   var _flgHit = false; //現在HIT中フラグ
+  var _flgFooking = false;  //アワセモード中フラグ
   //var _flgGameOver = false; //現在ゲームオーバーフラグ
 
   //ステート変数
   var _tension = 0.0; //テンション値
   var _tensionValMax = 0.0; //テンション最大値 竿によって可変
   var _fookingTension = 0.0; //アタリ時のアワセ判定値
+  var _fookingTensionPrev = 0.0;  //アワセモード時のテンション前回値記憶
   var _drag = 0.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _speedValMax = 0.0; //スピード最大値 リールによって可変
@@ -1106,11 +1114,11 @@ class _FishingState extends BasePageState<Fishing>
                 : _fookingTension);
             //アタリと判定
             _flgBait = true;
-            //_baitMaxTension = 0.0;
             debugPrint("アタリ");
-            //_dispInfo = 'アタリ';
+            //アワセ判定中フラグをリセット
+            _flgFooking = false;
+            _fookingTensionPrev = 0;
             _infoBackColor = TENSION_COLOR_DANGER;
-
             soundManagerPool.playSound('se/bait.mp3');
           }
           if (_flgBait || _flgHit) {
@@ -1131,48 +1139,54 @@ class _FishingState extends BasePageState<Fishing>
       //アタリ中またはHIT中の処理
       var fish = FISH_TABLE.fishs[_fishidx];
       if (_flgBait) {
-        debugPrint(_fookingTension.toString());
-
-        //アタリ中の処理
-        if (_tension > _fookingTension) {
-          //バイト中の最大テンションが一定値を超えるとHIT
-          _flgBait = false;
-          _flgHit = true;
-          //_fookingTension = 0.0;
-          debugPrint('HIT!!!!');
-          //_dispInfo = "HIT!";
-          //フッキングの成功度
-          _fookingLv = (_tension - _fookingTension) / 2;
-          if (_fookingLv > 100.0) _fookingLv = 100.0;
-          //フッキング成功度によってバレ判定値に補正
-          _fookingTension -= _fookingLv;
-          _fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
-          //HITメッセージ
-          _centerTextMain = "HIT!";
-          _centerTextMainColor = Colors.red;
-          _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
-          _centerTextSubColor = Colors.yellow;
-          startCenterInfo();
-
-          soundManagerPool.playSound('se/hit.mp3');
-          nowBgm = 'bgm_fight.mp3';
-          bgmPlay(nowBgm);
-        } else {
+        //アタリ中
+        if (!_flgFooking) {
+          //合わせ成立前
           //当たってからのスキャン数加算
           _baitCnt++;
           if (_baitCnt > fish.baitCntMax) {
             //アタリ判定期間終了
             //アワセ失敗
             _flgBait = false;
+          } else {
+            _pointerColor = clsColor.getColorFromHex("FF6A00"); //アタリ中はオレンジ
+            //点滅速度最大
+            duration = durationMin;
+            if (_tension > _fookingTension) {
+              //アワセモードに移行
+              _flgFooking = true;
+              _fookingTensionPrev = _tension;
+            }
           }
-          //アタリ中
-          // if (_tension > _baitMaxTension) {
-          //   //バイト中の最大テンションを記憶
-          //   //_baitMaxTension = _tension;
-          // }
-          _pointerColor = clsColor.getColorFromHex("FF6A00"); //アタリ中はオレンジ
-          //点滅速度最大
-          duration = durationMin;
+        } else {
+          //アワセモード中
+          if (_fookingTensionPrev > _tension) {
+            //テンションが前回値を下回った時、アワセ操作終了 = HIT成立
+            _flgBait = false;
+            _flgHit = true;
+            //_fookingTension = 0.0;
+            debugPrint('HIT!!!!');
+            //_dispInfo = "HIT!";
+            //フッキングの成功度
+            _fookingLv = (_fookingTensionPrev - _fookingTension) / 2;
+            //if (_fookingLv > 100.0) _fookingLv = 100.0;
+            //フッキング成功度によってバレ判定値に補正
+            _fookingTension -= _fookingLv;
+            _fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
+            //HITメッセージ
+            _centerTextMain = "HIT!";
+            _centerTextMainColor = Colors.red;
+            _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
+            _centerTextSubColor = Colors.yellow;
+            startCenterInfo();
+
+            soundManagerPool.playSound('se/hit.mp3');
+            nowBgm = 'bgm_fight.mp3';
+            bgmPlay(nowBgm);
+          } else {
+            //アワセ成立しないとき、テンションの今回値を記憶
+            _fookingTensionPrev = _tension;
+          }
         }
       } else {
         if (_flgHit) {
