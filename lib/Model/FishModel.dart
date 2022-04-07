@@ -40,7 +40,7 @@ class FishsModel {
       abareLv: 2,
       baitCntMax: 20,
       fookingTension: 200,
-      bareMin: 20,
+      bareEasy: 0.5,
       //flgBottom: false,
       type: enumFishType.blue,
     ));
@@ -70,7 +70,7 @@ class FishsModel {
       abareLv: 5,
       baitCntMax: 20,
       fookingTension: 200,
-      bareMin: 20,
+      bareEasy: 0.9,
       //flgBottom: false,
       type: enumFishType.blue,
     ));
@@ -102,7 +102,7 @@ class FishsModel {
       abareLv: 2,
       baitCntMax: 40,
       fookingTension: 200,
-      bareMin: 20,
+      bareEasy: 0.3,
       //flgBottom: false,
       type: enumFishType.bream, //？？？鯉はテスト用データなので適当にタイにする
     ));
@@ -134,7 +134,7 @@ class FishsModel {
       abareLv: 4,
       baitCntMax: 30,
       fookingTension: 1000,
-      bareMin: 20,
+      bareEasy: 0.4,
       //flgBottom: false,
       type: enumFishType.bream,
     ));
@@ -167,7 +167,7 @@ class FishsModel {
       abareLv: 10,
       baitCntMax: 10,
       fookingTension: 1000,
-      bareMin: 20,
+      bareEasy: 0.9,
       //flgBottom: false,
       type: enumFishType.bream, //？？？テスト用データなので適当にタイニする
     ));
@@ -200,7 +200,7 @@ class FishsModel {
       abareLv: 5,
       baitCntMax: 15,
       fookingTension: 150,
-      bareMin: 20,
+      bareEasy: 0.6,
       //flgBottom: false,
       type: enumFishType.blue,
     ));
@@ -233,7 +233,7 @@ class FishsModel {
       abareLv: 6,
       baitCntMax: 15,
       fookingTension: 100,
-      bareMin: 20,
+      bareEasy: 0.8,
       //flgBottom: false,
       type: enumFishType.blue,
     ));
@@ -265,7 +265,7 @@ class FishsModel {
       abareLv: 3,
       baitCntMax: 25,
       fookingTension: 400,
-      bareMin: 35,
+      bareEasy: 0.5,
       //flgBottom: true,
       type: enumFishType.bottom,
     ));
@@ -297,7 +297,7 @@ class FishsModel {
       abareLv: 3,
       baitCntMax: 25,
       fookingTension: 500,
-      bareMin: 35,
+      bareEasy: 0.5,
       //flgBottom: true,
       type: enumFishType.bottom,
     ));
@@ -329,7 +329,7 @@ class FishsModel {
       abareLv: 2,
       baitCntMax: 25,
       fookingTension: 700,
-      bareMin: 20,
+      bareEasy: 0.5,
       //flgBottom: false,
       type: enumFishType.bream,
     ));
@@ -361,7 +361,7 @@ class FishsModel {
       abareLv: 3,
       baitCntMax: 40,
       fookingTension: 600,
-      bareMin: 35,
+      bareEasy: 0.5,
       //flgBottom: true,
       type: enumFishType.bottom,
     ));
@@ -393,7 +393,7 @@ class FishsModel {
       abareLv: 4,
       baitCntMax: 40,
       fookingTension: 60,
-      bareMin: 35,
+      bareEasy: 0.1,
       //flgBottom: false,
       type: enumFishType.bream,
     ));
@@ -425,7 +425,7 @@ class FishsModel {
       abareLv: 8,
       baitCntMax: 40,
       fookingTension: 130,
-      bareMin: 35,
+      bareEasy: 0.4,
       //flgBottom: false,
       type: enumFishType.blue,
     ));
@@ -457,7 +457,7 @@ class FishsModel {
       abareLv: 7,
       baitCntMax: 40,
       fookingTension: 70,
-      bareMin: 20,
+      bareEasy: 0.8,
       //flgBottom: false,
       type: enumFishType.blue,
     ));
@@ -526,7 +526,7 @@ class FishModel {
   int abareLv; //自重の何倍まで暴れるか
   int baitCntMax; //アタリ発生からアワセまでの猶予スキャン
   double fookingTension; //アワセ成功テンション
-  int bareMin; //HIT後のバレ判定スキャン数（これプラスアワセレベル）
+  double bareEasy; //バレやすさ 0.0～1.0
   //bool flgBottom; //底生
   enumFishType type; //魚タイプ
 
@@ -558,7 +558,7 @@ class FishModel {
     required this.abareLv,
     required this.baitCntMax,
     required this.fookingTension,
-    required this.bareMin,
+    required this.bareEasy,
     //required this.flgBottom,
     required this.type,
   });

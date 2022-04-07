@@ -80,32 +80,47 @@ class _FishCardListState extends State<FishCardList>
   Widget makeFishCard(
       {required FishModel fish,
       required Iterable<FishResultModel> fishResult}) {
-    Color backgroundColor;
+    var borderColor = Colors.black;
+    var boxColor;
+    double backgroundOpacity = 0.9;
     bool flgBorder = false;
     String name;
+
+    switch (fish.type) {
+      case enumFishType.blue:
+        boxColor = Colors.lightBlue[100];
+        break;
+      case enumFishType.bream:
+        boxColor = Colors.red[200];
+        break;
+      case enumFishType.bottom:
+        boxColor = Colors.green[200];
+        break;
+      default:
+        return Container();
+    }
 
     if (fishResult.length > 0) {
       //釣果有り
       name = fish.name;
-      backgroundColor = Color(0xffffffe0);
     } else {
       //釣果なし
       name = "";
       for (var i = 0; i < fish.name.length; i++) name += "？";
       if (fish.id == widget.hitFishId) {
         flgBorder = true;
-        backgroundColor = Color(0xffffffff);
+        borderColor = widget.pointerColor;
       } else {
-        backgroundColor = Color(0xffc0c0c0).withOpacity(0.8);
+        backgroundOpacity = 0.3;
       }
     }
 
     return new Card(
-      color: backgroundColor,
+      color: boxColor.withOpacity(backgroundOpacity),
       shape: RoundedRectangleBorder(
         side: BorderSide(
-          width: (flgBorder ? widget.borderWidth : 0),
-          color: widget.pointerColor,
+          width: (flgBorder ? widget.borderWidth : 1),
+          color: borderColor,
         ),
       ),
       // child:

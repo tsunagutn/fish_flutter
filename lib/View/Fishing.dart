@@ -85,8 +85,11 @@
 //済・設定画面 合わせの強さ調節
 //済・ジャーク感度の調整機能
 //済・合わせシステムマシニする
-//・竿のMAXテンションによってジャーク強さかえる
-//・魚種を３種類に分けるやつ
+//済・竿のMAXテンションによってジャーク強さかえる
+//済・竿のMAXテンションによってバレ判定の速度かえる
+//中・魚種を３種類に分けるやつ
+//・アタリ時HIT時レア度や初によって音を返る
+//・吊り上げ時レア度によって音をかえる
 //・店をもっとましにする
 //・タックル変更をもっとましにする
 //・サカナ反応が空に浮くのをなおす
@@ -227,7 +230,6 @@ class _FishingState extends BasePageState<Fishing>
   //static const _speedValMax = 300.0; //巻き速度スライダーMAX値
   static const SPEED_VAL_MIN = 0.0; //巻き速度スライダーMIN値
   static const HOSEI_MAX = 3;
-  //static const BARE_MAX = 20; //バレ判定条件成立からバレ発生までのスキャン数 ？？？魚のでかさによって可変にするべき
   static const MAX_RAND_ADD_TENSION = 2; //何もしてない時テンションがウロウロするののMAX値
   static const MIN_RAND_ADD_TENSION = -11; //〃 MIN値
   final TENSION_COLOR_SAFE = clsColor.getColorFromHex("4CFF00");
@@ -704,8 +706,8 @@ class _FishingState extends BasePageState<Fishing>
       //アタリ中、HIT中でない時は現在の最大深さから可能性のある種を抽出
       _fishCardItem = FISH_TABLE.extractMaxDepth(maxDepth: _maxDepth);
     }
-    //シャクリによるテンション増加？？？竿長さによって係数を可変にする
-    weight += _rodStandUp * 3000;
+    //シャクリによるテンション増加 竿MAXテンションによって可変
+    weight += _rodStandUp * (_tensionValMax * 1.5);
 
     //巻き中の時、重量に巻速度を加味
     if (_onTap) {
@@ -776,6 +778,7 @@ class _FishingState extends BasePageState<Fishing>
         _flgHit = false;
         _pointerColor = clsColor.getColorFromHex("ffd900");
         _nowDurationLv = POINT_DURATION_MSEC.length - 1;
+        _rodStandUp = 0.0;
         _depth = 0.0;
       }
     }
@@ -800,11 +803,6 @@ class _FishingState extends BasePageState<Fishing>
         soundManagerPool.playSoundDisableContain(
             'se/drag2.mp3', enumDisableContainPlay.drag);
       }
-    } else {
-      //   //テンションMAX（切れそう）判定 最大値の9割で切れそうと判定
-      //   if (val >= (_tensionValMax * 0.9)) {
-      //     _tensionActiveTrackColor = TENSION_COLOR_DANGER;
-      //   }
     }
 
     if (val > _tensionValMax) val = _tensionValMax;
@@ -1198,24 +1196,24 @@ class _FishingState extends BasePageState<Fishing>
               ((durationMax - durationMin) * (_tension / _tensionValMax))
                   .floor();
 
-          //バレ値 時間経過で徐々にバレる
-          _fookingTension += 0.1;
-          //バレ判定 水深MAXか、テンションがアワセ値未満で条件成立
-          if (_depth >= _maxDepth || val < _fookingTension) {
-            //_bareCnt++;
-            _fookingTension += 5;
-          } else {
-            //_bareCnt = 0;
-          }
-          //if (_bareCnt >= fish.bareMin + _fookingLv.floor()) {
+          //バレ判定
+          //基本値 MAX2000の時0.5
+          var bare = _tensionValMax / 10000;
+          //底にいるとき4倍
+          if (_depth >= _maxDepth) bare = bare * 4;
+          //テンションがアワセ値未満の時3倍
+          if (val < _fookingTension) bare = bare * 3;
+          //現在テンションによって補正 少ないほど早い 0の時3倍
+          bare = bare * (3 * (1.0 - (_tension / _tensionValMax)));
+          //魚種による補正 MAXのとき3倍
+          bare = bare * (10 * fish.bareEasy);
+          _fookingTension += bare;
+
           if (_fookingTension > _tensionValMax) {
             //バレ条件成立が一定スキャン保持でバレとする
             debugPrint("バレ");
             _flgBait = false;
             _flgHit = false;
-            //console.log("bare...");
-            //バレのモーダル表示
-            //show_modal_bare();
             //バレメッセージ
             _centerTextMain = "";
             _centerTextMainColor = Colors.blue;
@@ -1522,20 +1520,22 @@ class _FishingState extends BasePageState<Fishing>
                   _speed = val;
                   //アワセ値
                   //addVal = (moveY / 100);
-                  addVal = (moveY / (50 + (100 * (1.0 - settings.jerkSense))));
-                  if (addVal > 0.5) {
-                    //シャクリ音（大）
-                    soundManagerPool.playSoundDisableContain(
-                        'se/middlejerk.mp3', enumDisableContainPlay.jerk);
-                  } else if (addVal > 0.2) {
-                    //シャクリ音（小）
-                    soundManagerPool.playSoundDisableContain(
-                        'se/lowjerk.mp3', enumDisableContainPlay.jerk);
-                  }
+                  debugPrint(settings.jerkSense.toString());
+                  addVal = (moveY / (40 + (110 * (1.0 - settings.jerkSense))));
                   val = _rodStandUp + addVal;
                   if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
                   if (val < 0) val = 0;
                   _rodStandUp = val;
+                  if (_rodStandUp > 4.0) {
+                    //シャクリ音（大）
+                    soundManagerPool.playSoundDisableContain(
+                        'se/middlejerk.mp3', enumDisableContainPlay.jerk);
+                  } else if (_rodStandUp > 2.0) {
+                    //シャクリ音（小）
+                    soundManagerPool.playSoundDisableContain(
+                        'se/lowjerk.mp3', enumDisableContainPlay.jerk);
+                  }
+
                 },
                 //タップ、ドラッグ操作が終了した時
                 onPanEnd: (DragEndDetails details) {

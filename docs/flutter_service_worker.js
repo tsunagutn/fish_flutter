@@ -64,7 +64,7 @@ const RESOURCES = {
 "assets/assets/se/engineon.mp3": "a7c9028087225d1753d40e6dc9f22603",
 "assets/assets/se/highjerk.mp3": "4a029842965c678817e470853de6acb8",
 "assets/assets/se/hit.mp3": "95d2d17d040e77681bea9b6152b7ba5c",
-"assets/assets/se/jingle01.mp3": "98a9b37ac6088d29d2c404d3a9a9a331",
+"assets/assets/se/jingle01.mp3": "2ad70cbcbd1d76a1afefc4c72e1b947d",
 "assets/assets/se/kk_sonar_low.mp3": "851fdb9ba3a25d9fefbf92d753ffae82",
 "assets/assets/se/linebreak.mp3": "b3063399a764ff4506d8fc1f576a4c69",
 "assets/assets/se/lowjerk.mp3": "fa7b4d4c640ffd5223cd309ce36468c7",
@@ -84,9 +84,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "c0adc6d1b2ca39828cc225ee6e643168",
-"/": "c0adc6d1b2ca39828cc225ee6e643168",
-"main.dart.js": "e0abbe5251fec789bc8d84c44858be2a",
+"index.html": "cdc2086a5b404dfa6d8a94fbbec6f920",
+"/": "cdc2086a5b404dfa6d8a94fbbec6f920",
+"main.dart.js": "4da78df08660cb3c0222ded33f564f79",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

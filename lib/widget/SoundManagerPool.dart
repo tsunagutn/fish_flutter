@@ -27,7 +27,6 @@ class SoundManagerPool {
   SoundManagerPoolInit() {
     List<String> lstSeFileName = [];
     //？？？これはあまりにもひどくないか・・・？
-    lstSeFileName.add("bgm/muon01.mp3");
     lstSeFileName.add("se/bait.mp3");
     lstSeFileName.add("se/book.mp3");
     lstSeFileName.add("se/bookclose.mp3");
@@ -109,7 +108,7 @@ class SoundManager {
 
   Future<void> playSound(String path) async {
     if (settings.flgBgm) {
-      await audioCache.play(path, mode: PlayerMode.LOW_LATENCY);
+      await audioCache.play(path, isNotification: true);
       advancedPlayer.setVolume(maxVolume * settings.volumeSe);
     }
     return;
