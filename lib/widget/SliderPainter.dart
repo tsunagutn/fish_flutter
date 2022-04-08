@@ -232,12 +232,12 @@ class SliderPainter extends CustomPainter {
     // テキスト描画用のペインター
     final textPainter = TextPainter(
       text: TextSpan(
-          style: textStyle, children: <TextSpan>[TextSpan(text: text)]),
-      textAlign: TextAlign.right,
+          style: textStyle, children: <TextSpan>[TextSpan(text: " " + text)]),
+      textAlign: TextAlign.left,
       textDirection: TextDirection.ltr,
     );
     textPainter.layout(
-      minWidth: size.width - 5,
+      minWidth: 0,
       maxWidth: size.width - 5,
     );
 
@@ -248,11 +248,11 @@ class SliderPainter extends CustomPainter {
     final textPainterMain = TextPainter(
       text: TextSpan(
           style: textStyleMain, children: <TextSpan>[TextSpan(text: text)]),
-      textAlign: TextAlign.right,
+      textAlign: TextAlign.left,
       textDirection: TextDirection.ltr,
     );
     textPainterMain.layout(
-      minWidth: size.width - 5,
+      minWidth: 0,
       maxWidth: size.width - 5,
     );
 

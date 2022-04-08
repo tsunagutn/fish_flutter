@@ -75,22 +75,22 @@ class _SettingDialogState extends State<SettingDialog>
         settings.volumeSe = _volumeSe;
       });
   void _changeEndVolumeBgm(double? e) => setState(() {
-    widget.bgm.volumeBgm();
-  });
+        widget.bgm.volumeBgm();
+      });
   void _changeEndVolumeSe(double? e) => setState(() {
-    //適当な音を再生
-    soundManagerPool.playSound('se/linebreak.mp3');
-  });
+        //適当な音を再生
+        soundManagerPool.playSound('se/linebreak.mp3');
+      });
 
   void _changeJerkSense(double? e) => setState(() {
-    _jerkSense = e!;
-    settings.jerkSense = _jerkSense;
-  });
+        _jerkSense = e!;
+        settings.jerkSense = _jerkSense;
+      });
 
   void _changeMakiSense(double? e) => setState(() {
-    _makiSense = e!;
-    settings.makiSense = _makiSense;
-  });
+        _makiSense = e!;
+        settings.makiSense = _makiSense;
+      });
 
   @override
   void initState() {
@@ -214,15 +214,8 @@ class _SettingDialogState extends State<SettingDialog>
                                 margin: EdgeInsets.only(left: 15),
                                 child: Row(
                                   children: [
-                                    new Icon(
-                                      Icons.arrow_upward,
-                                      color: _bgm
-                                          ? Colors.orange[700]
-                                          : Colors.grey[500],
-                                      size: 50.0,
-                                    ),
                                     Container(
-                                      width: 50,
+                                      width: 100,
                                       margin: EdgeInsets.only(left: 15),
                                       child: Text("ジャークの感度"),
                                     ),
@@ -242,17 +235,10 @@ class _SettingDialogState extends State<SettingDialog>
                                 margin: EdgeInsets.only(left: 15),
                                 child: Row(
                                   children: [
-                                    new Icon(
-                                      Icons.arrow_upward,
-                                      color: _bgm
-                                          ? Colors.orange[700]
-                                          : Colors.grey[500],
-                                      size: 50.0,
-                                    ),
                                     Container(
-                                      width: 50,
+                                      width: 100,
                                       margin: EdgeInsets.only(left: 15),
-                                      child: Text("巻き速度変更の感度"),
+                                      child: Text("巻き速度の感度"),
                                     ),
                                     Container(
                                       child: Slider(

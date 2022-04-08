@@ -99,7 +99,22 @@ class _fishGetDialogState extends State<fishGetDialog>
     int g = (255 * _gColorValue.value).floor();
     int b = (255 * _bColorValue.value).floor();
 
-    String mes = '';
+    String strLevel = '';
+    var colorLevel;
+    switch (widget.fish.type) {
+      case enumFishType.blue:
+        strLevel = "最大テンションが成長しました";
+        colorLevel = Colors.indigo[500];
+        break;
+      case enumFishType.bream:
+        strLevel = "巻き速度が成長しました";
+        colorLevel = Colors.red[200];
+        break;
+      case enumFishType.bottom:
+        strLevel = "ライン強さが成長しました";
+        colorLevel = Colors.green[200];
+        break;
+    }
 
     return Stack(children: [
       Opacity(
@@ -138,7 +153,8 @@ class _fishGetDialogState extends State<fishGetDialog>
                     ],
                   )),
               content: Container(
-                  height: widget.dispSize.height / 2,
+                  height: widget.dispSize.height / 1.7,
+                  width: widget.dispSize.width,
                   // decoration: new BoxDecoration(
                   //     image: new DecorationImage(
                   //   image: new AssetImage("assets/images/fishback.jpg"),
@@ -147,13 +163,28 @@ class _fishGetDialogState extends State<fishGetDialog>
                   child: Column(children: <Widget>[
                     new Image(
                       image: AssetImage('assets/images/' + widget.fish.image),
-                      // width: 150,
-                      // height: 150,
+                        width:250,
+                        fit: BoxFit.contain,
                     ),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-Container(margin: EdgeInsets.only(top: 5, right: 5),child:
+                          if (widget.flgNew)
+                            Container(
+                              margin: EdgeInsets.only(right: 3, top:5),
+                              padding: const EdgeInsets.all(2.0),
+                              decoration: BoxDecoration(
+                                border:
+                                Border.all(color: Colors.black, width: 1),
+                                color: Color.fromRGBO(r, g, b, 1.0),),
+                              child: Text("NEW!",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  )),
+                            ),
+                          Container(margin: EdgeInsets.only(top: 5, right: 5),child:
                           widget.fish.getNameContainer(widget.fish.type, 14),),
                           Text(widget.fish.name +
                               "　" +
@@ -180,23 +211,15 @@ Container(margin: EdgeInsets.only(top: 5, right: 5),child:
                           ),
                       ],
                     ),),
-                    Text(widget.addPoint.toString() + 'ポイント獲得です'),
-                    Text(widget.fish.text),
-                    if (widget.flgNew)
-                        Container(
-                          margin: EdgeInsets.only(right: 3, top:5),
-                          padding: const EdgeInsets.all(2.0),
-                          decoration: BoxDecoration(
-                            border:
-                            Border.all(color: Colors.black, width: 1),
-                            color: Color.fromRGBO(r, g, b, 1.0),),
-                          child: Text("NEW!",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              )),
-                        ),
+                    Text(widget.addPoint.toString() + '円ゲット!'),
+                    Text(strLevel,
+                        style: TextStyle(
+                          color: colorLevel,
+                          fontWeight: FontWeight.bold,
+                        ),),
+                    Container(margin: EdgeInsets.only(top:10),child:
+                    Text(widget.fish.text),),
+
                     if (widget.flgNew)
                       Container(
                         margin: EdgeInsets.only(top: 5),

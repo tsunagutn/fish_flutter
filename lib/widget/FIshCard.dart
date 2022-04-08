@@ -2,6 +2,8 @@ import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:flutter/material.dart';
 
+import 'SliderPainter.dart';
+
 class FishCardList extends StatefulWidget {
   @override
   const FishCardList({
@@ -10,6 +12,7 @@ class FishCardList extends StatefulWidget {
     required this.hitFishId,
     required this.pointerColor,
     required this.borderWidth,
+    required this.flgRight,
   });
 
   final List<FishModel> fishsTable;
@@ -17,14 +20,15 @@ class FishCardList extends StatefulWidget {
   final int hitFishId; //HITorアタリ中の魚ID 非HIT中は-1
   final Color pointerColor; //光点の色
   final double borderWidth; //枠線の幅
+  final bool flgRight;
   _FishCardListState createState() => _FishCardListState();
 }
 
 class _FishCardListState extends State<FishCardList>
-    with SingleTickerProviderStateMixin {
+     {
   List<FishModel> fishList = [];
 
-  static const double cardWidth = 90.0;
+  static const double cardWidth = 100.0;
   static const double cardHeight = 19.0;
 
   @override
@@ -82,9 +86,10 @@ class _FishCardListState extends State<FishCardList>
       required Iterable<FishResultModel> fishResult}) {
     var borderColor = Colors.black;
     var boxColor;
-    double backgroundOpacity = 0.9;
     bool flgBorder = false;
     String name;
+    var bold = false;
+    var prob;
 
     switch (fish.type) {
       case enumFishType.blue:
@@ -103,6 +108,7 @@ class _FishCardListState extends State<FishCardList>
     if (fishResult.length > 0) {
       //釣果有り
       name = fish.name;
+      bold = true;
     } else {
       //釣果なし
       name = "";
@@ -110,40 +116,78 @@ class _FishCardListState extends State<FishCardList>
       if (fish.id == widget.hitFishId) {
         flgBorder = true;
         borderColor = widget.pointerColor;
-      } else {
-        backgroundOpacity = 0.3;
       }
     }
+    //HIT率の整形
+    prob = fish.prob * 100.0;
+    if (prob > 1.0) prob = 1.0;
 
-    return new Card(
-      color: boxColor.withOpacity(backgroundOpacity),
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          width: (flgBorder ? widget.borderWidth : 1),
-          color: borderColor,
-        ),
-      ),
-      // child:
-      // new InkWell(
-      //     splashColor: Colors.blue.withAlpha(30),
-          //borderRadius: BorderRadius.circular(30),
-          //onTap: () async {
-          //タップ時 ？？？なにするかまだ未定
-          //？？？ヒント出す？図鑑のページ出す？
-          //？？？誤タップになるので何もし無い方がよいかも
-          //},
-          child: Container(
-            height: cardHeight,
-              margin: EdgeInsets.only(left:3,right: 3),
-              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                Text(
-                  name,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(color: Colors.black,fontSize: 12),
+    return Transform(
+        transform: Matrix4.skewX(-0.3),
+        child:
+
+Stack(children:[
+            new Card(
+              color: boxColor,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  width: (flgBorder ? widget.borderWidth : 1),
+                  color: borderColor,
                 ),
-              ]),
-          ),
-      //),
-    );
+              ),
+              child: Container(
+                height: cardHeight,
+                margin: EdgeInsets.only(left: 3, right: 3),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  Text(
+                    name,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: (bold ? FontWeight.bold:FontWeight.normal)),
+                  ),
+                ]),
+              ),
+              //),
+            ),
+            CustomPaint(
+              painter: new probPainter(prob: prob, flgRight: widget.flgRight),
+            ),]),
+        );
+  }
+}
+
+class probPainter extends CustomPainter {
+  const probPainter({
+    required this.prob,
+    required this.flgRight,
+  });
+  final double prob;
+  final bool flgRight;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double x = 0;
+    if (flgRight) {
+      x = 100;
+    } else {
+      x = 0;
+    }
+
+    final paint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 10;
+    canvas.drawLine(
+        Offset(x, 24), Offset(x, 4), paint);
+
+     paint
+    ..color = Colors.yellow
+    ..strokeWidth = 8;
+    canvas.drawLine(
+        Offset(x, 24), Offset(x, 2 + (22 - (22 * prob))), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }

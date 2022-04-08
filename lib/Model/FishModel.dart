@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 enum enumFishType {
   blue, //青物
-  bream,  //鯛系
+  bream, //鯛系
   bottom, //底物
 }
 
@@ -117,7 +117,7 @@ class FishsModel {
       // addMin: -15,
       // weight: 1000, //重さ
       wariai: 0.5,
-      point: 300, //ポイントの基礎値
+      point: 800, //ポイントの基礎値
       tanaMin: 500, //生息域 上 0.1m単位
       tanaMax: 1000, //生息域 下 0.1m単位
       hereTanaMin: 500,
@@ -216,7 +216,7 @@ class FishsModel {
       // addMin: -10, //引きの最小（最大との乖離が暴れ度）
       // weight: 700, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.8, //HIT率 条件全一致で確定1.0～
-      point: 300, //ポイントの基礎値
+      point: 200, //ポイントの基礎値
       tanaMin: 80, //生息域 上 0.1m単位
       tanaMax: 450, //生息域 下 0.1m単位
       hereTanaMin: 0,
@@ -376,7 +376,7 @@ class FishsModel {
       // addMin: -10, //引きの最小（最大との乖離が暴れ度）
       // weight: 500, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.5, //HIT率 条件全一致で確定1.0～
-      point: 10, //ポイントの基礎値
+      point: 100, //ポイントの基礎値
       tanaMin: 00, //生息域 上 0.1m単位
       tanaMax: 150, //生息域 下 0.1m単位
       hereTanaMin: 0,
@@ -408,7 +408,7 @@ class FishsModel {
       // addMin: -40, //引きの最小（最大との乖離が暴れ度）
       // weight: 3000, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.5, //HIT率 条件全一致で確定1.0～
-      point: 2300, //ポイントの基礎値
+      point: 1000, //ポイントの基礎値
       tanaMin: 200, //生息域 上 0.1m単位
       tanaMax: 1500, //生息域 下 0.1m単位
       hereTanaMin: 200,
@@ -440,7 +440,7 @@ class FishsModel {
       // addMin: -40, //引きの最小（最大との乖離が暴れ度）
       // weight: 2800, //重さ（HP0時の最低重量、これが無いとバレ判定にひっかかる）
       wariai: 0.4, //HIT率 条件全一致で確定1.0～
-      point: 2100, //ポイントの基礎値
+      point: 900, //ポイントの基礎値
       tanaMin: 50, //生息域 上 0.1m単位
       tanaMax: 300, //生息域 下 0.1m単位
       hereTanaMin: 200,
@@ -530,6 +530,8 @@ class FishModel {
   //bool flgBottom; //底生
   enumFishType type; //魚タイプ
 
+  var prob = 0.0; //今 釣れる確率の入れ物
+
   //コンストラクタ
   FishModel({
     required this.id,
@@ -579,7 +581,7 @@ class FishModel {
     var borderColor;
     var boxColor;
 
-    switch(type) {
+    switch (type) {
       case enumFishType.blue:
         name = "青物";
         borderColor = Colors.indigo[500];
@@ -601,14 +603,10 @@ class FishModel {
 
     return Container(
       margin: EdgeInsets.only(bottom: 2),
-      padding: const EdgeInsets.only(
-          left: 5, right: 5),
+      padding: const EdgeInsets.only(left: 5, right: 5),
       decoration: BoxDecoration(
-          border: Border.all(
-              color: borderColor,
-              width: 3),
-          borderRadius: BorderRadius.all(
-              Radius.circular(7.0)),
+          border: Border.all(color: borderColor, width: 3),
+          borderRadius: BorderRadius.all(Radius.circular(7.0)),
           color: boxColor),
       child: Text(name,
           style: TextStyle(

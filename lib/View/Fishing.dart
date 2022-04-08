@@ -88,6 +88,7 @@
 //済・竿のMAXテンションによってジャーク強さかえる
 //済・竿のMAXテンションによってバレ判定の速度かえる
 //中・魚種を３種類に分けるやつ
+//・つれたときドラグを割合で合わせる
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・店をもっとましにする
@@ -277,14 +278,14 @@ class _FishingState extends BasePageState<Fishing>
   var _onClutch = false; //現在クラッチ状態
   var _flgBait = false; //現在アタリ中フラグ
   var _flgHit = false; //現在HIT中フラグ
-  var _flgFooking = false;  //アワセモード中フラグ
+  var _flgFooking = false; //アワセモード中フラグ
   //var _flgGameOver = false; //現在ゲームオーバーフラグ
 
   //ステート変数
   var _tension = 0.0; //テンション値
   var _tensionValMax = 0.0; //テンション最大値 竿によって可変
   var _fookingTension = 0.0; //アタリ時のアワセ判定値
-  var _fookingTensionPrev = 0.0;  //アワセモード時のテンション前回値記憶
+  var _fookingTensionPrev = 0.0; //アワセモード時のテンション前回値記憶
   var _drag = 0.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _speedValMax = 0.0; //スピード最大値 リールによって可変
@@ -313,8 +314,6 @@ class _FishingState extends BasePageState<Fishing>
 
   var _shipMoveSeScan = 0;
 
-  List<SpeedRange> _listSpeedRange = []; //可能性ある魚種毎のスピード範囲
-
   var _cursorX = 0.0; //ドラッグ操作開始時の座標X
   var _cursorY = 0.0; //ドラッグ操作開始時の座標Y
   var _jerkCnt = 0; //ジャークの継続スキャン数
@@ -323,7 +322,7 @@ class _FishingState extends BasePageState<Fishing>
   //var _baitMaxTension = 0.0; //バイト中の最大テンション
   var _fookingLv = 0.0; //フッキングの成功度
 
-  var _fishidx = 0; //現在HIT中の魚種IDX
+  late FishModel _hitFish; //現在HIT中の魚種
   var _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
   var _hitScanCnt = 0; //HITしてからのスキャン数
   var _bareCnt = 0; //バレ判定カウント
@@ -405,6 +404,8 @@ class _FishingState extends BasePageState<Fishing>
     FISH_TABLE = new FishsModel();
     //釣果リストを初期化
     fishesResult = new FishesResultModel();
+    //今釣れている魚を初期化
+    _hitFish = FISH_TABLE.getFishDetail(0);
     //ルアーリストを初期化？？？本当はDBマスタから全取得
     lures = new LuresModel();
     //基本BGM
@@ -528,8 +529,8 @@ class _FishingState extends BasePageState<Fishing>
     //   return;
     // }
 
-    _tensionValMax = haveTackle.getUseRod().maxTention;
-    _speedValMax = haveTackle.getUseReel().maxSpeed;
+    // _tensionValMax = haveTackle.getUseRod().maxTention;
+    // _speedValMax = haveTackle.getUseReel().maxSpeed;
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
 
@@ -586,6 +587,8 @@ class _FishingState extends BasePageState<Fishing>
       _justTana = (new math.Random()).nextDouble();
       debugPrint("タナ" + _justTana.toString());
     }
+
+    _fishCardItem.forEach((cardFish) {cardFish.prob = 0.0;});
 
     //ジャーク継続スキャンカウントダウン
     _jerkCnt--;
@@ -652,7 +655,7 @@ class _FishingState extends BasePageState<Fishing>
       //暴れレベル変化判定
       if (rand < 0.05) {
         _abareLv =
-            (new math.Random()).nextInt(FISH_TABLE.fishs[_fishidx].abareLv) + 1;
+            (new math.Random()).nextInt(_hitFish.abareLv) + 1;
         debugPrint(_abareLv.toString());
       }
       //残HP減算 暴れLv分減算
@@ -690,16 +693,16 @@ class _FishingState extends BasePageState<Fishing>
     if (_flgBait || _flgHit) {
       //アタリかHIT中
       //アタリ中 or HIT中 テンション増減にHIT中補正をかける
-      var fish = FISH_TABLE.fishs[_fishidx];
+      //var fish = FISH_TABLE.fishs[_fishidx];
       // mx += fish.addMax * (_hitScanCnt / fish.hp * _fishSize).round();
       // mn += fish.addMin * (_hitScanCnt / fish.hp * _fishSize).round();
 
       //魚重量
-      var fishWeight = fish.getWeight(_fishSize);
+      var fishWeight = _hitFish.getWeight(_fishSize);
       //weight += (fish.abareWeight * (0.3 - rand) * (_hitScanCnt / fish.hp) * _fishSize;
       //暴れ重量 ((魚重量 * 暴れレベル) * rnd値 * 残HP割合
       var abareWeight =
-          ((fishWeight * _abareLv) * rand) * (_hitScanCnt / fish.hp);
+          ((fishWeight * _abareLv) * rand) * (_hitScanCnt / _hitFish.hp);
 
       weight += fishWeight + abareWeight;
     } else {
@@ -894,13 +897,13 @@ class _FishingState extends BasePageState<Fishing>
       _pointerColor = clsColor.getColorFromHex("ffd900");
       _nowDurationLv = POINT_DURATION_MSEC.length - 1;
       debugPrint("つりあげ");
-      var fish = FISH_TABLE.fishs[_fishidx];
+      //var fish = FISH_TABLE.fishs[_fishidx];
       //debugPrint("おおきさ" + size.toString());
-      var point = fish.point + (fish.point * _fishSize).floor();
+      var point = _hitFish.point + (_hitFish.point * _fishSize).floor();
       //初釣果判定
       var flgNew = true;
       fishesResult.listFishResult.forEach((val) {
-        if (val.fishId == fish.id) {
+        if (val.fishId == _hitFish.id) {
           flgNew = false;
           return;
         }
@@ -919,7 +922,7 @@ class _FishingState extends BasePageState<Fishing>
               //釣りあげダイアログ
               fishGetDialog(
                   dispSize: size,
-                  fish: fish,
+                  fish: _hitFish,
                   fishSize: _fishSize,
                   addPoint: point,
                   flgNew: flgNew),
@@ -933,7 +936,21 @@ class _FishingState extends BasePageState<Fishing>
       //ポイントを加算
       _point += point;
       //釣果リストに登録
-      fishesResult.addResult(fish.id, _fishSize);
+      fishesResult.addResult(_hitFish.id, _fishSize);
+      //魚種による成長
+      switch (_hitFish.type) {
+        case enumFishType.blue:
+          //青物は最大テンション成長
+          _tensionValMax += (point / 1);
+          break;
+        case enumFishType.bream:
+          //鯛は最大巻き速度成長
+          _speedValMax += (point / 10);
+          break;
+        case enumFishType.bottom:
+          //底物は最大ライン強度成長
+          _maxLineHp += (point / 10);
+      }
 
       startTimer(); //定周期タイマ再開
       nowBgm = Fishing.screenBgm;
@@ -951,7 +968,6 @@ class _FishingState extends BasePageState<Fishing>
     var fishs = FISH_TABLE.extractDepth(
         depth: _depth, maxDepth: _maxDepth, bottom: bottom);
     var maxProb = 0.0;
-    _listSpeedRange = []; //速度リスト初期化
     duration = durationMax;
 
     if (!(_flgBait || _flgHit || _collect)) {
@@ -999,7 +1015,9 @@ class _FishingState extends BasePageState<Fishing>
           hitTanaProb = 0.3; //棚範囲外の最低保証
         }
 
-        //種毎の判定
+        //HIT率記憶用
+        Map<int, double> mapProb = {};
+        //種毎のHIT率計算ループ
         fishs.forEach((fish) {
           var hitSpeedprob = 0.0;
           var hitSpeedprobDisp = 0.0;
@@ -1013,13 +1031,13 @@ class _FishingState extends BasePageState<Fishing>
           // //大きさ決定
           // var fishSize = (new math.Random()).nextDouble() * tanawari;
           var fishSize = (new math.Random()).nextDouble();
-          //使用中ルアーサイズと魚大きさによる確率 魚サイズの1/4が適正値
-          var lureProb = 0.0;
-          if (lureData.size * 4 > fish.getSize(fishSize)) {
-            lureProb = (lureData.size * 4) / fish.getSize(fishSize);
-          } else {
-            lureProb = fish.getSize(fishSize) / (lureData.size * 4);
-          }
+          // //使用中ルアーサイズと魚大きさによる確率 魚サイズの1/4が適正値
+          // var lureProb = 0.0;
+          // if (lureData.size * 4 > fish.getSize(fishSize)) {
+          //   lureProb = (lureData.size * 4) / fish.getSize(fishSize);
+          // } else {
+          //   lureProb = fish.getSize(fishSize) / (lureData.size * 4);
+          // }
           var jiaiProb = 0.0;
           if (flgFall) {
             //フォール中のHIT率判定 魚のフォール志向 * ルアーのフォール能力
@@ -1064,85 +1082,134 @@ class _FishingState extends BasePageState<Fishing>
             jiaiProb = _jiai;
           }
           //HIT確率の算出
-          hitProb = (hitTanaProb * hitSpeedprob * jiaiProb * lureProb) *
+          hitProb = (hitTanaProb * hitSpeedprob * jiaiProb) *
               fish.wariai /
               100;
 
-          if (hitSpeedprob < 0.01) {
-            debugPrint(hitSpeedprob.toString());
-            debugPrint(fish.id.toString());
-          }
+          //魚IDごとに確率を記憶
+          mapProb[fish.id] = hitProb;
+
           //全魚種で最も高い確率の取得
           if (hitTanaProb * hitSpeedprob > maxProb) {
             maxProb = hitTanaProb * hitSpeedprob * jiaiProb * fish.wariai;
           }
-          //魚種毎の速度レンジと確率を記憶（描画用）
-          _listSpeedRange.add(new SpeedRange(
-              justSpeed: fish.hitSpeedJust,
-              rangeSpeed: fish.hitSpeedRange,
-              hitSpeedProb: hitSpeedprobDisp));
-
-          //1～0の乱数生成
-          var hitrnd = (new math.Random()).nextDouble();
-          if (DEBUGFLG) {
-            //すぐつれる
-            hitrnd = 0.0005;
-          }
-
-          //HIT判定
-          if (hitProb > hitrnd) {
-            //i 番目HIT
-            _fishidx = FISH_TABLE.fishs.indexOf(fish);
-
-            _fishSize = fishSize;
-
-            if (flgFall) {
-              //フォール中のみアワセ時間を倍にする
-              _baitCnt -= fish.baitCntMax;
-            } else {
-              _baitCnt = 0;
-            }
-            _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
-
-            _abareLv = 0;
-            //フッキング判定テンション
-            _fookingTension = _tension + fish.fookingTension;
-            _fookingTension = (_fookingTension > _tensionValMax
-                ? _tensionValMax
-                : _fookingTension);
-            //アタリと判定
-            _flgBait = true;
-            debugPrint("アタリ");
-            //アワセ判定中フラグをリセット
-            _flgFooking = false;
-            _fookingTensionPrev = 0;
-            _infoBackColor = TENSION_COLOR_DANGER;
-            soundManagerPool.playSound('se/bait.mp3');
-          }
-          if (_flgBait || _flgHit) {
-          } else {
-            //HIT確率から点滅速度を算出
-            //duration =
-            //durationMax - ((durationMax - durationMin) * maxProb).floor();
-            //debugPrint(duration.toString());
-            //_dispInfo = (maxProb * 100).toStringAsFixed(0) + ' %';
-            _infoBackColor = Colors.white;
-            //HIT率に伴いポインタの色を変える？
-            _pointerColor = clsColor.getColorFromHex("ffd900"); //？？？とりあえず黄色固定
-          }
         });
-        //debugPrint(maxProb.toString());
+
+        // //今釣れる魚リストに確率を格納
+        // _fishCardItem.firstWhere((item) => item.id == fish.id).prob = hitProb;
+
+        _fishCardItem.forEach((cardFish) {
+          //確率計算した中に無い魚種の場合は確率0にして次へ
+          if (!mapProb.containsKey(cardFish.id)) {
+            cardFish.prob = 0.0;
+          } else {
+            //？？？mapのforEachにContinueがないのでelseで対応
+            var prob = mapProb[cardFish.id];
+            cardFish.prob = prob!;
+            // //HIT判定ループ
+            // mapProb.forEach((id, prob) {
+            //1～0の乱数生成
+            var hitrnd = (new math.Random()).nextDouble();
+            if (DEBUGFLG) {
+              //すぐつれる
+              hitrnd = 0.0005;
+            }
+
+            //HIT判定
+            if (prob > hitrnd) {
+              //i 番目HIT
+              _hitFish = FISH_TABLE.getFishDetail(cardFish.id);
+              //大きさ決定 今んとこ、単なるランダム？？？？？
+              _fishSize = (new math.Random()).nextDouble();
+
+              if (flgFall) {
+                //フォール中のみアワセ時間を倍にする
+                _baitCnt -= _hitFish.baitCntMax;
+              } else {
+                _baitCnt = 0;
+              }
+              _hitScanCnt = _hitFish.hp + (_hitFish.hp * _fishSize).floor();
+
+              _abareLv = 0;
+              //フッキング判定テンション
+              _fookingTension = _tension + _hitFish.fookingTension;
+              _fookingTension = (_fookingTension > _tensionValMax
+                  ? _tensionValMax
+                  : _fookingTension);
+              //アタリと判定
+              _flgBait = true;
+              debugPrint("アタリ");
+              //アワセ判定中フラグをリセット
+              _flgFooking = false;
+              _fookingTensionPrev = 0;
+              _infoBackColor = TENSION_COLOR_DANGER;
+              soundManagerPool.playSound('se/bait.mp3');
+            }
+            if (_flgBait || _flgHit) {} else {
+              _infoBackColor = Colors.white;
+              //HIT率に伴いポインタの色を変える？
+              _pointerColor = clsColor.getColorFromHex("ffd900"); //？？？とりあえず黄色固定
+            }
+          }
+
+        // //1～0の乱数生成
+        // var hitrnd = (new math.Random()).nextDouble();
+        // if (DEBUGFLG) {
+        //   //すぐつれる
+        //   hitrnd = 0.0005;
+        // }
+        //
+        // //HIT判定
+        // if (hitProb > hitrnd) {
+        //   //i 番目HIT
+        //   _fishidx = FISH_TABLE.fishs.indexOf(fish);
+        //
+        //   _fishSize = fishSize;
+        //
+        //   if (flgFall) {
+        //     //フォール中のみアワセ時間を倍にする
+        //     _baitCnt -= fish.baitCntMax;
+        //   } else {
+        //     _baitCnt = 0;
+        //   }
+        //   _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
+        //
+        //   _abareLv = 0;
+        //   //フッキング判定テンション
+        //   _fookingTension = _tension + fish.fookingTension;
+        //   _fookingTension = (_fookingTension > _tensionValMax
+        //       ? _tensionValMax
+        //       : _fookingTension);
+        //   //アタリと判定
+        //   _flgBait = true;
+        //   debugPrint("アタリ");
+        //   //アワセ判定中フラグをリセット
+        //   _flgFooking = false;
+        //   _fookingTensionPrev = 0;
+        //   _infoBackColor = TENSION_COLOR_DANGER;
+        //   soundManagerPool.playSound('se/bait.mp3');
+        // }
+        // if (_flgBait || _flgHit) {
+        // } else {
+        //   _infoBackColor = Colors.white;
+        //   //HIT率に伴いポインタの色を変える？
+        //   _pointerColor = clsColor.getColorFromHex("ffd900"); //？？？とりあえず黄色固定
+        // }
+        });
+
+
+
       }
     } else {
       //アタリ中またはHIT中の処理
-      var fish = FISH_TABLE.fishs[_fishidx];
+      //var fish = FISH_TABLE.fishs[_fishidx];
       if (_flgBait) {
         //アタリ中
         if (!_flgFooking) {
           //合わせ成立前
           //当たってからのスキャン数加算
           _baitCnt++;
-          if (_baitCnt > fish.baitCntMax) {
+          if (_baitCnt > _hitFish.baitCntMax) {
             //アタリ判定期間終了
             //アワセ失敗
             _flgBait = false;
@@ -1158,8 +1225,8 @@ class _FishingState extends BasePageState<Fishing>
           }
         } else {
           //アワセモード中
-          if (_fookingTensionPrev > _tension) {
-            //テンションが前回値を下回った時、アワセ操作終了 = HIT成立
+          if (_fookingTensionPrev >= _tension) {
+            //テンションが前回値以下の時、アワセ操作終了 = HIT成立
             _flgBait = false;
             _flgHit = true;
             //_fookingTension = 0.0;
@@ -1206,7 +1273,7 @@ class _FishingState extends BasePageState<Fishing>
           //現在テンションによって補正 少ないほど早い 0の時3倍
           bare = bare * (3 * (1.0 - (_tension / _tensionValMax)));
           //魚種による補正 MAXのとき3倍
-          bare = bare * (10 * fish.bareEasy);
+          bare = bare * (10 * _hitFish.bareEasy);
           _fookingTension += bare;
 
           if (_fookingTension > _tensionValMax) {
@@ -1429,7 +1496,7 @@ class _FishingState extends BasePageState<Fishing>
                       barrierDismissible: false,
                       builder: (_) {
                         return SettingDialog(
-                            bgm: super.bgm,
+                          bgm: super.bgm,
                         );
                       },
                     );
@@ -1515,7 +1582,9 @@ class _FishingState extends BasePageState<Fishing>
                   //巻き速度値の計算
                   //var addVal = (moveX / (1000 / 2) * _speedValMax);
                   //X軸の移動距離を 20～400の範囲で割った値（環境設定によって可変）
-                  var addVal = moveX / ( 20 + (180 * (1.0 - settings.makiSense))) * _speedValMax;
+                  var addVal = moveX /
+                      (20 + (180 * (1.0 - settings.makiSense))) *
+                      _speedValMax;
                   var val = _speed + addVal;
                   if (val > _speedValMax) val = _speedValMax;
                   if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
@@ -1538,7 +1607,6 @@ class _FishingState extends BasePageState<Fishing>
                     soundManagerPool.playSoundDisableContain(
                         'se/lowjerk.mp3', enumDisableContainPlay.jerk);
                   }
-
                 },
                 //タップ、ドラッグ操作が終了した時
                 onPanEnd: (DragEndDetails details) {
@@ -1729,7 +1797,7 @@ class _FishingState extends BasePageState<Fishing>
                                     children: <Widget>[
                                       CustomPaint(
                                         painter: new SliderPainter(
-                                          height: 5,
+                                          height: 10,
                                           activeColor: clsColor
                                               .getColorFromHex("FF3030"),
                                           inactiveColor: Colors.white,
@@ -1738,7 +1806,7 @@ class _FishingState extends BasePageState<Fishing>
                                           backRadius: 0,
                                           maxBackRadius: 0,
                                           flgShaKe: false,
-                                          flgDispValue: false,
+                                          flgDispValue: true,
                                           flgDispMaxValue: false,
                                         ),
                                         child: Container(),
@@ -1748,7 +1816,7 @@ class _FishingState extends BasePageState<Fishing>
                             //巻速度スライダー
                             Container(
                                 margin: EdgeInsets.only(left: 10, right: 10),
-                                height: 50,
+                                height: 40,
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -1781,17 +1849,7 @@ class _FishingState extends BasePageState<Fishing>
                                         ),
                                       ),
                                       //可能性のある魚種の速度範囲表示
-                                      CustomPaint(
-                                        painter: new FishRangeSliderPainter(
-                                          activeColor: _speedActiveTrackColor,
-                                          inactiveColor: Colors.red,
-                                          backRadius: 0,
-                                          maxBackRadius: 0,
-                                          maxSpeed: _speedValMax,
-                                          speedRange: _listSpeedRange,
-                                        ),
-                                        child: Container(),
-                                      )
+
                                     ])),
                           ]),
                         ),
@@ -1871,19 +1929,15 @@ class _FishingState extends BasePageState<Fishing>
                                                 height: 5,
                                                 activeColor: clsColor
                                                     .getRaitoColor(_hitScanCnt /
-                                                        (FISH_TABLE
-                                                                .fishs[_fishidx]
+                                                        (_hitFish
                                                                 .hp +
-                                                            (FISH_TABLE
-                                                                    .fishs[
-                                                                        _fishidx]
+                                                            (_hitFish
                                                                     .hp *
                                                                 _fishSize))),
                                                 inactiveColor: Colors.white,
                                                 value: _hitScanCnt.toDouble(),
-                                                maxValue: (FISH_TABLE
-                                                        .fishs[_fishidx].hp +
-                                                    (FISH_TABLE.fishs[_fishidx]
+                                                maxValue: (_hitFish.hp +
+                                                    (_hitFish
                                                             .hp *
                                                         _fishSize)),
                                                 backRadius: 0,
@@ -1959,28 +2013,8 @@ class _FishingState extends BasePageState<Fishing>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     Container(
-                                        width: size.width / 3, child: Text("")
-                                        // Row(
-                                        //   children: [
-                                        //     Container(
-                                        //       margin: EdgeInsets.only(
-                                        //           left: 10, right: 10),
-                                        //       padding: const EdgeInsets.all(5.0),
-                                        //       decoration: BoxDecoration(
-                                        //           border: Border.all(
-                                        //               color: Colors.red,
-                                        //               width: 3),
-                                        //           color: Colors.white),
-                                        //       child: Text(_dispDepth,
-                                        //           style: TextStyle(
-                                        //             color: Colors.black,
-                                        //             fontWeight: FontWeight.bold,
-                                        //             fontSize: 14,
-                                        //           )),
-                                        //     ),
-                                        //   ],
-                                        // ),
-                                        ),
+                                        width: size.width / 3,
+                                        child: Container()),
                                   ],
                                 ),
                                 Column(
@@ -2415,14 +2449,17 @@ class _FishingState extends BasePageState<Fishing>
                                     ? MainAxisAlignment.start
                                     : MainAxisAlignment.end,
                                 children: [
+                                  Container(margin:EdgeInsets.only(left: 8),child:
                                   new FishCardList(
                                     fishsTable: _fishCardItem,
                                     fishesResult: fishesResult,
                                     hitFishId: (_flgHit || _flgBait)
-                                        ? FISH_TABLE.fishs[_fishidx].id
+                                        ? _hitFish.id
                                         : -1,
                                     pointerColor: _pointerColor,
                                     borderWidth: _animationRadius.value,
+                                    flgRight:  settings.flgControlRight,
+                                  ),
                                   ),
                                 ])
                           ],
