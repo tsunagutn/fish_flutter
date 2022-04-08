@@ -23,7 +23,7 @@ class _SettingDialogState extends State<SettingDialog>
       text: '共通設定',
     ),
     Tab(
-      text: 'ジャーク感度',
+      text: 'その他の設定',
     ),
     // Tab(
     //   text: 'Ship',
@@ -35,6 +35,7 @@ class _SettingDialogState extends State<SettingDialog>
   var _volumeBgm = 0.8; //BGM音量
   var _volumeSe = 0.8; //SE音量
   var _jerkSense = 0.5; //ジャーク感度
+  var _makiSense = 0.5; //巻き速度変更の感度
 
   Future subBgmLoop(file) async {
     if (settings.flgBgm) {
@@ -77,14 +78,19 @@ class _SettingDialogState extends State<SettingDialog>
     widget.bgm.volumeBgm();
   });
   void _changeEndVolumeSe(double? e) => setState(() {
-        //適当な音を再生
-        soundManagerPool.playSound('se/linebreak.mp3');
-      });
+    //適当な音を再生
+    soundManagerPool.playSound('se/linebreak.mp3');
+  });
 
   void _changeJerkSense(double? e) => setState(() {
-        _jerkSense = e!;
-        settings.jerkSense = _jerkSense;
-      });
+    _jerkSense = e!;
+    settings.jerkSense = _jerkSense;
+  });
+
+  void _changeMakiSense(double? e) => setState(() {
+    _makiSense = e!;
+    settings.makiSense = _makiSense;
+  });
 
   @override
   void initState() {
@@ -96,6 +102,7 @@ class _SettingDialogState extends State<SettingDialog>
     _volumeBgm = settings.volumeBgm;
     _volumeSe = settings.volumeSe;
     _jerkSense = settings.jerkSense;
+    _makiSense = settings.makiSense;
 
     //設定画面BCM再生
     subBgmLoop('bgm_book.mp3');
@@ -231,6 +238,34 @@ class _SettingDialogState extends State<SettingDialog>
                                   ],
                                 ),
                               ),
+                              Container(
+                                margin: EdgeInsets.only(left: 15),
+                                child: Row(
+                                  children: [
+                                    new Icon(
+                                      Icons.arrow_upward,
+                                      color: _bgm
+                                          ? Colors.orange[700]
+                                          : Colors.grey[500],
+                                      size: 50.0,
+                                    ),
+                                    Container(
+                                      width: 50,
+                                      margin: EdgeInsets.only(left: 15),
+                                      child: Text("巻き速度変更の感度"),
+                                    ),
+                                    Container(
+                                      child: Slider(
+                                        value: _makiSense,
+                                        //MAX-MINはテンションと同じ
+                                        min: 0.0,
+                                        max: 1.0,
+                                        onChanged: _changeMakiSense,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ]),
                           ),
                           Container(
@@ -241,75 +276,6 @@ class _SettingDialogState extends State<SettingDialog>
                                     width: 50,
                                     child: Text("感度"),
                                   ),
-                                  // Container(
-                                  //   child: Slider(
-                                  //     value: _jerkSense,
-                                  //     //MAX-MINはテンションと同じ
-                                  //     min: 0.0,
-                                  //     max: 1.0,
-                                  //     onChanged: _changeJerkSense,
-                                  //   ),
-                                  // ),
-                                  //     GestureDetector(
-                                  //       //ドラッグ操作が開始された時
-                                  //       onPanStart: (DragStartDetails details) {
-                                  //         debugPrint("ドラッグ開始");
-                                  //         _cursorY = details.localPosition.dy;
-                                  //         _onTap = true;
-                                  //         //タップ時の画面エフェクト
-                                  //         offset = Offset(
-                                  //             details.globalPosition.dx, details.globalPosition.dy);
-                                  //         generateTapPointer(details);
-                                  //       },
-                                  //       //ドラッグ操作で位置が変化した時
-                                  //       onPanUpdate: (DragUpdateDetails details) {
-                                  //         if (size.isEmpty) {
-                                  //           return;
-                                  //         }
-                                  //         if (!_onTap) {
-                                  //           return;
-                                  //         }
-                                  //         //現在の座標を取得する
-                                  //         var mY = details.localPosition.dy; //Y座標
-                                  //         //初期位置から動いた値を取得
-                                  //         var moveY = mY - _cursorY;
-                                  //         _cursorY = mY;
-                                  //         //アワセ値
-                                  //         addVal = (moveY / 100);
-                                  //         if (addVal > 0.5) {
-                                  //           //シャクリ音（大）
-                                  //           soundManagerPool.playSoundDisableContain('se/middlejerk.mp3',enumDisableContainPlay.jerk);
-                                  //         } else if (addVal > 0.2) {
-                                  //           //シャクリ音（小）
-                                  //           soundManagerPool.playSoundDisableContain('se/lowjerk.mp3',enumDisableContainPlay.jerk);
-                                  //         }
-                                  //         val = _rodStandUp + addVal;
-                                  //         if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
-                                  //         if (val < 0) val = 0;
-                                  //         _rodStandUp = val;
-                                  //       },
-                                  //       //タップ、ドラッグ操作が終了した時
-                                  //       onPanEnd: (DragEndDetails details) {
-                                  //         debugPrint("タップはなし");
-                                  //         _onTap = false;
-                                  //       },
-                                  //       child: Container(
-                                  //         //key: globalKeyShore,
-                                  //         //margin: EdgeInsets.only(bottom: 50),
-                                  //           decoration: BoxDecoration(
-                                  //               gradient: LinearGradient(
-                                  //                 begin: FractionalOffset.topCenter,
-                                  //                 end: FractionalOffset.bottomCenter,
-                                  //                 colors: [
-                                  //                   clsColor.getColorFromHex("5495FF"),
-                                  //                   clsColor.getColorFromHex("EFFAFF")
-                                  //                 ],
-                                  //                 stops: const [
-                                  //                   0.0,
-                                  //                   0.3,
-                                  //                 ],
-                                  //               )),
-                                  //
                                 ]),
                           ),
                         ],

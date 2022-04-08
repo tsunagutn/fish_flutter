@@ -33,6 +33,7 @@ var settings = new SettingsModel(
     volumeBgm: 0.5,
     volumeSe: 0.5,
     jerkSense: 0.5,
+    makiSense: 0.5,
 );
 
 //SEプール

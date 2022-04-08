@@ -1513,7 +1513,9 @@ class _FishingState extends BasePageState<Fishing>
                   _cursorX = mX;
                   _cursorY = mY;
                   //巻き速度値の計算
-                  var addVal = (moveX / (1000 / 2) * _speedValMax);
+                  //var addVal = (moveX / (1000 / 2) * _speedValMax);
+                  //X軸の移動距離を 20～400の範囲で割った値（環境設定によって可変）
+                  var addVal = moveX / ( 20 + (180 * (1.0 - settings.makiSense))) * _speedValMax;
                   var val = _speed + addVal;
                   if (val > _speedValMax) val = _speedValMax;
                   if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
@@ -1521,7 +1523,8 @@ class _FishingState extends BasePageState<Fishing>
                   //アワセ値
                   //addVal = (moveY / 100);
                   debugPrint(settings.jerkSense.toString());
-                  addVal = (moveY / (40 + (110 * (1.0 - settings.jerkSense))));
+                  //Y軸の移動距離を 40～150の範囲で割った値（環境設定によって可変）
+                  addVal = moveY / (40 + (110 * (1.0 - settings.jerkSense)));
                   val = _rodStandUp + addVal;
                   if (val > ROD_STANDUP_MAX) val = ROD_STANDUP_MAX;
                   if (val < 0) val = 0;

@@ -4,6 +4,7 @@ class SettingsModel {
   double volumeBgm;
   double volumeSe;
   double jerkSense;
+  double makiSense;
   //コンストラクタ
   SettingsModel({
     required this.flgBgm,
@@ -11,5 +12,6 @@ class SettingsModel {
     required this.volumeBgm,
     required this.volumeSe,
     required this.jerkSense,
+    required this.makiSense,
   });
 }
