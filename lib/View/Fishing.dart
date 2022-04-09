@@ -414,7 +414,7 @@ class _FishingState extends BasePageState<Fishing>
     haveTackle = new HaveTackleModel();
     _tensionValMax = haveTackle.getUseRod().maxTention;
     _speedValMax = haveTackle.getUseReel().maxSpeed;
-    _drag = _tensionValMax * 0.8;
+    _drag = 0.8;
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -787,11 +787,9 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
     //ドラグ判定
-    var dragVal = _drag;
-    //_tensionActiveTrackColor = TENSION_COLOR_SAFE;
-    if (val > dragVal) {
+    if (val > (_tensionValMax * _drag)) {
       //テンションとドラグレベルの差分
-      var dragDiff = val - dragVal;
+      var dragDiff = val - (_tensionValMax * _drag);
       //ドラグ出た分深さを増やす？？？出すぎ？
       _depth = _depth + dragDiff / 300;
       //ドラグ出た分テンションを減らす？？？減らなすぎ？
@@ -943,8 +941,6 @@ class _FishingState extends BasePageState<Fishing>
         case enumFishType.blue:
           //青物は最大テンション成長
           _tensionValMax += (point / 1);
-          //ドラグの割合を維持
-          //_drag =
           break;
         case enumFishType.bream:
           //鯛は最大巻き速度成長
@@ -1474,8 +1470,6 @@ class _FishingState extends BasePageState<Fishing>
                           },
                         );
                         _point = result!;
-                        //？？？仮 ロッド変更時のみに変えること
-                        _drag = _tensionValMax * 0.8;
                         soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
                         startTimer(); //定周期タイマ再開
                         bgmPlay(nowBgm);
@@ -1733,7 +1727,8 @@ class _FishingState extends BasePageState<Fishing>
                                                           POINTER_BACK_SIZE,
                                                       flgShaKe: (_flgBait ||
                                                               (_tension >
-                                                                  _drag))
+                                                                  (_tensionValMax *
+                                                                      _drag)))
                                                           ? true
                                                           : false,
                                                       flgDispValue: true,
@@ -1781,15 +1776,14 @@ class _FishingState extends BasePageState<Fishing>
                                         ),
                                         child: Slider(
                                           value: _drag,
-                                          //MAX-MINはテンションと同じ
-                                          min: TENSION_VAL_MIN,
-                                          max: _tensionValMax,
+                                          min: 0.0,
+                                          max: 1.0,
                                           divisions:
                                               (_tensionValMax - TENSION_VAL_MIN)
                                                   .floor(),
                                           onChanged: (double value) {
                                             setState(() {
-                                              _drag = value.roundToDouble();
+                                              _drag = value;
                                             });
                                           },
                                         )),
