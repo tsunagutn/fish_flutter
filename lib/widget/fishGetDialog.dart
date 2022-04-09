@@ -160,81 +160,102 @@ class _fishGetDialogState extends State<fishGetDialog>
                   //   image: new AssetImage("assets/images/fishback.jpg"),
                   //   fit: BoxFit.cover,
                   // )),
-                  child: Column(children: <Widget>[
-                    new Image(
-                      image: AssetImage('assets/images/' + widget.fish.image),
-                        width:250,
-                        fit: BoxFit.contain,
-                    ),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          if (widget.flgNew)
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Column(
+                          children: [
+                            new Image(
+                              image: AssetImage(
+                                  'assets/images/' + widget.fish.image),
+                              width: 250,
+                              fit: BoxFit.contain,
+                            ),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  if (widget.flgNew)
+                                    Container(
+                                      margin: EdgeInsets.only(right: 3, top: 5),
+                                      padding: const EdgeInsets.all(2.0),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Colors.black, width: 1),
+                                        color: Color.fromRGBO(r, g, b, 1.0),
+                                      ),
+                                      child: Text("NEW!",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10,
+                                          )),
+                                    ),
+                                  Container(
+                                    margin: EdgeInsets.only(top: 5, right: 5),
+                                    child: widget.fish
+                                        .getNameContainer(widget.fish.type, 14),
+                                  ),
+                                  Text(widget.fish.name +
+                                      "　" +
+                                      widget.fish
+                                          .getSize(widget.fishSize)
+                                          .toStringAsFixed(1) +
+                                      "cm"),
+                                  if (widget.fishSize > 0.8 &&
+                                      widget.fishSize < 0.95)
+                                    Icon(Icons.star, color: Colors.teal),
+                                  if (widget.fishSize > 0.95)
+                                    Icon(
+                                      Icons.star,
+                                      color: Colors.yellow,
+                                    ),
+                                ]),
                             Container(
-                              margin: EdgeInsets.only(right: 3, top:5),
-                              padding: const EdgeInsets.all(2.0),
-                              decoration: BoxDecoration(
-                                border:
-                                Border.all(color: Colors.black, width: 1),
-                                color: Color.fromRGBO(r, g, b, 1.0),),
-                              child: Text("NEW!",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                  )),
+                              margin: EdgeInsets.only(top: 5, bottom: 5),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  for (var i = 0; i < widget.fish.rare; i++)
+                                    Icon(
+                                      Icons.star,
+                                      color: Colors.yellow,
+                                    ),
+                                ],
+                              ),
                             ),
-                          Container(margin: EdgeInsets.only(top: 5, right: 5),child:
-                          widget.fish.getNameContainer(widget.fish.type, 14),),
-                          Text(widget.fish.name +
-                              "　" +
-                              widget.fish
-                                  .getSize(widget.fishSize)
-                                  .toStringAsFixed(1) +
-                              "cm"),
-                          if (widget.fishSize > 0.8 && widget.fishSize < 0.95)
-                            Icon(Icons.star, color: Colors.teal),
-                          if (widget.fishSize > 0.95)
-                            Icon(
-                              Icons.star,
-                              color: Colors.yellow,
+                            Text(widget.addPoint.toString() + '円ゲット!'),
+                            Text(
+                              strLevel,
+                              style: TextStyle(
+                                color: colorLevel,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                        ]),
-                    Container(margin: EdgeInsets.only(top:5, bottom: 5),child:
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (var i = 0; i < widget.fish.rare; i++)
-                          Icon(
-                            Icons.star,
-                            color: Colors.yellow,
-                          ),
-                      ],
-                    ),),
-                    Text(widget.addPoint.toString() + '円ゲット!'),
-                    Text(strLevel,
-                        style: TextStyle(
-                          color: colorLevel,
-                          fontWeight: FontWeight.bold,
-                        ),),
-                    Container(margin: EdgeInsets.only(top:10),child:
-                    Text(widget.fish.text),),
-
-                    if (widget.flgNew)
-                      Container(
-                        margin: EdgeInsets.only(top: 5),
-                        child: Text("おさかな図鑑に登録します",
-                            style: TextStyle(color: Colors.red)),
-                      ),
-                  ])),
-              actions: <Widget>[
-                ElevatedButton(
-                  child: Text("OK"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
+                            Container(
+                              margin: EdgeInsets.only(top: 10),
+                              child: Text(widget.fish.text),
+                            ),
+                            if (widget.flgNew)
+                              Container(
+                                margin: EdgeInsets.only(top: 5),
+                                child: Text("おさかな図鑑に登録します",
+                                    style: TextStyle(color: Colors.red)),
+                              ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ElevatedButton(
+                              child: Text("OK"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      ])),
             )),
       ),
       //最初に画面全体を光らす
