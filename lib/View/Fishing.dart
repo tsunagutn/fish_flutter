@@ -588,7 +588,9 @@ class _FishingState extends BasePageState<Fishing>
       debugPrint("タナ" + _justTana.toString());
     }
 
-    _fishCardItem.forEach((cardFish) {cardFish.prob = 0.0;});
+    _fishCardItem.forEach((cardFish) {
+      cardFish.prob = 0.0;
+    });
 
     //ジャーク継続スキャンカウントダウン
     _jerkCnt--;
@@ -654,8 +656,7 @@ class _FishingState extends BasePageState<Fishing>
     if (_flgHit) {
       //暴れレベル変化判定
       if (rand < 0.05) {
-        _abareLv =
-            (new math.Random()).nextInt(_hitFish.abareLv) + 1;
+        _abareLv = (new math.Random()).nextInt(_hitFish.abareLv) + 1;
         debugPrint(_abareLv.toString());
       }
       //残HP減算 暴れLv分減算
@@ -942,6 +943,8 @@ class _FishingState extends BasePageState<Fishing>
         case enumFishType.blue:
           //青物は最大テンション成長
           _tensionValMax += (point / 1);
+          //ドラグの割合を維持
+          //_drag =
           break;
         case enumFishType.bream:
           //鯛は最大巻き速度成長
@@ -1030,7 +1033,7 @@ class _FishingState extends BasePageState<Fishing>
           // tanawari = (tanawari > 0.9) ? 1.0 : tanawari;
           // //大きさ決定
           // var fishSize = (new math.Random()).nextDouble() * tanawari;
-          var fishSize = (new math.Random()).nextDouble();
+          //var fishSize = (new math.Random()).nextDouble();
           // //使用中ルアーサイズと魚大きさによる確率 魚サイズの1/4が適正値
           // var lureProb = 0.0;
           // if (lureData.size * 4 > fish.getSize(fishSize)) {
@@ -1082,9 +1085,7 @@ class _FishingState extends BasePageState<Fishing>
             jiaiProb = _jiai;
           }
           //HIT確率の算出
-          hitProb = (hitTanaProb * hitSpeedprob * jiaiProb) *
-              fish.wariai /
-              100;
+          hitProb = (hitTanaProb * hitSpeedprob * jiaiProb) * fish.wariai / 100;
 
           //魚IDごとに確率を記憶
           mapProb[fish.id] = hitProb;
@@ -1119,8 +1120,18 @@ class _FishingState extends BasePageState<Fishing>
             if (prob > hitrnd) {
               //i 番目HIT
               _hitFish = FISH_TABLE.getFishDetail(cardFish.id);
-              //大きさ決定 今んとこ、単なるランダム？？？？？
-              _fishSize = (new math.Random()).nextDouble();
+              // //大きさ決定 今んとこ、単なるランダム？？？？？
+              // _fishSize = (new math.Random()).nextDouble();
+              //棚による大きさ補正値
+              var tanawari = (_maxDepth - _hitFish.tanaMin) /
+                  (_hitFish.tanaMax - _hitFish.tanaMin);
+              //棚範囲の半分より上ならMAX
+              tanawari = tanawari * 2;
+              //最低でも1割
+              tanawari = (tanawari < 0.1) ? 0.1 : tanawari;
+              tanawari = (tanawari > 1.0) ? 1.0 : tanawari;
+              //大きさ決定
+              _fishSize = (new math.Random()).nextDouble() * tanawari;
 
               if (flgFall) {
                 //フォール中のみアワセ時間を倍にする
@@ -1145,60 +1156,58 @@ class _FishingState extends BasePageState<Fishing>
               _infoBackColor = TENSION_COLOR_DANGER;
               soundManagerPool.playSound('se/bait.mp3');
             }
-            if (_flgBait || _flgHit) {} else {
+            if (_flgBait || _flgHit) {
+            } else {
               _infoBackColor = Colors.white;
               //HIT率に伴いポインタの色を変える？
               _pointerColor = clsColor.getColorFromHex("ffd900"); //？？？とりあえず黄色固定
             }
           }
 
-        // //1～0の乱数生成
-        // var hitrnd = (new math.Random()).nextDouble();
-        // if (DEBUGFLG) {
-        //   //すぐつれる
-        //   hitrnd = 0.0005;
-        // }
-        //
-        // //HIT判定
-        // if (hitProb > hitrnd) {
-        //   //i 番目HIT
-        //   _fishidx = FISH_TABLE.fishs.indexOf(fish);
-        //
-        //   _fishSize = fishSize;
-        //
-        //   if (flgFall) {
-        //     //フォール中のみアワセ時間を倍にする
-        //     _baitCnt -= fish.baitCntMax;
-        //   } else {
-        //     _baitCnt = 0;
-        //   }
-        //   _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
-        //
-        //   _abareLv = 0;
-        //   //フッキング判定テンション
-        //   _fookingTension = _tension + fish.fookingTension;
-        //   _fookingTension = (_fookingTension > _tensionValMax
-        //       ? _tensionValMax
-        //       : _fookingTension);
-        //   //アタリと判定
-        //   _flgBait = true;
-        //   debugPrint("アタリ");
-        //   //アワセ判定中フラグをリセット
-        //   _flgFooking = false;
-        //   _fookingTensionPrev = 0;
-        //   _infoBackColor = TENSION_COLOR_DANGER;
-        //   soundManagerPool.playSound('se/bait.mp3');
-        // }
-        // if (_flgBait || _flgHit) {
-        // } else {
-        //   _infoBackColor = Colors.white;
-        //   //HIT率に伴いポインタの色を変える？
-        //   _pointerColor = clsColor.getColorFromHex("ffd900"); //？？？とりあえず黄色固定
-        // }
+          // //1～0の乱数生成
+          // var hitrnd = (new math.Random()).nextDouble();
+          // if (DEBUGFLG) {
+          //   //すぐつれる
+          //   hitrnd = 0.0005;
+          // }
+          //
+          // //HIT判定
+          // if (hitProb > hitrnd) {
+          //   //i 番目HIT
+          //   _fishidx = FISH_TABLE.fishs.indexOf(fish);
+          //
+          //   _fishSize = fishSize;
+          //
+          //   if (flgFall) {
+          //     //フォール中のみアワセ時間を倍にする
+          //     _baitCnt -= fish.baitCntMax;
+          //   } else {
+          //     _baitCnt = 0;
+          //   }
+          //   _hitScanCnt = fish.hp + (fish.hp * _fishSize).floor();
+          //
+          //   _abareLv = 0;
+          //   //フッキング判定テンション
+          //   _fookingTension = _tension + fish.fookingTension;
+          //   _fookingTension = (_fookingTension > _tensionValMax
+          //       ? _tensionValMax
+          //       : _fookingTension);
+          //   //アタリと判定
+          //   _flgBait = true;
+          //   debugPrint("アタリ");
+          //   //アワセ判定中フラグをリセット
+          //   _flgFooking = false;
+          //   _fookingTensionPrev = 0;
+          //   _infoBackColor = TENSION_COLOR_DANGER;
+          //   soundManagerPool.playSound('se/bait.mp3');
+          // }
+          // if (_flgBait || _flgHit) {
+          // } else {
+          //   _infoBackColor = Colors.white;
+          //   //HIT率に伴いポインタの色を変える？
+          //   _pointerColor = clsColor.getColorFromHex("ffd900"); //？？？とりあえず黄色固定
+          // }
         });
-
-
-
       }
     } else {
       //アタリ中またはHIT中の処理
@@ -1849,7 +1858,6 @@ class _FishingState extends BasePageState<Fishing>
                                         ),
                                       ),
                                       //可能性のある魚種の速度範囲表示
-
                                     ])),
                           ]),
                         ),
@@ -1929,17 +1937,13 @@ class _FishingState extends BasePageState<Fishing>
                                                 height: 5,
                                                 activeColor: clsColor
                                                     .getRaitoColor(_hitScanCnt /
-                                                        (_hitFish
-                                                                .hp +
-                                                            (_hitFish
-                                                                    .hp *
+                                                        (_hitFish.hp +
+                                                            (_hitFish.hp *
                                                                 _fishSize))),
                                                 inactiveColor: Colors.white,
                                                 value: _hitScanCnt.toDouble(),
                                                 maxValue: (_hitFish.hp +
-                                                    (_hitFish
-                                                            .hp *
-                                                        _fishSize)),
+                                                    (_hitFish.hp * _fishSize)),
                                                 backRadius: 0,
                                                 maxBackRadius: 0,
                                                 flgShaKe: false,
@@ -2449,17 +2453,18 @@ class _FishingState extends BasePageState<Fishing>
                                     ? MainAxisAlignment.start
                                     : MainAxisAlignment.end,
                                 children: [
-                                  Container(margin:EdgeInsets.only(left: 8),child:
-                                  new FishCardList(
-                                    fishsTable: _fishCardItem,
-                                    fishesResult: fishesResult,
-                                    hitFishId: (_flgHit || _flgBait)
-                                        ? _hitFish.id
-                                        : -1,
-                                    pointerColor: _pointerColor,
-                                    borderWidth: _animationRadius.value,
-                                    flgRight:  settings.flgControlRight,
-                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(left: 8),
+                                    child: new FishCardList(
+                                      fishsTable: _fishCardItem,
+                                      fishesResult: fishesResult,
+                                      hitFishId: (_flgHit || _flgBait)
+                                          ? _hitFish.id
+                                          : -1,
+                                      pointerColor: _pointerColor,
+                                      borderWidth: _animationRadius.value,
+                                      flgRight: settings.flgControlRight,
+                                    ),
                                   ),
                                 ])
                           ],
