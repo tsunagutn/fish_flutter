@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 enum enumLureDiv {
   tairaba,
   jig,
-  inchiku,
+  slowjig,
 }
 
 //ルアーマスタ
@@ -12,139 +15,234 @@ class LuresModel {
   LuresModel() {
     //シーダーみたいなやつ
     lures.add(new LureModel(
-      id: 0,
-      div: enumLureDiv.tairaba.index,
-      name: "針",
-      image: "hari.png",
-      text: "絶対壊れない\n絶対釣れないことはない",
-      hp: -1,
-      weight: 1.0,
-      size: 1.0,
-      fall: 0.1,
-      reeling: 0.1,
-      jerk: 0.1,
-      prise: 0,
-    ));
-    lures.add(new LureModel(
-      id: 1,
-      div: enumLureDiv.tairaba.index,
-      name: "タイラバ ストレート 60g",
+      id: enumLureDiv.tairaba,
+      name: "タイラバ",
       image: "tairaba.png",
-      text: "鉛にシリコンのヒラヒラが付いた、シンプルなルアー。\nとても傷みやすい。\nタダ巻きで使おう！",
-      hp: 3000,
-      weight: 60.0,
-      size: 15.0,
+      lv: 1,
+      totalExp: 0,
+      weightList: new LureWeights(),
+      useWeightId: 0,
       fall: 0.2,
-      reeling: 0.9,
-      jerk: 0.1,
-      prise: 700,
-    ));
-
-    lures.add(new LureModel(
-      id: 2,
-      div: enumLureDiv.tairaba.index,
-      name: "タイラバ ストレート 120g",
-      image: "tairaba.png",
-      text: "タダ巻きで使おう2",
-      hp: 3000,
-      weight: 120.0,
-      size: 20.0,
-      fall: 0.2,
-      reeling: 0.9,
-      jerk: 0.1,
-      prise: 700,
-    ));
-
-    lures.add(new LureModel(
-      id: 3,
-      div: enumLureDiv.tairaba.index,
-      name: "タイラバ ストレート 999g",
-      image: "tairaba.png",
-      text: "テスト用\nバチクソ重い",
-      hp: 3000,
-      weight: 999.0,
-      size: 50.0,
-      fall: 0.8,
-      reeling: 0.7,
-      jerk: 0.5,
-      prise: 700,
-    ));
-    lures.add(new LureModel(
-      id: 4,
-      div: enumLureDiv.jig.index,
-      name: "メタルジグ バーチカル 80g",
-      image: "jig.png",
-      text: "鉛製で頑丈\nジャークに特化している",
-      hp: 5000,
-      weight: 80.0,
-      size: 20.0,
-      fall: 0.5,
-      reeling: 0.1,
-      jerk: 0.9,
-      prise: 700,
-    ));
-    lures.add(new LureModel(
-      id: 5,
-      div: enumLureDiv.jig.index,
-      name: "メタルジグ バーチカル 100g",
-      image: "jig.png",
-      text: "鉛製で頑丈\nジャークに特化している",
-      hp: 6000,
-      weight: 100.0,
-      size: 25.0,
-      fall: 0.5,
-      reeling: 0.1,
-      jerk: 0.9,
-      prise: 700,
-    ));
-    lures.add(new LureModel(
-      id: 6,
-      div: enumLureDiv.jig.index,
-      name: "メタルジグ スロー 60g",
-      image: "slowjig.png",
-      text: "鉛製で頑丈\nフォールでヒラヒラと誘う\n巻いてもOK",
-      hp: 4000,
-      weight: 100.0,
-      size: 15.0,
-      fall: 0.8,
       reeling: 0.5,
-      jerk: 0.4,
-      prise: 700,
+      jerk: 0.1,
+      lvAddFall: 0.02,
+      lvAddReeling: 0.05,
+      lvAddJerk: 0.01,
+    ));
+    lures.add(new LureModel(
+      id: enumLureDiv.jig,
+      name: "メタルジグ",
+      image: "jig.png",
+      lv: 1,
+      totalExp: 0,
+      weightList: new LureWeights(),
+      useWeightId: 0,
+      fall: 0.2,
+      reeling: 0.1,
+      jerk: 0.5,
+      lvAddFall: 0.03,
+      lvAddReeling: 0.01,
+      lvAddJerk: 0.05,
+    ));
+
+    lures.add(new LureModel(
+      id: enumLureDiv.slowjig,
+      name: "スロージグ",
+      image: "slowjig.png",
+      lv: 1,
+      totalExp: 0,
+      weightList: new LureWeights(),
+      useWeightId: 0,
+      fall: 0.4,
+      reeling: 0.2,
+      jerk: 0.2,
+      lvAddFall: 0.04,
+      lvAddReeling: 0.02,
+      lvAddJerk: 0.02,
     ));
   }
 
-  LureModel getLureData(int id) {
-    return lures.firstWhere((element) => element.id.compareTo(id) == 0);
+  //IDを指定してルアーデータを取得
+  LureModel getLureData(enumLureDiv id) {
+    return lures
+        .firstWhere((element) => element.id.index.compareTo(id.index) == 0);
   }
 }
 
 class LureModel {
-  int id; //一意識別キー
-  int div; //種類 0:タイラバ 1:ジグ 2:インチク
+  enumLureDiv id; //一意識別キー
   String name; //名前
   String image; //画像ファイル名
-  String text; //コメント
-  int prise; //価値
-  double weight; //重さ
-  double size; //大きさ 0.1cm
-  int hp; //耐久度
+  int lv; //レベル
+  double totalExp; //累計EXP
+  LureWeights weightList; //重さリスト
+  int useWeightId; //使用重さ
   double fall; //フォール志向
   double reeling; //巻き志向
   double jerk; //ジャーク志向
+  double lvAddFall; //フォール成長値
+  double lvAddReeling; //巻き成長値
+  double lvAddJerk; //ジャーク成長値
+
+  //Lv1→2に必要なEXP
+  static const double basicExp = 100.0;
+  //システム上最大Lv
+  static const int maxLv = 99;
 
   //コンストラクタ
   LureModel({
     required this.id,
-    required this.div,
     required this.name,
     required this.image,
-    required this.text,
-    required this.prise,
-    required this.weight,
-    required this.size,
-    required this.hp,
+    required this.lv,
+    required this.totalExp,
+    required this.weightList,
+    required this.useWeightId,
     required this.fall,
     required this.reeling,
     required this.jerk,
+    required this.lvAddFall,
+    required this.lvAddReeling,
+    required this.lvAddJerk,
+  });
+
+  //重さを取得
+  double getWeight(int id) {
+    double ret = 0.0;
+    //IDの存在チェック
+    if (weightList.list.asMap().containsKey(id)) {
+      ret = weightList.list[useWeightId].weight;
+    }
+    return ret;
+  }
+
+  //累計EXPから現在のレベルを取得
+  int getLv() {
+    int retLv = 1;
+    double nextExp = basicExp;
+    double divExp = nextExp;
+    //最大レベルまでループ
+    while (retLv < maxLv) {
+      if (totalExp >= divExp) {
+        retLv++;
+      } else {
+        //現Lv判明時にループ抜け
+        break;
+      }
+      //次Lvに必要なEXP
+      nextExp = nextExp * 1.1;
+      divExp += nextExp;
+    }
+    //現レベルを返す
+    return retLv;
+  }
+
+  //次のレベルまでのEXPを返す
+  int getNextLvExp() {
+    //既に最大レベルの場合は-1を返す
+    if (lv >= maxLv) return -1;
+    //次Lvの合計EXPと現EXPの差分を返す
+    return (getExp(lv + 1) - totalExp).floor();
+  }
+
+  //指定したレベルに必要な累計EXPを返す
+  double getExp(int nextLv) {
+    double exp = basicExp;
+    //次Lvに必要な合計EXPを算出
+    for (int iLv = 1; iLv < nextLv; iLv++) {
+      exp = exp * 1.1;
+    }
+    return exp;
+  }
+
+  //レベルアップ処理
+  lvUp() {
+    //既に最大レベルの場合はなにもしない
+    if (lv >= maxLv) return;
+    int oldLv = lv;
+    //新レベルの値をセット
+    lv = getLv();
+    debugPrint('EXP:' + totalExp.toString());
+    debugPrint('旧:' + oldLv.toString());
+    debugPrint('新:' + lv.toString());
+    //現レベル-新レベル間ループ
+    for (int i = oldLv; i < lv; i++) {
+      //fall成長
+      fall = stsUp(fall, lvAddFall);
+      //reeling成長
+      reeling = stsUp(reeling, lvAddReeling);
+      //jerk成長
+      jerk = stsUp(jerk, lvAddJerk);
+    }
+  }
+
+  double stsUp(double old, double add) {
+    double ret = old + add;
+    if (ret >= 1.0) ret = 1.0;
+    return ret;
+  }
+
+  //レベルダウン処理
+  lvDown() {
+    //現在1レベルの場合はなにもしない
+    if (lv <= 1) return;
+
+    //新レベルの値をセット
+    lv = lv - 1;
+    //累計EXPセット
+    totalExp = getExp(lv);
+    //fallマイナス
+    fall = fall - lvAddFall;
+    //reelingマイナス
+    reeling = reeling - lvAddReeling;
+    //jerkマイナス
+    jerk = jerk - lvAddJerk;
+  }
+
+  //ルアー種による色を取得
+  Color getLureColor(id) {
+    var ret;
+    switch (id) {
+      case enumLureDiv.jig:
+        ret = Colors.cyan[500];
+        break;
+      case enumLureDiv.tairaba:
+        ret = Colors.red[200];
+        break;
+      case enumLureDiv.slowjig:
+        ret = Colors.green[200];
+        break;
+    }
+    return ret;
+  }
+}
+
+class LureWeights {
+  List<LureWeight> list = [];
+
+  //コンストラクタ
+  LureWeights() {
+    list.add(new LureWeight(weightId: 0, weight: 10, enabled: true));
+    list.add(new LureWeight(weightId: 1, weight: 20, enabled: false));
+    list.add(new LureWeight(weightId: 2, weight: 40, enabled: false));
+    list.add(new LureWeight(weightId: 3, weight: 60, enabled: false));
+    list.add(new LureWeight(weightId: 4, weight: 80, enabled: false));
+    list.add(new LureWeight(weightId: 5, weight: 100, enabled: false));
+    list.add(new LureWeight(weightId: 6, weight: 150, enabled: false));
+    list.add(new LureWeight(weightId: 7, weight: 200, enabled: false));
+  }
+}
+
+//ルアー重さリスト用クラス
+class LureWeight {
+  int weightId; //重さのID
+  double weight; //重さ(g)
+  bool enabled; //解放済みフラグ
+
+  //コンストラクタ
+  LureWeight({
+    required this.weightId,
+    required this.weight,
+    required this.enabled,
   });
 }

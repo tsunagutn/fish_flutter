@@ -1,4 +1,5 @@
 import 'package:fish_flutter/Model/FishModel.dart';
+import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:flutter/material.dart';
 
 import '../Main.dart';
@@ -11,12 +12,15 @@ class fishGetDialog extends StatefulWidget {
     required this.fishSize,
     required this.addPoint,
     required this.flgNew,
+    required this.uselureData,
   });
   final Size dispSize;
   final FishModel fish;
   final double fishSize;
   final int addPoint;
   final bool flgNew;
+  final LureModel uselureData;
+
   _fishGetDialogState createState() => _fishGetDialogState();
 }
 
@@ -31,6 +35,11 @@ class _fishGetDialogState extends State<fishGetDialog>
   late Animation<double> _gColorValue;
   late AnimationController _bColorAnimationController;
   late Animation<double> _bColorValue;
+
+  String strLevel = '';
+  var colorLevel;
+  String strLureLevel = "";
+  var colorLureLevel;
 
   static const Map<int, String> RARE_MESSAGE = {
     1: 'あなたはうれしい',
@@ -83,6 +92,48 @@ class _fishGetDialogState extends State<fishGetDialog>
 
     //ジングル鳴らす
     soundManagerPool.playSound('se/jingle01.mp3');
+
+    switch (widget.fish.type) {
+      case enumFishType.blue:
+        strLevel = "最大テンションが成長しました";
+        colorLevel = Colors.indigo[500];
+        break;
+      case enumFishType.bream:
+        strLevel = "巻き速度が成長しました";
+        colorLevel = Colors.red[200];
+        break;
+      case enumFishType.bottom:
+        strLevel = "ライン強さが成長しました";
+        colorLevel = Colors.green[200];
+        break;
+    }
+
+    //ルアー成長
+    widget.uselureData.totalExp += widget.addPoint;
+    int nowLv = widget.uselureData.lv;
+    int newLv = widget.uselureData.getLv();
+    if (nowLv < newLv) {
+      //レベルアップ
+      widget.uselureData.lvUp();
+      strLureLevel = widget.uselureData.name +
+          "がLv " +
+          nowLv.toString() +
+          " → " +
+          newLv.toString() +
+          " にレベルアップ";
+
+      switch (widget.uselureData.id) {
+        case enumLureDiv.jig:
+          colorLureLevel = Colors.cyan[500];
+          break;
+        case enumLureDiv.tairaba:
+          colorLureLevel = Colors.red[200];
+          break;
+        case enumLureDiv.slowjig:
+          colorLureLevel = Colors.green[200];
+          break;
+      }
+    }
   }
 
   @override
@@ -98,23 +149,6 @@ class _fishGetDialogState extends State<fishGetDialog>
     int r = (255 * _rColorValue.value).floor();
     int g = (255 * _gColorValue.value).floor();
     int b = (255 * _bColorValue.value).floor();
-
-    String strLevel = '';
-    var colorLevel;
-    switch (widget.fish.type) {
-      case enumFishType.blue:
-        strLevel = "最大テンションが成長しました";
-        colorLevel = Colors.indigo[500];
-        break;
-      case enumFishType.bream:
-        strLevel = "巻き速度が成長しました";
-        colorLevel = Colors.red[200];
-        break;
-      case enumFishType.bottom:
-        strLevel = "ライン強さが成長しました";
-        colorLevel = Colors.green[200];
-        break;
-    }
 
     return Stack(children: [
       Opacity(
@@ -223,11 +257,20 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 ],
                               ),
                             ),
-                            Text(widget.addPoint.toString() + '円ゲット!'),
+                            Text("あなたは" +
+                                widget.addPoint.toString() +
+                                'の経験値を得ました'),
                             Text(
                               strLevel,
                               style: TextStyle(
                                 color: colorLevel,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              strLureLevel,
+                              style: TextStyle(
+                                color: colorLureLevel,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

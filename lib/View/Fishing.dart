@@ -89,8 +89,9 @@
 //済・竿のMAXテンションによってバレ判定の速度かえる
 //済・魚種を３種類に分けるやつ
 //済・つれたときドラグを割合で合わせる
+//済・ルアーにレベル
+//・ルアーレベルアップで重さを解禁
 //・画面上に小マップ 沖合XXｍはいらない
-//・ルアーにレベル
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
@@ -135,12 +136,13 @@
 //・アワセシステム ARVRモード時はスマホをジャイロで動かす、通常時は下にドラッグでアワセ
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
+//・ルアーの成長を曲線的にする
 
 import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
-import 'package:fish_flutter/Model/HaveTackleModel.dart';
+//import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/FIshCard.dart';
@@ -202,10 +204,12 @@ class _FishingState extends BasePageState<Fishing>
   late FishsModel FISH_TABLE;
   //ルアーリスト定義
   late LuresModel lures;
+  //現在使用中のルアー
+  late LureModel uselureData;
   //所持定義
-  late HaveTackleModel haveTackle;
+  //late HaveTackleModel haveTackle;
 
-  //光点の点滅速度
+  //光点の点滅速度 ？？？テンション最大値によって可変にする
   static const Map<int, int> POINT_DURATION_MSEC = {
     0: 50,
     1: 100,
@@ -289,6 +293,7 @@ class _FishingState extends BasePageState<Fishing>
   var _tensionValMax = 0.0; //テンション最大値 竿によって可変
   var _fookingTension = 0.0; //アタリ時のアワセ判定値
   var _fookingTensionPrev = 0.0; //アワセモード時のテンション前回値記憶
+  var _useLureId = enumLureDiv.tairaba; //使用中のルアー種類
   var _drag = 0.0; //ドラグレベル値
   var _speed = 0.0; //巻き速度値
   var _speedValMax = 0.0; //スピード最大値 リールによって可変
@@ -411,10 +416,12 @@ class _FishingState extends BasePageState<Fishing>
     _hitFish = FISH_TABLE.getFishDetail(0);
     //ルアーリストを初期化？？？本当はDBマスタから全取得
     lures = new LuresModel();
+    //現在使用中のルアーデータ
+    uselureData = lures.getLureData(_useLureId);
     //基本BGM
     nowBgm = Fishing.screenBgm;
     //所持リストを初期化
-    haveTackle = new HaveTackleModel();
+    //haveTackle = new HaveTackleModel();
     // _tensionValMax = haveTackle.getUseRod().maxTention;
     // _speedValMax = haveTackle.getUseReel().maxSpeed;
     _tensionValMax = 2000.0;
@@ -558,8 +565,6 @@ class _FishingState extends BasePageState<Fishing>
     //共通乱数 0.0～0.999... の乱数の作成 ※共通じゃだめなところには使っちゃだめ
     var rand = (new math.Random()).nextDouble();
 
-    //現在使用中のルアーデータ
-    LureModel lureData = lures.getLureData(haveTackle.getUseLure().lureId);
     //風レベル判定
     for (int key in WIND_FOR_DEPTH.keys) {
       if (_maxDepth.toInt() < key) {
@@ -682,11 +687,13 @@ class _FishingState extends BasePageState<Fishing>
 
     //テンションの処理
     num addVal = 0;
+    var lureWeight = 0.0;
     var weight = 0.0;
     var mx = MAX_RAND_ADD_TENSION;
     var mn = MIN_RAND_ADD_TENSION;
-    //ルアー重さ
-    weight = lureData.weight;
+    //使用中のルアー重さ
+    lureWeight = uselureData.getWeight(uselureData.useWeightId);
+    weight = lureWeight;
     if (_collect) {
       //高速回収中
       weight -= 1000;
@@ -739,7 +746,7 @@ class _FishingState extends BasePageState<Fishing>
       //クラッチON中は強制的にテンション減算
       //水深を加算
       //ルアー重さによってフォール速度に補正をかける 20gの時0.1m/スキャン
-      _depth += (lureData.weight / 20);
+      _depth += (lureWeight / 20);
     } else {
       if (_onTap) {
         //水深減算
@@ -771,13 +778,15 @@ class _FishingState extends BasePageState<Fishing>
         //糸切れ
         debugPrint("いときれ");
         //メッセージ
-        _centerTextMain = "BREAK";
+        _centerTextMain = "糸が切れた!";
         _centerTextMainColor = Colors.red;
-        _centerTextSub = "糸が切れた!";
+        _centerTextSub = "ルアーレベルダウン";
         _centerTextSubColor = Colors.yellow;
         startCenterInfo();
         //使用中のルアーを削除
-        haveTackle.lostLure(haveTackle.getUseLure().id);
+        //haveTackle.lostLure(haveTackle.getUseLure().id);
+        //使用中のルアーをレベルダウン
+        uselureData.lvDown();
         val = 0.0;
         soundManagerPool.playSound('se/linebreak.mp3');
         nowBgm = Fishing.screenBgm;
@@ -925,11 +934,13 @@ class _FishingState extends BasePageState<Fishing>
             children: [
               //釣りあげダイアログ
               fishGetDialog(
-                  dispSize: size,
-                  fish: _hitFish,
-                  fishSize: _fishSize,
-                  addPoint: point,
-                  flgNew: flgNew),
+                dispSize: size,
+                fish: _hitFish,
+                fishSize: _fishSize,
+                addPoint: point,
+                flgNew: flgNew,
+                uselureData: uselureData,
+              ),
             ],
           );
         },
@@ -1045,7 +1056,7 @@ class _FishingState extends BasePageState<Fishing>
           var jiaiProb = 0.0;
           if (flgFall) {
             //フォール中のHIT率判定 魚のフォール志向 * ルアーのフォール能力
-            hitSpeedprob = fish.hitFall * lureData.fall;
+            hitSpeedprob = fish.hitFall * uselureData.fall;
             hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
             //フォールは時合の影響を半分にする
             jiaiProb = (1.0 + _jiai) / 2;
@@ -1055,7 +1066,7 @@ class _FishingState extends BasePageState<Fishing>
             //     100;
           } else if (flgJerk) {
             //ジャーク中のHIT率判定 魚のジャーク志向 * ルアーのジャーク能力
-            hitSpeedprob = fish.hitJerk * lureData.jerk;
+            hitSpeedprob = fish.hitJerk * uselureData.jerk;
             hitSpeedprobDisp = 0.0; //ジャーク中は巻き速度手本を見せない
             //ジャークは時合の影響を1/3にする
             jiaiProb = (2.0 + _jiai) / 3;
@@ -1077,7 +1088,7 @@ class _FishingState extends BasePageState<Fishing>
               hitSpeedprob = ((speedDiff - fish.hitSpeedRange).abs() /
                       fish.hitSpeedRange) *
                   fish.hitMaki *
-                  lureData.reeling;
+                  uselureData.reeling;
             }
             if (hitSpeedprob < 0.01) {
               hitSpeedprob = 0.01; //速度範囲外の最低保証
@@ -1445,42 +1456,43 @@ class _FishingState extends BasePageState<Fishing>
               //右（複数可）
               actions: <Widget>[
                 Container(
-                    margin: EdgeInsets.only(right: 10),
-                    child: ElevatedButton(
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Icon(
-                              Icons.shopping_cart,
-                              color: Colors.white,
-                              size: 30.0,
-                            ),
-                            Text(
-                              _point.toString() + "円",
-                            ),
-                          ]),
-                      onPressed: () async {
-                        //買い物モーダルの表示
-                        _timer.cancel(); //定周期タイマ停止
-                        soundManagerPool.playSound('se/book.mp3'); //音は仮
-                        int? result = await showDialog<int>(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) {
-                            return ShopDialog(
-                              haveTakcle: haveTackle,
-                              originPoint: _point,
-                              bgm: super.bgm,
-                            );
-                          },
-                        );
-                        _point = result!;
-                        soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
-                        startTimer(); //定周期タイマ再開
-                        bgmPlay(nowBgm);
-                        setState(() {});
-                      },
-                    )),
+                    // margin: EdgeInsets.only(right: 10),
+                    // child: ElevatedButton(
+                    //   child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.end,
+                    //       children: [
+                    //         Icon(
+                    //           Icons.shopping_cart,
+                    //           color: Colors.white,
+                    //           size: 30.0,
+                    //         ),
+                    //         Text(
+                    //           _point.toString() + "円",
+                    //         ),
+                    //       ]),
+                    //   onPressed: () async {
+                    //     //買い物モーダルの表示
+                    //     _timer.cancel(); //定周期タイマ停止
+                    //     soundManagerPool.playSound('se/book.mp3'); //音は仮
+                    //     int? result = await showDialog<int>(
+                    //       context: context,
+                    //       barrierDismissible: false,
+                    //       builder: (_) {
+                    //         return ShopDialog(
+                    //           haveTakcle: haveTackle,
+                    //           originPoint: _point,
+                    //           bgm: super.bgm,
+                    //         );
+                    //       },
+                    //     );
+                    //     _point = result!;
+                    //     soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
+                    //     startTimer(); //定周期タイマ再開
+                    //     bgmPlay(nowBgm);
+                    //     setState(() {});
+                    //   },
+                    //),
+                    ),
                 Container(
                     child: ElevatedButton(
                   child: Column(
@@ -2348,25 +2360,11 @@ class _FishingState extends BasePageState<Fishing>
                                                 },
                                                 child: tackleIcon(
                                                   tackleIconSize: 40.0,
-                                                  imagePath: 'assets/images/' +
-                                                      lures
-                                                          .getLureData(
-                                                              haveTackle
-                                                                  .getUseLure()
-                                                                  .lureId)
-                                                          .image,
+                                                  lure: uselureData,
                                                   flgSelect: false,
                                                   opacity: (_depth > 0.0
                                                       ? 0.7
                                                       : 1.0),
-                                                  subText: lures
-                                                          .getLureData(
-                                                              haveTackle
-                                                                  .getUseLure()
-                                                                  .lureId)
-                                                          .weight
-                                                          .toString() +
-                                                      'g',
                                                 )),
                                       ),
                                 (settings.flgControlRight)
@@ -2424,25 +2422,11 @@ class _FishingState extends BasePageState<Fishing>
                                                 },
                                                 child: tackleIcon(
                                                   tackleIconSize: 40.0,
-                                                  imagePath: 'assets/images/' +
-                                                      lures
-                                                          .getLureData(
-                                                              haveTackle
-                                                                  .getUseLure()
-                                                                  .lureId)
-                                                          .image,
+                                                  lure: uselureData,
                                                   flgSelect: false,
                                                   opacity: (_depth > 0.0
                                                       ? 0.7
                                                       : 1.0),
-                                                  subText: lures
-                                                          .getLureData(
-                                                              haveTackle
-                                                                  .getUseLure()
-                                                                  .lureId)
-                                                          .weight
-                                                          .toString() +
-                                                      'g',
                                                 )),
                                       ),
                               ],
@@ -2523,99 +2507,82 @@ class _FishingState extends BasePageState<Fishing>
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            //現在選択中のルアー
-                                            //竿
+                                            //タイラバ
                                             GestureDetector(
                                               onTap: () {
                                                 setState(() {
-                                                  _selectTacleIcon = 'rod';
+                                                  _useLureId =
+                                                      enumLureDiv.tairaba;
+                                                  //使用中のルアーを変更
+                                                  uselureData = lures
+                                                      .getLureData(_useLureId);
                                                 });
                                               },
                                               child: Container(
                                                   padding: EdgeInsets.all(10),
                                                   child: tackleIcon(
                                                     tackleIconSize: 60.0,
-                                                    imagePath:
-                                                        'assets/images/' +
-                                                            haveTackle
-                                                                .getUseRod()
-                                                                .image,
-                                                    flgSelect:
-                                                        _selectTacleIcon ==
-                                                                'rod'
-                                                            ? true
-                                                            : false,
+                                                    lure: lures.getLureData(
+                                                        enumLureDiv.tairaba),
+                                                    flgSelect: _useLureId ==
+                                                            enumLureDiv.tairaba
+                                                        ? true
+                                                        : false,
+                                                    opacity: (_depth > 0.0
+                                                        ? 0.7
+                                                        : 1.0),
+                                                  )),
+                                            ),
+                                            //メタルジグ
+                                            GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  _useLureId = enumLureDiv.jig;
+                                                  //使用中のルアーを変更
+                                                  uselureData = lures
+                                                      .getLureData(_useLureId);
+                                                });
+                                              },
+                                              child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: tackleIcon(
+                                                    tackleIconSize: 60.0,
+                                                    lure: lures.getLureData(
+                                                        enumLureDiv.jig),
+                                                    flgSelect: _useLureId ==
+                                                            enumLureDiv.jig
+                                                        ? true
+                                                        : false,
                                                     opacity: (_depth > 0.0
                                                         ? 0.7
                                                         : 1.0),
                                                   )),
                                             ),
 
-                                            //リール
+                                            //スロージグ
                                             GestureDetector(
                                               onTap: () {
                                                 setState(() {
-                                                  _selectTacleIcon = 'reel';
+                                                  _useLureId =
+                                                      enumLureDiv.slowjig;
+                                                  //使用中のルアーを変更
+                                                  uselureData = lures
+                                                      .getLureData(_useLureId);
                                                 });
                                               },
                                               child: Container(
                                                   padding: EdgeInsets.all(10),
                                                   child: tackleIcon(
                                                     tackleIconSize: 60.0,
-                                                    imagePath:
-                                                        'assets/images/reel.png',
-                                                    flgSelect:
-                                                        _selectTacleIcon ==
-                                                                'reel'
-                                                            ? true
-                                                            : false,
+                                                    lure: lures.getLureData(
+                                                        enumLureDiv.slowjig),
+                                                    flgSelect: _useLureId ==
+                                                            enumLureDiv.slowjig
+                                                        ? true
+                                                        : false,
                                                     opacity: (_depth > 0.0
                                                         ? 0.7
                                                         : 1.0),
-                                                  )),
-                                            ),
-                                            //ルアー
-                                            GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  _selectTacleIcon = 'lure';
-                                                });
-                                              },
-                                              child: Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: tackleIcon(
-                                                    tackleIconSize: 60.0,
-                                                    imagePath: 'assets/images/' +
-                                                        lures
-                                                            .getLureData(
-                                                                haveTackle
-                                                                    .getUseLure()
-                                                                    .lureId)
-                                                            .image,
-                                                    flgSelect:
-                                                        _selectTacleIcon ==
-                                                                'lure'
-                                                            ? true
-                                                            : false,
-                                                    opacity: (_depth > 0.0
-                                                        ? 0.7
-                                                        : 1.0),
-                                                    subText: lures
-                                                            .getLureData(
-                                                                haveTackle
-                                                                    .getUseLure()
-                                                                    .lureId)
-                                                            .weight
-                                                            .toString() +
-                                                        'g',
-                                                    // hp: haveTackle
-                                                    //     .getUseLure()
-                                                    //     .lureHp,
-                                                    // maxHp: lures
-                                                    //     .getLureData(haveTackle
-                                                    //         .getUseLure()
-                                                    //         .lureId)
-                                                    //     .hp
                                                   )),
                                             ),
                                           ],
@@ -2627,92 +2594,95 @@ class _FishingState extends BasePageState<Fishing>
                                       )),
                                       //交換
                                       Container(
-                                        margin:
-                                            EdgeInsets.only(top: 4, bottom: 4),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                                width: size.width - 60,
-                                                height: 60,
-                                                color: Colors.white
-                                                    .withOpacity(0.6),
-                                                child: ListView.builder(
-                                                  scrollDirection:
-                                                      Axis.horizontal,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int index) {
-                                                    return Row(children: [
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          setState(() {
-                                                            //タックル替え
-                                                            haveTackle.changeLure(
-                                                                haveTackle
-                                                                    .haveLures[
-                                                                        index]
-                                                                    .id);
-                                                          });
-                                                        },
-                                                        child: Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    10),
-                                                            child: tackleIcon(
-                                                              tackleIconSize:
-                                                                  40.0,
-                                                              imagePath: 'assets/images/' +
-                                                                  lures
-                                                                      .getLureData(haveTackle
-                                                                          .haveLures[
-                                                                              index]
-                                                                          .lureId)
-                                                                      .image,
-                                                              flgSelect: haveTackle
-                                                                          .haveLures[
-                                                                              index]
-                                                                          .id ==
-                                                                      haveTackle
-                                                                          .getUseLure()
-                                                                          .id
-                                                                  ? true
-                                                                  : false,
-                                                              opacity:
-                                                                  (_depth > 0.0
-                                                                      ? 0.7
-                                                                      : 1.0),
-                                                              subText: lures
-                                                                      .getLureData(haveTackle
-                                                                          .haveLures[
-                                                                              index]
-                                                                          .lureId)
-                                                                      .weight
-                                                                      .toString() +
-                                                                  'g',
-                                                              //hp: haveTackle.haveLures[index].lureHp,
-                                                              //maxHp: lures.getLureData(haveTackle.haveLures[index].lureId).hp
-                                                            )),
-                                                      ),
-                                                    ]);
-                                                  },
-                                                  itemCount: haveTackle
-                                                      .haveLures.length,
-                                                ))
-                                          ],
-                                        ),
-                                      ),
+                                          // margin:
+                                          //     EdgeInsets.only(top: 4, bottom: 4),
+                                          // child: Row(
+                                          //   mainAxisAlignment:
+                                          //       MainAxisAlignment.center,
+                                          //   children: <Widget>[
+                                          //     Container(
+                                          //         width: size.width - 60,
+                                          //         height: 60,
+                                          //         color: Colors.white
+                                          //             .withOpacity(0.6),
+                                          //         child: ListView.builder(
+                                          //           scrollDirection:
+                                          //               Axis.horizontal,
+                                          //           itemBuilder:
+                                          //               (BuildContext context,
+                                          //                   int index) {
+                                          //             return Row(children: [
+                                          //               GestureDetector(
+                                          //                 onTap: () {
+                                          //                   setState(() {
+                                          //                     //タックル替え
+                                          //                     haveTackle.changeLure(
+                                          //                         haveTackle
+                                          //                             .haveLures[
+                                          //                                 index]
+                                          //                             .id);
+                                          //                   });
+                                          //                 },
+                                          //                 child: Container(
+                                          //                     padding:
+                                          //                         EdgeInsets.all(
+                                          //                             10),
+                                          //                     child: tackleIcon(
+                                          //                       tackleIconSize:
+                                          //                           40.0,
+                                          //                       imagePath: 'assets/images/' +
+                                          //                           lures
+                                          //                               .getLureData(haveTackle
+                                          //                                   .haveLures[
+                                          //                                       index]
+                                          //                                   .lureId)
+                                          //                               .image,
+                                          //                       flgSelect: haveTackle
+                                          //                                   .haveLures[
+                                          //                                       index]
+                                          //                                   .id ==
+                                          //                               haveTackle
+                                          //                                   .getUseLure()
+                                          //                                   .id
+                                          //                           ? true
+                                          //                           : false,
+                                          //                       opacity:
+                                          //                           (_depth > 0.0
+                                          //                               ? 0.7
+                                          //                               : 1.0),
+                                          //                       subText: lures
+                                          //                               .getLureData(haveTackle
+                                          //                                   .haveLures[
+                                          //                                       index]
+                                          //                                   .lureId)
+                                          //                               .weight
+                                          //                               .toString() +
+                                          //                           'g',
+                                          //                       //hp: haveTackle.haveLures[index].lureHp,
+                                          //                       //maxHp: lures.getLureData(haveTackle.haveLures[index].lureId).hp
+                                          //                     )),
+                                          //               ),
+                                          //             ]);
+                                          //           },
+                                          //           itemCount: haveTackle
+                                          //               .haveLures.length,
+                                          //         ))
+                                          //   ],
+                                          // ),
+                                          ),
                                       Container(
                                         margin: EdgeInsets.only(top: 10),
                                         child: Text(
-                                          lures
-                                              .getLureData(haveTackle
-                                                  .getUseLure()
-                                                  .lureId)
-                                              .name,
+                                          lures.getLureData(_useLureId).name +
+                                              " Lv." +
+                                              lures
+                                                  .getLureData(_useLureId)
+                                                  .lv
+                                                  .toString(),
                                           style: TextStyle(
-                                              color: Colors.yellow,
+                                              color: lures
+                                                  .getLureData(_useLureId)
+                                                  .getLureColor(_useLureId),
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold),
                                         ),
@@ -2734,73 +2704,73 @@ class _FishingState extends BasePageState<Fishing>
                                               radarColors: [Colors.orange],
                                               fontColor: Colors.white,
                                             ),
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  left: 10, right: 10),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  //重さ
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        '重さ：',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                      Text(
-                                                        lures
-                                                                .getLureData(
-                                                                    haveTackle
-                                                                        .getUseLure()
-                                                                        .lureId)
-                                                                .weight
-                                                                .toString() +
-                                                            'g',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      )
-                                                    ],
-                                                  ),
-                                                  //説明テキスト
-                                                  // Expanded(
-                                                  //     child:
-                                                  Container(
-                                                      height: 100,
-                                                      width: size.width / 2,
-                                                      padding: EdgeInsets.only(
-                                                          left: 10, right: 10),
-                                                      decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                              color:
-                                                                  Colors.black,
-                                                              width: 3),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          7.0)),
-                                                          color: clsColor
-                                                              .getColorFromHex(
-                                                                  '#DFDFDF')),
-                                                      child: Text(
-                                                        lures
-                                                            .getLureData(
-                                                                haveTackle
-                                                                    .getUseLure()
-                                                                    .lureId)
-                                                            .text,
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.black),
-                                                      )),
-                                                  //),
-                                                ],
-                                              ),
-                                            ),
+                                            //     Container(
+                                            //       margin: EdgeInsets.only(
+                                            //           left: 10, right: 10),
+                                            //       child: Column(
+                                            //         crossAxisAlignment:
+                                            //             CrossAxisAlignment.start,
+                                            //         children: [
+                                            //           //重さ
+                                            //           Row(
+                                            //             children: [
+                                            //               Text(
+                                            //                 '重さ：',
+                                            //                 style: TextStyle(
+                                            //                     color:
+                                            //                         Colors.white),
+                                            //               ),
+                                            //               Text(
+                                            //                 lures
+                                            //                         .getLureData(
+                                            //                             haveTackle
+                                            //                                 .getUseLure()
+                                            //                                 .lureId)
+                                            //                         .weight
+                                            //                         .toString() +
+                                            //                     'g',
+                                            //                 style: TextStyle(
+                                            //                     color:
+                                            //                         Colors.white),
+                                            //               )
+                                            //             ],
+                                            //           ),
+                                            //           //説明テキスト
+                                            //           // Expanded(
+                                            //           //     child:
+                                            //           Container(
+                                            //               height: 100,
+                                            //               width: size.width / 2,
+                                            //               padding: EdgeInsets.only(
+                                            //                   left: 10, right: 10),
+                                            //               decoration: BoxDecoration(
+                                            //                   border: Border.all(
+                                            //                       color:
+                                            //                           Colors.black,
+                                            //                       width: 3),
+                                            //                   borderRadius:
+                                            //                       BorderRadius.all(
+                                            //                           Radius
+                                            //                               .circular(
+                                            //                                   7.0)),
+                                            //                   color: clsColor
+                                            //                       .getColorFromHex(
+                                            //                           '#DFDFDF')),
+                                            //               child: Text(
+                                            //                 lures
+                                            //                     .getLureData(
+                                            //                         haveTackle
+                                            //                             .getUseLure()
+                                            //                             .lureId)
+                                            //                     .text,
+                                            //                 style: TextStyle(
+                                            //                     color:
+                                            //                         Colors.black),
+                                            //               )),
+                                            //           //),
+                                            //         ],
+                                            //       ),
+                                            //     ),
                                           ],
                                         ),
                                       ),
@@ -2978,15 +2948,10 @@ class _FishingState extends BasePageState<Fishing>
   //ルアーの能力チャート描画
   List<RadarChartItemModel> getLureRadarChartItem() {
     List<RadarChartItemModel> ret = [];
-    ret.add(new RadarChartItemModel(
-        itemName: '巻き',
-        value: lures.getLureData(haveTackle.getUseLure().lureId).reeling));
-    ret.add(new RadarChartItemModel(
-        itemName: 'ﾌｫｰﾙ',
-        value: lures.getLureData(haveTackle.getUseLure().lureId).fall));
-    ret.add(new RadarChartItemModel(
-        itemName: 'ｼｬｸﾘ',
-        value: lures.getLureData(haveTackle.getUseLure().lureId).jerk));
+    ret.add(
+        new RadarChartItemModel(itemName: '巻き', value: uselureData.reeling));
+    ret.add(new RadarChartItemModel(itemName: 'ﾌｫｰﾙ', value: uselureData.fall));
+    ret.add(new RadarChartItemModel(itemName: 'ｼｬｸﾘ', value: uselureData.jerk));
     return ret;
   }
 
@@ -3002,11 +2967,13 @@ class _FishingState extends BasePageState<Fishing>
 //タックルサムネの表示
 Widget tackleIcon({
   required double tackleIconSize,
-  required String imagePath,
+  required LureModel lure,
   required bool flgSelect,
-  String subText = '',
-  int hp = 0,
-  int maxHp = 0,
+  // required String imagePath,
+  // String subText = '',
+  // String lvText = '',
+  // int hp = 0,
+  // int maxHp = 0,
   double opacity = 1.0,
 }) {
   //final value = hp / maxHp;
@@ -3020,7 +2987,7 @@ Widget tackleIcon({
             color: flgSelect ? Colors.yellow : Colors.black,
             width: flgSelect ? 3 : 1),
         image: DecorationImage(
-            image: AssetImage(imagePath),
+            image: AssetImage('images/' + lure.image),
             colorFilter: new ColorFilter.mode(
                 Colors.black.withOpacity(opacity), BlendMode.dstATop),
             fit: BoxFit.contain),
@@ -3030,9 +2997,19 @@ Widget tackleIcon({
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            subText,
+            lure.getWeight(lure.useWeightId).toString() + 'g',
             style: TextStyle(fontSize: 12),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Lv ' + lure.lv.toString(),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          //HPバーの表示 ボツ
           // Visibility(
           //   visible: (maxHp > 0),
           //   child: Container(
