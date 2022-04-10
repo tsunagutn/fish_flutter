@@ -87,8 +87,11 @@
 //済・合わせシステムマシニする
 //済・竿のMAXテンションによってジャーク強さかえる
 //済・竿のMAXテンションによってバレ判定の速度かえる
-//中・魚種を３種類に分けるやつ
-//・つれたときドラグを割合で合わせる
+//済・魚種を３種類に分けるやつ
+//済・つれたときドラグを割合で合わせる
+//・画面上に小マップ 沖合XXｍはいらない
+//・ルアーにレベル
+//・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・店をもっとましにする
@@ -412,8 +415,10 @@ class _FishingState extends BasePageState<Fishing>
     nowBgm = Fishing.screenBgm;
     //所持リストを初期化
     haveTackle = new HaveTackleModel();
-    _tensionValMax = haveTackle.getUseRod().maxTention;
-    _speedValMax = haveTackle.getUseReel().maxSpeed;
+    // _tensionValMax = haveTackle.getUseRod().maxTention;
+    // _speedValMax = haveTackle.getUseReel().maxSpeed;
+    _tensionValMax = 2000.0;
+    _speedValMax = 200.0;
     _drag = 0.8;
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
@@ -2488,30 +2493,30 @@ class _FishingState extends BasePageState<Fishing>
                                   child: Container(
                                     color: Colors.black.withOpacity(0.3),
                                     child: Column(children: <Widget>[
-                                      Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              "使用中のタックル",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
-                                                  fontFamily: 'OpenSans',
-                                                  decoration:
-                                                      TextDecoration.none,
-                                                  shadows: <Shadow>[
-                                                    Shadow(
-                                                        offset:
-                                                            Offset(1.0, 3.0),
-                                                        blurRadius: 2.0,
-                                                        color: Colors.black
-                                                            .withOpacity(0.8))
-                                                  ]),
-                                            )
-                                          ]),
+                                      // Row(
+                                      //     mainAxisAlignment:
+                                      //         MainAxisAlignment.center,
+                                      //     children: [
+                                      //       Text(
+                                      //         "使用中のタックル",
+                                      //         textAlign: TextAlign.center,
+                                      //         style: TextStyle(
+                                      //             color: Colors.white,
+                                      //             fontWeight: FontWeight.bold,
+                                      //             fontSize: 20,
+                                      //             fontFamily: 'OpenSans',
+                                      //             decoration:
+                                      //                 TextDecoration.none,
+                                      //             shadows: <Shadow>[
+                                      //               Shadow(
+                                      //                   offset:
+                                      //                       Offset(1.0, 3.0),
+                                      //                   blurRadius: 2.0,
+                                      //                   color: Colors.black
+                                      //                       .withOpacity(0.8))
+                                      //             ]),
+                                      //       )
+                                      //     ]),
                                       Container(
                                         //margin: EdgeInsets.only(top: 4, bottom: 4),
                                         child: Row(

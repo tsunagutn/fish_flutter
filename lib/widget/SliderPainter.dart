@@ -247,7 +247,8 @@ class SliderPainter extends CustomPainter {
     // テキスト描画用のペインター
     final textPainterMain = TextPainter(
       text: TextSpan(
-          style: textStyleMain, children: <TextSpan>[TextSpan(text: text)]),
+          style: textStyleMain,
+          children: <TextSpan>[TextSpan(text: " " + text)]),
       textAlign: TextAlign.left,
       textDirection: TextDirection.ltr,
     );
