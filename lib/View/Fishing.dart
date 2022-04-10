@@ -2673,15 +2673,14 @@ class _FishingState extends BasePageState<Fishing>
                                       Container(
                                         margin: EdgeInsets.only(top: 10),
                                         child: Text(
-                                          lures.getLureData(_useLureId).name +
+                                          uselureData.name +
                                               " Lv." +
                                               lures
                                                   .getLureData(_useLureId)
                                                   .lv
                                                   .toString(),
                                           style: TextStyle(
-                                              color: lures
-                                                  .getLureData(_useLureId)
+                                              color: uselureData
                                                   .getLureColor(_useLureId),
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold),
@@ -2704,73 +2703,163 @@ class _FishingState extends BasePageState<Fishing>
                                               radarColors: [Colors.orange],
                                               fontColor: Colors.white,
                                             ),
-                                            //     Container(
-                                            //       margin: EdgeInsets.only(
-                                            //           left: 10, right: 10),
-                                            //       child: Column(
-                                            //         crossAxisAlignment:
-                                            //             CrossAxisAlignment.start,
-                                            //         children: [
-                                            //           //重さ
-                                            //           Row(
-                                            //             children: [
-                                            //               Text(
-                                            //                 '重さ：',
-                                            //                 style: TextStyle(
-                                            //                     color:
-                                            //                         Colors.white),
-                                            //               ),
-                                            //               Text(
-                                            //                 lures
-                                            //                         .getLureData(
-                                            //                             haveTackle
-                                            //                                 .getUseLure()
-                                            //                                 .lureId)
-                                            //                         .weight
-                                            //                         .toString() +
-                                            //                     'g',
-                                            //                 style: TextStyle(
-                                            //                     color:
-                                            //                         Colors.white),
-                                            //               )
-                                            //             ],
-                                            //           ),
-                                            //           //説明テキスト
-                                            //           // Expanded(
-                                            //           //     child:
-                                            //           Container(
-                                            //               height: 100,
-                                            //               width: size.width / 2,
-                                            //               padding: EdgeInsets.only(
-                                            //                   left: 10, right: 10),
-                                            //               decoration: BoxDecoration(
-                                            //                   border: Border.all(
-                                            //                       color:
-                                            //                           Colors.black,
-                                            //                       width: 3),
-                                            //                   borderRadius:
-                                            //                       BorderRadius.all(
-                                            //                           Radius
-                                            //                               .circular(
-                                            //                                   7.0)),
-                                            //                   color: clsColor
-                                            //                       .getColorFromHex(
-                                            //                           '#DFDFDF')),
-                                            //               child: Text(
-                                            //                 lures
-                                            //                     .getLureData(
-                                            //                         haveTackle
-                                            //                             .getUseLure()
-                                            //                             .lureId)
-                                            //                     .text,
-                                            //                 style: TextStyle(
-                                            //                     color:
-                                            //                         Colors.black),
-                                            //               )),
-                                            //           //),
-                                            //         ],
-                                            //       ),
-                                            //     ),
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                  left: 10, right: 10),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  //重さ
+                                                  //rbLureWeight(uselureData),
+
+                                                  Container(
+                                                    child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        children: <Widget>[
+                                                          Center(
+                                                            child: Text(
+                                                              '重さ：' +
+                                                                  uselureData
+                                                                      .getMyWeight()
+                                                                      .toString() +
+                                                                  "g",
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white),
+                                                            ),
+                                                          ),
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                                border: Border.all(
+                                                                    color: Colors
+                                                                        .black),
+                                                                color: Colors
+                                                                    .white),
+                                                            height: uselureData
+                                                                    .weightList
+                                                                    .list
+                                                                    .length *
+                                                                24,
+                                                            width: 80,
+                                                            child: ListView
+                                                                .builder(
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 0,
+                                                                      bottom:
+                                                                          0),
+                                                              itemBuilder:
+                                                                  (BuildContext
+                                                                          context,
+                                                                      int index) {
+                                                                //return Text(useLureData.weightList.list[index].weight.toString());
+
+                                                                return Row(
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Radio(
+                                                                      materialTapTargetSize:
+                                                                          MaterialTapTargetSize
+                                                                              .shrinkWrap,
+                                                                      activeColor:
+                                                                          Colors
+                                                                              .blueAccent,
+                                                                      value:
+                                                                          index,
+                                                                      groupValue:
+                                                                          uselureData
+                                                                              .useWeightId,
+                                                                      //onChanged: {uselureData.useWeightId = index},
+                                                                      onChanged:
+                                                                          (int?
+                                                                              value) {
+                                                                        setState(
+                                                                            () {
+                                                                          uselureData.useWeightId =
+                                                                              value!;
+                                                                        });
+                                                                      },
+                                                                    ),
+                                                                    Text(uselureData
+                                                                            .weightList
+                                                                            .list[index]
+                                                                            .weight
+                                                                            .toString() +
+                                                                        "g"),
+                                                                  ],
+                                                                );
+                                                              },
+                                                              itemCount:
+                                                                  uselureData
+                                                                      .weightList
+                                                                      .list
+                                                                      .length,
+                                                            ),
+                                                          )
+                                                        ]),
+                                                  ),
+
+                                                  // Row(
+                                                  //   children: [
+                                                  //     Text(
+                                                  //       '重さ：',
+                                                  //       style: TextStyle(
+                                                  //           color:
+                                                  //               Colors.white),
+                                                  //     ),
+                                                  //     Text(
+                                                  //       uselureData
+                                                  //               .getMyWeight()
+                                                  //               .toString() +
+                                                  //           'g',
+                                                  //       style: TextStyle(
+                                                  //           color:
+                                                  //               Colors.white),
+                                                  //     )
+                                                  //   ],
+                                                  // ),
+                                                  //説明テキスト
+                                                  // Expanded(
+                                                  //     child:
+                                                  // Container(
+                                                  //     height: 100,
+                                                  //     width: size.width / 2,
+                                                  //     padding: EdgeInsets.only(
+                                                  //         left: 10, right: 10),
+                                                  //     decoration: BoxDecoration(
+                                                  //         border: Border.all(
+                                                  //             color:
+                                                  //                 Colors.black,
+                                                  //             width: 3),
+                                                  //         borderRadius:
+                                                  //             BorderRadius.all(
+                                                  //                 Radius
+                                                  //                     .circular(
+                                                  //                         7.0)),
+                                                  //         color: clsColor
+                                                  //             .getColorFromHex(
+                                                  //                 '#DFDFDF')),
+                                                  //     child: Text(
+                                                  //       lures
+                                                  //           .getLureData(
+                                                  //               haveTackle
+                                                  //                   .getUseLure()
+                                                  //                   .lureId)
+                                                  //           .text,
+                                                  //       style: TextStyle(
+                                                  //           color:
+                                                  //               Colors.black),
+                                                  //     )),
+                                                  //),
+                                                ],
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),

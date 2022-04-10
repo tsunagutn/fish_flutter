@@ -116,6 +116,11 @@ class LureModel {
     return ret;
   }
 
+  //自分の重さを取得
+  double getMyWeight() {
+    return getWeight(useWeightId);
+  }
+
   //累計EXPから現在のレベルを取得
   int getLv() {
     int retLv = 1;
