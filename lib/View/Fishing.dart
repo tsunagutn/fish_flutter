@@ -2501,7 +2501,7 @@ class _FishingState extends BasePageState<Fishing>
                                       //             ]),
                                       //       )
                                       //     ]),
-                                      Container(
+                                      FittedBox(
                                         //margin: EdgeInsets.only(top: 4, bottom: 4),
                                         child: Row(
                                           mainAxisAlignment:
