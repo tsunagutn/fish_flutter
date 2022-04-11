@@ -161,15 +161,13 @@ class LureModel {
   }
 
   //レベルアップ処理
-  lvUp() {
+  String lvUp() {
+    String ret = "";
     //既に最大レベルの場合はなにもしない
-    if (lv >= maxLv) return;
+    if (lv >= maxLv) return ret;
     int oldLv = lv;
     //新レベルの値をセット
     lv = getLv();
-    debugPrint('EXP:' + totalExp.toString());
-    debugPrint('旧:' + oldLv.toString());
-    debugPrint('新:' + lv.toString());
     //現レベル-新レベル間ループ
     for (int i = oldLv; i < lv; i++) {
       //fall成長
@@ -179,6 +177,18 @@ class LureModel {
       //jerk成長
       jerk = stsUp(jerk, lvAddJerk);
     }
+    ret = name + "がレベルアップ Lv " + oldLv.toString() + " → " + lv.toString();
+
+    //3レベル毎に新しい重さをアンロック
+    int maxWeightId = weightList.list.length;
+    int nowWeightLv = (lv ~/ 3);
+    if (!weightList.list[nowWeightLv].enabled) {
+      weightList.list[nowWeightLv].enabled = true;
+      ret += "\n" +
+          weightList.list[nowWeightLv].weight.toString() +
+          "gが使用可能になりました";
+    }
+    return ret;
   }
 
   double stsUp(double old, double add) {

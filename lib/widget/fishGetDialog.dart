@@ -114,13 +114,7 @@ class _fishGetDialogState extends State<fishGetDialog>
     int newLv = widget.uselureData.getLv();
     if (nowLv < newLv) {
       //レベルアップ
-      widget.uselureData.lvUp();
-      strLureLevel = widget.uselureData.name +
-          "がLv " +
-          nowLv.toString() +
-          " → " +
-          newLv.toString() +
-          " にレベルアップ";
+      strLureLevel = widget.uselureData.lvUp();
 
       switch (widget.uselureData.id) {
         case enumLureDiv.jig:
@@ -187,7 +181,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                     ],
                   )),
               content: Container(
-                  height: widget.dispSize.height / 1.7,
+                  height: widget.dispSize.height,
                   width: widget.dispSize.width,
                   // decoration: new BoxDecoration(
                   //     image: new DecorationImage(
@@ -274,16 +268,16 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            if (widget.flgNew)
+                              Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: Text("おさかな図鑑に登録します",
+                                    style: TextStyle(color: Colors.red)),
+                              ),
                             Container(
                               margin: EdgeInsets.only(top: 10),
                               child: Text(widget.fish.text),
                             ),
-                            if (widget.flgNew)
-                              Container(
-                                margin: EdgeInsets.only(top: 5),
-                                child: Text("おさかな図鑑に登録します",
-                                    style: TextStyle(color: Colors.red)),
-                              ),
                           ],
                         ),
                         Row(
