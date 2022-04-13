@@ -96,8 +96,8 @@
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・店をもっとましにする
-//・タックル変更をもっとましにする
-//・サカナ反応が空に浮くのをなおす
+//・タックル変更をもっとましにする、特に重さ
+//・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 //・ドラグ使いにくいの何とかする
 //・風の描画？？？いる？
 //・雲の描画
@@ -139,6 +139,7 @@
 //・ルアーの成長を曲線的にする
 
 import 'package:fish_flutter/Main.dart';
+import 'package:fish_flutter/Model/ImageModel.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
@@ -194,7 +195,7 @@ class _FishingState extends BasePageState<Fishing>
   //モーダル中のBGM
 
   //late AudioCache _subBgm;
-  late AudioPlayer _ap;
+  //late AudioPlayer _ap;
 
   //デバッグフラグ すぐつれちゃう
   //static const DEBUGFLG = true;
@@ -208,6 +209,10 @@ class _FishingState extends BasePageState<Fishing>
   late LureModel uselureData;
   //所持定義
   //late HaveTackleModel haveTackle;
+  //画像リスト
+  List<ImageModel> lstImage = [];
+  //現在表示する画像リスト
+  List<ImageModel> lstDispImage = [];
 
   //光点の点滅速度 ？？？テンション最大値によって可変にする
   static const Map<int, int> POINT_DURATION_MSEC = {
@@ -403,8 +408,7 @@ class _FishingState extends BasePageState<Fishing>
   //沖合何km
   var offShore = 0.0;
 
-  late ui.Image imageTeibou;
-  var getImageTeibou = false;
+  var flgImageSetOk = false;
 
   @override
   void initState() {
@@ -485,11 +489,57 @@ class _FishingState extends BasePageState<Fishing>
     super.initState();
   }
 
+  //画像のプリロード？？？ほんとはMAINでやっといたほうがいいかも
   void createImage() async {
-    final rawData = await rootBundle.load('assets/images/teibou.png');
-    final imgList = Uint8List.view(rawData.buffer);
-    imageTeibou = await decodeImageFromList(imgList);
-    getImageTeibou = true;
+    var rawData = await rootBundle.load('assets/images/mounten.png');
+    var imgList = Uint8List.view(rawData.buffer);
+    ui.Image image = await decodeImageFromList(imgList);
+    lstImage.add(new ImageModel(
+      id: 0,
+      image: image,
+      type: enumImageDispType.surface,
+      width: image.width.toDouble(),
+      height: image.height.toDouble(),
+      top: _shoreHeight - 5,
+      left: MediaQuery.of(context).size.width,
+      startDepth: -100.0, //0.1m単位
+      endDepth: 200.0, //0.1m単位
+      flgDisp: false,
+    ));
+
+    rawData = await rootBundle.load('assets/images/teibou.png');
+    imgList = Uint8List.view(rawData.buffer);
+    image = await decodeImageFromList(imgList);
+    lstImage.add(new ImageModel(
+      id: 1,
+      image: image,
+      type: enumImageDispType.surface,
+      width: MediaQuery.of(context).size.width,
+      height: image.height.toDouble() * 2,
+      top: _shoreHeight + 10,
+      left: MediaQuery.of(context).size.width,
+      startDepth: 0.0, //0.1m単位
+      endDepth: 70.0, //0.1m単位
+      flgDisp: false,
+    ));
+
+    rawData = await rootBundle.load('assets/images/sun.png');
+    imgList = Uint8List.view(rawData.buffer);
+    image = await decodeImageFromList(imgList);
+    lstImage.add(new ImageModel(
+      id: 2,
+      image: image,
+      type: enumImageDispType.sky,
+      width: image.width.toDouble(),
+      height: image.height.toDouble(),
+      top: _appBarHeight,
+      left: MediaQuery.of(context).size.width,
+      startDepth: 0.0, //0.1m単位
+      endDepth: 500.0, //0.1m単位
+      flgDisp: false,
+    ));
+
+    flgImageSetOk = true;
   }
 
   void dispose() {
@@ -661,6 +711,19 @@ class _FishingState extends BasePageState<Fishing>
       _maxDepth = 3.0;
       if (_moveShipTarget < 0.5) _moveShipTarget = 0.5;
     }
+
+    //画像表示リスト
+    lstImage.forEach((img) {
+      if (img.startDepth < _maxDepth && img.endDepth > _maxDepth) {
+        img.flgDisp = true;
+        double diffDepth = img.endDepth - img.startDepth;
+        //depth 0.1毎の移動ピクセル数
+        double moveLeft = ((img.width * 2) + size.width) / diffDepth;
+        img.left = size.width - (_maxDepth - img.startDepth) * moveLeft;
+      } else {
+        img.flgDisp = false;
+      }
+    });
 
     //HIT中
     if (_flgHit) {
@@ -1652,24 +1715,25 @@ class _FishingState extends BasePageState<Fishing>
                       ],
                     )),
                     child: new Stack(children: <Widget>[
-                      if (getImageTeibou)
+                      if (flgImageSetOk)
                         Stack(
                           children: [
-                            Container(
-                              //margin: EdgeInsets.only(top: _shoreHeight),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: CustomPaint(
-                                painter: new imagePainter(
-                                    dispSize: size,
-                                    //imagePath: 'assets/images/teibou.png',
-                                    image: imageTeibou,
-                                    top: _shoreHeight + 10,
-                                    left: imageTeibou.width - (_maxDepth * 10),
-                                    width: size.width,
-                                    height: imageTeibou.height.toDouble() * 2),
+                            if (lstImage[0].flgDisp)
+                              Container(
+                                //margin: EdgeInsets.only(top: _shoreHeight),
+                                width: double.infinity,
+                                height: double.infinity,
+                                child: CustomPaint(
+                                  painter: new imagePainter(
+                                      dispSize: size,
+                                      //imagePath: 'assets/images/teibou.png',
+                                      image: lstImage[0].image,
+                                      top: lstImage[0].top,
+                                      left: lstImage[0].left,
+                                      width: lstImage[0].width,
+                                      height: lstImage[0].height),
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       Column(children: <Widget>[
@@ -2227,11 +2291,11 @@ class _FishingState extends BasePageState<Fishing>
                         //タップ時の光点
                         (tapPointerList.isNotEmpty)
                             ? Stack(children: tapPointerList)
-                            : Text(""),
+                            : Container(),
                         //反応光点
                         (fishPointerList.isNotEmpty)
                             ? Stack(children: fishPointerList)
-                            : Text(""),
+                            : Container(),
                         //タックルの描画
                         CustomPaint(
                           painter: new tacklePainter(
