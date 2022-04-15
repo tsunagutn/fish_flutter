@@ -34,12 +34,13 @@ class _FishPointerState extends State<FishPointer>
     return CustomPaint(
       key: widget.painterKey,
       painter: FishPainter(
-          controller: controller,
-          offsetX: widget.offsetX,
-          offsetY: widget.offsetY,
-          dispSizeX: widget.dispSizeX,
-          fishPointerSize: widget.fishPointerSize,
-          randMove: widget.randMove),
+        controller: controller,
+        offsetX: widget.offsetX,
+        offsetY: widget.offsetY,
+        dispSizeX: widget.dispSizeX,
+        fishPointerSize: widget.fishPointerSize,
+        randMove: widget.randMove,
+      ),
     );
   }
 

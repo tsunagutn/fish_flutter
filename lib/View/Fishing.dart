@@ -175,6 +175,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
 
+import '../widget/ImageList.dart';
+
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
   static String screenBgm = 'bgm_field.mp3';
@@ -210,9 +212,7 @@ class _FishingState extends BasePageState<Fishing>
   //所持定義
   //late HaveTackleModel haveTackle;
   //画像リスト
-  List<ImageModel> lstImage = [];
-  //現在表示する画像リスト
-  List<ImageModel> lstDispImage = [];
+  List<ImageItem> lstImage = [];
 
   //光点の点滅速度 ？？？テンション最大値によって可変にする
   static const Map<int, int> POINT_DURATION_MSEC = {
@@ -354,6 +354,7 @@ class _FishingState extends BasePageState<Fishing>
   var _sonarTop = 0.0;
   var _shoreHeight = 0.0;
   var _bottomHeight = 0.0;
+  var _sonarHeight = 0.0;
 
   var _centerTextMain = "";
   var _centerTextMainColor = Colors.red;
@@ -408,7 +409,7 @@ class _FishingState extends BasePageState<Fishing>
   //沖合何km
   var offShore = 0.0;
 
-  var flgImageSetOk = false;
+  var flgDispSettingsOk = false;
 
   @override
   void initState() {
@@ -436,8 +437,6 @@ class _FishingState extends BasePageState<Fishing>
     // addPostFrameCallbackメソッドを実行
     // null safety対応で?（null以外の時のみアクセス）をつける
     WidgetsBinding.instance?.addPostFrameCallback((cb) {
-      createImage();
-
       //AppBarの高さを取得
       _appBarHeight = AppBar().preferredSize.height;
 
@@ -490,56 +489,65 @@ class _FishingState extends BasePageState<Fishing>
   }
 
   //画像のプリロード？？？ほんとはMAINでやっといたほうがいいかも
-  void createImage() async {
-    var rawData = await rootBundle.load('assets/images/mounten.png');
-    var imgList = Uint8List.view(rawData.buffer);
-    ui.Image image = await decodeImageFromList(imgList);
-    lstImage.add(new ImageModel(
+  void dispSettings() async {
+    //ソナー部のY位置と高さを取得
+    var sonarWidget =
+    globalKeySonar.currentContext?.findRenderObject() as RenderBox;
+    _sonarHeight = sonarWidget.size.height;
+    _sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
+
+    //海上部の高さ
+    var shoreWidget =
+    globalKeyShore.currentContext?.findRenderObject() as RenderBox;
+    _shoreHeight = shoreWidget.size.height;
+
+    //海底部の高さ
+    var bottomWidget =
+    globalKeyBottom.currentContext?.findRenderObject() as RenderBox;
+    _bottomHeight = bottomWidget.size.height;
+
+    //表示画像の定義
+    lstImage.add(new ImageItem(
+      key: UniqueKey(),
+      painterKey: GlobalKey(),
       id: 0,
-      image: image,
+      imageName: 'mounten.png',
       type: enumImageDispType.surface,
-      width: image.width.toDouble(),
-      height: image.height.toDouble(),
-      top: _shoreHeight - 5,
+      top: _shoreHeight - 35,
       left: MediaQuery.of(context).size.width,
+      //nowMaxDepth: 0.0,
       startDepth: -100.0, //0.1m単位
-      endDepth: 200.0, //0.1m単位
-      flgDisp: false,
+      endDepth: 250.0, //0.1m単位
+      size: MediaQuery.of(context).size,
     ));
 
-    rawData = await rootBundle.load('assets/images/teibou.png');
-    imgList = Uint8List.view(rawData.buffer);
-    image = await decodeImageFromList(imgList);
-    lstImage.add(new ImageModel(
+    lstImage.add(new ImageItem(
+      key: UniqueKey(),
+      painterKey: GlobalKey(),
       id: 1,
-      image: image,
+      imageName: 'teibou.png',
       type: enumImageDispType.surface,
-      width: MediaQuery.of(context).size.width,
-      height: image.height.toDouble() * 2,
       top: _shoreHeight + 10,
       left: MediaQuery.of(context).size.width,
       startDepth: 0.0, //0.1m単位
-      endDepth: 70.0, //0.1m単位
-      flgDisp: false,
+      endDepth: 90.0, //0.1m単位
+      size: MediaQuery.of(context).size,
     ));
 
-    rawData = await rootBundle.load('assets/images/sun.png');
-    imgList = Uint8List.view(rawData.buffer);
-    image = await decodeImageFromList(imgList);
-    lstImage.add(new ImageModel(
+    lstImage.add(new ImageItem(
+      key: UniqueKey(),
+      painterKey: GlobalKey(),
       id: 2,
-      image: image,
+      imageName: 'sun.png',
       type: enumImageDispType.sky,
-      width: image.width.toDouble(),
-      height: image.height.toDouble(),
       top: _appBarHeight,
       left: MediaQuery.of(context).size.width,
       startDepth: 0.0, //0.1m単位
       endDepth: 500.0, //0.1m単位
-      flgDisp: false,
+      size: MediaQuery.of(context).size,
     ));
 
-    flgImageSetOk = true;
+    flgDispSettingsOk = true;
   }
 
   void dispose() {
@@ -596,21 +604,7 @@ class _FishingState extends BasePageState<Fishing>
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
 
-    //ソナー部のY位置と高さを取得
-    var sonarWidget =
-        globalKeySonar.currentContext?.findRenderObject() as RenderBox;
-    var sonarHeight = sonarWidget.size.height;
-    _sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
-
-    //海上部の高さ
-    var shoreWidget =
-        globalKeyShore.currentContext?.findRenderObject() as RenderBox;
-    _shoreHeight = shoreWidget.size.height;
-
-    //海底部の高さ
-    var bottomWidget =
-        globalKeyBottom.currentContext?.findRenderObject() as RenderBox;
-    _bottomHeight = bottomWidget.size.height;
+    if (!flgDispSettingsOk) dispSettings();
 
     //共通乱数 0.0～0.999... の乱数の作成 ※共通じゃだめなところには使っちゃだめ
     var rand = (new math.Random()).nextDouble();
@@ -712,17 +706,16 @@ class _FishingState extends BasePageState<Fishing>
       if (_moveShipTarget < 0.5) _moveShipTarget = 0.5;
     }
 
-    //画像表示リスト
-    lstImage.forEach((img) {
-      if (img.startDepth < _maxDepth && img.endDepth > _maxDepth) {
-        img.flgDisp = true;
-        double diffDepth = img.endDepth - img.startDepth;
-        //depth 0.1毎の移動ピクセル数
-        double moveLeft = ((img.width * 2) + size.width) / diffDepth;
-        img.left = size.width - (_maxDepth - img.startDepth) * moveLeft;
-      } else {
-        img.flgDisp = false;
-      }
+    //画像リストのMAX水深を更新
+    lstImage.forEach((element) {
+      //描画ごとにglovalkeyを付けているのでそれにアクセス
+      try {
+        RenderCustomPaint obj = element.painterKey.currentContext
+            ?.findRenderObject() as RenderCustomPaint;
+        ImagePainter obj2 = obj.painter as ImagePainter;
+        //addxの値を加減算で移動
+        obj2.nowMaxDepth = _maxDepth;
+      } catch (e) {}
     });
 
     //HIT中
@@ -1417,14 +1410,14 @@ class _FishingState extends BasePageState<Fishing>
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
     if (hannornd > 0.96 && _jiai > tanarnd) {
-      var fishy = _sonarTop + (sonarHeight * _justTana);
+      var fishy = _sonarTop + (_sonarHeight * _justTana);
       //レンジ分バラケ
       var barakeLevel = 4; //バラケ度
       var barake = (_justTanaRange * ((0.5 - tanarnd) * barakeLevel));
       fishy = fishy + barake;
       fishy = (fishy < _shoreHeight) ? _shoreHeight : fishy;
-      fishy = (fishy > _shoreHeight + sonarHeight)
-          ? _shoreHeight + sonarHeight
+      fishy = (fishy > _shoreHeight + _sonarHeight)
+          ? _shoreHeight + _sonarHeight
           : fishy;
       generateFishPointer(fishy, 20.0);
     }
@@ -1715,27 +1708,30 @@ class _FishingState extends BasePageState<Fishing>
                       ],
                     )),
                     child: new Stack(children: <Widget>[
-                      if (flgImageSetOk)
-                        Stack(
-                          children: [
-                            if (lstImage[0].flgDisp)
-                              Container(
-                                //margin: EdgeInsets.only(top: _shoreHeight),
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: CustomPaint(
-                                  painter: new imagePainter(
-                                      dispSize: size,
-                                      //imagePath: 'assets/images/teibou.png',
-                                      image: lstImage[0].image,
-                                      top: lstImage[0].top,
-                                      left: lstImage[0].left,
-                                      width: lstImage[0].width,
-                                      height: lstImage[0].height),
-                                ),
-                              ),
-                          ],
-                        ),
+                      if (flgDispSettingsOk)
+                        (lstImage.isNotEmpty)
+                            ? Stack(children: lstImage)
+                            : Container(),
+                      // Stack(
+                      //   children: [
+                      //     if (lstImage[0].flgDisp)
+                      //       Container(
+                      //         //margin: EdgeInsets.only(top: _shoreHeight),
+                      //         width: double.infinity,
+                      //         height: double.infinity,
+                      //         child: CustomPaint(
+                      //           painter: new imagePainter(
+                      //               dispSize: size,
+                      //               //imagePath: 'assets/images/teibou.png',
+                      //               image: lstImage[0].image,
+                      //               top: lstImage[0].top,
+                      //               left: lstImage[0].left,
+                      //               width: lstImage[0].width,
+                      //               height: lstImage[0].height),
+                      //         ),
+                      //       ),
+                      //   ],
+                      // ),
                       Column(children: <Widget>[
                         //海上
                         Container(
