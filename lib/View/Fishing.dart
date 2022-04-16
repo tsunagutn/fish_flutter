@@ -10,6 +10,25 @@
 
 //☆基本概要
 
+//☆残り必要な素材
+//・絵
+//  船
+//  タイラバ
+//  ジグ
+//  スロージグ
+//  背景・１面の山と砂浜
+//  背景・１面の高島
+//  背景・２面の都会
+//  背景・堤防
+//  底の岩 ３パターンぐらい
+//  底のわかめ
+//  底の沈船
+//  雲 ３パターンぐらい
+//  タイトル画面
+//・音
+//・音楽
+//
+
 //☆残タス
 //済・ソナー光点をアニメーション光るにする
 //済・HIT率でソナー光点の色を変える or 光る頻度を変える
@@ -92,12 +111,12 @@
 //済・ルアーにレベル
 //済・ルアーレベルアップで重さを解禁
 //・画面上に小マップ 沖合XXｍはいらない
+//・水深20mごとに？おや、風向きが・・・（釣れる魚種の傾向を選択）
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・店をもっとましにする
 //・タックル変更をもっとましにする、特に重さ
-//・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 //・ドラグ使いにくいの何とかする
 //・風の描画？？？いる？
 //・雲の描画
@@ -109,14 +128,19 @@
 
 //・ジャークをリズムで
 //・光点が横に走る
-//・水流
 //・水中に泡とか
 //・全体的見た目何とかする、水中にテカリ的なグラデーションとか
-//・通知インフォメーション 今が時合で！みたいな
-//・HIT時につっこみモード、おとなしいモードつけて勢い度
-//・魚種データをDB化して登録画面実装
+//・時合度を何らか表示（今は魚反応の多さで判断できるが・・・
+//・HIT中のアバレベルを何らか表示
 //・エリア選択 エリアによって魚種、深さ等変える
 //・チュートリアルか、ヘルプか
+//・クリア後、最初から振り返りリザルト表示　ここで切られたとかバレた魚種分かる（魚種以外分かるの方がええかも）
+//・寝る機能 寝中は何もできずすごい速さでゲームが進む
+//・今日はもう納得した機能 ゲームを途中で諦める
+
+//バグ
+//・バレた時アワセ失敗したとき光点の色が戻らん
+//・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 
 //リリース前作業
 //・全体的に重いのをなんとかする、画像圧縮とか余計な処理消しとか
@@ -128,11 +152,13 @@
 //・バランス調整
 
 //ボツ
+//・水流
 //・赤ポイント緑ポイント青ポイント
 //・糸切れ判定 勢い度を加味して切れるようにする
 //・ポイントで色々　道具買ったり、糸替え、船長指示、ゲームオーバーから復活とか
 
 //夢
+//・魚種データをDB化して好きに登録画面実装？
 //・アワセシステム ARVRモード時はスマホをジャイロで動かす、通常時は下にドラッグでアワセ
 //・背景にAR的なカメラ映像（カメラ無いときはアニメーション）
 //・背景にrod、ジャイロで動かす
@@ -492,18 +518,18 @@ class _FishingState extends BasePageState<Fishing>
   void dispSettings() async {
     //ソナー部のY位置と高さを取得
     var sonarWidget =
-    globalKeySonar.currentContext?.findRenderObject() as RenderBox;
+        globalKeySonar.currentContext?.findRenderObject() as RenderBox;
     _sonarHeight = sonarWidget.size.height;
     _sonarTop = sonarWidget.localToGlobal(Offset.zero).dy;
 
     //海上部の高さ
     var shoreWidget =
-    globalKeyShore.currentContext?.findRenderObject() as RenderBox;
+        globalKeyShore.currentContext?.findRenderObject() as RenderBox;
     _shoreHeight = shoreWidget.size.height;
 
     //海底部の高さ
     var bottomWidget =
-    globalKeyBottom.currentContext?.findRenderObject() as RenderBox;
+        globalKeyBottom.currentContext?.findRenderObject() as RenderBox;
     _bottomHeight = bottomWidget.size.height;
 
     //表示画像の定義
