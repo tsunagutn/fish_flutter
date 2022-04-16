@@ -110,7 +110,8 @@
 //済・つれたときドラグを割合で合わせる
 //済・ルアーにレベル
 //済・ルアーレベルアップで重さを解禁
-//・画面上に小マップ 沖合XXｍはいらない
+//済・画面上に小マップ 沖合XXｍはいらない
+//済・初ゲットはポイント2倍
 //・水深20mごとに？おや、風向きが・・・（釣れる魚種の傾向を選択）
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
@@ -141,6 +142,9 @@
 //バグ
 //・バレた時アワセ失敗したとき光点の色が戻らん
 //・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
+//・大量に経験値で一気にレベル上がった時、途中の重さが解放されない
+//・Android たまに「System UI isnt responding」「Wrote stack traces to tombstoned」がでる
+//　多分FIshPointer関係のバグっぽい？
 
 //リリース前作業
 //・全体的に重いのをなんとかする、画像圧縮とか余計な処理消しとか
@@ -271,11 +275,12 @@ class _FishingState extends BasePageState<Fishing>
   static const HOSEI_MAX = 3;
   static const MAX_RAND_ADD_TENSION = 2; //何もしてない時テンションがウロウロするののMAX値
   static const MIN_RAND_ADD_TENSION = -11; //〃 MIN値
-  final TENSION_COLOR_SAFE = clsColor.getColorFromHex("4CFF00");
-  final TENSION_COLOR_DRAG = clsColor.getColorFromHex("FFD800");
-  final TENSION_COLOR_DANGER = clsColor.getColorFromHex("DD0000");
-  final SPEED_COLOR = clsColor.getColorFromHex("83BBE2");
-  final SPEED_COLOR_REELING = clsColor.getColorFromHex("0026FF");
+  final TENSION_COLOR_SAFE = clsColor.getColorFromHex("007FFF");
+  //final TENSION_COLOR_DRAG = clsColor.getColorFromHex("FFD800");
+  final TENSION_COLOR_DANGER = clsColor.getColorFromHex("FFFF00");
+  final LINE_HP_COLOR =  clsColor.getColorFromHex("65B558");
+  final SPEED_COLOR = clsColor.getColorFromHex("FFBABE");
+  final SPEED_COLOR_REELING = clsColor.getColorFromHex("FF6B77");
   static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
   static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
   static const TANA_CHANGE_SCAN = 3000; //このスキャン毎にタナが変わる
@@ -295,6 +300,7 @@ class _FishingState extends BasePageState<Fishing>
   GlobalKey globalKeySonar = GlobalKey();
   GlobalKey globalKeyShore = GlobalKey();
   GlobalKey globalKeyBottom = GlobalKey();
+  GlobalKey grobalKeyMinimap = GlobalKey();
 
   //アニメーション関連
   late AnimationController _animationController; //光点の光アニメーション
@@ -381,6 +387,7 @@ class _FishingState extends BasePageState<Fishing>
   var _shoreHeight = 0.0;
   var _bottomHeight = 0.0;
   var _sonarHeight = 0.0;
+  var _minimapWidth = 0.0;
 
   var _centerTextMain = "";
   var _centerTextMainColor = Colors.red;
@@ -629,6 +636,10 @@ class _FishingState extends BasePageState<Fishing>
     // _speedValMax = haveTackle.getUseReel().maxSpeed;
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
+
+    var minimapWidget =
+    grobalKeyMinimap.currentContext?.findRenderObject() as RenderBox;
+    _minimapWidth = minimapWidget.size.width;
 
     if (!flgDispSettingsOk) dispSettings();
 
@@ -882,6 +893,7 @@ class _FishingState extends BasePageState<Fishing>
         _depth = 0.0;
       }
     }
+    bool flgDrag = false;
     //ドラグ判定
     if (val > (_tensionValMax * _drag)) {
       //テンションとドラグレベルの差分
@@ -891,7 +903,8 @@ class _FishingState extends BasePageState<Fishing>
       //ドラグ出た分テンションを減らす？？？減らなすぎ？
       val = val - (dragDiff / 10);
       //テンションゲージの色を変える
-      _tensionActiveTrackColor = TENSION_COLOR_DRAG;
+      //_tensionActiveTrackColor = TENSION_COLOR_DRAG;
+      flgDrag = true;
 
       //ドラグ音再生
       if (dragDiff > 15) {
@@ -1003,6 +1016,7 @@ class _FishingState extends BasePageState<Fishing>
           return;
         }
       });
+      if (flgNew) point = point * 2;  //初ゲットはポイント2倍
 
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
@@ -1082,13 +1096,13 @@ class _FishingState extends BasePageState<Fishing>
           if (_onClutch && _depth < _maxDepth) {
             //糸出中、かつ水深MAXではない時はフォール中
             flgFall = true;
-          } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
+          } else if (!flgDrag &&
               _rodStandUp > 0.5 &&
               _depth < _maxDepth) {
             //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
             flgJerk = true;
             _jerkCnt = JERK_SCAN; //一度ジャークと判定されたら一定スキャン数ジャーク継続
-          } else if (_tensionActiveTrackColor != TENSION_COLOR_DRAG &&
+          } else if (!flgDrag &&
               _onTap &&
               _depth < _maxDepth) {
             //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
@@ -1529,12 +1543,35 @@ class _FishingState extends BasePageState<Fishing>
                   ),
                 ],
               ),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('沖合' + offShore.toStringAsFixed(1) + 'km'),
-                ],
-              ),
+              title:
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     Text('沖合' + offShore.toStringAsFixed(1) + 'km'),
+              //   ],
+              // ),
+              Stack(children: [
+              Container(
+              margin:EdgeInsets.only(top:10, left: 15),
+
+              child:
+                new Image(
+                  key: grobalKeyMinimap,
+                  image:
+                  AssetImage('assets/images/minimap.png'),
+                  //width: 60,
+                  height: _appBarHeight - 10,
+                ),),
+                Container(
+                  margin:EdgeInsets.only(top: 10,left:(_minimapWidth * (_maxDepth / 1000.0))),
+                  child:
+                new Image(
+                  image:
+                  AssetImage('assets/images/ship.png'),
+                  //width: 30,
+                  height: 15,
+                ),),
+              ],),
               //右（複数可）
               actions: <Widget>[
                 Container(
@@ -1904,8 +1941,7 @@ class _FishingState extends BasePageState<Fishing>
                                       CustomPaint(
                                         painter: new SliderPainter(
                                           height: 10,
-                                          activeColor: clsColor
-                                              .getColorFromHex("FF3030"),
+                                          activeColor: LINE_HP_COLOR,
                                           inactiveColor: Colors.white,
                                           value: _nowLineHp,
                                           maxValue: _maxLineHp,

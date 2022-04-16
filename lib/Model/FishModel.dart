@@ -111,7 +111,7 @@ class FishsModel {
       name: "マダイ",
       rare: 3,
       image: "fish/madai.png",
-      text: "やるなすたべ",
+      text: "40センチぐらいが一番美味い",
       hp: 5000,
       // addMax: 23,
       // addMin: -15,
@@ -177,7 +177,7 @@ class FishsModel {
       name: "サバ", //魚種名
       rare: 1,
       image: "fish/saba.png", //超過画面の画像
-      text: "写真は仮です", //釣果画面のコメント
+      text: "小さいのは美味しくない", //釣果画面のコメント
       hp: 1200, //このスキャン経過で0になる
       // addMax: 19, //引きの最大
       // addMin: -6, //引きの最小（最大との乖離が暴れ度）
@@ -210,7 +210,7 @@ class FishsModel {
       name: "サゴシ", //魚種名
       rare: 2,
       image: "fish/sagoshi.png", //超過画面の画像
-      text: "この魚は美味です", //釣果画面のコメント
+      text: "大きいほど美味い", //釣果画面のコメント
       hp: 2000, //このスキャン経過で0になる
       // addMax: 15, //引きの最大
       // addMin: -10, //引きの最小（最大との乖離が暴れ度）
@@ -402,7 +402,7 @@ class FishsModel {
       name: "ヒラマサ",
       rare: 4,
       image: "fish/hiramasa.png",
-      text: "ヤッターマン",
+      text: "とても美味しい",
       hp: 5000,
       // addMax: 40,
       // addMin: -40, //引きの最小（最大との乖離が暴れ度）
@@ -434,7 +434,7 @@ class FishsModel {
       name: "サワラ",
       rare: 4,
       image: "fish/sawara.png",
-      text: "サゴシのでかいやつ",
+      text: "大きいほど美味い",
       hp: 4000,
       // addMax: 46,
       // addMin: -40, //引きの最小（最大との乖離が暴れ度）
@@ -458,6 +458,180 @@ class FishsModel {
       baitCntMax: 40,
       fookingTension: 70,
       bareEasy: 0.8,
+      //flgBottom: false,
+      type: enumFishType.blue,
+    ));
+    fishs.add(new FishModel(
+      id: 14,
+      name: "近目金時",
+      rare: 5,
+      image: "fish/chikamekintoki.png",
+      text: "非常に美味",
+      hp: 1500,
+      wariai: 0.1, //HIT率 条件全一致で確定1.0～
+      point: 1500, //ポイントの基礎値
+      tanaMin: 400, //生息域 上 0.1m単位
+      tanaMax: 1500, //生息域 下 0.1m単位
+      hereTanaMin: 400,
+      hereTanaMax: 1500,
+      hitMaki: 0.5,
+      hitJerk: 0.3,
+      hitFall: 1.0,
+      hitSpeedJust: 230,
+      hitSpeedRange: 100,
+      sizeMin: 25.0,
+      sizeMax: 60.2,
+      weightMin: 500,
+      weightMax: 1500,
+      abareLv: 5,
+      baitCntMax: 20,
+      fookingTension: 70,
+      bareEasy: 0.5,
+      //flgBottom: false,
+      type: enumFishType.bottom,
+    ));
+    fishs.add(new FishModel(
+      id: 15,
+      name: "エソ",
+      rare: 1,
+      image: "fish/eso.png",
+      text: "美味いが小骨が多い",
+      hp: 600,
+      wariai: 0.6, //HIT率 条件全一致で確定1.0～
+      point: 240, //ポイントの基礎値
+      tanaMin: 40, //生息域 上 0.1m単位
+      tanaMax: 300, //生息域 下 0.1m単位
+      hereTanaMin: 40,
+      hereTanaMax: 300,
+      hitMaki: 0.6,
+      hitJerk: 0.6,
+      hitFall: 1.0,
+      hitSpeedJust: 230,
+      hitSpeedRange: 100,
+      sizeMin: 25.0,
+      sizeMax: 60.2,
+      weightMin: 500,
+      weightMax: 1500,
+      abareLv: 2,
+      baitCntMax: 20,
+      fookingTension: 70,
+      bareEasy: 0.5,
+      //flgBottom: false,
+      type: enumFishType.bottom,
+    ));
+    fishs.add(new FishModel(
+      id: 16,
+      name: "イトヨリ",
+      rare: 3,
+      image: "fish/itoyori.png",
+      text: "美味いが小骨が多い",
+      hp: 1300,
+      wariai: 0.4, //HIT率 条件全一致で確定1.0～
+      point: 470, //ポイントの基礎値
+      tanaMin: 200, //生息域 上 0.1m単位
+      tanaMax: 600, //生息域 下 0.1m単位
+      hereTanaMin: 400,
+      hereTanaMax: 800,
+      hitMaki: 1.0,
+      hitJerk: 0.4,
+      hitFall: 0.4,
+      hitSpeedJust: 250,
+      hitSpeedRange: 100,
+      sizeMin: 23.0,
+      sizeMax: 60.2,
+      weightMin: 500,
+      weightMax: 2000,
+      abareLv: 4,
+      baitCntMax: 40,
+      fookingTension: 150,
+      bareEasy: 0.4,
+      //flgBottom: false,
+      type: enumFishType.bream,
+    ));
+    fishs.add(new FishModel(
+      id: 17,
+      name: "キハッソク",
+      rare: 5,
+      image: "fish/kihassoku.png",
+      text: "おいしくない",
+      hp: 1300,
+      wariai: 0.2, //HIT率 条件全一致で確定1.0～
+      point: 850, //ポイントの基礎値
+      tanaMin: 150, //生息域 上 0.1m単位
+      tanaMax: 430, //生息域 下 0.1m単位
+      hereTanaMin: 150,
+      hereTanaMax: 430,
+      hitMaki: 0.3,
+      hitJerk: 0.1,
+      hitFall: 1.0,
+      hitSpeedJust: 150,
+      hitSpeedRange: 100,
+      sizeMin: 23.0,
+      sizeMax: 45.2,
+      weightMin: 500,
+      weightMax: 1500,
+      abareLv: 5,
+      baitCntMax: 40,
+      fookingTension: 70,
+      bareEasy: 0.4,
+      //flgBottom: false,
+      type: enumFishType.bottom,
+    ));
+    fishs.add(new FishModel(
+      id: 17,
+      name: "レンコダイ",
+      rare: 2,
+      image: "fish/renkodai.png",
+      text: "美味",
+      hp: 2000,
+      wariai: 0.6, //HIT率 条件全一致で確定1.0～
+      point: 660, //ポイントの基礎値
+      tanaMin: 150, //生息域 上 0.1m単位
+      tanaMax: 530, //生息域 下 0.1m単位
+      hereTanaMin: 150,
+      hereTanaMax: 630,
+      hitMaki: 1.0,
+      hitJerk: 0.4,
+      hitFall: 0.1,
+      hitSpeedJust: 150,
+      hitSpeedRange: 100,
+      sizeMin: 23.0,
+      sizeMax: 51.2,
+      weightMin: 500,
+      weightMax: 2300,
+      abareLv: 5,
+      baitCntMax: 40,
+      fookingTension: 100,
+      bareEasy: 0.3,
+      //flgBottom: false,
+      type: enumFishType.bream,
+    ));
+    fishs.add(new FishModel(
+      id: 18,
+      name: "シイラ",
+      rare: 4,
+      image: "fish/shiira.png",
+      text: "引きが強い",
+      hp: 3000,
+      wariai: 0.3, //HIT率 条件全一致で確定1.0～
+      point: 1200, //ポイントの基礎値
+      tanaMin: 0, //生息域 上 0.1m単位
+      tanaMax: 100, //生息域 下 0.1m単位
+      hereTanaMin: 250,
+      hereTanaMax: 1500,
+      hitMaki: 0.5,
+      hitJerk: 1.0,
+      hitFall: 0.7,
+      hitSpeedJust: 300,
+      hitSpeedRange: 150,
+      sizeMin: 46.0,
+      sizeMax: 134.2,
+      weightMin: 1000,
+      weightMax: 6200,
+      abareLv: 10,
+      baitCntMax: 40,
+      fookingTension: 100,
+      bareEasy: 0.7,
       //flgBottom: false,
       type: enumFishType.blue,
     ));
