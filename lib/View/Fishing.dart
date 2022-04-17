@@ -320,105 +320,102 @@ class _FishingState extends BasePageState<Fishing>
   late Timer _timer;
 
   //状態フラグ変数
-  var _onTap = false; //現在タップ中フラグ
-  var _onClutch = false; //現在クラッチ状態
-  var _flgBait = false; //現在アタリ中フラグ
-  var _flgHit = false; //現在HIT中フラグ
-  var _flgFooking = false; //アワセモード中フラグ
+  bool _onTap = false; //現在タップ中フラグ
+  bool _onClutch = false; //現在クラッチ状態
+  bool _flgBait = false; //現在アタリ中フラグ
+  bool _flgHit = false; //現在HIT中フラグ
+  bool _flgFooking = false; //アワセモード中フラグ
   //var _flgGameOver = false; //現在ゲームオーバーフラグ
 
   //ステート変数
-  var _tension = 0.0; //テンション値
-  var _tensionValMax = 0.0; //テンション最大値 竿によって可変
-  var _fookingTension = 0.0; //アタリ時のアワセ判定値
-  var _fookingTensionPrev = 0.0; //アワセモード時のテンション前回値記憶
+  double _tension = 0.0; //テンション値
+  double _tensionValMax = 0.0; //テンション最大値 竿によって可変
+  double _fookingTension = 0.0; //アタリ時のアワセ判定値
+  double _fookingTensionPrev = 0.0; //アワセモード時のテンション前回値記憶
   var _useLureId = enumLureDiv.tairaba; //使用中のルアー種類
-  var _drag = 0.0; //ドラグレベル値
-  var _speed = 0.0; //巻き速度値
-  var _speedValMax = 0.0; //スピード最大値 リールによって可変
-  var _depth = 0.0; //現在糸出し量(0.1m)
-  var _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
-  var _maxDepth = 50.0; //最大水深(0.1m)
-  var _dispDepth = '0.0 m'; //深さ表示用
-  //var _dispInfo = '0.00 %'; //HIT率表示用（デバッグ用）
-  var _tensionActiveTrackColor =
+  double _drag = 0.0; //ドラグレベル値
+  double _speed = 0.0; //巻き速度値
+  double _speedValMax = 0.0; //スピード最大値 リールによって可変
+  double _depth = 0.0; //現在糸出し量(0.1m)
+  double _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
+  double _maxDepth = 50.0; //最大水深(0.1m)
+  String _dispDepth = '0.0 m'; //深さ表示用
+  Color _tensionActiveTrackColor =
       clsColor.getColorFromHex("4CFF00"); //テンションゲージの色
-  var _flgShaKe = false; //ドラグスライダーを揺らす用
-  var _speedActiveTrackColor = clsColor.getColorFromHex("0094FF"); //スピードゲージの色
-  var _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
-  var _clutchBackColor = Colors.red; //クラッチボタンの背景色
+  bool _flgShaKe = false; //ドラグスライダーを揺らす用
+  Color _speedActiveTrackColor = clsColor.getColorFromHex("0094FF"); //スピードゲージの色
+  Color _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
+  Color _clutchBackColor = Colors.red; //クラッチボタンの背景色
   Color _pointerColor = Colors.yellow; //ソナー部光点の色
-  var _lightSpotY = 0.0; //ソナー部光点TOP
-  var _lightSpotX = 50.0; //ソナー部光点LEFT
-  var _point = 1000; //獲得ポイント
-  var _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
-  var _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
-  var _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
-  var _jiai = 0.9; //時合度 0.0～0.9999...
-  var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
-  var _maxLineHp = 50000.0; //ラインHP最大値
-  var _nowLineHp = 50.0; //現在ラインHP
+  double _lightSpotY = 0.0; //ソナー部光点TOP
+  double _lightSpotX = 50.0; //ソナー部光点LEFT
+  int _point = 1000; //獲得ポイント
+  double _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
+  double _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
+  int _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
+  double _jiai = 0.9; //時合度 0.0～0.9999...
+  int _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
+  double _maxLineHp = 1000.0; //ラインHP最大値
+  double _nowLineHp = 1000.0; //現在ラインHP
 
-  var _shipMoveSeScan = 0;
+  int _shipMoveSeScan = 0;
 
-  var _cursorX = 0.0; //ドラッグ操作開始時の座標X
-  var _cursorY = 0.0; //ドラッグ操作開始時の座標Y
-  var _jerkCnt = 0; //ジャークの継続スキャン数
-
-  var _baitCnt = 0; //当たってからのスキャン数
+  double _cursorX = 0.0; //ドラッグ操作開始時の座標X
+  double _cursorY = 0.0; //ドラッグ操作開始時の座標Y
+  int _jerkCnt = 0; //ジャークの継続スキャン数
+  int _baitCnt = 0; //当たってからのスキャン数
   //var _baitMaxTension = 0.0; //バイト中の最大テンション
-  var _fookingLv = 0.0; //フッキングの成功度
+  double _fookingLv = 0.0; //フッキングの成功度
 
   late FishModel _hitFish; //現在HIT中の魚種
-  var _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
-  var _hitScanCnt = 0; //HITしてからのスキャン数
-  var _bareCnt = 0; //バレ判定カウント
-  var _abareLv = 0;
+  double _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
+  int _hitScanCnt = 0; //HITしてからのスキャン数
+  int _bareCnt = 0; //バレ判定カウント
+  int _abareLv = 0;
 
-  var _shipMove = 0.5; //船の動き 1.0～0,0 +なら深くなる、-なら浅くなる
-  var _depthChange = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
+  double _shipMove = 0.5; //船の動き 1.0～0,0 +なら深くなる、-なら浅くなる
+  double _depthChange = 0.5; //深さの変化傾向 1.0～0,0 +なら深くなる、-なら浅くなる
   //var _depthChangeScanCnt = 0; //深さの変化傾向スキャンカウント数
   //var _depthChangeOrder = 0; //変化傾向 初期値は現状維持
-  var _dispDepthLv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
-  var _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
+  double _dispDepthLv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
+  double _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
 
-  var _windLevel = 0.5; //風レベル 0.0～1.0 0.5で無風
+  double _windLevel = 0.5; //風レベル 0.0～1.0 0.5で無風
 
   var _nowDurationLv; //光点点滅レベル
-  var _sonarTop = 0.0;
-  var _shoreHeight = 0.0;
-  var _bottomHeight = 0.0;
-  var _sonarHeight = 0.0;
-  var _minimapWidth = 0.0;
+  double _sonarTop = 0.0;
+  double _shoreHeight = 0.0;
+  double _bottomHeight = 0.0;
+  double _sonarHeight = 0.0;
+  double _minimapWidth = 0.0;
 
-  var _centerTextMain = "";
-  var _centerTextMainColor = Colors.red;
-  var _centerTextSub = "";
-  var _centerTextSubColor = Colors.black;
-  var _senchoMessage = ""; //船長の発言
+  String _centerTextMain = "";
+  Color _centerTextMainColor = Colors.red;
+  String _centerTextSub = "";
+  Color _centerTextSubColor = Colors.black;
 
   late Offset offset = Offset(0.0, 0.0);
-  late double _appBarHeight = 0.0;
+  double _appBarHeight = 0.0;
 
   late AnimationController waveController; // AnimationControllerの宣言
 
-  var _ligntSpotAnimationChangeing = false;
+  bool _ligntSpotAnimationChangeing = false;
 
-  var _actionText = "";
+  String _actionText = "";
 
   //タックルの描画関連
-  var _tackleCenterX = 0.0;
-  var _rodSizeX = 0.0;
-  var _rodSizeY = 0.0;
-  var _reelSizeX = 0.0;
-  var _reelSizeY = 0.0;
-  var _reelCenterY = 0.0;
+  double _tackleCenterX = 0.0;
+  double _rodSizeX = 0.0;
+  double _rodSizeY = 0.0;
+  double _reelSizeX = 0.0;
+  double _reelSizeY = 0.0;
+  double _reelCenterY = 0.0;
   var _takcleChangeButtonPosition = MainAxisAlignment.end;
-  var _rodStandUp = 0.0;
-  var _handleRoll = 0.0;
+  double _rodStandUp = 0.0;
+  double _handleRoll = 0.0;
 
   //タックル変更モーダル表示非表示
-  var _showTacleChangeDialog = false;
+  bool _showTacleChangeDialog = false;
   //タックル変更モーダル内で選択している種類
   var _selectTacleIcon = '';
 
@@ -429,11 +426,11 @@ class _FishingState extends BasePageState<Fishing>
   List<FishModel> _fishCardItem = [];
 
   //ドラグ音の再生IDX記憶（連続防止）
-  var dragSeIdx = 0;
+  int dragSeIdx = 0;
   //ジャーク音の再生IDX記憶（連続防止）
-  var jerkSeIdx = 0;
+  int jerkSeIdx = 0;
   //現在再生中のBGMファイル名
-  var nowBgm = "";
+  String nowBgm = "";
 
   //船移動
   // var _MoveLeft = false;
@@ -547,6 +544,18 @@ class _FishingState extends BasePageState<Fishing>
     lstImage.add(new ImageItem(
       key: UniqueKey(),
       painterKey: GlobalKey(),
+      id: 2,
+      imageName: 'sun.png',
+      type: enumImageDispType.sky,
+      top: _appBarHeight,
+      left: MediaQuery.of(context).size.width,
+      startDepth: 0.0, //0.1m単位
+      endDepth: 500.0, //0.1m単位
+      size: MediaQuery.of(context).size,
+    ));
+    lstImage.add(new ImageItem(
+      key: UniqueKey(),
+      painterKey: GlobalKey(),
       id: 0,
       imageName: 'mounten.png',
       type: enumImageDispType.surface,
@@ -570,17 +579,17 @@ class _FishingState extends BasePageState<Fishing>
       endDepth: 90.0, //0.1m単位
       size: MediaQuery.of(context).size,
     ));
-
     lstImage.add(new ImageItem(
       key: UniqueKey(),
       painterKey: GlobalKey(),
-      id: 2,
-      imageName: 'sun.png',
-      type: enumImageDispType.sky,
-      top: _appBarHeight,
+      id: 3,
+      imageName: 'takashima.png',
+      type: enumImageDispType.surface,
+      top: _shoreHeight - 5,
       left: MediaQuery.of(context).size.width,
-      startDepth: 0.0, //0.1m単位
-      endDepth: 500.0, //0.1m単位
+      //nowMaxDepth: 0.0,
+      startDepth: 700.0, //0.1m単位
+      endDepth: 1000.0, //0.1m単位
       size: MediaQuery.of(context).size,
     ));
 
@@ -695,22 +704,22 @@ class _FishingState extends BasePageState<Fishing>
 
     //船移動
     if (_moveShipTarget > _shipMove) {
-      _shipMove += 0.01;
+      _shipMove += 0.05;
     }
     if (_moveShipTarget < _shipMove) {
-      _shipMove -= 0.01;
+      _shipMove -= 0.05;
     }
     //船移動の指示中
     if (_moveShipTarget != 0.5) {
-      if (_point > 0) {
-        //ポイント消費
-        _point -= SHIP_MOVE_POINT;
-      }
-      if (_point <= 0) {
-        //ポイント切れ
-        _point = 0;
-        _moveShipTarget = 0.5;
-      }
+      // if (_point > 0) {
+      //   //ポイント消費
+      //   _point -= SHIP_MOVE_POINT;
+      // }
+      // if (_point <= 0) {
+      //   //ポイント切れ
+      //   _point = 0;
+      //   _moveShipTarget = 0.5;
+      // }
       _shipMoveSeScan++;
       if (_shipMoveSeScan >= (800 / TIMER_INTERVAL).floor()) {
         //船動作音が連続再生しすぎるのを防止
@@ -1663,21 +1672,6 @@ class _FishingState extends BasePageState<Fishing>
                   },
                 )),
               ],
-              flexibleSpace:
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Container(
-                    color: Colors.white,
-                    child: Text(
-                      _senchoMessage,
-                      style: TextStyle(
-                        backgroundColor: Colors.white,
-                      ),
-                    ),
-                  )
-                ]),
-              ]),
-              //automaticallyImplyLeading: true,
             ),
             //endDrawer: DrawerItem(),
 

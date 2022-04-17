@@ -47,11 +47,12 @@ class _FishCardListState extends State<FishCardList>
     widget.fishsTable.forEach((value) {
       fishList.add(value);
     });
-    //リストソート レア度→棚
+    //リストソート タイプ→レア度
     fishList.sort((a, b) {
-      int result = a.rare.compareTo(b.rare);
+      int result = a.type.index.compareTo(b.type.index);
+      //result = a.tanaMin.compareTo(b.tanaMin);
       if (result != 0) return result;
-      return a.tanaMax.compareTo(b.tanaMax);
+      return  a.rare.compareTo(b.rare);
     });
     //リストビューの高さを算出
     double listHeight = cardHeight * fishList.length + (8 * fishList.length);
