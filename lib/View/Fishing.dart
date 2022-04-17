@@ -112,8 +112,9 @@
 //済・ルアーレベルアップで重さを解禁
 //済・画面上に小マップ 沖合XXｍはいらない
 //済・初ゲットはポイント2倍
+//済・簡易的なタイトル画面
+//済・ジャークだけじゃなくフォール、巻も表示j
 //・水深20mごとに？おや、風向きが・・・（釣れる魚種の傾向を選択）
-//・ジャークだけじゃなくフォール、巻も表示j
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
@@ -355,7 +356,7 @@ class _FishingState extends BasePageState<Fishing>
   var _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
   var _jiai = 0.9; //時合度 0.0～0.9999...
   var _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
-  var _maxLineHp = 500.0; //ラインHP最大値
+  var _maxLineHp = 50000.0; //ラインHP最大値
   var _nowLineHp = 50.0; //現在ラインHP
 
   var _shipMoveSeScan = 0;
@@ -897,10 +898,11 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
     bool flgDrag = false;
+    double dragDiff = 0.0;
     //ドラグ判定
     if (val > (_tensionValMax * _drag)) {
       //テンションとドラグレベルの差分
-      var dragDiff = val - (_tensionValMax * _drag);
+      dragDiff = val - (_tensionValMax * _drag);
       //ドラグ出た分深さを増やす？？？出すぎ？
       _depth = _depth + dragDiff / 300;
       //ドラグ出た分テンションを減らす？？？減らなすぎ？
@@ -1355,14 +1357,23 @@ class _FishingState extends BasePageState<Fishing>
             //フッキングの成功度
             _fookingLv = (_fookingTensionPrev - _fookingTension) / 2;
             //if (_fookingLv > 100.0) _fookingLv = 100.0;
-            //フッキング成功度によってバレ判定値に補正
-            _fookingTension -= _fookingLv;
-            _fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
+            //最大テンションの半分が基本値 - フッキング成功度
+            _fookingTension = (_tensionValMax / 2) - _fookingLv;
+            bool flgOniAwase = false;
+            if (_fookingTension < 0) {
+              _fookingTension = 0;
+              flgOniAwase = true;
+            }
+            //_fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
             //HITメッセージ
             _centerTextMain = "HIT!";
-            _centerTextMainColor = Colors.red;
-            _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
-            _centerTextSubColor = Colors.yellow;
+            if (flgOniAwase) {
+              _centerTextSub = "鬼アワセ";
+              _centerTextMainColor = Colors.red;
+            } else {
+              _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
+              _centerTextSubColor = Colors.yellow;
+            }
             startCenterInfo();
 
             soundManagerPool.playSound('se/hit.mp3');
@@ -1389,11 +1400,14 @@ class _FishingState extends BasePageState<Fishing>
           //底にいるとき4倍
           if (_depth >= _maxDepth) bare = bare * 4;
           //テンションがアワセ値未満の時3倍
-          if (val < _fookingTension) bare = bare * 3;
-          //現在テンションによって補正 少ないほど早い 0の時3倍
-          bare = bare * (3 * (1.0 - (_tension / _tensionValMax)));
+          //if (val < _fookingTension) bare = bare * 3;
+          //現在テンションによって補正 少ないほど早い 0の時2倍
+          bare = bare * (2 * (1.0 - (_tension / _tensionValMax)));
           //魚種による補正 MAXのとき3倍
           bare = bare * (10 * _hitFish.bareEasy);
+          //ドラグ出た分だけ上昇
+          bare = bare + dragDiff / 75;
+
           _fookingTension += bare;
 
           if (_fookingTension > _tensionValMax) {
@@ -3040,7 +3054,8 @@ class _FishingState extends BasePageState<Fishing>
     });
     //_cache.play('se/kk_sonar_low.mp3');
     //play('assets/se/kk_sonar_low.mp3');
-    if (!_flgHit) soundManagerPool.playSound('se/kk_sonar_low.mp3');
+    if (!_flgHit && !_flgBait)
+      soundManagerPool.playSound('se/kk_sonar_low.mp3');
     await Future<void>.delayed(duration);
     if (!mounted) {
       return;
