@@ -113,6 +113,7 @@
 //済・画面上に小マップ 沖合XXｍはいらない
 //済・初ゲットはポイント2倍
 //・水深20mごとに？おや、風向きが・・・（釣れる魚種の傾向を選択）
+//・ジャークだけじゃなくフォール、巻も表示j
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
@@ -278,7 +279,7 @@ class _FishingState extends BasePageState<Fishing>
   final TENSION_COLOR_SAFE = clsColor.getColorFromHex("007FFF");
   //final TENSION_COLOR_DRAG = clsColor.getColorFromHex("FFD800");
   final TENSION_COLOR_DANGER = clsColor.getColorFromHex("FFFF00");
-  final LINE_HP_COLOR =  clsColor.getColorFromHex("65B558");
+  final LINE_HP_COLOR = clsColor.getColorFromHex("65B558");
   final SPEED_COLOR = clsColor.getColorFromHex("FFBABE");
   final SPEED_COLOR_REELING = clsColor.getColorFromHex("FF6B77");
   static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
@@ -401,6 +402,8 @@ class _FishingState extends BasePageState<Fishing>
   late AnimationController waveController; // AnimationControllerの宣言
 
   var _ligntSpotAnimationChangeing = false;
+
+  var _actionText = "";
 
   //タックルの描画関連
   var _tackleCenterX = 0.0;
@@ -638,7 +641,7 @@ class _FishingState extends BasePageState<Fishing>
     final Size size = MediaQuery.of(context).size;
 
     var minimapWidget =
-    grobalKeyMinimap.currentContext?.findRenderObject() as RenderBox;
+        grobalKeyMinimap.currentContext?.findRenderObject() as RenderBox;
     _minimapWidth = minimapWidget.size.width;
 
     if (!flgDispSettingsOk) dispSettings();
@@ -1016,7 +1019,7 @@ class _FishingState extends BasePageState<Fishing>
           return;
         }
       });
-      if (flgNew) point = point * 2;  //初ゲットはポイント2倍
+      if (flgNew) point = point * 2; //初ゲットはポイント2倍
 
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
@@ -1096,15 +1099,11 @@ class _FishingState extends BasePageState<Fishing>
           if (_onClutch && _depth < _maxDepth) {
             //糸出中、かつ水深MAXではない時はフォール中
             flgFall = true;
-          } else if (!flgDrag &&
-              _rodStandUp > 0.5 &&
-              _depth < _maxDepth) {
+          } else if (!flgDrag && _rodStandUp > 0.5 && _depth < _maxDepth) {
             //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
             flgJerk = true;
             _jerkCnt = JERK_SCAN; //一度ジャークと判定されたら一定スキャン数ジャーク継続
-          } else if (!flgDrag &&
-              _onTap &&
-              _depth < _maxDepth) {
+          } else if (!flgDrag && _onTap && _depth < _maxDepth) {
             //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
             flgMaki = true;
           }
@@ -1160,6 +1159,8 @@ class _FishingState extends BasePageState<Fishing>
             // hitProb = (hitTanaProb * hitSpeedprob * ((1.0 + _jiai) / 2)) *
             //     fish.wariai /
             //     100;
+            //フォール表示
+            startJerk("ﾌｫｰﾙ中…");
           } else if (flgJerk) {
             //ジャーク中のHIT率判定 魚のジャーク志向 * ルアーのジャーク能力
             hitSpeedprob = fish.hitJerk * uselureData.jerk;
@@ -1173,7 +1174,7 @@ class _FishingState extends BasePageState<Fishing>
 
             //debugPrint("じゃーく" + hitSpeedprob.toString());
             //ジャーク表示
-            startJerk();
+            startJerk("ｼｬｸﾘ!");
           } else if (flgMaki) {
             //巻き中のHIT率判定
             //HITスピードとの差分
@@ -1191,6 +1192,8 @@ class _FishingState extends BasePageState<Fishing>
             }
             hitSpeedprobDisp = hitSpeedprob;
             jiaiProb = _jiai;
+            //フォール表示
+            startJerk("巻き");
           }
           //HIT確率の算出
           hitProb = (hitTanaProb * hitSpeedprob * jiaiProb) * fish.wariai / 100;
@@ -1544,34 +1547,34 @@ class _FishingState extends BasePageState<Fishing>
                 ],
               ),
               title:
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: [
-              //     Text('沖合' + offShore.toStringAsFixed(1) + 'km'),
-              //   ],
-              // ),
-              Stack(children: [
-              Container(
-              margin:EdgeInsets.only(top:10, left: 15),
-
-              child:
-                new Image(
-                  key: grobalKeyMinimap,
-                  image:
-                  AssetImage('assets/images/minimap.png'),
-                  //width: 60,
-                  height: _appBarHeight - 10,
-                ),),
-                Container(
-                  margin:EdgeInsets.only(top: 10,left:(_minimapWidth * (_maxDepth / 1000.0))),
-                  child:
-                new Image(
-                  image:
-                  AssetImage('assets/images/ship.png'),
-                  //width: 30,
-                  height: 15,
-                ),),
-              ],),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text('沖合' + offShore.toStringAsFixed(1) + 'km'),
+                  //   ],
+                  // ),
+                  Stack(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 10, left: 15),
+                    child: new Image(
+                      key: grobalKeyMinimap,
+                      image: AssetImage('assets/images/minimap.png'),
+                      //width: 60,
+                      height: _appBarHeight - 10,
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(
+                        top: 10, left: (_minimapWidth * (_maxDepth / 1000.0))),
+                    child: new Image(
+                      image: AssetImage('assets/images/ship.png'),
+                      //width: 30,
+                      height: 15,
+                    ),
+                  ),
+                ],
+              ),
               //右（複数可）
               actions: <Widget>[
                 Container(
@@ -2047,7 +2050,7 @@ class _FishingState extends BasePageState<Fishing>
                                                         _jerkTextLocation
                                                             .value)),
                                             child: Text(
-                                              'ｼｬｸﾘ!',
+                                              _actionText,
                                               style: TextStyle(
                                                   color: Colors.red,
                                                   fontWeight: FontWeight.bold),
@@ -3110,7 +3113,7 @@ class _FishingState extends BasePageState<Fishing>
   }
 
   //ジャーク表示
-  startJerk() {
+  startJerk(String actionText) {
     //ジャーク時のアニメーションの定義
     _jerkTextAnimationController =
         AnimationController(duration: Duration(milliseconds: 800), vsync: this);
@@ -3120,6 +3123,7 @@ class _FishingState extends BasePageState<Fishing>
             setState(() {});
           });
     _jerkTextAnimationController.forward();
+    _actionText = actionText;
   }
 
   //ルアーの能力チャート描画

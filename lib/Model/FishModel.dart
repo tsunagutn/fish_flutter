@@ -578,7 +578,7 @@ class FishsModel {
       type: enumFishType.bottom,
     ));
     fishs.add(new FishModel(
-      id: 17,
+      id: 18,
       name: "レンコダイ",
       rare: 2,
       image: "fish/renkodai.png",
@@ -607,7 +607,7 @@ class FishsModel {
       type: enumFishType.bream,
     ));
     fishs.add(new FishModel(
-      id: 18,
+      id: 19,
       name: "シイラ",
       rare: 4,
       image: "fish/shiira.png",
