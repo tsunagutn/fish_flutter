@@ -177,6 +177,7 @@ import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 //import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/Model/SpeedRange.dart';
+import 'package:fish_flutter/Model/StageModel.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/FIshCard.dart';
 import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
@@ -208,6 +209,7 @@ import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
 
 import '../widget/ImageList.dart';
+import '../widget/goalDialog.dart';
 
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
@@ -338,7 +340,8 @@ class _FishingState extends BasePageState<Fishing>
   double _speedValMax = 0.0; //スピード最大値 リールによって可変
   double _depth = 0.0; //現在糸出し量(0.1m)
   double _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
-  double _maxDepth = 50.0; //最大水深(0.1m)
+  double _maxDepth = 50.0; //現在の最大水深(0.1m)
+  double _maximumDepth = 1000.0;  //ステージ内の最大水深
   String _dispDepth = '0.0 m'; //深さ表示用
   Color _tensionActiveTrackColor =
       clsColor.getColorFromHex("4CFF00"); //テンションゲージの色
@@ -402,6 +405,8 @@ class _FishingState extends BasePageState<Fishing>
   bool _ligntSpotAnimationChangeing = false;
 
   String _actionText = "";
+
+  late StageModel stage;
 
   //タックルの描画関連
   double _tackleCenterX = 0.0;
@@ -471,6 +476,17 @@ class _FishingState extends BasePageState<Fishing>
     // addPostFrameCallbackメソッドを実行
     // null safety対応で?（null以外の時のみアクセス）をつける
     WidgetsBinding.instance?.addPostFrameCallback((cb) {
+
+      // `ModalRoute.of()`メソッドを使用して引数を取得
+      stage = ModalRoute.of(context)?.settings.arguments as StageModel;
+
+      //スタート深さを設定
+      _maxDepth = stage.startDepth;
+      //ゴール深さを設定
+      _maximumDepth = stage.maximumDepth;
+      //風レベル
+      _windLevel = stage.windLevel;
+
       //AppBarの高さを取得
       _appBarHeight = AppBar().preferredSize.height;
 
@@ -550,7 +566,7 @@ class _FishingState extends BasePageState<Fishing>
       top: _appBarHeight,
       left: MediaQuery.of(context).size.width,
       startDepth: 0.0, //0.1m単位
-      endDepth: 500.0, //0.1m単位
+      endDepth: _maximumDepth, //0.1m単位
       size: MediaQuery.of(context).size,
     ));
     lstImage.add(new ImageItem(
@@ -640,11 +656,6 @@ class _FishingState extends BasePageState<Fishing>
       return;
     }
 
-    // if (_flgGameOver) {
-    //   //ゲームオーバー中は無処理
-    //   return;
-    // }
-
     // _tensionValMax = haveTackle.getUseRod().maxTention;
     // _speedValMax = haveTackle.getUseReel().maxSpeed;
     //画面サイズ取得用
@@ -660,10 +671,37 @@ class _FishingState extends BasePageState<Fishing>
     var rand = (new math.Random()).nextDouble();
 
     //風レベル判定
-    for (int key in WIND_FOR_DEPTH.keys) {
-      if (_maxDepth.toInt() < key) {
-        _windLevel = WIND_FOR_DEPTH[key] as double;
-        break;
+    // for (int key in WIND_FOR_DEPTH.keys) {
+    //   if (_maxDepth.toInt() < key) {
+    //     _windLevel = WIND_FOR_DEPTH[key] as double;
+    //     break;
+    //   }
+    // }
+
+    //ゴール深さに到達
+    bool flgGoal = false;
+    if (_maxDepth >= _maximumDepth) {
+      flgGoal = true;
+      if (!_flgHit && !_flgBait) {
+        //ゴール条件成立
+        _timer.cancel(); //定周期タイマ停止
+        bgmStop();
+        var result = await showDialog<int>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) {
+            return Stack(
+              children: [
+                //ゴールダイアログ
+                goalDialog(
+                  dispSize: size,
+                ),
+              ],
+            );
+          },
+        );
+        //モーダル閉じた時、メニューに戻る
+        Navigator.of(context).pop();
       }
     }
 
@@ -727,12 +765,14 @@ class _FishingState extends BasePageState<Fishing>
         _shipMoveSeScan = 0;
       }
     }
-    //深さ変化度合の決定
-    _depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
-
-    //深さ決定 船移動分と風分
-    _maxDepth += _depthChange;
-
+    if (!flgGoal) {
+      //深さ変化度合の決定
+      _depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
+      //深さ決定 船移動分と風分
+      _maxDepth += _depthChange;
+    } else {
+      _depthChange = 0.0;
+    }
     //深さ変化中
     if (_depthChange != 0.0) {
       //魚反応を移動させる
@@ -1508,6 +1548,7 @@ class _FishingState extends BasePageState<Fishing>
 
   @override
   Widget buildChildWidget(BuildContext context) {
+
     // <-- 通常のbuildメソッドの代わりに実装
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
@@ -1589,7 +1630,7 @@ class _FishingState extends BasePageState<Fishing>
                   ),
                   Container(
                     margin: EdgeInsets.only(
-                        top: 10, left: (_minimapWidth * (_maxDepth / 1000.0))),
+                        top: 10, left: (_minimapWidth * (_maxDepth / _maximumDepth))),
                     child: new Image(
                       image: AssetImage('assets/images/ship.png'),
                       //width: 30,

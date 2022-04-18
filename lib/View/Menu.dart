@@ -1,3 +1,4 @@
+import 'package:fish_flutter/Model/StageModel.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fish_flutter/View/DrawerItem.dart';
@@ -52,9 +53,9 @@ class _menuState extends BasePageState<Menu> {
                 children: [
                   Card(
                     margin: const EdgeInsets.only(bottom: 30),
-                    color: Color(0xffffffe0),
+                    color: clsColor.getColorFromHex("ffffe0"),
                     elevation: 10,
-                    shadowColor: Color(0xff555555),
+                    shadowColor: clsColor.getColorFromHex("555555"),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -70,7 +71,9 @@ class _menuState extends BasePageState<Menu> {
                             //効果音managerで無音を再生
                             soundManagerPool.SoundManagerPoolInit();
                             bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
-                            Navigator.pushNamed(context, "/fishing"); // 遷移
+                            Navigator.pushNamed(context, "/fishing",
+                                arguments: stages.getStageData(1)
+                            );
                           });
                         },
                         child: Container(

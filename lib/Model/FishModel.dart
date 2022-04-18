@@ -29,8 +29,8 @@ class FishsModel {
       hereTanaMin: 0,
       hereTanaMax: 100,
       hitMaki: 1.0,
-      hitJerk: 0.5,
-      hitFall: 0.4,
+      hitJerk: 0.8,
+      hitFall: 1.0,
       hitSpeedJust: 50,
       hitSpeedRange: 40,
       sizeMin: 7.6,
@@ -42,7 +42,7 @@ class FishsModel {
       fookingTension: 200,
       bareEasy: 0.5,
       //flgBottom: false,
-      type: enumFishType.blue,
+      type: enumFishType.bream,
     ));
 
     fishs.add(new FishModel(

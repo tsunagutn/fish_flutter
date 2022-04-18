@@ -10,6 +10,7 @@ import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/View/Test.dart';
 import 'package:provider/provider.dart';
 
+import 'Model/StageModel.dart';
 import 'View/LightSpotWegit.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -35,6 +36,9 @@ var settings = new SettingsModel(
     jerkSense: 0.5,
     makiSense: 0.5,
 );
+
+//ステージ情報のインスタンス
+var stages = new StagesModel();
 
 //SEプール
 SoundManagerPool soundManagerPool = new SoundManagerPool(7);

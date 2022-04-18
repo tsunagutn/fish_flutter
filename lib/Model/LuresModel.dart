@@ -181,15 +181,20 @@ class LureModel {
 
     //3レベル毎に新しい重さをアンロック
     int maxWeightId = weightList.list.length;
-    int nowWeightLv = (lv ~/ 3);
-    if (maxWeightId > nowWeightLv) {
-      if (!weightList.list[nowWeightLv].enabled) {
-        weightList.list[nowWeightLv].enabled = true;
-        ret += "\n" +
-            weightList.list[nowWeightLv].weight.toString() +
-            "gが使用可能になりました";
+    int newWeightLv = (lv ~/ 3);
+    //if (maxWeightId > newWeightLv) {
+      String strWeight = "";
+      weightList.list.forEach((element) {
+        if (weightList.list.indexOf(element) <= newWeightLv && !element.enabled) {
+          element.enabled = true;
+          strWeight += element.weight.toString() + "g ";
+        }
+      });
+
+      if (strWeight != "") {
+        ret += "\n" + strWeight + "が使えるようになった";
       }
-    }
+    //}
     return ret;
   }
 
