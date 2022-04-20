@@ -11,6 +11,7 @@ import 'package:fish_flutter/View/Test.dart';
 import 'package:provider/provider.dart';
 
 import 'Model/StageModel.dart';
+import 'Model/TutorialModel.dart';
 import 'View/LightSpotWegit.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -39,6 +40,8 @@ var settings = new SettingsModel(
 
 //ステージ情報のインスタンス
 var stages = new StagesModel();
+//チュートリアル情報のインスタンス
+var tutorials = new TutorialsModel();
 
 //SEプール
 SoundManagerPool soundManagerPool = new SoundManagerPool(7);

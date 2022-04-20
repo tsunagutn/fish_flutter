@@ -24,11 +24,11 @@ class _menuState extends BasePageState<Menu> {
     // <-- 通常のbuildメソッドの代わりに実装
     return Material(
         child: Scaffold(
-      // appBar: AppBar(
-      //   title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      //     Text("メインメニュー"),
-      //   ]),
-      // ),
+      appBar: AppBar(
+        title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          //Text("メインメニュー"),
+        ]),
+      ),
       endDrawer: DrawerItem(),
       body: Container(
         decoration: BoxDecoration(
@@ -91,6 +91,51 @@ class _menuState extends BasePageState<Menu> {
                                   ),
                                   Text(
                                     "ゲームを開始",
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.black),
+                                  ),
+                                ]))),
+                  ),
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 30),
+                    color: clsColor.getColorFromHex("ffffe0"),
+                    elevation: 10,
+                    shadowColor: clsColor.getColorFromHex("555555"),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: InkWell(
+                        splashColor: Colors.blue.withAlpha(10),
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () async {
+                          final result =
+                          //await Navigator.of(context).pushNamed('/fishing');
+                          bgm.loadBgm().then((_) {
+                            // ここでBGMデータの全ロード処理実行
+                            debugPrint(Fishing.screenBgm);
+                            //効果音managerで無音を再生
+                            soundManagerPool.SoundManagerPoolInit();
+                            bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                            Navigator.pushNamed(context, "/fishing",
+                                arguments: stages.getStageData(0)
+                            );
+                          });
+                        },
+                        child: Container(
+                            margin: const EdgeInsets.all(10.0),
+                            width: 200,
+                            height: 50,
+                            child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceAround,
+                                children: [
+                                  Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                    size: 30.0,
+                                  ),
+                                  Text(
+                                    "あそびかた",
                                     style: TextStyle(
                                         fontSize: 16, color: Colors.black),
                                   ),

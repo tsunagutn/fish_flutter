@@ -115,6 +115,7 @@
 //済・簡易的なタイトル画面
 //済・ジャークだけじゃなくフォール、巻も表示j
 //・水深20mごとに？おや、風向きが・・・（釣れる魚種の傾向を選択）
+//・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
@@ -188,6 +189,7 @@ import 'package:fish_flutter/widget/SettingDialog.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
+import 'package:fish_flutter/widget/TutorialDialog.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
 import 'package:fish_flutter/widget/SliderPainter.dart';
 import 'package:fish_flutter/widget/fishGetDialog.dart';
@@ -210,6 +212,7 @@ import 'package:fish_flutter/Class/clsColor.dart';
 
 import '../widget/ImageList.dart';
 import '../widget/goalDialog.dart';
+import 'DrawerItem.dart';
 
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
@@ -1639,82 +1642,192 @@ class _FishingState extends BasePageState<Fishing>
                   ),
                 ],
               ),
-              //右（複数可）
-              actions: <Widget>[
-                Container(
-                    // margin: EdgeInsets.only(right: 10),
-                    // child: ElevatedButton(
-                    //   child: Column(
-                    //       mainAxisAlignment: MainAxisAlignment.end,
-                    //       children: [
-                    //         Icon(
-                    //           Icons.shopping_cart,
-                    //           color: Colors.white,
-                    //           size: 30.0,
-                    //         ),
-                    //         Text(
-                    //           _point.toString() + "円",
-                    //         ),
-                    //       ]),
-                    //   onPressed: () async {
-                    //     //買い物モーダルの表示
-                    //     _timer.cancel(); //定周期タイマ停止
-                    //     soundManagerPool.playSound('se/book.mp3'); //音は仮
-                    //     int? result = await showDialog<int>(
-                    //       context: context,
-                    //       barrierDismissible: false,
-                    //       builder: (_) {
-                    //         return ShopDialog(
-                    //           haveTakcle: haveTackle,
-                    //           originPoint: _point,
-                    //           bgm: super.bgm,
-                    //         );
-                    //       },
-                    //     );
-                    //     _point = result!;
-                    //     soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
-                    //     startTimer(); //定周期タイマ再開
-                    //     bgmPlay(nowBgm);
-                    //     setState(() {});
-                    //   },
-                    //),
-                    ),
-                Container(
-                    child: ElevatedButton(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Icon(
-                          Icons.settings,
-                          color: Colors.white,
-                          size: 30.0,
-                        ),
-                        Text("設定"),
-                      ]),
-                  onPressed: () async {
-                    //買い物モーダルの表示
-                    _timer.cancel(); //定周期タイマ停止
-                    bgmStop();
-                    //subBgmLoop('bgm/bgm_book.mp3');
-                    //soundManagerPool.playSound('se/book.mp3'); //音は仮
-                    int? result = await showDialog<int>(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (_) {
-                        return SettingDialog(
-                          bgm: super.bgm,
-                        );
-                      },
-                    );
-                    //soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
-                    startTimer(); //定周期タイマ再開
-                    bgmPlay(nowBgm);
-                    setState(() {});
-                  },
-                )),
-              ],
+              // //右（複数可）
+              // actions: <Widget>[
+              //   Container(
+              //       // margin: EdgeInsets.only(right: 10),
+              //       // child: ElevatedButton(
+              //       //   child: Column(
+              //       //       mainAxisAlignment: MainAxisAlignment.end,
+              //       //       children: [
+              //       //         Icon(
+              //       //           Icons.shopping_cart,
+              //       //           color: Colors.white,
+              //       //           size: 30.0,
+              //       //         ),
+              //       //         Text(
+              //       //           _point.toString() + "円",
+              //       //         ),
+              //       //       ]),
+              //       //   onPressed: () async {
+              //       //     //買い物モーダルの表示
+              //       //     _timer.cancel(); //定周期タイマ停止
+              //       //     soundManagerPool.playSound('se/book.mp3'); //音は仮
+              //       //     int? result = await showDialog<int>(
+              //       //       context: context,
+              //       //       barrierDismissible: false,
+              //       //       builder: (_) {
+              //       //         return ShopDialog(
+              //       //           haveTakcle: haveTackle,
+              //       //           originPoint: _point,
+              //       //           bgm: super.bgm,
+              //       //         );
+              //       //       },
+              //       //     );
+              //       //     _point = result!;
+              //       //     soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
+              //       //     startTimer(); //定周期タイマ再開
+              //       //     bgmPlay(nowBgm);
+              //       //     setState(() {});
+              //       //   },
+              //       //),
+              //       ),
+              //   Container(
+              //       child: ElevatedButton(
+              //     child: Column(
+              //         mainAxisAlignment: MainAxisAlignment.end,
+              //         children: [
+              //           Icon(
+              //             Icons.settings,
+              //             color: Colors.white,
+              //             size: 30.0,
+              //           ),
+              //           Text("設定"),
+              //         ]),
+              //     onPressed: () async {
+              //       _timer.cancel(); //定周期タイマ停止
+              //       bgmStop();
+              //       //subBgmLoop('bgm/bgm_book.mp3');
+              //       //soundManagerPool.playSound('se/book.mp3'); //音は仮
+              //       int? result = await showDialog<int>(
+              //         context: context,
+              //         barrierDismissible: false,
+              //         builder: (_) {
+              //           return SettingDialog(
+              //             bgm: super.bgm,
+              //           );
+              //         },
+              //       );
+              //       //soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
+              //       startTimer(); //定周期タイマ再開
+              //       bgmPlay(nowBgm);
+              //       setState(() {});
+              //     },
+              //   )),
+              //
+              //   Container(
+              //       child: ElevatedButton(
+              //         child: Column(
+              //             mainAxisAlignment: MainAxisAlignment.end,
+              //             children: [
+              //               Icon(
+              //                 Icons.help,
+              //                 color: Colors.white,
+              //                 size: 30.0,
+              //               ),
+              //               Text("ヘルプ"),
+              //             ]),
+              //         onPressed: () async {
+              //           _timer.cancel(); //定周期タイマ停止
+              //           bgmStop();
+              //           //subBgmLoop('bgm/bgm_book.mp3');
+              //           //soundManagerPool.playSound('se/book.mp3'); //音は仮
+              //           int? result = await showDialog<int>(
+              //             context: context,
+              //             barrierDismissible: false,
+              //             builder: (_) {
+              //               return tutorialDialog(tutorialId: 1,
+              //                   dispSize: MediaQuery.of(context).size,
+              //                   flgAll: true)
+              //             },
+              //           );
+              //           //soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
+              //           startTimer(); //定周期タイマ再開
+              //           bgmPlay(nowBgm);
+              //           setState(() {});
+              //         },
+              //       )),
+              //
+              //
+              // ],
             ),
             //endDrawer: DrawerItem(),
+endDrawer:  Drawer(
+        child: ListView(
+        children: <Widget>[
+            Container(
+            height: 60,
+            child: const DrawerHeader(
+              child: Text('ゲーム（仮）'),
+              decoration: BoxDecoration(
+                color: Color(0xffE7E7E7),
+              ),
+            )),
+
+      ListTile(
+        title: Text("設定"),
+        trailing: Icon(Icons.arrow_forward_ios),
+        onTap: () async {
+              _timer.cancel(); //定周期タイマ停止
+              bgmStop();
+              //subBgmLoop('bgm/bgm_book.mp3');
+              //soundManagerPool.playSound('se/book.mp3'); //音は仮
+              int? result = await showDialog<int>(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) {
+                  return SettingDialog(
+                    bgm: super.bgm,
+                  );
+              //soundManagerPool.playSound('se/bookclose.mp3'); //音は仮
+            },
+          );
+              startTimer(); //定周期タイマ再開
+              bgmPlay(nowBgm);
+              setState(() {});
+        },
+      ),
+          ListTile(
+            title: Text("ヘルプ"),
+            trailing: Icon(Icons.arrow_forward_ios),
+            onTap: () async {
+                        _timer.cancel(); //定周期タイマ停止
+                        bgmStop();
+                        int? result = await showDialog<int>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) {
+                            return tutorialDialog(tutorialId: 1,
+                                dispSize: MediaQuery.of(context).size,
+                                flgAll: true)
+                          },
+                        );
+                        startTimer(); //定周期タイマ再開
+                        bgmPlay(nowBgm);
+                        setState(() {});
+
+
+
+
+
+            },
+          ),
+
+      ListTile(
+        title: Text("利用規約"),
+        trailing: Icon(Icons.arrow_forward_ios),
+        onTap: () async {
+          Navigator.of(context).pop();
+          final result = await Navigator.of(context).pushNamed('/term');
+        },
+      ),
+      ListTile(
+        title: Text("バージョン"),
+        trailing: Text("0.0.1"),
+      ),
+      ],
+    ),
+    ),
 
             // body: SafeArea(
             //   child: SpriteWidget(

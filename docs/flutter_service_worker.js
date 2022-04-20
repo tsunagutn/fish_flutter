@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "b4c730b979e12168a13b4d967b960bcb",
+  "assets/AssetManifest.json": "93f7c3a6dac50271d4dfd2e1df5d3339",
 "assets/assets/bgm/bgm_book.mp3": "aeb1c7d372bece72793057403ea32e51",
 "assets/assets/bgm/bgm_field.mp3": "24af8bdee28fe421db22248a9243d1e9",
 "assets/assets/bgm/bgm_fight.mp3": "841ec535c2af527edc286cda935584b4",
@@ -63,6 +63,7 @@ const RESOURCES = {
 "assets/assets/images/teibou.png": "a3b6895a202fa73af273d8844fdfcb2c",
 "assets/assets/images/TENSIONDRAG.png": "dea693a59acb1a40525ff3efcebe7a90",
 "assets/assets/images/title.png": "2205c13aa68936313daf9bbbdf4bcee9",
+"assets/assets/images/tutorial/aeae.png": "bc5c3f756fa13507f2ff00a818c8cec2",
 "assets/assets/images/unknownfish.png": "215db669697114a97c663c498cb4f64e",
 "assets/assets/images/white.png": "a6420dd4a339ca12cf90768ae5934ea1",
 "assets/assets/se/bait.mp3": "42c5148478b778379524ac908639d75a",
@@ -97,9 +98,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "3191b95248bbc5b2590c20c04e8adf9d",
-"/": "3191b95248bbc5b2590c20c04e8adf9d",
-"main.dart.js": "cd8420e989eb05ea202de69530007a53",
+"index.html": "38a16bb311821033eb3f784e0ba93a24",
+"/": "38a16bb311821033eb3f784e0ba93a24",
+"main.dart.js": "f2f64e40189d07ebca027dd32b51f069",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

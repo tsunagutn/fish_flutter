@@ -9,11 +9,20 @@ class DrawerItem extends StatelessWidget {
           Container(
               height: 60,
               child: const DrawerHeader(
-                child: Text('チェックリストAP'),
+                child: Text('ゲーム（仮）'),
                 decoration: BoxDecoration(
                   color: Color(0xffE7E7E7),
                 ),
               )),
+
+          ListTile(
+            title: Text("利用規約"),
+            trailing: Icon(Icons.arrow_forward_ios),
+            onTap: () async {
+              Navigator.of(context).pop();
+              final result = await Navigator.of(context).pushNamed('/term');
+            },
+          ),
           ListTile(
             title: Text("利用規約"),
             trailing: Icon(Icons.arrow_forward_ios),

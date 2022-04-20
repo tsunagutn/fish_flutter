@@ -1,47 +1,35 @@
-//ステージマスタ
-class StagesModel {
-  late List<StageModel> stages = [];
+//チュートリアルマスタ
+class TutorialsModel {
+  late Map<int, TutorialModel> tutorialList= {};
   //コンストラクタ
-  StagesModel() {
+  TutorialsModel() {
     //シーダーみたいなやつ
-    stages.add(new StageModel(
-      id: 0,
-      name: "練習",
-      startDepth: 40.0,
-      maximumDepth: 200.0,
-      windLevel: 0.7,
-      tutorial: true,
+    tutorialList[1] = new TutorialModel(
+      title: "ゲーム画面について 1/2",
+      text: "",
+      imageName: "aeae.png",
+      flgNext: true,
+    );
+    tutorialList[2] = (new TutorialModel(
+      title: "ゲーム画面について 2/2",
+      text: "",
+      imageName: "aeae.png",
+      flgNext: false,
     ));
-    stages.add(new StageModel(
-      id: 1,
-      name: "益田沖",
-      startDepth: 40.0,
-      maximumDepth: 1000.0,
-      windLevel: 0.7,
-      tutorial: false,
-    ));
-  }
-
-  StageModel getStageData(int id) {
-    return stages.firstWhere((element) => element.id.compareTo(id) == 0);
   }
 }
 
-class StageModel {
-  int id; //一意識別キー
-  String name; //名前
-  double startDepth; //スタート水深
-  double maximumDepth; //ゴール水深
-  double windLevel; //風レベル
-  bool tutorial;  //チュートリアル
+class TutorialModel {
+  String title; //タイトル
+  String text; //説明文
+  String imageName; //説明画像名
+  bool flgNext; //次ページの有無
 
   //コンストラクタ
-  StageModel({
-    required this.id,
-    required this.name,
-    required this.startDepth,
-    required this.maximumDepth,
-    required this.windLevel,
-    required this.tutorial,
+  TutorialModel({
+    required this.title,
+    required this.text,
+    required this.imageName,
+    required this.flgNext,
   });
 }

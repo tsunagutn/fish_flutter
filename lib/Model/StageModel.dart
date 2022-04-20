@@ -5,6 +5,14 @@ class StagesModel {
   StagesModel() {
     //シーダーみたいなやつ
     stages.add(new StageModel(
+      id: 0,
+      name: "練習",
+      startDepth: 40.0,
+      maximumDepth: 200.0,
+      windLevel: 0.7,
+      tutorial: true,
+    ));
+    stages.add(new StageModel(
       id: 1,
       name: "益田沖",
       startDepth: 40.0,
