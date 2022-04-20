@@ -1407,23 +1407,20 @@ class _FishingState extends BasePageState<Fishing>
             debugPrint('HIT!!!!');
             //_dispInfo = "HIT!";
             //フッキングの成功度
-            _fookingLv = (_fookingTensionPrev - _fookingTension) / 2;
+            _fookingLv =  (_fookingTensionPrev - _fookingTension) / (_tensionValMax / 2);
             //if (_fookingLv > 100.0) _fookingLv = 100.0;
             //最大テンションの半分が基本値 - フッキング成功度
-            _fookingTension = (_tensionValMax / 2) - _fookingLv;
-            bool flgOniAwase = false;
-            if (_fookingTension < 0) {
-              _fookingTension = 0;
-              flgOniAwase = true;
-            }
+            _fookingTension = (_tensionValMax / 2) - ((_tensionValMax / 2) * _fookingLv);
             //_fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
             //HITメッセージ
             _centerTextMain = "HIT!";
-            if (flgOniAwase) {
+            if (_fookingLv > 0.8) {
+              _fookingTension = 0;
               _centerTextSub = "鬼アワセ";
               _centerTextMainColor = Colors.red;
+              _centerTextSubColor = Colors.red;
             } else {
-              _centerTextSub = "アワセLv " + _fookingLv.floor().toString();
+              _centerTextSub = "アワセLv " + (_fookingLv * 100).floor().toString();
               _centerTextSubColor = Colors.yellow;
             }
             startCenterInfo();
@@ -2040,7 +2037,7 @@ endDrawer:  Drawer(
                                                       flgDispMaxValue: true,
                                                       value2: _fookingTension,
                                                       value2Color: Colors.black
-                                                          .withOpacity(0.3),
+                                                          .withOpacity(0.1),
                                                     ),
                                                     child: Container(),
                                                   ),
