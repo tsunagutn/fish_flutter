@@ -5,15 +5,15 @@ class TutorialsModel {
   TutorialsModel() {
     //シーダーみたいなやつ
     tutorialList[1] = new TutorialModel(
-      title: "ゲーム画面について 1/2",
+      title: "ゲーム画面",
       text: "",
-      imageName: "aeae.png",
+      imageName: "tutorial1.png",
       flgNext: true,
     );
     tutorialList[2] = (new TutorialModel(
-      title: "ゲーム画面について 2/2",
+      title: "魚の釣り方",
       text: "",
-      imageName: "aeae.png",
+      imageName: "tutorial2.png",
       flgNext: false,
     ));
   }

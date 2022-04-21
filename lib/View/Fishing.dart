@@ -1414,7 +1414,7 @@ class _FishingState extends BasePageState<Fishing>
             //_fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
             //HITメッセージ
             _centerTextMain = "HIT!";
-            if (_fookingLv > 0.8) {
+            if (_fookingLv > 0.95) {
               _fookingTension = 0;
               _centerTextSub = "鬼アワセ";
               _centerTextMainColor = Colors.red;
