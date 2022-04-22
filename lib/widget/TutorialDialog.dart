@@ -74,15 +74,28 @@ class _tutorialDialogState extends State<tutorialDialog>
                   blurRadius: 2.0,
                   color: Colors.black)
             ]),
-        title: Text(
+        title:
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+          Text(
           tutorial.title,
         ),
+          new Image(
+            image:
+            AssetImage('assets/images/sencho.png'),
+            width: 50,
+          ),
+        ],),
         content: Container(
           height: widget.dispSize.height,
           width: widget.dispSize.width,
-          child: Column(
+          child:
+          Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              SizedBox(height: widget.dispSize.height * 0.7,child:
+              SingleChildScrollView(
+                child:
           Column(children:[
               new Image(
                 image:
@@ -91,12 +104,14 @@ class _tutorialDialogState extends State<tutorialDialog>
                 fit: BoxFit.fitWidth,
               ),
           ],
-          ),
+          ),),),
               SizedBox(width: widget.dispSize.width,child:
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Container(width: 50,
+                    child:
                   (flgDispPrev) ?
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -108,6 +123,7 @@ class _tutorialDialogState extends State<tutorialDialog>
                       prevPage();
                     },
                   ) : Container(),
+                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
@@ -117,6 +133,8 @@ class _tutorialDialogState extends State<tutorialDialog>
                       Navigator.pop(context);
                     },
                   ),
+                Container(width: 50,
+                  child:
                   (flgDispNext) ?
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -128,6 +146,7 @@ class _tutorialDialogState extends State<tutorialDialog>
                       nextPage();
                     },
                   ):Container(),
+                ),
                 ],
               ),),
             ],

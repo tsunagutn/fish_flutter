@@ -114,12 +114,14 @@
 //済・初ゲットはポイント2倍
 //済・簡易的なタイトル画面
 //済・ジャークだけじゃなくフォール、巻も表示j
-//・水深20mごとに？おや、風向きが・・・（釣れる魚種の傾向を選択）
+//済・巻き成立にディレイかける
+//済・店をもっとましにする→店無くなったのでOK
+//済・王冠つきじゃないと詳細アンロックしない？→つまらんのでボツ
+//・水深20mごとに？風向きを選択（釣れる魚種の傾向を選択も？）
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
-//・店をもっとましにする
 //・タックル変更をもっとましにする、特に重さ
 //・ドラグ使いにくいの何とかする
 //・風の描画？？？いる？
@@ -127,7 +129,6 @@
 //・海底に漁礁とか
 //・実績
 //・時合度が低いのが続かんようにするか、高くできるようにする
-//・王冠つきじゃないと詳細アンロックしない？
 //・中断セーブ機能
 
 //・ジャークをリズムで
@@ -193,9 +194,7 @@ import 'package:fish_flutter/widget/TutorialDialog.dart';
 import 'package:fish_flutter/widget/WaveClipper.dart';
 import 'package:fish_flutter/widget/SliderPainter.dart';
 import 'package:fish_flutter/widget/fishGetDialog.dart';
-import 'package:fish_flutter/widget/imagePainter.dart';
 import 'package:fish_flutter/widget/tacklePainter.dart';
-
 import 'package:flutter/material.dart';
 
 import 'dart:async';
@@ -295,6 +294,7 @@ class _FishingState extends BasePageState<Fishing>
   static const POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
   static const ROD_STANDUP_MAX = 100.0; //竿立て度MAX
   static const JERK_SCAN = 10; //ジャークの継続スキャン数
+  static const MAKI_SCAN = 10; //巻きの成立に必要なスキャン数
   // static const BAIT_CNT_MAX = 30; //アタリ判定期間
   // static const FOOKING_TENSION = 150; //アワセ成功閾値
   static const MOVE_FISHPOINTER_MAX = 20.0; //最高速度 +-0.5の時の魚反応光点移動量
@@ -372,6 +372,7 @@ class _FishingState extends BasePageState<Fishing>
   int _baitCnt = 0; //当たってからのスキャン数
   //var _baitMaxTension = 0.0; //バイト中の最大テンション
   double _fookingLv = 0.0; //フッキングの成功度
+  int _makiDelayCnt = 0;  //巻き成立カウント
 
   late FishModel _hitFish; //現在HIT中の魚種
   double _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
@@ -1149,17 +1150,25 @@ class _FishingState extends BasePageState<Fishing>
         if (_jerkCnt > 0) {
           //ジャーク状態の継続
           flgJerk = true;
+          _makiDelayCnt = 0;
         } else {
           if (_onClutch && _depth < _maxDepth) {
             //糸出中、かつ水深MAXではない時はフォール中
             flgFall = true;
+            _makiDelayCnt = 0;
           } else if (!flgDrag && _rodStandUp > 0.5 && _depth < _maxDepth) {
             //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
             flgJerk = true;
+            _makiDelayCnt = 0;
             _jerkCnt = JERK_SCAN; //一度ジャークと判定されたら一定スキャン数ジャーク継続
           } else if (!flgDrag && _onTap && _depth < _maxDepth) {
             //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
-            flgMaki = true;
+            _makiDelayCnt++;
+            if (_makiDelayCnt > MAKI_SCAN) {
+              flgMaki = true;
+            }
+          } else {
+            _makiDelayCnt = 0;
           }
         }
       }

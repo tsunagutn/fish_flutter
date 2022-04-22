@@ -57,6 +57,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/fish/
+    - assets/images/tutorial/
     - assets/bgm/
     - assets/se/
 

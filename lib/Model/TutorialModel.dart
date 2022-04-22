@@ -14,7 +14,13 @@ class TutorialsModel {
       title: "魚の釣り方",
       text: "",
       imageName: "tutorial2.png",
-      flgNext: false,
+      flgNext: true,
+    ));
+    tutorialList[3] = (new TutorialModel(
+      title: "魚がヒットした時",
+      text: "",
+      imageName: "tutorial3.png",
+      flgNext: true,
     ));
   }
 }
