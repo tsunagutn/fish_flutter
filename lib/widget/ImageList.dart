@@ -18,7 +18,8 @@ class ImageItem extends StatefulWidget {
     //required this.nowMaxDepth,
     required this.startDepth,
     required this.endDepth,
-    required this.size,
+    required this.imageSize,
+    required this.dispSize,
   }) : super(key: key);
 
   final GlobalKey painterKey;
@@ -30,7 +31,8 @@ class ImageItem extends StatefulWidget {
   //late double nowMaxDepth; //現在のMAX水深
   final double startDepth; //MAX水深がこの値の時右から描画開始
   final double endDepth; //MAX水深がこの値の時左に描画終了
-  final Size size; //MAX水深がこの値の時左に描画終了
+  final Size imageSize; //画像サイズ
+  final Size dispSize; //画面サイズ
 
   @override
   _ImageItemState createState() => _ImageItemState();
@@ -56,7 +58,8 @@ class _ImageItemState extends State<ImageItem>{
           //nowMaxDepth: widget.nowMaxDepth,
           startDepth: widget.startDepth,
           endDepth: widget.endDepth,
-          size: widget.size,
+          imageSize: widget.imageSize,
+          dispSize: widget.dispSize,
         ),
       ),
     );
@@ -99,7 +102,8 @@ class ImagePainter extends CustomPainter {
     //required this.nowMaxDepth,
     required this.startDepth,
     required this.endDepth,
-    required this.size,
+    required this.imageSize,
+    required this.dispSize,
   });
 
   final int id;
@@ -110,7 +114,8 @@ class ImagePainter extends CustomPainter {
   //late double nowMaxDepth; //現在のMAX水深
   final double startDepth; //MAX水深がこの値の時右から描画開始
   final double endDepth; //MAX水深がこの値の時左に描画終了
-  final Size size;
+  final Size imageSize;
+  final Size dispSize;
 
   late ui.Image image;
   bool flgDisp = false;
@@ -118,7 +123,7 @@ class ImagePainter extends CustomPainter {
   double nowMaxDepth = 0.0; //現在のMAX水深
 
   @override
-  Future<void> paint(Canvas canvas, Size size) async {
+  Future<void> paint(Canvas canvas, Size dispSize) async {
     if (!flgSetImage) {
       setImage();
       return;
@@ -128,8 +133,8 @@ class ImagePainter extends CustomPainter {
       flgDisp = true;
       double diffDepth = endDepth - startDepth;
       //depth 0.1毎の移動ピクセル数
-      double moveLeft = ((image.width * 2) + size.width) / diffDepth;
-      left = size.width - (nowMaxDepth - startDepth) * moveLeft;
+      double moveLeft = ((image.width * 2) + dispSize.width) / diffDepth;
+      left = dispSize.width - (nowMaxDepth - startDepth) * moveLeft;
     } else {
       flgDisp = false;
     }
@@ -139,9 +144,9 @@ class ImagePainter extends CustomPainter {
         image,
         // Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         // Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-        Rect.fromLTWH(0, 0, image.width.toDouble(), image.width.toDouble()),
+        Rect.fromLTWH(0, 0, imageSize.width.toDouble(), imageSize.height.toDouble()),
         Rect.fromLTWH(
-            left, top, image.width.toDouble(), image.height.toDouble()),
+            left, top, imageSize.width.toDouble(), imageSize.height.toDouble()),
         new Paint(),
       );
     } else {}

@@ -491,8 +491,8 @@ class _FishingState extends BasePageState<Fishing>
       //風レベル
       _windLevel = stage.windLevel;
 
-      //AppBarの高さを取得
-      _appBarHeight = AppBar().preferredSize.height;
+      //AppBarの高さを取得 ステータスバーの高さも加算
+      _appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
 
       //定周期タイマの開始
       startTimer();
@@ -571,7 +571,8 @@ class _FishingState extends BasePageState<Fishing>
       left: MediaQuery.of(context).size.width,
       startDepth: 0.0, //0.1m単位
       endDepth: _maximumDepth, //0.1m単位
-      size: MediaQuery.of(context).size,
+      imageSize: new Size(50,50),
+      dispSize: MediaQuery.of(context).size,
     ));
     lstImage.add(new ImageItem(
       key: UniqueKey(),
@@ -579,12 +580,13 @@ class _FishingState extends BasePageState<Fishing>
       id: 0,
       imageName: 'mounten.png',
       type: enumImageDispType.surface,
-      top: _shoreHeight - 35,
+      top: _shoreHeight - 50,
       left: MediaQuery.of(context).size.width,
       //nowMaxDepth: 0.0,
       startDepth: -100.0, //0.1m単位
-      endDepth: 250.0, //0.1m単位
-      size: MediaQuery.of(context).size,
+      endDepth: 2000.0, //0.1m単位
+      imageSize: new Size(5000,_shoreHeight - _appBarHeight),
+      dispSize: MediaQuery.of(context).size,
     ));
 
     lstImage.add(new ImageItem(
@@ -597,7 +599,8 @@ class _FishingState extends BasePageState<Fishing>
       left: MediaQuery.of(context).size.width,
       startDepth: 0.0, //0.1m単位
       endDepth: 90.0, //0.1m単位
-      size: MediaQuery.of(context).size,
+      imageSize: new Size(500,150),
+      dispSize: MediaQuery.of(context).size,
     ));
     lstImage.add(new ImageItem(
       key: UniqueKey(),
@@ -610,7 +613,8 @@ class _FishingState extends BasePageState<Fishing>
       //nowMaxDepth: 0.0,
       startDepth: 700.0, //0.1m単位
       endDepth: 1000.0, //0.1m単位
-      size: MediaQuery.of(context).size,
+      imageSize: new Size(300,_shoreHeight - _appBarHeight),
+      dispSize: MediaQuery.of(context).size,
     ));
 
     flgDispSettingsOk = true;
@@ -2028,7 +2032,7 @@ endDrawer:  Drawer(
                                                           _tensionActiveTrackColor,
                                                       inactiveColor: (_flgHit)
                                                           ? Colors.black
-                                                          : Colors.white,
+                                                          : Colors.white.withOpacity(0.7),
                                                       value: _tension,
                                                       maxValue: _tensionValMax,
                                                       backRadius:
@@ -2148,7 +2152,7 @@ endDrawer:  Drawer(
                                               height: 20,
                                               activeColor:
                                                   _speedActiveTrackColor,
-                                              inactiveColor: Colors.white,
+                                              inactiveColor: Colors.white.withOpacity(0.7),
                                               value: _speed,
                                               maxValue: _speedValMax,
                                               backRadius: 0,
@@ -2416,7 +2420,7 @@ endDrawer:  Drawer(
                                     child: Container(
                                         color: clsColor
                                             .getColorFromHex("02D5F2")
-                                            .withOpacity(1.0)),
+                                            .withOpacity(0.9)),
                                     clipper: WaveClipper(
                                         context, waveController.value, 0),
                                   ),
@@ -2425,7 +2429,7 @@ endDrawer:  Drawer(
                                     child: Container(
                                         color: clsColor
                                             .getColorFromHex("02D5F2")
-                                            .withOpacity(0.3)),
+                                            .withOpacity(0.5)),
                                     clipper: WaveClipper(
                                         context, waveController.value, 0.5),
                                   ),
