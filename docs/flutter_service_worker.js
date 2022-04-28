@@ -97,14 +97,14 @@ const RESOURCES = {
 "assets/assets/se/waterupfish.mp3": "693952101367a3e46d859cf39670c26b",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
 "assets/fonts/MaterialIcons-Regular.otf": "7e7a6cccddf6d7b20012a548461d5d81",
-"assets/NOTICES": "5d7c89a97504c95aa5316ccad5077f8a",
+"assets/NOTICES": "d8f2c641b7c07ee9724be9201007503e",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "6d342eb68f170c97609e9da345464e5e",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "0ef73f28f9b7db766a5d618fecea4758",
-"/": "0ef73f28f9b7db766a5d618fecea4758",
-"main.dart.js": "6874c944d2820d64bb70391c148dc69a",
+"index.html": "416617a7995ea88e5a9f2b90eeff38dd",
+"/": "416617a7995ea88e5a9f2b90eeff38dd",
+"main.dart.js": "b7d8b38bcb733314ed3149371623b947",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

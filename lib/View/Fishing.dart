@@ -117,9 +117,9 @@
 //済・巻き成立にディレイかける
 //済・店をもっとましにする→店無くなったのでOK
 //済・王冠つきじゃないと詳細アンロックしない？→つまらんのでボツ
+//・時間
 //・水深20mごとに？風向きを選択（釣れる魚種の傾向を選択も？）
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
-//・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・タックル変更をもっとましにする、特に重さ
@@ -142,6 +142,7 @@
 //・クリア後、最初から振り返りリザルト表示　ここで切られたとかバレた魚種分かる（魚種以外分かるの方がええかも）
 //・寝る機能 寝中は何もできずすごい速さでゲームが進む
 //・今日はもう納得した機能 ゲームを途中で諦める
+//・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 
 //バグ
 //・バレた時アワセ失敗したとき光点の色が戻らん
@@ -208,6 +209,7 @@ import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
+import 'package:intl/intl.dart';
 
 import '../widget/ImageList.dart';
 import '../widget/goalDialog.dart';
@@ -333,6 +335,7 @@ class _FishingState extends BasePageState<Fishing>
   //var _flgGameOver = false; //現在ゲームオーバーフラグ
 
   //ステート変数
+  int _timeCount = 0; //時間 1カウント0.1分
   double _tension = 0.0; //テンション値
   double _tensionValMax = 0.0; //テンション最大値 竿によって可変
   double _fookingTension = 0.0; //アタリ時のアワセ判定値
@@ -584,7 +587,7 @@ class _FishingState extends BasePageState<Fishing>
       left: MediaQuery.of(context).size.width,
       //nowMaxDepth: 0.0,
       startDepth: -100.0, //0.1m単位
-      endDepth: 2000.0, //0.1m単位
+      endDepth: 1000.0, //0.1m単位
       imageSize: new Size(5000,_shoreHeight - _appBarHeight),
       dispSize: MediaQuery.of(context).size,
     ));
@@ -669,9 +672,9 @@ class _FishingState extends BasePageState<Fishing>
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
 
-    var minimapWidget =
-        grobalKeyMinimap.currentContext?.findRenderObject() as RenderBox;
-    _minimapWidth = minimapWidget.size.width;
+    // var minimapWidget =
+    //     grobalKeyMinimap.currentContext?.findRenderObject() as RenderBox;
+    // _minimapWidth = minimapWidget.size.width;
 
     if (!flgDispSettingsOk) dispSettings();
 
@@ -774,6 +777,7 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
     if (!flgGoal) {
+      _timeCount++;
       //深さ変化度合の決定
       _depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
       //深さ決定 船移動分と風分
@@ -1634,22 +1638,34 @@ class _FishingState extends BasePageState<Fishing>
                 children: [
                   Container(
                     margin: EdgeInsets.only(top: 10, left: 15),
-                    child: new Image(
-                      key: grobalKeyMinimap,
-                      image: AssetImage('assets/images/minimap.png'),
-                      //width: 60,
-                      height: _appBarHeight - 10,
+                    child:
+                    // new Image(
+                    //   key: grobalKeyMinimap,
+                    //   image: AssetImage('assets/images/minimap.png'),
+                    //   //width: 60,
+                    //   //height: _appBarHeight - 10,
+                    // ),
+                    Container(
+                      margin: EdgeInsets.only(top: 10, left: 15),
+                      child:
+                      Text(getTime(_timeCount)),
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        top: 10, left: (_minimapWidth * (_maxDepth / _maximumDepth))),
-                    child: new Image(
-                      image: AssetImage('assets/images/ship.png'),
-                      //width: 30,
-                      height: 15,
-                    ),
-                  ),
+                  // Container(
+                  //   margin: EdgeInsets.only(
+                  //       top: 10, left: (_minimapWidth * (_maxDepth / _maximumDepth))),
+                  //   child: new Image(
+                  //     image: AssetImage('assets/images/ship.png'),
+                  //     //width: 30,
+                  //     height: 15,
+                  //   ),
+                  // ),
+                  // Container(
+                  //   height: _appBarHeight - 10,
+                  //   margin: EdgeInsets.only(top: 10, left: 15),
+                  //   child:
+                  //   Text(_timeCount.toString()),
+                  // ),
                 ],
               ),
               // //右（複数可）
@@ -3156,6 +3172,13 @@ endDrawer:  Drawer(
                         ),
                       ]),
                     ])))));
+  }
+
+  //時間データ取得
+  String getTime(int time) {
+    //？？？これは上で宣言すべき
+    final DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
+    return DateFormat('HH:mm').format(startTime.add(Duration(minutes: (time ~/ 50))));
   }
 
   //タップ時のエフェクトのリスト

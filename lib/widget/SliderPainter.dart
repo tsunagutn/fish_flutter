@@ -166,7 +166,7 @@ class SliderPainter extends CustomPainter {
 
       path = Path();
       paint = new Paint()
-        ..color = Colors.yellow
+        ..color = Colors.orangeAccent
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.fill
         ..strokeWidth = 2;
