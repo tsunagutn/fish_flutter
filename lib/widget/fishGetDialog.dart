@@ -253,7 +253,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                             ),
                             Text("あなたは" +
                                 widget.addPoint.toString() +
-                                'の経験値を得ました'),
+                                'ポイントを得ました'),
                             Text(
                               strLevel,
                               style: TextStyle(

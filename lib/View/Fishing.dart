@@ -275,6 +275,8 @@ class _FishingState extends BasePageState<Fishing>
   static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
   //static const TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
   //static const TIMER_INTERVAL = 17; //1スキャン時間(msec) 60FPS
+  static const int MINCOUNT = 50; //1分間のスキャンカウント数
+
   //static const TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
   static const TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
   //static const TENSION_LINECUT = 290.0; //糸切れ判定値
@@ -336,6 +338,7 @@ class _FishingState extends BasePageState<Fishing>
 
   //ステート変数
   int _timeCount = 0; //時間 1カウント0.1分
+  DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
   double _tension = 0.0; //テンション値
   double _tensionValMax = 0.0; //テンション最大値 竿によって可変
   double _fookingTension = 0.0; //アタリ時のアワセ判定値
@@ -689,9 +692,10 @@ class _FishingState extends BasePageState<Fishing>
     //   }
     // }
 
-    //ゴール深さに到達
+    //終了時間に到達
     bool flgGoal = false;
-    if (_maxDepth >= _maximumDepth) {
+    //if (_maxDepth >= _maximumDepth) {
+    if (_timeCount >= getLastTime()) {
       flgGoal = true;
       if (!_flgHit && !_flgBait) {
         //ゴール条件成立
@@ -715,6 +719,29 @@ class _FishingState extends BasePageState<Fishing>
         Navigator.of(context).pop();
       }
     }
+
+    // //風向き替えタイミング
+    // if (_timeCount == 0) {
+    //   _timer.cancel(); //定周期タイマ停止
+    //   bgmStop();
+    //   var result = await showDialog<double>(
+    //     context: context,
+    //     barrierDismissible: false,
+    //     builder: (_) {
+    //       return Stack(
+    //         children: [
+    //           //ゴールダイアログ
+    //           windDialog(
+    //             windLevel: _windLevel,
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   //モーダルを閉じた時
+    //   _windLevel = result;
+    // }
+
 
     // _depthChangeScanCnt++;
     // if (_depthChangeScanCnt > DEPTH_CHANGE_SCAN) {
@@ -1433,7 +1460,7 @@ class _FishingState extends BasePageState<Fishing>
             _centerTextMain = "HIT!";
             if (_fookingLv > 0.95) {
               _fookingTension = 0;
-              _centerTextSub = "鬼アワセ";
+              _centerTextSub = "アワセLv 鬼";
               _centerTextMainColor = Colors.red;
               _centerTextSubColor = Colors.red;
             } else {
@@ -1628,46 +1655,44 @@ class _FishingState extends BasePageState<Fishing>
                 ],
               ),
               title:
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: [
-                  //     Text('沖合' + offShore.toStringAsFixed(1) + 'km'),
-                  //   ],
-                  // ),
-                  Stack(
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 10, left: 15),
-                    child:
-                    // new Image(
-                    //   key: grobalKeyMinimap,
-                    //   image: AssetImage('assets/images/minimap.png'),
-                    //   //width: 60,
-                    //   //height: _appBarHeight - 10,
-                    // ),
                     Container(
-                      margin: EdgeInsets.only(top: 10, left: 15),
+                      //margin: EdgeInsets.only(top: 10, left: 15),
                       child:
-                      Text(getTime(_timeCount)),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children:[
+                                Column(children:[
+                                  Text("時刻",
+                                      style: TextStyle(
+                                          fontSize: 16),
+                                  ),
+                                  Text(getTime(_timeCount),
+                                       style: TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                ]),
+                                GestureDetector(
+                                  onTap: () {
+                                    debugPrint("onTap called.");
+                                  },
+                                  child:Column(children:[
+                                    Text("風速",
+                                      style: TextStyle(
+                                          fontSize: 16),
+                                    ),
+                                    Text((10 * _windLevel).toInt().toString() + "m/s",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ]),
+                                ),
+                                Column(children:[
+                                  Text("ポイント",
+                                    style: TextStyle(
+                                        fontSize: 16),
+                                  ),
+                                  Text(_point.toString()),
+                                ]),
+                              ]),
                     ),
-                  ),
-                  // Container(
-                  //   margin: EdgeInsets.only(
-                  //       top: 10, left: (_minimapWidth * (_maxDepth / _maximumDepth))),
-                  //   child: new Image(
-                  //     image: AssetImage('assets/images/ship.png'),
-                  //     //width: 30,
-                  //     height: 15,
-                  //   ),
-                  // ),
-                  // Container(
-                  //   height: _appBarHeight - 10,
-                  //   margin: EdgeInsets.only(top: 10, left: 15),
-                  //   child:
-                  //   Text(_timeCount.toString()),
-                  // ),
-                ],
-              ),
+
               // //右（複数可）
               // actions: <Widget>[
               //   Container(
@@ -3176,9 +3201,12 @@ endDrawer:  Drawer(
 
   //時間データ取得
   String getTime(int time) {
-    //？？？これは上で宣言すべき
-    final DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
-    return DateFormat('HH:mm').format(startTime.add(Duration(minutes: (time ~/ 50))));
+    return DateFormat('HH:mm').format(startTime.add(Duration(minutes: (time ~/ MINCOUNT))));
+  }
+
+  int getLastTime() {
+    //7:00 ～ 18:00（11h）のカウント数
+    return MINCOUNT * 60 * 11;
   }
 
   //タップ時のエフェクトのリスト
