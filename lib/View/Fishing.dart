@@ -213,6 +213,7 @@ import 'package:intl/intl.dart';
 
 import '../widget/ImageList.dart';
 import '../widget/goalDialog.dart';
+import '../widget/windDialog.dart';
 import 'DrawerItem.dart';
 
 class Fishing extends StatefulWidget {
@@ -335,6 +336,7 @@ class _FishingState extends BasePageState<Fishing>
   bool _flgHit = false; //現在HIT中フラグ
   bool _flgFooking = false; //アワセモード中フラグ
   //var _flgGameOver = false; //現在ゲームオーバーフラグ
+  bool _flgChangeWind = false;  //風変更可能フラグ
 
   //ステート変数
   int _timeCount = 0; //時間 1カウント0.1分
@@ -481,6 +483,7 @@ class _FishingState extends BasePageState<Fishing>
     _tensionValMax = 2000.0;
     _speedValMax = 200.0;
     _drag = 0.8;
+    _flgChangeWind = true;
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -494,7 +497,7 @@ class _FishingState extends BasePageState<Fishing>
       _maxDepth = stage.startDepth;
       //ゴール深さを設定
       _maximumDepth = stage.maximumDepth;
-      //風レベル
+      //風レベル初期値
       _windLevel = stage.windLevel;
 
       //AppBarの高さを取得 ステータスバーの高さも加算
@@ -806,7 +809,10 @@ class _FishingState extends BasePageState<Fishing>
     if (!flgGoal) {
       _timeCount++;
       //深さ変化度合の決定
-      _depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
+      //0.5が無風の場合はこっち
+      //_depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
+      //0が無風の場合はこっち
+      _depthChange = (_shipMove - 0.5) + (_windLevel / 10);
       //深さ決定 船移動分と風分
       _maxDepth += _depthChange;
     } else {
@@ -1670,18 +1676,45 @@ class _FishingState extends BasePageState<Fishing>
                                         fontWeight: FontWeight.bold)),
                                 ]),
                                 GestureDetector(
-                                  onTap: () {
-                                    debugPrint("onTap called.");
+                                  onTap: () async {
+                                    if (_flgChangeWind) {
+                                        _timer.cancel(); //定周期タイマ停止
+                                        bgmStop();
+                                        var result = await showDialog<double>(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (_) {
+                                            return Stack(
+                                              children: [
+                                                windDialog(
+                                                  dispSize: size,
+                                                  nowWindLevel: _windLevel,
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                        //モーダルを閉じた時
+                                        setState(() {
+                                          _windLevel = result!;
+                                        });
+                                        startTimer(); //定周期タイマ再開
+                                        bgmPlay(nowBgm);
+                                    }
                                   },
-                                  child:Column(children:[
-                                    Text("風速",
-                                      style: TextStyle(
-                                          fontSize: 16),
-                                    ),
-                                    Text((10 * _windLevel).toInt().toString() + "m/s",
+                                  child:
+                                  //_flgChangeWind
+                                  Container(child:
+                                    Column(children:[
+                                      Text("風速",
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ]),
+                                            fontSize: 16),
+                                      ),
+                                      Text((10 * _windLevel).toInt().toString() + "m/s",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ]),
+                                  ),
                                 ),
                                 Column(children:[
                                   Text("ポイント",
