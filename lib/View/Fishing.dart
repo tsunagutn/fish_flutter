@@ -223,7 +223,7 @@ import 'DrawerItem.dart';
 
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
-  static String screenBgm = 'bgm_field.mp3';
+  static String screenBgm = 'hamabenouta.mp3';
 
   @override
   _FishingState createState() => _FishingState();
@@ -575,19 +575,20 @@ class _FishingState extends BasePageState<Fishing>
     _bottomHeight = bottomWidget.size.height;
 
     //表示画像の定義
-    lstImage.add(new ImageItem(
-      key: UniqueKey(),
-      painterKey: GlobalKey(),
-      id: 2,
-      imageName: 'sun.png',
-      type: enumImageDispType.sky,
-      top: _appBarHeight,
-      left: MediaQuery.of(context).size.width,
-      startDepth: 0.0, //0.1m単位
-      endDepth: _maximumDepth, //0.1m単位
-      imageSize: new Size(50,50),
-      dispSize: MediaQuery.of(context).size,
-    ));
+    // lstImage.add(new ImageItem(
+    //   key: UniqueKey(),
+    //   painterKey: GlobalKey(),
+    //   id: 2,
+    //   imageName: 'sun.png',
+    //   type: enumImageDispType.sky,
+    //   top: _appBarHeight,
+    //   left: MediaQuery.of(context).size.width,
+    //   startDepth: 0.0, //0.1m単位
+    //   endDepth: _maximumDepth, //0.1m単位
+    //   imageSize: new Size(50,50),
+    //   dispSize: MediaQuery.of(context).size,
+    // ));
+
     lstImage.add(new ImageItem(
       key: UniqueKey(),
       painterKey: GlobalKey(),
@@ -601,7 +602,34 @@ class _FishingState extends BasePageState<Fishing>
       endDepth: 1000.0, //0.1m単位
       imageSize: new Size(5000,_shoreHeight - _appBarHeight),
       dispSize: MediaQuery.of(context).size,
+      widthPer: 0,
     ));
+
+    int kumocount = 100;
+
+    for (var i = 0; i < kumocount; i++) {
+      var rnd = (new math.Random()).nextDouble();
+      var rnd2 = (new math.Random()).nextDouble();
+      var irnd = (new math.Random()).nextInt(2);
+      var kumoWidth = 500 * rnd;
+      var kumoHeight = 100 * rnd;
+
+      lstImage.add(new ImageItem(
+        key: UniqueKey(),
+        painterKey: GlobalKey(),
+        id: 2 + i,
+        imageName: "kumo" + (irnd + 1).toString() + ".png",
+        type: enumImageDispType.sky,
+        top: ((_appBarHeight / 2) + (_appBarHeight * rnd2)),
+        left: MediaQuery.of(context).size.width,
+        startDepth: 1000.0 * rnd, //0.1m単位
+        endDepth: 1500.0 * rnd, //0.1m単位
+        imageSize: new Size(500 ,100),
+        dispSize: MediaQuery.of(context).size,
+        widthPer: rnd2,
+      ));
+    }
+
 
     lstImage.add(new ImageItem(
       key: UniqueKey(),
@@ -615,6 +643,7 @@ class _FishingState extends BasePageState<Fishing>
       endDepth: 90.0, //0.1m単位
       imageSize: new Size(500,150),
       dispSize: MediaQuery.of(context).size,
+      widthPer: 0,
     ));
     lstImage.add(new ImageItem(
       key: UniqueKey(),
@@ -629,6 +658,7 @@ class _FishingState extends BasePageState<Fishing>
       endDepth: 1000.0, //0.1m単位
       imageSize: new Size(300,_shoreHeight - _appBarHeight),
       dispSize: MediaQuery.of(context).size,
+      widthPer: 0,
     ));
 
     flgDispSettingsOk = true;
@@ -649,6 +679,7 @@ class _FishingState extends BasePageState<Fishing>
   //画面の基本BGM関連
   Future bgmPlay(file) async {
     super.bgm.playBgm(name: file);
+    //super.bgm.playBgmRnd();
   }
 
   Future bgmPause() async {
@@ -751,7 +782,7 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
 
-    // _depthChangeScanCnt++;
+    // _depthChangeScanCnt+;
     // if (_depthChangeScanCnt > DEPTH_CHANGE_SCAN) {
     //   _depthChangeScanCnt = 0;
     //   _depthChange = DEPTH_CHANGE_ORDERS[_depthChangeOrder]! +

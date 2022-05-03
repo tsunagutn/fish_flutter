@@ -20,6 +20,7 @@ class ImageItem extends StatefulWidget {
     required this.endDepth,
     required this.imageSize,
     required this.dispSize,
+    required this.widthPer,
   }) : super(key: key);
 
   final GlobalKey painterKey;
@@ -33,6 +34,7 @@ class ImageItem extends StatefulWidget {
   final double endDepth; //MAX水深がこの値の時左に描画終了
   final Size imageSize; //画像サイズ
   final Size dispSize; //画面サイズ
+  final double widthPer;  //画像の幅ランダム割合
 
   @override
   _ImageItemState createState() => _ImageItemState();
@@ -60,6 +62,7 @@ class _ImageItemState extends State<ImageItem>{
           endDepth: widget.endDepth,
           imageSize: widget.imageSize,
           dispSize: widget.dispSize,
+            widthPer: widget.widthPer,  //画像の幅ランダム割合
         ),
       ),
     );
@@ -104,6 +107,7 @@ class ImagePainter extends CustomPainter {
     required this.endDepth,
     required this.imageSize,
     required this.dispSize,
+    required this.widthPer,
   });
 
   final int id;
@@ -116,6 +120,7 @@ class ImagePainter extends CustomPainter {
   final double endDepth; //MAX水深がこの値の時左に描画終了
   final Size imageSize;
   final Size dispSize;
+  final double widthPer;
 
   late ui.Image image;
   bool flgDisp = false;
@@ -146,7 +151,7 @@ class ImagePainter extends CustomPainter {
         // Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         Rect.fromLTWH(0, 0, imageSize.width.toDouble(), imageSize.height.toDouble()),
         Rect.fromLTWH(
-            left, top, imageSize.width.toDouble(), imageSize.height.toDouble()),
+            left, top, imageSize.width.toDouble() * (0.5 + (3 * widthPer)), imageSize.height.toDouble()),
         new Paint(),
       );
     } else {}

@@ -2,6 +2,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audioplayers_api.dart';
 import 'package:fish_flutter/Main.dart';
 
+import 'dart:math' as math;
+
+import 'package:flutter/cupertino.dart';
+
 class BgmPlayer {
   //ボリュームの最大値
   static const maxVolume = 0.5;
@@ -22,6 +26,7 @@ class BgmPlayer {
     bgmUriMap["bgm_field.mp3"] = await _cache.load("bgm/bgm_field.mp3");
     bgmUriMap["bgm_fight.mp3"] = await _cache.load("bgm/bgm_fight.mp3");
     bgmUriMap["bgm_book.mp3"] = await _cache.load("bgm/bgm_book.mp3");
+    bgmUriMap["hamabenouta.mp3"] = await _cache.load("bgm/hamabenouta.mp3");
   }
 
   void playBgm({required String name, bool isLoop = true}) {
@@ -41,6 +46,27 @@ class BgmPlayer {
           volume: maxVolume * settings.volumeBgm);
     }
   }
+  //
+  // void playBgmRnd({bool isLoop = true}) {
+  //   //if (nowBgmName != '') {
+  //   //現在何か再生中なら止める
+  //   stopBgmAny();
+  //   //}
+  //   //設定でBGM有効の時のみ
+  //   if (settings.flgBgm) {
+  //     if (isLoop) {
+  //       _player?.setReleaseMode(ReleaseMode.LOOP);
+  //     } else {
+  //       _player?.setReleaseMode(ReleaseMode.RELEASE);
+  //     }
+  //
+  //     //ランダムでインデックスを作成
+  //     var rnd = (new math.Random()).nextInt(bgmUriMap.length - 1);
+  //     debugPrint("ああああ" + rnd.toString());
+  //     _player?.play(bgmUriMap[rnd].toString(),
+  //         volume: maxVolume * settings.volumeBgm);
+  //   }
+  // }
 
   void pauseBgm(String? name) async {
     if (nowBgmName == name) {
