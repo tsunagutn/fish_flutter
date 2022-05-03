@@ -608,11 +608,9 @@ class _FishingState extends BasePageState<Fishing>
     int kumocount = 100;
 
     for (var i = 0; i < kumocount; i++) {
-      var rnd = (new math.Random()).nextDouble();
-      var rnd2 = (new math.Random()).nextDouble();
-      var irnd = (new math.Random()).nextInt(2);
-      var kumoWidth = 500 * rnd;
-      var kumoHeight = 100 * rnd;
+      double rnd = (new math.Random()).nextDouble();
+      double rnd2 = (new math.Random()).nextDouble();
+      int irnd = (new math.Random()).nextInt(2);
 
       lstImage.add(new ImageItem(
         key: UniqueKey(),
@@ -623,7 +621,7 @@ class _FishingState extends BasePageState<Fishing>
         top: ((_appBarHeight / 2) + (_appBarHeight * rnd2)),
         left: MediaQuery.of(context).size.width,
         startDepth: 1000.0 * rnd, //0.1m単位
-        endDepth: 1500.0 * rnd, //0.1m単位
+        endDepth: 5000.0 * rnd, //0.1m単位
         imageSize: new Size(500 ,100),
         dispSize: MediaQuery.of(context).size,
         widthPer: rnd2,
