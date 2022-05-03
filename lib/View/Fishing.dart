@@ -8,6 +8,9 @@
 //フリーイラスト素材集ジャパクリップ
 //https://japaclip.com/terms-ja/
 
+//童謡・唱歌の世界
+//https://s-pst.info/douyou-syouka/51site/site.htm
+
 //☆基本概要
 
 //☆残り必要な素材
@@ -117,14 +120,15 @@
 //済・巻き成立にディレイかける
 //済・店をもっとましにする→店無くなったのでOK
 //済・王冠つきじゃないと詳細アンロックしない？→つまらんのでボツ
-//・時間
-//・水深20mごとに？風向きを選択（釣れる魚種の傾向を選択も？）
+//済・水深20mごとに？風向きを選択（釣れる魚種の傾向を選択も？）ボツ
+//済・時間
+//・音楽をマシにする
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・タックル変更をもっとましにする、特に重さ
 //・ドラグ使いにくいの何とかする
-//・風の描画？？？いる？
+//・風の描画
 //・雲の描画
 //・海底に漁礁とか
 //・実績
@@ -143,6 +147,7 @@
 //・寝る機能 寝中は何もできずすごい速さでゲームが進む
 //・今日はもう納得した機能 ゲームを途中で諦める
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
+//・光点の残像
 
 //バグ
 //・バレた時アワセ失敗したとき光点の色が戻らん
@@ -275,7 +280,7 @@ class _FishingState extends BasePageState<Fishing>
   static const TIMER_INTERVAL = 50; //1スキャン時間(msec) 20FPS
   //static const TIMER_INTERVAL = 33; //1スキャン時間(msec) 30FPS
   //static const TIMER_INTERVAL = 17; //1スキャン時間(msec) 60FPS
-  static const int MINCOUNT = 50; //1分間のスキャンカウント数
+  static const int MINCOUNT = 30; //1分間のスキャンカウント数
 
   //static const TENSION_VAL_MAX = 300.0; //テンションスライダーMAX値
   static const TENSION_VAL_MIN = 0.0; //テンションスライダーMIN値
@@ -361,7 +366,7 @@ class _FishingState extends BasePageState<Fishing>
   Color _pointerColor = Colors.yellow; //ソナー部光点の色
   double _lightSpotY = 0.0; //ソナー部光点TOP
   double _lightSpotX = 50.0; //ソナー部光点LEFT
-  int _point = 1000; //獲得ポイント
+  int _point = 0; //獲得ポイント
   double _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
   double _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
   int _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
@@ -393,7 +398,7 @@ class _FishingState extends BasePageState<Fishing>
   double _dispDepthLv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
   double _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
 
-  double _windLevel = 0.5; //風レベル 0.0～1.0 0.5で無風
+  double _windLevel = 0.1; //風レベル 0.0～1.0 0.5で無風
 
   var _nowDurationLv; //光点点滅レベル
   double _sonarTop = 0.0;
@@ -495,7 +500,7 @@ class _FishingState extends BasePageState<Fishing>
       //ゴール深さを設定
       _maximumDepth = stage.maximumDepth;
       //風レベル
-      _windLevel = stage.windLevel;
+      //_windLevel = stage.windLevel;
 
       //AppBarの高さを取得 ステータスバーの高さも加算
       _appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
@@ -751,6 +756,12 @@ class _FishingState extends BasePageState<Fishing>
     //   debugPrint("深さ変化傾向" + _depthChange.toString());
     // }
 
+    //水深とポイントを元に風レベル変更
+    //水深10mのとき3000ポイント？
+    var planWindLevel = _point / (_maxDepth * 30);
+
+    _windLevel += (planWindLevel - _windLevel) / 100;
+
     //時合の変化判定
     _jiaiChangeScanCnt++;
     if (_jiaiChangeScanCnt > JIAI_CHANGE_SCAN) {
@@ -805,8 +816,10 @@ class _FishingState extends BasePageState<Fishing>
     }
     if (!flgGoal) {
       _timeCount++;
-      //深さ変化度合の決定
-      _depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
+      //深さ変化度合の決定 0.5が停止の場合
+      //_depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
+      //深さ変化度合の決定 0が停止の場合
+      _depthChange = (_shipMove - 0.5) + (_windLevel / 10);
       //深さ決定 船移動分と風分
       _maxDepth += _depthChange;
     } else {
@@ -1669,20 +1682,21 @@ class _FishingState extends BasePageState<Fishing>
                                        style: TextStyle(
                                         fontWeight: FontWeight.bold)),
                                 ]),
-                                GestureDetector(
-                                  onTap: () {
-                                    debugPrint("onTap called.");
-                                  },
-                                  child:Column(children:[
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     debugPrint("onTap called.");
+                                //   },
+                                //   child:
+                                  Column(children:[
                                     Text("風速",
                                       style: TextStyle(
                                           fontSize: 16),
                                     ),
-                                    Text((10 * _windLevel).toInt().toString() + "m/s",
+                                    Text((10 * _windLevel).toStringAsFixed(1) + "m/s",
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
                                   ]),
-                                ),
+                                //),
                                 Column(children:[
                                   Text("ポイント",
                                     style: TextStyle(
