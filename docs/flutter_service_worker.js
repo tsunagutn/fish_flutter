@@ -3,10 +3,20 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "2cb114aa83a19669ba259d8861fd4886",
+  "assets/AssetManifest.json": "1046510f6ffe4de9b4a4ae598bbb5b58",
 "assets/assets/bgm/bgm_book.mp3": "aeb1c7d372bece72793057403ea32e51",
 "assets/assets/bgm/bgm_field.mp3": "24af8bdee28fe421db22248a9243d1e9",
 "assets/assets/bgm/bgm_fight.mp3": "841ec535c2af527edc286cda935584b4",
+"assets/assets/bgm/boatnouta.mp3": "d25895e4a8f77b5229218986b59aadba",
+"assets/assets/bgm/hamabenouta.mp3": "62ec6c186e639ae5547d92927069423d",
+"assets/assets/bgm/ieji.mp3": "42903ca8afe5b87cccaafc4d9ff728d9",
+"assets/assets/bgm/kaigarabushi.mp3": "e9a62dab07e847b1114603e1db717015",
+"assets/assets/bgm/kanpainouta.mp3": "5936b1cbe961200d48d3e2b70818a9b5",
+"assets/assets/bgm/namiunouta.mp3": "50d31fbcdf8545900897af342b2e34bf",
+"assets/assets/bgm/saitarobushi.mp3": "2f7fa75a20ac7bb17b8c3b61c9456959",
+"assets/assets/bgm/sendosan.mp3": "d08d32dabe266a879438c3e911c842ee",
+"assets/assets/bgm/syusen.mp3": "5dcef04fa26094040af4fb4844a78d56",
+"assets/assets/bgm/tairyobushi.mp3": "83ff4372993dfb3d5708e73b6a3dbcc0",
 "assets/assets/images/aeae.png": "bc5c3f756fa13507f2ff00a818c8cec2",
 "assets/assets/images/arrow_left.png": "97454757e6b76718d951b11bf14ea1bb",
 "assets/assets/images/arrow_right.png": "da0cbb5cf372a6d5e713f8b7cd07f8de",
@@ -39,6 +49,9 @@ const RESOURCES = {
 "assets/assets/images/fishback.jpg": "cccd1f3d68e9ff004efb15bfbde56ed4",
 "assets/assets/images/hari.png": "4c6f2b13241cd99063741beda3b2e2e3",
 "assets/assets/images/jig.png": "89c822c67ef2f22de295089524b6c9a5",
+"assets/assets/images/kumo1.png": "2d94b689dd249f6338cd2ee5c83ffcb4",
+"assets/assets/images/kumo2.png": "cc91e24688916e753aa2f1575fe2a229",
+"assets/assets/images/kumo3.png": "a8d6c2b21eb4ce15b1f823c78943c40c",
 "assets/assets/images/minimap.png": "4c792493b5822785a03df6c7551c2f51",
 "assets/assets/images/mounten.png": "f5bcb31243d3d7da60adf5177c689870",
 "assets/assets/images/mounten_test.png": "fed8fe92b0fa7b9b5e1c7d5b6cfd121d",
@@ -102,10 +115,10 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "416617a7995ea88e5a9f2b90eeff38dd",
-"/": "416617a7995ea88e5a9f2b90eeff38dd",
-"main.dart.js": "b7d8b38bcb733314ed3149371623b947",
-"manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
+"index.html": "b097c6a05a5318db8a9e37fd67c354c0",
+"/": "b097c6a05a5318db8a9e37fd67c354c0",
+"main.dart.js": "7b43fff74df7457b82c8e3af71a956fc",
+"manifest.json": "e47fc872923be81230833286bf30a0aa",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };
 
