@@ -10,6 +10,11 @@ import '../Main.dart';
 import '../widget/SettingDialog.dart';
 
 class Menu extends StatefulWidget {
+  static List<String> screenBgms = [
+    'hamabenouta.mp3',
+    'kaigarabushi.mp3',
+    'saitarobushi.mp3'
+  ];
   @override
   _menuState createState() {
     return _menuState();
@@ -17,7 +22,7 @@ class Menu extends StatefulWidget {
 }
 
 class _menuState extends BasePageState<Menu> {
-  _menuState() : super(fileName: "bgm_fight.mp3");
+  _menuState() : super(fileNames: Menu.screenBgms);
 
   @override
   Widget buildChildWidget(BuildContext context) {
@@ -67,13 +72,12 @@ class _menuState extends BasePageState<Menu> {
                               //await Navigator.of(context).pushNamed('/fishing');
                               bgm.loadBgm().then((_) {
                             // ここでBGMデータの全ロード処理実行
-                            debugPrint(Fishing.screenBgm);
                             //効果音managerで無音を再生
                             soundManagerPool.SoundManagerPoolInit();
-                            bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                            //bgm.playBgm(name: Fishing.screenBgms); // 遷移先のBGM再生
+                            super.bgmPlay(Fishing.screenBgms);
                             Navigator.pushNamed(context, "/fishing",
-                                arguments: stages.getStageData(1)
-                            );
+                                arguments: stages.getStageData(1));
                           });
                         },
                         child: Container(
@@ -109,16 +113,15 @@ class _menuState extends BasePageState<Menu> {
                         borderRadius: BorderRadius.circular(10),
                         onTap: () async {
                           final result =
-                          //await Navigator.of(context).pushNamed('/fishing');
-                          bgm.loadBgm().then((_) {
+                              //await Navigator.of(context).pushNamed('/fishing');
+                              bgm.loadBgm().then((_) {
                             // ここでBGMデータの全ロード処理実行
-                            debugPrint(Fishing.screenBgm);
                             //効果音managerで無音を再生
                             soundManagerPool.SoundManagerPoolInit();
-                            bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                            //bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                            super.bgmPlay(Fishing.screenBgms);
                             Navigator.pushNamed(context, "/fishing",
-                                arguments: stages.getStageData(0)
-                            );
+                                arguments: stages.getStageData(0));
                           });
                         },
                         child: Container(
@@ -127,7 +130,7 @@ class _menuState extends BasePageState<Menu> {
                             height: 50,
                             child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceAround,
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   Icon(
                                     Icons.check,
@@ -169,7 +172,7 @@ class _menuState extends BasePageState<Menu> {
                               );
                             },
                           );
-                          bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                          //bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
                         },
                         child: Container(
                             margin: const EdgeInsets.all(10.0),

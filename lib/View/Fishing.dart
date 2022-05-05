@@ -122,14 +122,16 @@
 //済・王冠つきじゃないと詳細アンロックしない？→つまらんのでボツ
 //済・水深20mごとに？風向きを選択（釣れる魚種の傾向を選択も？）ボツ
 //済・時間
-//・音楽をマシにする
+//済・音楽をマシにする
+//済・音楽再生のランダム化
+//済・夕方でＢＧＭ変える
+//済・雲の描画
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・タックル変更をもっとましにする、特に重さ
 //・ドラグ使いにくいの何とかする
 //・風の描画
-//・雲の描画
 //・海底に漁礁とか
 //・実績
 //・時合度が低いのが続かんようにするか、高くできるようにする
@@ -186,6 +188,7 @@ import 'package:fish_flutter/Model/FishResultsModel.dart';
 //import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/Model/StageModel.dart';
+import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/FIshCard.dart';
 import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
@@ -223,7 +226,8 @@ import 'DrawerItem.dart';
 
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
-  static String screenBgm = 'hamabenouta.mp3';
+  //static String screenBgm = 'hamabenouta.mp3';
+  static List<String> screenBgms = ['hamabenouta.mp3','kaigarabushi.mp3','saitarobushi.mp3','kanpainouta.mp3','namiunouta.mp3','sendosan.mp3','syusen.mp3','tairyobushi.mp3'];
 
   @override
   _FishingState createState() => _FishingState();
@@ -235,7 +239,7 @@ enum PlayerState { stopped, playing, paused }
 class _FishingState extends BasePageState<Fishing>
     with TickerProviderStateMixin {
   _FishingState()
-      : super(fileName: Fishing.screenBgm); // <-- 親クラスのコンストラクタにファイル名設定
+      : super(fileNames: Fishing.screenBgms); // <-- 親クラスのコンストラクタにファイル名設定
 
   //定数の定義？？？いろいろ環境設定にした方がいいかと
   //モーダル中のBGM
@@ -342,6 +346,7 @@ class _FishingState extends BasePageState<Fishing>
   bool _flgFooking = false; //アワセモード中フラグ
   //var _flgGameOver = false; //現在ゲームオーバーフラグ
   bool _flgChangeWind = false;  //風変更可能フラグ
+  bool _flgEvening = false; //夕方フラグ
 
   //ステート変数
   int _timeCount = 0; //時間 1カウント0.1分
@@ -377,6 +382,7 @@ class _FishingState extends BasePageState<Fishing>
   double _maxLineHp = 1000.0; //ラインHP最大値
   double _nowLineHp = 1000.0; //現在ラインHP
 
+  List<Color> _skyColors = [];
   int _shipMoveSeScan = 0;
 
   double _cursorX = 0.0; //ドラッグ操作開始時の座標X
@@ -480,7 +486,7 @@ class _FishingState extends BasePageState<Fishing>
     //現在使用中のルアーデータ
     uselureData = lures.getLureData(_useLureId);
     //基本BGM
-    nowBgm = Fishing.screenBgm;
+    //nowBgm = Fishing.screenBgm;
     //所持リストを初期化
     //haveTackle = new HaveTackleModel();
     // _tensionValMax = haveTackle.getUseRod().maxTention;
@@ -489,6 +495,12 @@ class _FishingState extends BasePageState<Fishing>
     _speedValMax = 200.0;
     _drag = 0.8;
     _flgChangeWind = true;
+    //空の色 初期値
+    _skyColors = [
+      clsColor.getColorFromHex("5495FF"),
+      clsColor.getColorFromHex("EFFAFF")
+    ];
+
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -675,22 +687,22 @@ class _FishingState extends BasePageState<Fishing>
   }
 
   //画面の基本BGM関連
-  Future bgmPlay(file) async {
-    super.bgm.playBgm(name: file);
-    //super.bgm.playBgmRnd();
-  }
+  // Future bgmPlay(file) async {
+  //   super.bgm.playBgm(name: file);
+  //   //super.bgm.playBgmRnd();
+  // }
 
-  Future bgmPause() async {
-    super.bgm.pauseBgmAny();
-  }
+  // Future bgmPause() async {
+  //   super.bgm.pauseBgmAny();
+  // }
 
-  Future bgmResume() async {
-    super.bgm.resumeBgm();
-  }
+  // Future bgmResume() async {
+  //   super.bgm.resumeBgm();
+  // }
 
-  Future bgmStop() async {
-    super.bgm.stopBgmAny();
-  }
+  // Future bgmStop() async {
+  //   super.bgmStop();
+  // }
 
   //定周期タイマの起動
   void startTimer() {
@@ -728,6 +740,25 @@ class _FishingState extends BasePageState<Fishing>
     //     break;
     //   }
     // }
+
+
+    //16:30から徐々に夕方
+    double eveningCount = MINCOUNT * 60 * 10.0;
+    //現在が夕方の場合
+    if (_timeCount > eveningCount) {
+      _flgEvening = true;
+      var skyMaxVal =  getLastTime() - eveningCount;
+      var skyVal =  _timeCount - eveningCount;
+      if (skyVal > skyMaxVal) skyVal = skyMaxVal;
+      _skyColors = [];
+      //時間によって空の色を変える
+      _skyColors.add(clsColor.getColorRange(clsColor.getColorFromHex("5495FF"),clsColor.getColorFromHex("952E02"),
+      skyVal, skyMaxVal));
+      _skyColors.add(clsColor.getColorRange(clsColor.getColorFromHex("EFFAFF"),clsColor.getColorFromHex("F69500"),
+      skyVal, skyMaxVal));
+    } else {
+      _flgEvening = false;
+    }    
 
     //終了時間に到達
     bool flgGoal = false;
@@ -789,10 +820,9 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     //水深とポイントを元に風レベル変更
-    //水深10mのとき3000ポイント？
-    var planWindLevel = _point / (_maxDepth * 30);
+    var planWindLevel = _point / (_maxDepth * 50);
 
-    _windLevel += (planWindLevel - _windLevel) / 100;
+    _windLevel += (planWindLevel - _windLevel) / 50;
 
     //時合の変化判定
     _jiaiChangeScanCnt++;
@@ -897,7 +927,6 @@ class _FishingState extends BasePageState<Fishing>
       //暴れレベル変化判定
       if (rand < 0.05) {
         _abareLv = (new math.Random()).nextInt(_hitFish.abareLv) + 1;
-        debugPrint(_abareLv.toString());
       }
       //残HP減算 暴れLv分減算
       _hitScanCnt -= _abareLv * 2;
@@ -1019,8 +1048,8 @@ class _FishingState extends BasePageState<Fishing>
         uselureData.lvDown();
         val = 0.0;
         soundManagerPool.playSound('se/linebreak.mp3');
-        nowBgm = Fishing.screenBgm;
-        bgmPlay(nowBgm);
+        //nowBgm = Fishing.screenBgm;
+        playFieldBgm();
 
         _flgBait = false;
         _flgHit = false;
@@ -1202,9 +1231,9 @@ class _FishingState extends BasePageState<Fishing>
       }
 
       startTimer(); //定周期タイマ再開
-      nowBgm = Fishing.screenBgm;
-      bgmPlay(nowBgm);
-    }
+      //nowBgm = Fishing.screenBgm;
+      playFieldBgm();
+      }
 
     //光点点滅速度関連の変数
     final durationMax = POINT_DURATION_MSEC[POINT_DURATION_MSEC.length - 1]!;
@@ -1515,8 +1544,8 @@ class _FishingState extends BasePageState<Fishing>
             startCenterInfo();
 
             soundManagerPool.playSound('se/hit.mp3');
-            nowBgm = 'bgm_fight.mp3';
-            bgmPlay(nowBgm);
+            //nowBgm = 'bgm_fight.mp3';
+            super.bgmPlaytoFile('bgm_fight.mp3');
           } else {
             //アワセ成立しないとき、テンションの今回値を記憶
             _fookingTensionPrev = _tension;
@@ -1560,8 +1589,8 @@ class _FishingState extends BasePageState<Fishing>
             _centerTextSubColor = Colors.blue;
             startCenterInfo();
 
-            nowBgm = Fishing.screenBgm;
-            bgmPlay(nowBgm);
+            //nowBgm = Fishing.screenBgm;
+            playFieldBgm();
             _bareCnt = 0;
           }
         }
@@ -1692,7 +1721,7 @@ class _FishingState extends BasePageState<Fishing>
                       );
                       soundManagerPool.playSound('se/bookclose.mp3');
                       startTimer(); //定周期タイマ再開
-                      bgmPlay(nowBgm);
+                      playFieldBgm();
 
                       setState(() {});
                     },
@@ -1866,7 +1895,7 @@ endDrawer:  Drawer(
         trailing: Icon(Icons.arrow_forward_ios),
         onTap: () async {
               _timer.cancel(); //定周期タイマ停止
-              bgmStop();
+              super.bgmStop();
               //subBgmLoop('bgm/bgm_book.mp3');
               //soundManagerPool.playSound('se/book.mp3'); //音は仮
               int? result = await showDialog<int>(
@@ -1880,7 +1909,7 @@ endDrawer:  Drawer(
             },
           );
               startTimer(); //定周期タイマ再開
-              bgmPlay(nowBgm);
+              playFieldBgm();
               setState(() {});
         },
       ),
@@ -1889,7 +1918,7 @@ endDrawer:  Drawer(
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () async {
                         _timer.cancel(); //定周期タイマ停止
-                        bgmStop();
+                        super.bgmStop();
                         int? result = await showDialog<int>(
                           context: context,
                           barrierDismissible: false,
@@ -1900,7 +1929,7 @@ endDrawer:  Drawer(
                           },
                         );
                         startTimer(); //定周期タイマ再開
-                        bgmPlay(nowBgm);
+      playFieldBgm();
                         setState(() {});
 
 
@@ -1992,7 +2021,6 @@ endDrawer:  Drawer(
                   _speed = val;
                   //アワセ値
                   //addVal = (moveY / 100);
-                  debugPrint(settings.jerkSense.toString());
                   //Y軸の移動距離を 40～150の範囲で割った値（環境設定によって可変）
                   addVal = moveY / (40 + (110 * (1.0 - settings.jerkSense)));
                   val = _rodStandUp + addVal;
@@ -2023,10 +2051,7 @@ endDrawer:  Drawer(
                         gradient: LinearGradient(
                       begin: FractionalOffset.topCenter,
                       end: FractionalOffset.bottomCenter,
-                      colors: [
-                        clsColor.getColorFromHex("5495FF"),
-                        clsColor.getColorFromHex("EFFAFF")
-                      ],
+                      colors: _skyColors,
                       stops: const [
                         0.0,
                         0.3,
@@ -3253,6 +3278,17 @@ endDrawer:  Drawer(
   int getLastTime() {
     //7:00 ～ 18:00（11h）のカウント数
     return MINCOUNT * 60 * 11;
+  }
+
+  //通常BGM再生
+  void playFieldBgm() {
+    //時間が夕方なら専用BGMを流す
+    if (_flgEvening) {
+        super.bgmPlaytoFile('ieji.mp3');
+    } else {
+    //夕方で無ければランダムで流す
+        super.bgmPlay(Fishing.screenBgms);
+    }
   }
 
   //タップ時のエフェクトのリスト

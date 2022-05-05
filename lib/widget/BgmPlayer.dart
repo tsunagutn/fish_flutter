@@ -26,7 +26,16 @@ class BgmPlayer {
     bgmUriMap["bgm_field.mp3"] = await _cache.load("bgm/bgm_field.mp3");
     bgmUriMap["bgm_fight.mp3"] = await _cache.load("bgm/bgm_fight.mp3");
     bgmUriMap["bgm_book.mp3"] = await _cache.load("bgm/bgm_book.mp3");
+    bgmUriMap["boatnouta.mp3"] = await _cache.load("bgm/boatnouta.mp3");
     bgmUriMap["hamabenouta.mp3"] = await _cache.load("bgm/hamabenouta.mp3");
+    bgmUriMap["ieji.mp3"] = await _cache.load("bgm/ieji.mp3");
+    bgmUriMap["kaigarabushi.mp3"] = await _cache.load("bgm/kaigarabushi.mp3");
+    bgmUriMap["kanpainouta.mp3"] = await _cache.load("bgm/kanpainouta.mp3");
+    bgmUriMap["namiunouta.mp3"] = await _cache.load("bgm/namiunouta.mp3");
+    bgmUriMap["saitarobushi.mp3"] = await _cache.load("bgm/saitarobushi.mp3");
+    bgmUriMap["sendosan.mp3"] = await _cache.load("bgm/sendosan.mp3");
+    bgmUriMap["syusen.mp3"] = await _cache.load("bgm/syusen.mp3");
+    bgmUriMap["tairyobushi.mp3"] = await _cache.load("bgm/tairyobushi.mp3");
   }
 
   void playBgm({required String name, bool isLoop = true}) {
@@ -46,27 +55,6 @@ class BgmPlayer {
           volume: maxVolume * settings.volumeBgm);
     }
   }
-  //
-  // void playBgmRnd({bool isLoop = true}) {
-  //   //if (nowBgmName != '') {
-  //   //現在何か再生中なら止める
-  //   stopBgmAny();
-  //   //}
-  //   //設定でBGM有効の時のみ
-  //   if (settings.flgBgm) {
-  //     if (isLoop) {
-  //       _player?.setReleaseMode(ReleaseMode.LOOP);
-  //     } else {
-  //       _player?.setReleaseMode(ReleaseMode.RELEASE);
-  //     }
-  //
-  //     //ランダムでインデックスを作成
-  //     var rnd = (new math.Random()).nextInt(bgmUriMap.length - 1);
-  //     debugPrint("ああああ" + rnd.toString());
-  //     _player?.play(bgmUriMap[rnd].toString(),
-  //         volume: maxVolume * settings.volumeBgm);
-  //   }
-  // }
 
   void pauseBgm(String? name) async {
     if (nowBgmName == name) {
