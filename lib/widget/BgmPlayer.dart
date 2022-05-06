@@ -35,7 +35,16 @@ class BgmPlayer {
     bgmUriMap["saitarobushi.mp3"] = await _cache.load("bgm/saitarobushi.mp3");
     bgmUriMap["sendosan.mp3"] = await _cache.load("bgm/sendosan.mp3");
     bgmUriMap["syusen.mp3"] = await _cache.load("bgm/syusen.mp3");
-    bgmUriMap["tairyobushi.mp3"] = await _cache.load("bgm/tairyobushi.mp3");
+    bgmUriMap["bgm_fight_star1.mp3"] =
+        await _cache.load("bgm/bgm_fight_star1.mp3");
+    bgmUriMap["bgm_fight_star2.mp3"] =
+        await _cache.load("bgm/bgm_fight_star2.mp3");
+    bgmUriMap["bgm_fight_star3.mp3"] =
+        await _cache.load("bgm/bgm_fight_star3.mp3");
+    bgmUriMap["bgm_fight_star4.mp3"] =
+        await _cache.load("bgm/bgm_fight_star4.mp3");
+    bgmUriMap["bgm_fight_star5.mp3"] =
+        await _cache.load("bgm/bgm_fight_star5.mp3");
   }
 
   void playBgm({required String name, bool isLoop = true}) {

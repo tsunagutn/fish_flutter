@@ -11,9 +11,9 @@ import '../widget/SettingDialog.dart';
 
 class Menu extends StatefulWidget {
   static List<String> screenBgms = [
-    'hamabenouta.mp3',
-    'kaigarabushi.mp3',
-    'saitarobushi.mp3'
+    'kanpainouta.mp3',
+    // 'kaigarabushi.mp3',
+    // 'saitarobushi.mp3'
   ];
   @override
   _menuState createState() {
@@ -75,7 +75,7 @@ class _menuState extends BasePageState<Menu> {
                             //効果音managerで無音を再生
                             soundManagerPool.SoundManagerPoolInit();
                             //bgm.playBgm(name: Fishing.screenBgms); // 遷移先のBGM再生
-                            super.bgmPlay(Fishing.screenBgms);
+                            //super.bgmPlay(Fishing.screenBgms);
                             Navigator.pushNamed(context, "/fishing",
                                 arguments: stages.getStageData(1));
                           });
@@ -113,7 +113,6 @@ class _menuState extends BasePageState<Menu> {
                         borderRadius: BorderRadius.circular(10),
                         onTap: () async {
                           final result =
-                              //await Navigator.of(context).pushNamed('/fishing');
                               bgm.loadBgm().then((_) {
                             // ここでBGMデータの全ロード処理実行
                             //効果音managerで無音を再生
@@ -156,12 +155,7 @@ class _menuState extends BasePageState<Menu> {
                         splashColor: Colors.blue.withAlpha(10),
                         borderRadius: BorderRadius.circular(10),
                         onTap: () async {
-                          // final result =
-                          //     await Navigator.of(context).pushNamed('/settings');
-                          // if (result != null) {
-                          //   setState(() {
-                          //     todoList.add(result);
-                          //   });
+
                           super.bgm.stopBgmAny();
                           int? result = await showDialog<int>(
                             context: context,
@@ -172,7 +166,8 @@ class _menuState extends BasePageState<Menu> {
                               );
                             },
                           );
-                          //bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                          super.bgmPlay(Menu.screenBgms);
+
                         },
                         child: Container(
                             margin: const EdgeInsets.all(10.0),

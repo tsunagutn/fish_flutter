@@ -126,6 +126,7 @@
 //済・音楽再生のランダム化
 //済・夕方でＢＧＭ変える
 //済・雲の描画
+//済・大量に経験値で一気にレベル上がった時、途中の重さが解放されない
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
@@ -154,7 +155,6 @@
 //バグ
 //・バレた時アワセ失敗したとき光点の色が戻らん
 //・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
-//・大量に経験値で一気にレベル上がった時、途中の重さが解放されない
 //・Android たまに「System UI isnt responding」「Wrote stack traces to tombstoned」がでる
 //　多分FIshPointer関係のバグっぽい？
 
@@ -227,7 +227,15 @@ import 'DrawerItem.dart';
 class Fishing extends StatefulWidget {
   Fishing({Key? key}) : super(key: key);
   //static String screenBgm = 'hamabenouta.mp3';
-  static List<String> screenBgms = ['hamabenouta.mp3','kaigarabushi.mp3','saitarobushi.mp3','kanpainouta.mp3','namiunouta.mp3','sendosan.mp3','syusen.mp3','tairyobushi.mp3'];
+  static List<String> screenBgms = [
+    'hamabenouta.mp3',
+    'kaigarabushi.mp3',
+    'saitarobushi.mp3',
+    'namiunouta.mp3',
+    'sendosan.mp3',
+    'syusen.mp3',
+    'tairyobushi.mp3'
+  ];
 
   @override
   _FishingState createState() => _FishingState();
@@ -261,6 +269,14 @@ class _FishingState extends BasePageState<Fishing>
   //late HaveTackleModel haveTackle;
   //画像リスト
   List<ImageItem> lstImage = [];
+
+  static const List<String> lstBgmFight = [
+    "bgm_fight_star1.mp3",
+    "bgm_fight_star2.mp3",
+    "bgm_fight_star3.mp3",
+    "bgm_fight_star4.mp3",
+    "bgm_fight_star5.mp3",
+  ];
 
   //光点の点滅速度 ？？？テンション最大値によって可変にする
   static const Map<int, int> POINT_DURATION_MSEC = {
@@ -350,6 +366,7 @@ class _FishingState extends BasePageState<Fishing>
 
   //ステート変数
   int _timeCount = 0; //時間 1カウント0.1分
+  //int _timeCount = MINCOUNT * 60 * 10;  //夕方から
   DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
   double _tension = 0.0; //テンション値
   double _tensionValMax = 0.0; //テンション最大値 竿によって可変
@@ -500,7 +517,6 @@ class _FishingState extends BasePageState<Fishing>
       clsColor.getColorFromHex("5495FF"),
       clsColor.getColorFromHex("EFFAFF")
     ];
-
 
     // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
     // addPostFrameCallbackメソッドを実行
@@ -672,6 +688,8 @@ class _FishingState extends BasePageState<Fishing>
     ));
 
     flgDispSettingsOk = true;
+    super.bgmPlay(Fishing.screenBgms);
+
   }
 
   void dispose() {
@@ -1545,7 +1563,7 @@ class _FishingState extends BasePageState<Fishing>
 
             soundManagerPool.playSound('se/hit.mp3');
             //nowBgm = 'bgm_fight.mp3';
-            super.bgmPlaytoFile('bgm_fight.mp3');
+            super.bgmPlaytoFile(lstBgmFight[_hitFish.rare - 1]);
           } else {
             //アワセ成立しないとき、テンションの今回値を記憶
             _fookingTensionPrev = _tension;
@@ -2288,13 +2306,13 @@ endDrawer:  Drawer(
                                 decoration: BoxDecoration(
                                     border: Border.all(
                                         color:
-                                            clsColor.getColorFromHex("02D5F2")),
+                                            clsColor.getColorFromHex("84E0ED")),
                                     //color: clsColor.getColorFromHex("200070"),
                                     gradient: LinearGradient(
                                       begin: FractionalOffset.topCenter,
                                       end: FractionalOffset.bottomCenter,
                                       colors: [
-                                        clsColor.getColorFromHex("02D5F2"),
+                                        clsColor.getColorFromHex("84E0ED"),
                                         clsColor.getColorFromHex("013367"),
                                         clsColor.getColorFromHex("002142"),
                                         clsColor.getColorFromHex("000000"),
@@ -2531,8 +2549,8 @@ endDrawer:  Drawer(
                                   ClipPath(
                                     child: Container(
                                         color: clsColor
-                                            .getColorFromHex("02D5F2")
-                                            .withOpacity(0.9)),
+                                            .getColorFromHex("FFFFFF")
+                                            .withOpacity(0.5)),
                                     clipper: WaveClipper(
                                         context, waveController.value, 0),
                                   ),
@@ -2540,8 +2558,8 @@ endDrawer:  Drawer(
                                   ClipPath(
                                     child: Container(
                                         color: clsColor
-                                            .getColorFromHex("02D5F2")
-                                            .withOpacity(0.5)),
+                                            .getColorFromHex("84E0ED")
+                                            .withOpacity(0.9)),
                                     clipper: WaveClipper(
                                         context, waveController.value, 0.5),
                                   ),
