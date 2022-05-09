@@ -1,5 +1,11 @@
 import 'package:fish_flutter/Model/FishModel.dart';
 
+enum enumResult {
+  success,
+  bare,
+  cut,
+}
+
 //釣果全体のモデル
 class FishesResultModel {
   late List<FishResultModel> listFishResult;
@@ -9,9 +15,20 @@ class FishesResultModel {
   }
 
   //釣果の追加
-  addResult(int fishId, double size) {
-    FishResultModel fishResult =
-        new FishResultModel(fishId: fishId, size: size);
+  addResult(
+    int fishId,
+    double size,
+    double depth,
+    double maxDepth,
+    enumResult resultKbn,
+  ) {
+    FishResultModel fishResult = new FishResultModel(
+      fishId: fishId,
+      size: size,
+      depth: depth,
+      maxDepth: maxDepth,
+      resultKbn: resultKbn,
+    );
     listFishResult.add(fishResult);
   }
 
@@ -19,7 +36,7 @@ class FishesResultModel {
   double getMinSize(int fishId) {
     var minSize = 1.1;
     listFishResult.forEach((val) {
-      if (val.fishId == fishId) {
+      if (val.fishId == fishId && val.resultKbn == enumResult.success) {
         if (minSize > val.size) {
           minSize = val.size;
         }
@@ -33,7 +50,7 @@ class FishesResultModel {
   double getMaxSize(int fishId) {
     var maxSize = -0.1;
     listFishResult.forEach((val) {
-      if (val.fishId == fishId) {
+      if (val.fishId == fishId && val.resultKbn == enumResult.success) {
         if (maxSize < val.size) {
           maxSize = val.size;
         }
@@ -48,10 +65,16 @@ class FishesResultModel {
 class FishResultModel {
   int fishId;
   double size; //0.0～1.0
+  double depth;
+  double maxDepth;
+  enumResult resultKbn;
 
   //コンストラクタ
   FishResultModel({
     required this.fishId,
     required this.size,
+    required this.depth,
+    required this.maxDepth,
+    required this.resultKbn,
   });
 }

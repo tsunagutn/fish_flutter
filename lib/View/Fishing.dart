@@ -363,6 +363,7 @@ class _FishingState extends BasePageState<Fishing>
   //var _flgGameOver = false; //現在ゲームオーバーフラグ
   bool _flgChangeWind = false;  //風変更可能フラグ
   bool _flgEvening = false; //夕方フラグ
+  bool _flgWindLvUp = false; //風レベル上昇中フラグ
 
   //ステート変数
   int _timeCount = 0; //時間 1カウント0.1分
@@ -839,8 +840,13 @@ class _FishingState extends BasePageState<Fishing>
 
     //水深とポイントを元に風レベル変更
     var planWindLevel = _point / (_maxDepth * 50);
-
+    var oldLv = _windLevel;
     _windLevel += (planWindLevel - _windLevel) / 50;
+    if (oldLv < _windLevel) {
+      _flgWindLvUp = true;
+    } else {
+      _flgWindLvUp = false;
+    }
 
     //時合の変化判定
     _jiaiChangeScanCnt++;
@@ -1054,6 +1060,14 @@ class _FishingState extends BasePageState<Fishing>
       if (_nowLineHp < 0) {
         //糸切れ
         debugPrint("いときれ");
+        //釣果リストに登録
+        fishesResult.addResult(
+          _hitFish.id,
+          _fishSize,
+          _depth,
+          _maxDepth,
+          enumResult.cut,
+        );
         //メッセージ
         _centerTextMain = "糸が切れた!";
         _centerTextMainColor = Colors.red;
@@ -1196,7 +1210,7 @@ class _FishingState extends BasePageState<Fishing>
       //初釣果判定
       var flgNew = true;
       fishesResult.listFishResult.forEach((val) {
-        if (val.fishId == _hitFish.id) {
+        if (val.fishId == _hitFish.id && val.resultKbn == enumResult.success) {
           flgNew = false;
           return;
         }
@@ -1226,13 +1240,19 @@ class _FishingState extends BasePageState<Fishing>
           );
         },
       );
+      //釣果リストに登録
+      fishesResult.addResult(
+        _hitFish.id,
+        _fishSize,
+        _depth,
+        _maxDepth,
+        enumResult.success,
+      );
       //モーダル閉じた時
       _depth = 0.0;
       _tension = 0.0;
       //ポイントを加算
       _point += point;
-      //釣果リストに登録
-      fishesResult.addResult(_hitFish.id, _fishSize);
       //魚種による成長
       switch (_hitFish.type) {
         case enumFishType.blue:
@@ -1598,6 +1618,14 @@ class _FishingState extends BasePageState<Fishing>
           if (_fookingTension > _tensionValMax) {
             //バレ条件成立が一定スキャン保持でバレとする
             debugPrint("バレ");
+            //釣果リストに登録
+            fishesResult.addResult(
+              _hitFish.id,
+              _fishSize,
+              _depth,
+              _maxDepth,
+              enumResult.bare,
+            );
             _flgBait = false;
             _flgHit = false;
             //バレメッセージ
@@ -1755,33 +1783,86 @@ class _FishingState extends BasePageState<Fishing>
                                 Column(children:[
                                   Text("時刻",
                                       style: TextStyle(
-                                          fontSize: 16),
+                                          fontSize: 16,  shadows: <Shadow>[
+             Shadow(
+               color: Colors.black,
+               offset: Offset(2.0, 2.0),
+               blurRadius: 3.0,
+             ),],),
                                   ),
                                   Text(getTime(_timeCount),
                                        style: TextStyle(
-                                        fontWeight: FontWeight.bold)),
+                                        fontWeight: FontWeight.bold,  shadows: <Shadow>[
+             Shadow(
+               color: Colors.black,
+               offset: Offset(2.0, 2.0),
+               blurRadius: 3.0,
+             ),],),),
                                 ]),
                                 // GestureDetector(
                                 //   onTap: () {
                                 //     debugPrint("onTap called.");
                                 //   },
                                 //   child:
+          Container(
+        decoration: BoxDecoration(
+            image: DecorationImage(
+          image: AssetImage("assets/images/windlvup.gif"),
+          fit: BoxFit.cover,
+          opacity: _flgWindLvUp ? 0.7 : 0.0,
+        )),
+        child:
                                   Column(children:[
                                     Text("風速",
                                       style: TextStyle(
-                                          fontSize: 16),
+                                          fontSize: 16,  shadows: <Shadow>[
+             Shadow(
+               color: Colors.black,
+               offset: Offset(2.0, 2.0),
+               blurRadius: 3.0,
+             ),
+           ],),
                                     ),
                                     Text((10 * _windLevel).toStringAsFixed(1) + "m/s",
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
+                                            fontWeight: FontWeight.bold,  shadows: <Shadow>[
+             Shadow(
+               color: Colors.black,
+               offset: Offset(2.0, 2.0),
+               blurRadius: 3.0,
+             ),
+           ],)),
                                   ]),
-                                //),
+                                  //   (_flgWindLvUp) ?
+                                  //     new Image(
+                                  //       image: AssetImage(
+                                  //           'assets/images/windlvup.gif'),
+                                  //           height: 40,
+                                  //     ):Container(),
+                                  // ],),
+                                ),
                                 Column(children:[
                                   Text("ポイント",
                                     style: TextStyle(
-                                        fontSize: 16),
+                                        fontSize: 16,  shadows: <Shadow>[
+             Shadow(
+               color: Colors.black,
+               offset: Offset(2.0, 2.0),
+               blurRadius: 3.0,
+             ),],),
                                   ),
-                                  Text(_point.toString()),
+                                  Text(_point.toString(),
+                                    style: TextStyle(
+                                        fontSize: 16,  shadows: <Shadow>[
+             Shadow(
+               color: Colors.black,
+               offset: Offset(2.0, 2.0),
+               blurRadius: 3.0,
+             ),],),
+                                  
+                                  
+                                  
+                                  ),
                                 ]),
                               ]),
                     ),

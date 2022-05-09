@@ -24,8 +24,7 @@ class FishCardList extends StatefulWidget {
   _FishCardListState createState() => _FishCardListState();
 }
 
-class _FishCardListState extends State<FishCardList>
-     {
+class _FishCardListState extends State<FishCardList> {
   List<FishModel> fishList = [];
 
   static const double cardWidth = 100.0;
@@ -52,7 +51,7 @@ class _FishCardListState extends State<FishCardList>
       int result = a.type.index.compareTo(b.type.index);
       //result = a.tanaMin.compareTo(b.tanaMin);
       if (result != 0) return result;
-      return  a.rare.compareTo(b.rare);
+      return a.rare.compareTo(b.rare);
     });
     //リストビューの高さを算出
     double listHeight = cardHeight * fishList.length + (8 * fishList.length);
@@ -72,7 +71,8 @@ class _FishCardListState extends State<FishCardList>
                   fish: fishList[index],
                   fishResult: widget.fishesResult.listFishResult.where(
                       (FishResultModel value) =>
-                          value.fishId == fishList[index].id)),
+                          value.fishId == fishList[index].id &&
+                          value.resultKbn == enumResult.success)),
             ],
           );
         },
@@ -124,36 +124,37 @@ class _FishCardListState extends State<FishCardList>
     if (prob > 1.0) prob = 1.0;
 
     return Transform(
-        transform: Matrix4.skewX(-0.3),
-        child:
-
-Stack(children:[
-            new Card(
-              color: boxColor,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  width: (flgBorder ? widget.borderWidth : 1),
-                  color: borderColor,
-                ),
-              ),
-              child: Container(
-                height: cardHeight,
-                margin: EdgeInsets.only(left: 3, right: 3),
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                  Text(
-                    name,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: (bold ? FontWeight.bold:FontWeight.normal)),
-                  ),
-                ]),
-              ),
-              //),
+      transform: Matrix4.skewX(-0.3),
+      child: Stack(children: [
+        new Card(
+          color: boxColor,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: (flgBorder ? widget.borderWidth : 1),
+              color: borderColor,
             ),
-            CustomPaint(
-              painter: new probPainter(prob: prob, flgRight: widget.flgRight),
-            ),]),
-        );
+          ),
+          child: Container(
+            height: cardHeight,
+            margin: EdgeInsets.only(left: 3, right: 3),
+            child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Text(
+                name,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontWeight: (bold ? FontWeight.bold : FontWeight.normal)),
+              ),
+            ]),
+          ),
+          //),
+        ),
+        CustomPaint(
+          painter: new probPainter(prob: prob, flgRight: widget.flgRight),
+        ),
+      ]),
+    );
   }
 }
 
@@ -177,14 +178,12 @@ class probPainter extends CustomPainter {
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 10;
-    canvas.drawLine(
-        Offset(x, 24), Offset(x, 4), paint);
+    canvas.drawLine(Offset(x, 24), Offset(x, 4), paint);
 
-     paint
-    ..color = Colors.yellow
-    ..strokeWidth = 8;
-    canvas.drawLine(
-        Offset(x, 24), Offset(x, 2 + (22 - (22 * prob))), paint);
+    paint
+      ..color = Colors.yellow
+      ..strokeWidth = 8;
+    canvas.drawLine(Offset(x, 24), Offset(x, 2 + (22 - (22 * prob))), paint);
   }
 
   @override

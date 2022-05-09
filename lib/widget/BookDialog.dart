@@ -63,7 +63,8 @@ class _BookDialogState extends State<BookDialog>
                             fish: fishList[index],
                             fishResult: widget.fishesResult.listFishResult
                                 .where((FishResultModel value) =>
-                                    value.fishId == fishList[index].id)),
+                                    value.fishId == fishList[index].id &&
+                                    value.resultKbn == enumResult.success)),
                       ],
                     );
                   },
@@ -115,26 +116,28 @@ class _BookDialogState extends State<BookDialog>
                               ),
                             ),
 
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                            _showFishData.getNameContainer(_showFishData.type, 18),
-                            //名前
-                            Container(
-                                margin: EdgeInsets.only(left: 10,bottom: 10),
-                                child: Text(_showFishData.name,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                      shadows: <Shadow>[
-                                        Shadow(
-                                            offset: Offset(2.0, 4.0),
-                                            blurRadius: 2.0,
-                                            color:
-                                                Colors.black.withOpacity(0.4))
-                                      ],
-                                    ))),
-]),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _showFishData.getNameContainer(
+                                      _showFishData.type, 18),
+                                  //名前
+                                  Container(
+                                      margin:
+                                          EdgeInsets.only(left: 10, bottom: 10),
+                                      child: Text(_showFishData.name,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            shadows: <Shadow>[
+                                              Shadow(
+                                                  offset: Offset(2.0, 4.0),
+                                                  blurRadius: 2.0,
+                                                  color: Colors.black
+                                                      .withOpacity(0.4))
+                                            ],
+                                          ))),
+                                ]),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -294,7 +297,11 @@ class _BookDialogState extends State<BookDialog>
                                                       .where((FishResultModel
                                                               value) =>
                                                           value.fishId ==
-                                                          _showFishData.id)
+                                                              _showFishData
+                                                                  .id &&
+                                                          value.resultKbn ==
+                                                              enumResult
+                                                                  .success)
                                                       .length
                                                       .toString() +
                                                   "匹")),
@@ -353,8 +360,7 @@ class _BookDialogState extends State<BookDialog>
                                   onPrimary: Colors.white,
                                 ),
                                 onPressed: () {
-                                  soundManagerPool
-                                      .playSound('se/book.mp3');
+                                  soundManagerPool.playSound('se/book.mp3');
 
                                   setState(() {
                                     _showFishDetail = false;
@@ -446,24 +452,22 @@ class _BookDialogState extends State<BookDialog>
                           margin: EdgeInsets.only(
                             left: 10,
                           ),
-                          child:
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              fish.getNameContainer(fish.type, 12),
-                          Container(
-                              margin: EdgeInsets.only(
-                                left: 7,
-                              ),
-                              child:
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          ),
-                          ]),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                fish.getNameContainer(fish.type, 12),
+                                Container(
+                                  margin: EdgeInsets.only(
+                                    left: 7,
+                                  ),
+                                  child: Text(
+                                    name,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ]),
                         ),
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
