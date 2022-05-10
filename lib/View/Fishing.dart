@@ -424,7 +424,7 @@ class _FishingState extends BasePageState<Fishing>
   double _dispDepthLv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
   double _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
 
-  double _windLevel = 0.1; //風レベル 0.0～1.0 0.5で無風
+  double _windLevel = 0.0; //風レベル 0.0～1.0 0.5で無風
 
   var _nowDurationLv; //光点点滅レベル
   double _sonarTop = 0.0;
@@ -466,7 +466,7 @@ class _FishingState extends BasePageState<Fishing>
   var _selectTacleIcon = '';
 
   //釣果リスト
-  late FishesResultModel fishesResult;
+  late FishesResultModel _fishesResult;
 
   //今の場所で釣れる可能性のある魚種リスト
   List<FishModel> _fishCardItem = [];
@@ -496,7 +496,7 @@ class _FishingState extends BasePageState<Fishing>
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
     //釣果リストを初期化
-    fishesResult = new FishesResultModel();
+    _fishesResult = new FishesResultModel();
     //今釣れている魚を初期化
     _hitFish = FISH_TABLE.getFishDetail(0);
     //ルアーリストを初期化？？？本当はDBマスタから全取得
@@ -781,7 +781,6 @@ class _FishingState extends BasePageState<Fishing>
 
     //終了時間に到達
     bool flgGoal = false;
-    //if (_maxDepth >= _maximumDepth) {
     if (_timeCount >= getLastTime()) {
       flgGoal = true;
       if (!_flgHit && !_flgBait) {
@@ -796,7 +795,9 @@ class _FishingState extends BasePageState<Fishing>
               children: [
                 //ゴールダイアログ
                 goalDialog(
+                  bgm: super.bgm,
                   dispSize: size,
+                  fishResult: _fishesResult,
                 ),
               ],
             );
@@ -841,12 +842,18 @@ class _FishingState extends BasePageState<Fishing>
     //水深とポイントを元に風レベル変更
     var planWindLevel = _point / (_maxDepth * 50);
     var oldLv = _windLevel;
-    _windLevel += (planWindLevel - _windLevel) / 50;
-    if (oldLv < _windLevel) {
+
+    var addWindLevel = (_point / (_maxDepth * 50) - _windLevel) / 50;
+
+    if (addWindLevel > 0) {
       _flgWindLvUp = true;
     } else {
+      //減速は倍にする
+      addWindLevel= addWindLevel * 2;
       _flgWindLvUp = false;
     }
+    _windLevel += addWindLevel;
+    if (_windLevel < 0) _windLevel = 0;
 
     //時合の変化判定
     _jiaiChangeScanCnt++;
@@ -1061,7 +1068,7 @@ class _FishingState extends BasePageState<Fishing>
         //糸切れ
         debugPrint("いときれ");
         //釣果リストに登録
-        fishesResult.addResult(
+        _fishesResult.addResult(
           _hitFish.id,
           _fishSize,
           _depth,
@@ -1209,7 +1216,7 @@ class _FishingState extends BasePageState<Fishing>
       var point = _hitFish.point + (_hitFish.point * _fishSize).floor();
       //初釣果判定
       var flgNew = true;
-      fishesResult.listFishResult.forEach((val) {
+      _fishesResult.listFishResult.forEach((val) {
         if (val.fishId == _hitFish.id && val.resultKbn == enumResult.success) {
           flgNew = false;
           return;
@@ -1241,7 +1248,7 @@ class _FishingState extends BasePageState<Fishing>
         },
       );
       //釣果リストに登録
-      fishesResult.addResult(
+      _fishesResult.addResult(
         _hitFish.id,
         _fishSize,
         _depth,
@@ -1475,7 +1482,7 @@ class _FishingState extends BasePageState<Fishing>
               _flgFooking = false;
               _fookingTensionPrev = 0;
               _infoBackColor = TENSION_COLOR_DANGER;
-              soundManagerPool.playSound('se/bait.mp3');
+              soundManagerPool.playSound('se/bait1.mp3');
             }
             if (_flgBait || _flgHit) {
             } else {
@@ -1619,7 +1626,7 @@ class _FishingState extends BasePageState<Fishing>
             //バレ条件成立が一定スキャン保持でバレとする
             debugPrint("バレ");
             //釣果リストに登録
-            fishesResult.addResult(
+            _fishesResult.addResult(
               _hitFish.id,
               _fishSize,
               _depth,
@@ -1760,7 +1767,7 @@ class _FishingState extends BasePageState<Fishing>
                         builder: (_) {
                           return BookDialog(
                             fishsTable: FISH_TABLE,
-                            fishesResult: fishesResult,
+                            fishesResult: _fishesResult,
                             bgm: super.bgm,
                           );
                         },
@@ -1783,27 +1790,25 @@ class _FishingState extends BasePageState<Fishing>
                                 Column(children:[
                                   Text("時刻",
                                       style: TextStyle(
-                                          fontSize: 16,  shadows: <Shadow>[
-             Shadow(
-               color: Colors.black,
-               offset: Offset(2.0, 2.0),
-               blurRadius: 3.0,
-             ),],),
+                                          fontSize: 16,
+                                          shadows: <Shadow> [
+                                            Shadow(
+                                              color: Colors.black,
+                                              offset: Offset(2.0, 2.0),
+                                              blurRadius: 3.0,
+                                            ),
+                                          ],
+                                      ),
                                   ),
                                   Text(getTime(_timeCount),
                                        style: TextStyle(
                                         fontWeight: FontWeight.bold,  shadows: <Shadow>[
-             Shadow(
-               color: Colors.black,
-               offset: Offset(2.0, 2.0),
-               blurRadius: 3.0,
-             ),],),),
-                                ]),
-                                // GestureDetector(
-                                //   onTap: () {
-                                //     debugPrint("onTap called.");
-                                //   },
-                                //   child:
+                Shadow(
+                  color: Colors.black,
+                  offset: Offset(2.0, 2.0),
+                  blurRadius: 3.0,
+                ),],),),
+                    ]),
           Container(
         decoration: BoxDecoration(
             image: DecorationImage(
@@ -2948,7 +2953,7 @@ endDrawer:  Drawer(
                                     margin: EdgeInsets.only(left: 8),
                                     child: new FishCardList(
                                       fishsTable: _fishCardItem,
-                                      fishesResult: fishesResult,
+                                      fishesResult: _fishesResult,
                                       hitFishId: (_flgHit || _flgBait)
                                           ? _hitFish.id
                                           : -1,
