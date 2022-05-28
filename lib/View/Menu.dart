@@ -39,18 +39,13 @@ class _menuState extends BasePageState<Menu> {
         decoration: BoxDecoration(
           border: Border.all(color: clsColor.getColorFromHex("4C58FF")),
           color: clsColor.getColorFromHex("4C58FF"),
+          image: DecorationImage(
+            fit: BoxFit.fitWidth,
+            image: AssetImage('assets/images/title.png'),
+          ),
         ),
         child: Stack(
           children: <Widget>[
-            FittedBox(
-              fit: BoxFit.fill,
-//              margin: EdgeInsets.only(top: 0, left: 0),
-              child: new Image(
-                image: AssetImage('assets/images/title.png'),
-                //width: 60,
-                //height: _appBarHeight - 10,
-              ),
-            ),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -100,49 +95,49 @@ class _menuState extends BasePageState<Menu> {
                                   ),
                                 ]))),
                   ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 30),
-                    color: clsColor.getColorFromHex("ffffe0"),
-                    elevation: 10,
-                    shadowColor: clsColor.getColorFromHex("555555"),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: InkWell(
-                        splashColor: Colors.blue.withAlpha(10),
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () async {
-                          final result =
-                              bgm.loadBgm().then((_) {
-                            // ここでBGMデータの全ロード処理実行
-                            //効果音managerで無音を再生
-                            soundManagerPool.SoundManagerPoolInit();
-                            //bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
-                            super.bgmPlay(Fishing.screenBgms);
-                            Navigator.pushNamed(context, "/fishing",
-                                arguments: stages.getStageData(0));
-                          });
-                        },
-                        child: Container(
-                            margin: const EdgeInsets.all(10.0),
-                            width: 200,
-                            height: 50,
-                            child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Icon(
-                                    Icons.check,
-                                    color: Colors.green,
-                                    size: 30.0,
-                                  ),
-                                  Text(
-                                    "あそびかた",
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.black),
-                                  ),
-                                ]))),
-                  ),
+                  // Card(
+                  //   margin: const EdgeInsets.only(bottom: 30),
+                  //   color: clsColor.getColorFromHex("ffffe0"),
+                  //   elevation: 10,
+                  //   shadowColor: clsColor.getColorFromHex("555555"),
+                  //   shape: RoundedRectangleBorder(
+                  //     borderRadius: BorderRadius.circular(10),
+                  //   ),
+                  //   child: InkWell(
+                  //       splashColor: Colors.blue.withAlpha(10),
+                  //       borderRadius: BorderRadius.circular(10),
+                  //       onTap: () async {
+                  //         final result =
+                  //             bgm.loadBgm().then((_) {
+                  //           // ここでBGMデータの全ロード処理実行
+                  //           //効果音managerで無音を再生
+                  //           soundManagerPool.SoundManagerPoolInit();
+                  //           //bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
+                  //           super.bgmPlay(Fishing.screenBgms);
+                  //           Navigator.pushNamed(context, "/fishing",
+                  //               arguments: stages.getStageData(0));
+                  //         });
+                  //       },
+                  //       child: Container(
+                  //           margin: const EdgeInsets.all(10.0),
+                  //           width: 200,
+                  //           height: 50,
+                  //           child: Row(
+                  //               mainAxisAlignment:
+                  //                   MainAxisAlignment.spaceAround,
+                  //               children: [
+                  //                 Icon(
+                  //                   Icons.check,
+                  //                   color: Colors.green,
+                  //                   size: 30.0,
+                  //                 ),
+                  //                 Text(
+                  //                   "あそびかた",
+                  //                   style: TextStyle(
+                  //                       fontSize: 16, color: Colors.black),
+                  //                 ),
+                  //               ]))),
+                  // ),
                   Card(
                     margin: const EdgeInsets.only(bottom: 60),
                     color: Color(0xffffffe0),
@@ -155,7 +150,6 @@ class _menuState extends BasePageState<Menu> {
                         splashColor: Colors.blue.withAlpha(10),
                         borderRadius: BorderRadius.circular(10),
                         onTap: () async {
-
                           super.bgm.stopBgmAny();
                           int? result = await showDialog<int>(
                             context: context,
@@ -167,7 +161,6 @@ class _menuState extends BasePageState<Menu> {
                             },
                           );
                           super.bgmPlay(Menu.screenBgms);
-
                         },
                         child: Container(
                             margin: const EdgeInsets.all(10.0),

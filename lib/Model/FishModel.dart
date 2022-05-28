@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 enum enumFishType {
-  blue, //青物
+  blue, //青魚
   bream, //鯛系
   bottom, //底物
 }
@@ -42,37 +42,37 @@ class FishsModel {
       fookingTension: 200,
       bareEasy: 0.5,
       //flgBottom: false,
-      type: enumFishType.bream,
+      type: enumFishType.blue,
     ));
 
     fishs.add(new FishModel(
       id: 1,
-      name: "タチウオ",
-      rare: 3,
-      image: "fish/tachiuo.jpg",
-      text: "おおきいぞっ",
-      hp: 1500, //このスキャン経過で0になる
+      name: "シーバス",
+      rare: 2,
+      image: "fish/seabass.png",
+      text: "旬は夏",
+      hp: 3000, //このスキャン経過で0になる
       wariai: 0.7,
       point: 200, //ポイントの基礎値
-      tanaMin: 100, //生息域 上 0.1m単位
-      tanaMax: 300, //生息域 下 0.1m単位
-      hereTanaMin: 100,
-      hereTanaMax: 300,
+      tanaMin: 10, //生息域 上 0.1m単位
+      tanaMax: 200, //生息域 下 0.1m単位
+      hereTanaMin: 40,
+      hereTanaMax: 200,
       hitMaki: 0.7,
-      hitJerk: 0.7,
+      hitJerk: 0.3,
       hitFall: 0.5,
       hitSpeedJust: 100,
       hitSpeedRange: 50,
-      sizeMin: 64.0,
-      sizeMax: 150.5,
+      sizeMin: 25.0,
+      sizeMax: 112.5,
       weightMin: 400,
-      weightMax: 2000,
-      abareLv: 5,
+      weightMax: 7000,
+      abareLv: 6,
       baitCntMax: 20,
       fookingTension: 200,
       bareEasy: 0.9,
       //flgBottom: false,
-      type: enumFishType.blue,
+      type: enumFishType.bream,
     ));
     fishs.add(new FishModel(
       id: 2,
@@ -177,7 +177,7 @@ class FishsModel {
       name: "サバ", //魚種名
       rare: 1,
       image: "fish/saba.png", //超過画面の画像
-      text: "小さいのは美味しくない", //釣果画面のコメント
+      text: "大きいほど美味", //釣果画面のコメント
       hp: 1200, //このスキャン経過で0になる
       // addMax: 19, //引きの最大
       // addMin: -6, //引きの最小（最大との乖離が暴れ度）
@@ -210,7 +210,7 @@ class FishsModel {
       name: "サゴシ", //魚種名
       rare: 2,
       image: "fish/sagoshi.png", //超過画面の画像
-      text: "大きいほど美味い", //釣果画面のコメント
+      text: "大きいほど美味", //釣果画面のコメント
       hp: 2000, //このスキャン経過で0になる
       // addMax: 15, //引きの最大
       // addMin: -10, //引きの最小（最大との乖離が暴れ度）
@@ -757,7 +757,7 @@ class FishModel {
 
     switch (type) {
       case enumFishType.blue:
-        name = "青物";
+        name = "青魚";
         borderColor = Colors.indigo[500];
         boxColor = Colors.cyan[500];
         break;

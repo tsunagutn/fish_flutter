@@ -136,11 +136,22 @@ class _fishTile extends StatelessWidget {
                           children: [
                             Text("最大サイズ：" + resultMaxSize),
                             if (max > 0.8 && max < 0.95)
-                              Icon(Icons.star, color: Colors.grey),
+                              //Icon(Icons.star, color: Colors.grey),
+                              new Image(
+                                image: AssetImage(
+                                    'assets/images/clown_silver.png'),
+                                height: 24,
+                                width: 24,
+                              ),
                             if (max > 0.95)
-                              Icon(
-                                Icons.star,
-                                color: Colors.yellow,
+                              // Icon(
+                              //   Icons.star,
+                              //   color: Colors.yellow,
+                              new Image(
+                                image:
+                                    AssetImage('assets/images/clown_gold.png'),
+                                height: 24,
+                                width: 24,
                               ),
                           ],
                         )

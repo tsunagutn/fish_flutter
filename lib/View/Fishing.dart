@@ -367,7 +367,8 @@ class _FishingState extends BasePageState<Fishing>
 
   //ステート変数
   int _timeCount = 0; //時間 1カウント0.1分
-  //int _timeCount = MINCOUNT * 60 * 10;  //夕方から
+  //int _timeCount = MINCOUNT * 60 * 10 ;  //残１時間から
+  //int _timeCount = MINCOUNT * 60 * 10 + 2500;  //夕方から
   DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
   double _tension = 0.0; //テンション値
   double _tensionValMax = 0.0; //テンション最大値 竿によって可変
@@ -425,6 +426,7 @@ class _FishingState extends BasePageState<Fishing>
   double _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
 
   double _windLevel = 0.0; //風レベル 0.0～1.0 0.5で無風
+  double _maxWindLevel = 0.0;
 
   var _nowDurationLv; //光点点滅レベル
   double _sonarTop = 0.0;
@@ -798,6 +800,8 @@ class _FishingState extends BasePageState<Fishing>
                   bgm: super.bgm,
                   dispSize: size,
                   fishResult: _fishesResult,
+                  maxWindLevel: _maxWindLevel,
+                  maxDepth: _maxDepth,
                 ),
               ],
             );
@@ -854,6 +858,9 @@ class _FishingState extends BasePageState<Fishing>
     }
     _windLevel += addWindLevel;
     if (_windLevel < 0) _windLevel = 0;
+
+    //最大の風レベル記憶
+    if (_maxWindLevel < _windLevel) _maxWindLevel = _windLevel;
 
     //時合の変化判定
     _jiaiChangeScanCnt++;
@@ -1263,11 +1270,11 @@ class _FishingState extends BasePageState<Fishing>
       //魚種による成長
       switch (_hitFish.type) {
         case enumFishType.blue:
-          //青物は最大テンション成長
+          //青魚は最大テンション成長
           _tensionValMax += (point / 1);
           break;
         case enumFishType.bream:
-          //鯛は最大巻き速度成長
+          //赤魚は最大巻き速度成長
           _speedValMax += (point / 10);
           break;
         case enumFishType.bottom:

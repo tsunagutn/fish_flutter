@@ -231,11 +231,23 @@ class _fishGetDialogState extends State<fishGetDialog>
                                       "cm"),
                                   if (widget.fishSize > 0.8 &&
                                       widget.fishSize < 0.95)
-                                    Icon(Icons.star, color: Colors.teal),
+                                    //Icon(Icons.star, color: Colors.teal),
+                                    new Image(
+                                      image: AssetImage(
+                                          'assets/images/clown_silver.png'),
+                                      height: 24,
+                                      width: 24,
+                                    ),
                                   if (widget.fishSize > 0.95)
-                                    Icon(
-                                      Icons.star,
-                                      color: Colors.yellow,
+                                    // Icon(
+                                    //   Icons.star,
+                                    //   color: Colors.yellow,
+                                    // ),
+                                    new Image(
+                                      image: AssetImage(
+                                          'assets/images/clown_gold.png'),
+                                      height: 24,
+                                      width: 24,
                                     ),
                                 ]),
                             Container(
@@ -274,10 +286,10 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 child: Text("おさかな図鑑に登録します",
                                     style: TextStyle(color: Colors.red)),
                               ),
-                            Container(
-                              margin: EdgeInsets.only(top: 10),
-                              child: Text(widget.fish.text),
-                            ),
+                            // Container(
+                            //   margin: EdgeInsets.only(top: 10),
+                            //   child: Text(widget.fish.text),
+                            // ),
                           ],
                         ),
                         Row(
