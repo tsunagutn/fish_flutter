@@ -11,7 +11,7 @@ import '../widget/SettingDialog.dart';
 
 class Menu extends StatefulWidget {
   static List<String> screenBgms = [
-    'kanpainouta.mp3',
+    'title.mp3',
     // 'kaigarabushi.mp3',
     // 'saitarobushi.mp3'
   ];
@@ -23,6 +23,12 @@ class Menu extends StatefulWidget {
 
 class _menuState extends BasePageState<Menu> {
   _menuState() : super(fileNames: Menu.screenBgms);
+
+  @override
+  void initState() {
+    super.initState();
+    super.bgmPlay(Menu.screenBgms);
+  }
 
   @override
   Widget buildChildWidget(BuildContext context) {
@@ -72,7 +78,13 @@ class _menuState extends BasePageState<Menu> {
                             //bgm.playBgm(name: Fishing.screenBgms); // 遷移先のBGM再生
                             //super.bgmPlay(Fishing.screenBgms);
                             Navigator.pushNamed(context, "/fishing",
-                                arguments: stages.getStageData(1));
+                                    arguments: stages.getStageData(1))
+                                .then(
+                              (value) {
+                                //メニュー画面のBGMを再生
+                                super.bgmPlay(Menu.screenBgms);
+                              },
+                            );
                           });
                         },
                         child: Container(
@@ -176,7 +188,7 @@ class _menuState extends BasePageState<Menu> {
                                     size: 30.0,
                                   ),
                                   Text(
-                                    "設定を変更する",
+                                    "設定",
                                     style: TextStyle(
                                         fontSize: 16, color: Colors.black),
                                   ),

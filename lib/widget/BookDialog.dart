@@ -13,10 +13,12 @@ class BookDialog extends StatefulWidget {
     required this.fishsTable,
     required this.fishesResult,
     required this.bgm,
+    required this.flgBgm,
   });
   final FishsModel fishsTable;
   final FishesResultModel fishesResult;
   final BgmPlayer bgm;
+  final bool flgBgm;
   _BookDialogState createState() => _BookDialogState();
 }
 
@@ -38,8 +40,10 @@ class _BookDialogState extends State<BookDialog>
 
     _showFishData = widget.fishsTable.fishs[0];
 
-    //設定画面BGM再生
-    widget.bgm.playBgm(name: 'bgm_book.mp3');
+    if (widget.flgBgm) {
+      //設定画面BGM再生
+      widget.bgm.playBgm(name: 'bgm_book.mp3');
+    }
   }
 
   @override

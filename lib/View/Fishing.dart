@@ -127,6 +127,8 @@
 //済・夕方でＢＧＭ変える
 //済・雲の描画
 //済・大量に経験値で一気にレベル上がった時、途中の重さが解放されない
+//・クリア後、最初から振り返りリザルト表示
+//・MENUの前のTOP画面追加 そこでローディングとか表示しつつ画面タップさせてBGMプリロードさせる
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
@@ -138,6 +140,8 @@
 //・時合度が低いのが続かんようにするか、高くできるようにする
 //・中断セーブ機能
 
+//・リザルト画面をリッチにする
+//・リザルト画面で切られたとかバレた魚種分かる（魚種以外分かるの方がええかも）
 //・ジャークをリズムで
 //・光点が横に走る
 //・水中に泡とか
@@ -146,7 +150,6 @@
 //・HIT中のアバレベルを何らか表示
 //・エリア選択 エリアによって魚種、深さ等変える
 //・チュートリアルか、ヘルプか
-//・クリア後、最初から振り返りリザルト表示　ここで切られたとかバレた魚種分かる（魚種以外分かるの方がええかも）
 //・寝る機能 寝中は何もできずすごい速さでゲームが進む
 //・今日はもう納得した機能 ゲームを途中で諦める
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
@@ -366,9 +369,9 @@ class _FishingState extends BasePageState<Fishing>
   bool _flgWindLvUp = false; //風レベル上昇中フラグ
 
   //ステート変数
-  int _timeCount = 0; //時間 1カウント0.1分
+  //int _timeCount = 0; //時間 1カウント0.1分
   //int _timeCount = MINCOUNT * 60 * 10 ;  //残１時間から
-  //int _timeCount = MINCOUNT * 60 * 10 + 2500;  //夕方から
+  int _timeCount = MINCOUNT * 60 * 10 + 1700;  //すぐ終了
   DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
   double _tension = 0.0; //テンション値
   double _tensionValMax = 0.0; //テンション最大値 竿によって可変
@@ -788,7 +791,9 @@ class _FishingState extends BasePageState<Fishing>
       if (!_flgHit && !_flgBait) {
         //ゴール条件成立
         _timer.cancel(); //定周期タイマ停止
+        //現在再生中のBGMをフェードアウト
         bgmStop();
+        //super.bgm.volumeBgmHalf;
         var result = await showDialog<int>(
           context: context,
           barrierDismissible: false,
@@ -799,6 +804,7 @@ class _FishingState extends BasePageState<Fishing>
                 goalDialog(
                   bgm: super.bgm,
                   dispSize: size,
+                  point: _point,
                   fishResult: _fishesResult,
                   maxWindLevel: _maxWindLevel,
                   maxDepth: _maxDepth,
@@ -1776,6 +1782,7 @@ class _FishingState extends BasePageState<Fishing>
                             fishsTable: FISH_TABLE,
                             fishesResult: _fishesResult,
                             bgm: super.bgm,
+                            flgBgm: true,
                           );
                         },
                       );

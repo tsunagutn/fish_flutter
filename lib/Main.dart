@@ -29,13 +29,13 @@ var routeObserver = RouteObserver<PageRoute>();
 
 //環境設定のインスタンス
 var settings = new SettingsModel(
-    //？？？ここは本当は環境設定のファイルかDBから読むように
-    flgBgm: false,
-    flgControlRight: true,
-    volumeBgm: 0.5,
-    volumeSe: 0.5,
-    jerkSense: 0.5,
-    makiSense: 0.5,
+  //？？？ここは本当は環境設定のファイルかDBから読むように
+  flgBgm: true,
+  flgControlRight: true,
+  volumeBgm: 0.5,
+  volumeSe: 0.5,
+  jerkSense: 0.5,
+  makiSense: 0.5,
 );
 
 //ステージ情報のインスタンス

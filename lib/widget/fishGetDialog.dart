@@ -132,6 +132,7 @@ class _fishGetDialogState extends State<fishGetDialog>
 
   @override
   void dispose() {
+    _lightingAnimationController.dispose();
     _rColorAnimationController.dispose();
     _gColorAnimationController.dispose();
     _bColorAnimationController.dispose();

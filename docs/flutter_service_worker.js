@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "938c4e2964078303c285080240f2d8e2",
+  "assets/AssetManifest.json": "aeddbe3d3d91fafcefecf80ff6388d81",
 "assets/assets/bgm/bgm_book.mp3": "aeb1c7d372bece72793057403ea32e51",
 "assets/assets/bgm/bgm_field.mp3": "24af8bdee28fe421db22248a9243d1e9",
 "assets/assets/bgm/bgm_fight_star1.mp3": "b8d6fed5cb36087f53c5cc813267ab1a",
@@ -17,11 +17,14 @@ const RESOURCES = {
 "assets/assets/bgm/ieji.mp3": "42903ca8afe5b87cccaafc4d9ff728d9",
 "assets/assets/bgm/kaigarabushi.mp3": "e9a62dab07e847b1114603e1db717015",
 "assets/assets/bgm/kanpainouta.mp3": "5936b1cbe961200d48d3e2b70818a9b5",
+"assets/assets/bgm/menu.mp3": "a9742638ad9f303bc67535b1f49760ee",
 "assets/assets/bgm/namiunouta.mp3": "50d31fbcdf8545900897af342b2e34bf",
+"assets/assets/bgm/result.mp3": "0463b08e6ad30e035592e6c0d5e2a6d9",
 "assets/assets/bgm/saitarobushi.mp3": "2f7fa75a20ac7bb17b8c3b61c9456959",
 "assets/assets/bgm/sendosan.mp3": "d08d32dabe266a879438c3e911c842ee",
 "assets/assets/bgm/syusen.mp3": "5dcef04fa26094040af4fb4844a78d56",
 "assets/assets/bgm/tairyobushi.mp3": "83ff4372993dfb3d5708e73b6a3dbcc0",
+"assets/assets/bgm/title.mp3": "52c0eb88d59dd7d6fb46a69b6e452007",
 "assets/assets/images/aeae.png": "bc5c3f756fa13507f2ff00a818c8cec2",
 "assets/assets/images/arrow_left.png": "97454757e6b76718d951b11bf14ea1bb",
 "assets/assets/images/arrow_right.png": "da0cbb5cf372a6d5e713f8b7cd07f8de",
@@ -132,9 +135,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "3672e2c572359f7b9c8a6b964868f588",
-"/": "3672e2c572359f7b9c8a6b964868f588",
-"main.dart.js": "795c1aaca3f9084bbc64818222682859",
+"index.html": "0c967647ec101d0b19f7e6e94c9ebf4d",
+"/": "0c967647ec101d0b19f7e6e94c9ebf4d",
+"main.dart.js": "874f1a048a64bc63ec0e94c86409f9c3",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };
