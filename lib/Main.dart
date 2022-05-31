@@ -17,6 +17,8 @@ import 'View/LightSpotWegit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fish_flutter/widget/BgmPlayer.dart';
 
+import 'View/Loading.dart';
+
 void main() {
   runApp(Provider(
     create: (context) => BgmPlayer(),
@@ -73,7 +75,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (_) => Menu(),
+        '/': (_) => Loading(),
+        '/menu': (_) => Menu(),
         '/settings': (_) => Settings(),
         '/term': (_) => Term(),
         '/fishing': (_) => Fishing(),

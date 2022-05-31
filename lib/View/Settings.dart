@@ -11,7 +11,6 @@ class Settings extends StatefulWidget {
 
 // 設定ページのステータス管理
 class _SettingsState extends State<Settings> {
-
   // コントローラーの初期化
   void initState() {
     super.initState();
@@ -24,26 +23,28 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text("環境設定"),
-          ]),
-          leading: IconButton(
-            // 表示アイコン
-            icon: Icon(Icons.arrow_back),
-            color: Colors.white,
-            iconSize: 30.0,
-            onPressed: () {
-              //前画面に戻る
-              Navigator.of(context).pop();
-            },
+    return new WillPopScope(
+        onWillPop: () async => false,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text("環境設定"),
+            ]),
+            leading: IconButton(
+              // 表示アイコン
+              icon: Icon(Icons.arrow_back),
+              color: Colors.white,
+              iconSize: 30.0,
+              onPressed: () {
+                //前画面に戻る
+                Navigator.of(context).pop();
+              },
+            ),
           ),
-        ),
-        endDrawer: DrawerItem(),
-        // 背景色
-        //backgroundColor: Colors.teal[50],
-        body: Container(),
-    );
+          endDrawer: DrawerItem(),
+          // 背景色
+          //backgroundColor: Colors.teal[50],
+          body: Container(),
+        ));
   }
 }

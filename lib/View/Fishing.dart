@@ -321,8 +321,8 @@ class _FishingState extends BasePageState<Fishing>
   final SPEED_COLOR = clsColor.getColorFromHex("FFBABE");
   final SPEED_COLOR_REELING = clsColor.getColorFromHex("FF6B77");
   static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
-  static const JIAI_CHANGE_SCAN = 1500; //このスキャン毎に時合度が変わる
-  static const TANA_CHANGE_SCAN = 3000; //このスキャン毎にタナが変わる
+  static const JIAI_CHANGE_SCAN = 1000; //このスキャン毎に時合度が変わる
+  static const TANA_CHANGE_SCAN = 1500; //このスキャン毎にタナが変わる
   static const POINTER_SIZE = 5.0; //ソナー光点の基本サイズ
   static const POINTER_BACK_SIZE = 4.0; //ソナー光点後光の最大サイズ
   static const ROD_STANDUP_MAX = 100.0; //竿立て度MAX
@@ -1737,7 +1737,10 @@ class _FishingState extends BasePageState<Fishing>
     //画面サイズ取得用
     final Size size = MediaQuery.of(context).size;
     return Material(
-        child: Scaffold(
+      
+        child: new WillPopScope(
+            onWillPop: () async => false,
+            child: Scaffold(
             // appBar: AppBar(
             //   title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             //     Text("環境設定"),
@@ -3385,7 +3388,7 @@ endDrawer:  Drawer(
                           ),
                         ),
                       ]),
-                    ])))));
+                    ]))))));
   }
 
   //時間データ取得

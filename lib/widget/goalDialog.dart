@@ -82,14 +82,14 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
     anime[enumResultAnime.fishResultTitle] = new relultAnimeModel(span: 1000);
     anime[enumResultAnime.fishResultHeader] = new relultAnimeModel(span: 1000);
     anime[enumResultAnime.fishResultRare] = new relultAnimeModel(span: 1000);
-    anime[enumResultAnime.fishResultTotal] = new relultAnimeModel(span: 1000);
+    anime[enumResultAnime.fishResultTotal] = new relultAnimeModel(span: 2000);
     anime[enumResultAnime.fishResultGold] = new relultAnimeModel(span: 1000);
     anime[enumResultAnime.fishResultSilver] = new relultAnimeModel(span: 1000);
-    anime[enumResultAnime.fishResultMax] = new relultAnimeModel(span: 1000);
-    anime[enumResultAnime.maxWind] = new relultAnimeModel(span: 2000);
+    anime[enumResultAnime.fishResultMax] = new relultAnimeModel(span: 2000);
+    anime[enumResultAnime.maxWind] = new relultAnimeModel(span: 1000);
     anime[enumResultAnime.maxDepth] = new relultAnimeModel(span: 1000);
     anime[enumResultAnime.point] = new relultAnimeModel(span: 2000);
-    anime[enumResultAnime.last] = new relultAnimeModel(span: 3000);
+    anime[enumResultAnime.last] = new relultAnimeModel(span: 10);
 
     //最初の光
     _lightingAnimationController = AnimationController(
@@ -207,415 +207,481 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
             //   image: new AssetImage("assets/images/fishback.jpg"),
             //   fit: BoxFit.cover,
             // )),
-            child: AlertDialog(
-          titleTextStyle: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              shadows: <Shadow>[
-                Shadow(
-                    offset: Offset(2.0, 4.0),
-                    blurRadius: 2.0,
-                    color: Colors.black)
-              ]),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          backgroundColor: Colors.white.withOpacity(0.9),
-          content: Container(
-            height: widget.dispSize.height,
-            width: widget.dispSize.width,
-            // decoration: new BoxDecoration(
-            //     image: new DecorationImage(
-            //   image: new AssetImage("assets/images/fishback.jpg"),
-            //   fit: BoxFit.cover,
-            // )),
-            child: SingleChildScrollView(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Column(children: [
-                      Text(
-                        "おつかれさまでした",
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          shadows: <Shadow>[
-                            Shadow(
-                              color: Colors.black,
-                              offset: Offset(2.0, 2.0),
-                              blurRadius: 3.0,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.fishResultTitle]!
-                                    .state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.fishResultTitle]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Container(
-                          margin: EdgeInsets.only(top: 20, bottom: 10),
-                          child: Text("釣った魚の数",
-                              style: TextStyle(
-                                fontSize: 20,
-                              )),
-                        ),
-                      ),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.fishResultHeader]!
-                                    .state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.fishResultHeader]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Container(
-                          width: double.maxFinite,
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 100,
-                                  margin: EdgeInsets.only(right: 4),
-                                  child: Center(
-                                    child: Text("レア度"),
-                                  ),
-                                ),
-                                Container(
-                                  width: 46,
-                                  margin: EdgeInsets.only(right: 4),
-                                  child: FISH_TABLE.fishs[0]
-                                      .getNameContainer(enumFishType.blue, 14),
-                                ),
-                                Container(
-                                  width: 46,
-                                  margin: EdgeInsets.only(right: 4),
-                                  child: FISH_TABLE.fishs[0]
-                                      .getNameContainer(enumFishType.bream, 14),
-                                ),
-                                Container(
-                                  width: 46,
-                                  margin: EdgeInsets.only(right: 4),
-                                  child: FISH_TABLE.fishs[0].getNameContainer(
-                                      enumFishType.bottom, 14),
-                                ),
-                                Container(
-                                  width: 46,
-                                  margin: EdgeInsets.only(right: 4),
-                                  child: Center(
-                                    child: Text("計"),
-                                  ),
-                                ),
-                              ]),
-                        ),
-                      ),
-                      Container(
-                          width: double.maxFinite,
-                          height: 150,
-                          margin: EdgeInsets.only(bottom: 10),
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: Opacity(
-                                  opacity: (anime[enumResultAnime
-                                                  .fishResultRare]!
-                                              .state ==
-                                          enumAnimeState.doing
-                                      ? _dispValue.value
-                                      : anime[enumResultAnime.fishResultRare]!
-                                                  .state ==
-                                              enumAnimeState.end
-                                          ? 1.0
-                                          : 0.0),
-                                  child: ListView.builder(
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return Container(
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              width: 100,
-                                              margin: EdgeInsets.only(right: 4),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Stack(
-                                                    children: [
-                                                      for (var i = 0;
-                                                          i < index + 1;
-                                                          i++)
-                                                        Container(
-                                                          margin:
-                                                              EdgeInsets.only(
-                                                            left: i * 15,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons.star,
-                                                            color:
-                                                                Colors.yellow,
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            //青魚数
-                                            Container(
-                                              width: 50,
-                                              margin: EdgeInsets.only(right: 4),
-                                              child: Center(
-                                                child: Text(lstFishCount[index][
-                                                        enumFishType.blue.index]
-                                                    .toString()),
-                                              ),
-                                            ),
-                                            //赤魚数
-                                            Container(
-                                              width: 50,
-                                              margin: EdgeInsets.only(right: 4),
-                                              child: Center(
-                                                child: Text(lstFishCount[index][
-                                                        enumFishType
-                                                            .bream.index]
-                                                    .toString()),
-                                              ),
-                                            ),
-                                            //底魚数
-                                            Container(
-                                              width: 50,
-                                              margin: EdgeInsets.only(right: 4),
-                                              child: Center(
-                                                child: Text(lstFishCount[index][
-                                                        enumFishType
-                                                            .bottom.index]
-                                                    .toString()),
-                                              ),
-                                            ),
-                                            //計
-                                            Container(
-                                              width: 50,
-                                              margin: EdgeInsets.only(right: 4),
-                                              child: Center(
-                                                child: Text((lstFishCount[index]
-                                                            [enumFishType
-                                                                .blue.index] +
-                                                        lstFishCount[index][
-                                                            enumFishType
-                                                                .bream.index] +
-                                                        lstFishCount[index][
-                                                            enumFishType
-                                                                .bottom.index])
-                                                    .toString()),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    itemCount: lstFishCount.length,
-                                  ),
+            child: GestureDetector(
+                onTap: () {
+                  debugPrint("onTap called.");
+                  if (_dispController.isAnimating) {
+                    debugPrint("isAnimating");
+                    _dispController.value = 1.0;
+                  }
+                },
+                child: AlertDialog(
+                  titleTextStyle: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      shadows: <Shadow>[
+                        Shadow(
+                            offset: Offset(2.0, 4.0),
+                            blurRadius: 2.0,
+                            color: Colors.black)
+                      ]),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  content: Container(
+                    height: widget.dispSize.height,
+                    width: widget.dispSize.width,
+                    // decoration: new BoxDecoration(
+                    //     image: new DecorationImage(
+                    //   image: new AssetImage("assets/images/fishback.jpg"),
+                    //   fit: BoxFit.cover,
+                    // )),
+                    child: SingleChildScrollView(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Column(children: [
+                              Text(
+                                "おつかれさまでした",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: <Shadow>[
+                                    Shadow(
+                                      color: Colors.black,
+                                      offset: Offset(2.0, 2.0),
+                                      blurRadius: 3.0,
+                                    ),
+                                  ],
                                 ),
                               ),
                               Opacity(
                                 opacity: (anime[enumResultAnime
-                                                .fishResultTotal]!
+                                                .fishResultTitle]!
                                             .state ==
                                         enumAnimeState.doing
                                     ? _dispValue.value
-                                    : anime[enumResultAnime.fishResultTotal]!
+                                    : anime[enumResultAnime.fishResultTitle]!
+                                                .state ==
+                                            enumAnimeState.end
+                                        ? 1.0
+                                        : 0.0),
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 20, bottom: 10),
+                                  child: Text("釣った魚の数",
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                      )),
+                                ),
+                              ),
+                              Opacity(
+                                opacity: (anime[enumResultAnime
+                                                .fishResultHeader]!
+                                            .state ==
+                                        enumAnimeState.doing
+                                    ? _dispValue.value
+                                    : anime[enumResultAnime.fishResultHeader]!
+                                                .state ==
+                                            enumAnimeState.end
+                                        ? 1.0
+                                        : 0.0),
+                                child: Container(
+                                  width: double.maxFinite,
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: 100,
+                                          margin: EdgeInsets.only(right: 4),
+                                          child: Center(
+                                            child: Text("レア度"),
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 46,
+                                          margin: EdgeInsets.only(right: 4),
+                                          child: FISH_TABLE.fishs[0]
+                                              .getNameContainer(
+                                                  enumFishType.blue, 14),
+                                        ),
+                                        Container(
+                                          width: 46,
+                                          margin: EdgeInsets.only(right: 4),
+                                          child: FISH_TABLE.fishs[0]
+                                              .getNameContainer(
+                                                  enumFishType.bream, 14),
+                                        ),
+                                        Container(
+                                          width: 46,
+                                          margin: EdgeInsets.only(right: 4),
+                                          child: FISH_TABLE.fishs[0]
+                                              .getNameContainer(
+                                                  enumFishType.bottom, 14),
+                                        ),
+                                        Container(
+                                          width: 46,
+                                          margin: EdgeInsets.only(right: 4),
+                                          child: Center(
+                                            child: Text("計"),
+                                          ),
+                                        ),
+                                      ]),
+                                ),
+                              ),
+                              Container(
+                                  width: double.maxFinite,
+                                  height: 150,
+                                  margin: EdgeInsets.only(bottom: 10),
+                                  child: Column(
+                                    children: [
+                                      Expanded(
+                                        child: Opacity(
+                                          opacity: (anime[enumResultAnime
+                                                          .fishResultRare]!
+                                                      .state ==
+                                                  enumAnimeState.doing
+                                              ? _dispValue.value
+                                              : anime[enumResultAnime
+                                                              .fishResultRare]!
+                                                          .state ==
+                                                      enumAnimeState.end
+                                                  ? 1.0
+                                                  : 0.0),
+                                          child: ListView.builder(
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              return Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      width: 100,
+                                                      margin: EdgeInsets.only(
+                                                          right: 4),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Stack(
+                                                            children: [
+                                                              for (var i = 0;
+                                                                  i < index + 1;
+                                                                  i++)
+                                                                Container(
+                                                                  margin:
+                                                                      EdgeInsets
+                                                                          .only(
+                                                                    left:
+                                                                        i * 15,
+                                                                  ),
+                                                                  child: Icon(
+                                                                    Icons.star,
+                                                                    color: Colors
+                                                                        .yellow,
+                                                                  ),
+                                                                ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    //青魚数
+                                                    Container(
+                                                      width: 50,
+                                                      margin: EdgeInsets.only(
+                                                          right: 4),
+                                                      child: Center(
+                                                        child: Text(
+                                                            lstFishCount[index][
+                                                                    enumFishType
+                                                                        .blue
+                                                                        .index]
+                                                                .toString()),
+                                                      ),
+                                                    ),
+                                                    //赤魚数
+                                                    Container(
+                                                      width: 50,
+                                                      margin: EdgeInsets.only(
+                                                          right: 4),
+                                                      child: Center(
+                                                        child: Text(
+                                                            lstFishCount[index][
+                                                                    enumFishType
+                                                                        .bream
+                                                                        .index]
+                                                                .toString()),
+                                                      ),
+                                                    ),
+                                                    //底魚数
+                                                    Container(
+                                                      width: 50,
+                                                      margin: EdgeInsets.only(
+                                                          right: 4),
+                                                      child: Center(
+                                                        child: Text(
+                                                            lstFishCount[index][
+                                                                    enumFishType
+                                                                        .bottom
+                                                                        .index]
+                                                                .toString()),
+                                                      ),
+                                                    ),
+                                                    //計
+                                                    Container(
+                                                      width: 50,
+                                                      margin: EdgeInsets.only(
+                                                          right: 4),
+                                                      child: Center(
+                                                        child: Text((lstFishCount[
+                                                                        index][
+                                                                    enumFishType
+                                                                        .blue
+                                                                        .index] +
+                                                                lstFishCount[
+                                                                        index][
+                                                                    enumFishType
+                                                                        .bream
+                                                                        .index] +
+                                                                lstFishCount[
+                                                                        index][
+                                                                    enumFishType
+                                                                        .bottom
+                                                                        .index])
+                                                            .toString()),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                            itemCount: lstFishCount.length,
+                                          ),
+                                        ),
+                                      ),
+                                      Opacity(
+                                        opacity: (anime[enumResultAnime
+                                                        .fishResultTotal]!
+                                                    .state ==
+                                                enumAnimeState.doing
+                                            ? _dispValue.value
+                                            : anime[enumResultAnime
+                                                            .fishResultTotal]!
+                                                        .state ==
+                                                    enumAnimeState.end
+                                                ? 1.0
+                                                : 0.0),
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Text(
+                                                "合計",
+                                              ),
+                                              Text(widget.fishResult
+                                                      .listFishResult.length
+                                                      .toString() +
+                                                  "匹"),
+                                              ElevatedButton(
+                                                child: Text("図鑑"),
+                                                onPressed: () async {
+                                                  if (anime[enumResultAnime
+                                                              .fishResultTotal]!
+                                                          .state !=
+                                                      enumAnimeState.end) {
+                                                    return;
+                                                  }
+                                                  // //図鑑モーダルの表示
+                                                  //soundManagerPool.playSound('se/book.mp3');
+                                                  var result =
+                                                      await showDialog<int>(
+                                                    context: context,
+                                                    barrierDismissible: false,
+                                                    builder: (_) {
+                                                      return BookDialog(
+                                                        fishsTable: FISH_TABLE,
+                                                        fishesResult:
+                                                            widget.fishResult,
+                                                        bgm: widget.bgm,
+                                                        flgBgm: false,
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ]),
+                                      ),
+                                    ],
+                                  )),
+                              Opacity(
+                                opacity: (anime[enumResultAnime.fishResultGold]!
+                                            .state ==
+                                        enumAnimeState.doing
+                                    ? _dispValue.value
+                                    : anime[enumResultAnime.fishResultGold]!
                                                 .state ==
                                             enumAnimeState.end
                                         ? 1.0
                                         : 0.0),
                                 child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    new Image(
+                                      image: AssetImage(
+                                          'assets/images/clown_gold.png'),
+                                      height: 24,
+                                      width: 24,
+                                    ),
+                                    Text(crownCountGold.toString() + "匹"),
+                                  ],
+                                ),
+                              ),
+                              Opacity(
+                                opacity: (anime[enumResultAnime
+                                                .fishResultSilver]!
+                                            .state ==
+                                        enumAnimeState.doing
+                                    ? _dispValue.value
+                                    : anime[enumResultAnime.fishResultSilver]!
+                                                .state ==
+                                            enumAnimeState.end
+                                        ? 1.0
+                                        : 0.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    new Image(
+                                      image: AssetImage(
+                                          'assets/images/clown_silver.png'),
+                                      height: 24,
+                                      width: 24,
+                                    ),
+                                    Text(crownCountSilver.toString() + "匹"),
+                                  ],
+                                ),
+                              ),
+                              Opacity(
+                                opacity: (anime[enumResultAnime.fishResultMax]!
+                                            .state ==
+                                        enumAnimeState.doing
+                                    ? _dispValue.value
+                                    : anime[enumResultAnime.fishResultMax]!
+                                                .state ==
+                                            enumAnimeState.end
+                                        ? 1.0
+                                        : 0.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text("最大サイズ："),
+                                    Text(maxSizeName +
+                                        " " +
+                                        maxSize.toStringAsFixed(1).toString() +
+                                        " cm"),
+                                  ],
+                                ),
+                              ),
+                              Opacity(
+                                opacity: (anime[enumResultAnime.maxWind]!
+                                            .state ==
+                                        enumAnimeState.doing
+                                    ? _dispValue.value
+                                    : anime[enumResultAnime.maxWind]!.state ==
+                                            enumAnimeState.end
+                                        ? 1.0
+                                        : 0.0),
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 20),
+                                  child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Text(
-                                        "合計",
-                                      ),
-                                      Text(widget
-                                              .fishResult.listFishResult.length
-                                              .toString() +
-                                          "匹"),
-                                      ElevatedButton(
-                                        child: Text("図鑑"),
-                                        onPressed: () async {
-                                          // //図鑑モーダルの表示
-                                          //soundManagerPool.playSound('se/book.mp3');
-                                          var result = await showDialog<int>(
-                                            context: context,
-                                            barrierDismissible: false,
-                                            builder: (_) {
-                                              return BookDialog(
-                                                fishsTable: FISH_TABLE,
-                                                fishesResult: widget.fishResult,
-                                                bgm: widget.bgm,
-                                                flgBgm: false,
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ]),
+                                      Text("最大風速："),
+                                      Text((10 * widget.maxWindLevel)
+                                              .toStringAsFixed(1) +
+                                          "m/s"),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ],
-                          )),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.fishResultGold]!
-                                    .state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.fishResultGold]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            new Image(
-                              image: AssetImage('assets/images/clown_gold.png'),
-                              height: 24,
-                              width: 24,
-                            ),
-                            Text(crownCountGold.toString() + "匹"),
-                          ],
-                        ),
-                      ),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.fishResultSilver]!
-                                    .state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.fishResultSilver]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            new Image(
-                              image:
-                                  AssetImage('assets/images/clown_silver.png'),
-                              height: 24,
-                              width: 24,
-                            ),
-                            Text(crownCountSilver.toString() + "匹"),
-                          ],
-                        ),
-                      ),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.fishResultMax]!.state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.fishResultMax]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text("最大サイズ："),
-                            Text(maxSizeName +
-                                " " +
-                                maxSize.toStringAsFixed(1).toString() +
-                                " cm"),
-                          ],
-                        ),
-                      ),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.maxWind]!.state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.maxWind]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Text("最大風速："),
-                              Text((10 * widget.maxWindLevel)
-                                      .toStringAsFixed(1) +
-                                  "m/s"),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.maxDepth]!.state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.maxDepth]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text("最大水深："),
-                            Text(((widget.maxDepth).round() / 10)
-                                    .toStringAsFixed(1) +
-                                ' m'),
-                          ],
-                        ),
-                      ),
-                      Opacity(
-                        opacity: (anime[enumResultAnime.point]!.state ==
-                                enumAnimeState.doing
-                            ? _dispValue.value
-                            : anime[enumResultAnime.point]!.state ==
-                                    enumAnimeState.end
-                                ? 1.0
-                                : 0.0),
-                        child: Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Text("ポイント："),
-                              Text(widget.point.toString() + " ポイント"),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ]),
-                  ]),
-            ),
-          ),
-          actions: <Widget>[
-            Opacity(
-              opacity:
-                  (anime[enumResultAnime.last]!.state == enumAnimeState.doing
-                      ? _dispValue.value
-                      : anime[enumResultAnime.last]!.state == enumAnimeState.end
-                          ? 1.0
-                          : 0.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //mainAxisSize: MainAxisSize.min,
-                children: [
-                  ElevatedButton(
-                    child: Text("OK"),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                              Opacity(
+                                opacity: (anime[enumResultAnime.maxDepth]!
+                                            .state ==
+                                        enumAnimeState.doing
+                                    ? _dispValue.value
+                                    : anime[enumResultAnime.maxDepth]!.state ==
+                                            enumAnimeState.end
+                                        ? 1.0
+                                        : 0.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text("最大水深："),
+                                    Text(((widget.maxDepth).round() / 10)
+                                            .toStringAsFixed(1) +
+                                        ' m'),
+                                  ],
+                                ),
+                              ),
+                              Opacity(
+                                opacity: (anime[enumResultAnime.point]!.state ==
+                                        enumAnimeState.doing
+                                    ? _dispValue.value
+                                    : anime[enumResultAnime.point]!.state ==
+                                            enumAnimeState.end
+                                        ? 1.0
+                                        : 0.0),
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 20),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Text("ポイント："),
+                                      Text(widget.point.toString() + " ポイント"),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ]),
+                          ]),
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ],
-        )),
+                  actions: <Widget>[
+                    Opacity(
+                      opacity: (anime[enumResultAnime.last]!.state ==
+                              enumAnimeState.doing
+                          ? _dispValue.value
+                          : anime[enumResultAnime.last]!.state ==
+                                  enumAnimeState.end
+                              ? 1.0
+                              : 0.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        //mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            child: Text("OK"),
+                            onPressed: () {
+                              if (anime[enumResultAnime.last]!.state !=
+                                  enumAnimeState.end) {
+                                return;
+                              }
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ))),
       ),
       //最初に画面全体を光らす
       IgnorePointer(
