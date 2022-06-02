@@ -369,9 +369,9 @@ class _FishingState extends BasePageState<Fishing>
   bool _flgWindLvUp = false; //風レベル上昇中フラグ
 
   //ステート変数
-  //int _timeCount = 0; //時間 1カウント0.1分
+  int _timeCount = 0; //時間 1カウント0.1分
   //int _timeCount = MINCOUNT * 60 * 10 ;  //残１時間から
-  int _timeCount = MINCOUNT * 60 * 10 + 1700;  //すぐ終了
+  //int _timeCount = MINCOUNT * 60 * 10 + 1700;  //すぐ終了
   DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
   double _tension = 0.0; //テンション値
   double _tensionValMax = 0.0; //テンション最大値 竿によって可変
@@ -442,6 +442,8 @@ class _FishingState extends BasePageState<Fishing>
   Color _centerTextMainColor = Colors.red;
   String _centerTextSub = "";
   Color _centerTextSubColor = Colors.black;
+  
+  late ui.Image _reelwheel;
 
   late Offset offset = Offset(0.0, 0.0);
   double _appBarHeight = 0.0;
@@ -662,7 +664,6 @@ class _FishingState extends BasePageState<Fishing>
       ));
     }
 
-
     lstImage.add(new ImageItem(
       key: UniqueKey(),
       painterKey: GlobalKey(),
@@ -693,9 +694,17 @@ class _FishingState extends BasePageState<Fishing>
       widthPer: 0,
     ));
 
+    await setReelwheel();
+
     flgDispSettingsOk = true;
     super.bgmPlay(Fishing.screenBgms);
 
+  }
+
+  setReelwheel() async {
+    var rawData = await rootBundle.load('assets/images/reelwheel.png');
+    var imgList = Uint8List.view(rawData.buffer);
+    _reelwheel = await decodeImageFromList(imgList);
   }
 
   void dispose() {
@@ -2763,6 +2772,7 @@ endDrawer:  Drawer(
                             ? Stack(children: fishPointerList)
                             : Container(),
                         //タックルの描画
+                        if (flgDispSettingsOk)
                         CustomPaint(
                           painter: new tacklePainter(
                             shoreHeight: _shoreHeight,
@@ -2782,6 +2792,8 @@ endDrawer:  Drawer(
                                 ? 0.0
                                 : 20 * (_clutchAnime.value + 3.0) / 4),
                             handleRoll: _handleRoll,
+                            reelwheel:  _reelwheel,
+                            depth: _depth,
                           ),
                         ),
                         if (_centerTextAnimationController.isAnimating)

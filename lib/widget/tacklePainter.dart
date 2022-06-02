@@ -1,6 +1,7 @@
 import 'package:fish_flutter/View/Fishing.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 class tacklePainter extends CustomPainter {
   const tacklePainter({
@@ -19,6 +20,8 @@ class tacklePainter extends CustomPainter {
     required this.rodStandUp,
     required this.rodTension,
     required this.handleRoll,
+    required this.reelwheel,
+    required this.depth,
   });
   final double shoreHeight;
   final Size dispSize;
@@ -34,6 +37,8 @@ class tacklePainter extends CustomPainter {
   final double rodStandUp;
   final double rodTension;
   final double handleRoll;
+  final ui.Image reelwheel;
+  final double depth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -201,6 +206,20 @@ class tacklePainter extends CustomPainter {
     path.addPolygon(linePath, false);
     path.close();
     canvas.drawPath(path, paint);
+
+    //リール糸巻部分画像の切り出し開始位置 5mで一回転
+    double wheelPosi = (depth % 50) / 50 / 2;
+    double reelWheelTop = (reelwheel.height * wheelPosi);
+
+    canvas.drawImageRect(
+      reelwheel,
+      //画像の切り出し位置の指定
+      Rect.fromLTWH(0, reelWheelTop, reelwheel.width.toDouble(), reelSizeY / 2),
+      //描画位置の指定
+      Rect.fromLTWH(linePath[0].dx, linePath[0].dy,
+          linePath[2].dx - linePath[0].dx, linePath[1].dy - linePath[0].dy),
+      new Paint(),
+    );
 
     //クラッチ
     List<Offset> clutchPath = [];
