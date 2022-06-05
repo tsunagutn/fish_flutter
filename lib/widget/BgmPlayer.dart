@@ -47,6 +47,8 @@ class BgmPlayer {
         await _cache.load("bgm/bgm_fight_star4.mp3");
     bgmUriMap["bgm_fight_star5.mp3"] =
         await _cache.load("bgm/bgm_fight_star5.mp3");
+    bgmUriMap["muon01.mp3"] =
+    await _cache.load("se/muon01.mp3");
   }
 
   void playBgm({required String name, bool isLoop = true}) {

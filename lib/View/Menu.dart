@@ -27,7 +27,13 @@ class _menuState extends BasePageState<Menu> {
   @override
   void initState() {
     super.initState();
-    //super.bgmPlay(Menu.screenBgms);
+
+    // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
+    // addPostFrameCallbackメソッドを実行
+    // null safety対応で?（null以外の時のみアクセス）をつける
+    WidgetsBinding.instance?.addPostFrameCallback((cb) {
+      super.bgmPlay(Menu.screenBgms);
+    });
   }
 
   @override
@@ -36,7 +42,8 @@ class _menuState extends BasePageState<Menu> {
     return Material(
         child: new WillPopScope(
             onWillPop: () async => false,
-            child: Scaffold(
+            child:
+            Scaffold(
               appBar: AppBar(
                 title:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -72,14 +79,6 @@ class _menuState extends BasePageState<Menu> {
                                 splashColor: Colors.blue.withAlpha(10),
                                 borderRadius: BorderRadius.circular(10),
                                 onTap: () async {
-                                  final result =
-                                      //await Navigator.of(context).pushNamed('/fishing');
-                                      bgm.loadBgm().then((_) {
-                                    // ここでBGMデータの全ロード処理実行
-                                    //効果音managerで無音を再生
-                                    soundManagerPool.SoundManagerPoolInit();
-                                    //bgm.playBgm(name: Fishing.screenBgms); // 遷移先のBGM再生
-                                    //super.bgmPlay(Fishing.screenBgms);
                                     Navigator.pushNamed(context, "/fishing",
                                             arguments: stages.getStageData(1))
                                         .then(
@@ -88,8 +87,27 @@ class _menuState extends BasePageState<Menu> {
                                         super.bgmPlay(Menu.screenBgms);
                                       },
                                     );
-                                  });
+
                                 },
+
+                                  // final result =
+                                  //     //await Navigator.of(context).pushNamed('/fishing');
+                                  //     bgm.loadBgm().then((_) {
+                                  //   // ここでBGMデータの全ロード処理実行
+                                  //   //効果音managerで無音を再生
+                                  //   soundManagerPool.SoundManagerPoolInit();
+                                  //   //bgm.playBgm(name: Fishing.screenBgms); // 遷移先のBGM再生
+                                  //   //super.bgmPlay(Fishing.screenBgms);
+                                  //   Navigator.pushNamed(context, "/fishing",
+                                  //           arguments: stages.getStageData(1))
+                                  //       .then(
+                                  //     (value) {
+                                  //       //メニュー画面のBGMを再生
+                                  //       super.bgmPlay(Menu.screenBgms);
+                                  //     },
+                                  //   );
+                                  // });
+                                // },
                                 child: Container(
                                     margin: const EdgeInsets.all(10.0),
                                     width: 200,

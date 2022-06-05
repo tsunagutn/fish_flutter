@@ -19,7 +19,23 @@ import 'package:fish_flutter/widget/BgmPlayer.dart';
 
 import 'View/Loading.dart';
 
-void main() {
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+late Box box;
+
+void main() async {
+  await Hive.initFlutter();
+  box = await Hive.openBox('box');
+  var test = box.get('num');
+  debugPrint("前" + test.toString());
+  if (test == null) {
+    box.put('num', 0);
+  } else {
+    box.put('num', test++);
+  }
+  debugPrint("後" + test.toString());
+
   runApp(Provider(
     create: (context) => BgmPlayer(),
     child: MyApp(),

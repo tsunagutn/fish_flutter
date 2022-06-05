@@ -641,7 +641,7 @@ class _FishingState extends BasePageState<Fishing>
       widthPer: 0,
     ));
 
-    int kumocount = 100;
+    int kumocount = 30;
 
     for (var i = 0; i < kumocount; i++) {
       double rnd = (new math.Random()).nextDouble();
@@ -705,6 +705,19 @@ class _FishingState extends BasePageState<Fishing>
     var rawData = await rootBundle.load('assets/images/reelwheel.png');
     var imgList = Uint8List.view(rawData.buffer);
     _reelwheel = await decodeImageFromList(imgList);
+  }
+
+  // アプリケーションのライフサイクル
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      //バックグラウンド状態から戻ってきた時
+      startTimer(); //定周期タイマ再開
+    } else if (state == AppLifecycleState.paused) {
+      // バックグラウンド状態になった時
+      _timer.cancel();  //定周期タイマ停止
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   void dispose() {

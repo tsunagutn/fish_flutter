@@ -51,6 +51,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
     } else if (state == AppLifecycleState.paused) {
       this.onBackground();
     }
+    super.didChangeAppLifecycleState(state);
   }
 
   void onBackground() {

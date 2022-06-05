@@ -143,6 +143,19 @@ class tacklePainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paint);
 
+    //糸巻部分
+    List<Offset> linePath = [];
+    linePath.add(new Offset(
+        tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY / 2));
+    linePath.add(new Offset(
+        tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2));
+    linePath.add(new Offset(
+        tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2));
+    linePath.add(new Offset(
+        tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY / 2));
+
+    //傾けと描画はリールの描画後
+
     //リール（仮で6角形)
     List<Offset> reelPath = [];
     reelPath.add(
@@ -153,6 +166,15 @@ class tacklePainter extends CustomPainter {
         new Offset(tackleCenterX - reelSizeX, reelCenterY + (reelSizeY / 2)));
     reelPath.add(
         new Offset(tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY));
+
+    //reelPath.add(linePath[1]);
+
+    reelPath.add(new Offset(linePath[1].dx, reelCenterY + reelSizeY));
+
+    reelPath.add(linePath[0]);
+    reelPath.add(linePath[3]);
+    //reelPath.add(linePath[2]);
+    reelPath.add(new Offset(linePath[2].dx, reelCenterY + reelSizeY));
     reelPath
         .add(new Offset(tackleCenterX - (reelSizeX), reelCenterY + reelSizeY));
     reelPath
@@ -171,32 +193,12 @@ class tacklePainter extends CustomPainter {
             o, angle * rodTension * position, tackleCenterX, reelCenterY))
         .toList();
 
-    path = Path();
-    paint = new Paint()
-      ..color = Colors.black.withOpacity(0.6)
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2;
-    path.addPolygon(reelPath, false);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    //糸巻部分
-    List<Offset> linePath = [];
-    linePath.add(new Offset(
-        tackleCenterX - (reelSizeX / 2), reelCenterY - reelSizeY / 2));
-    linePath.add(new Offset(
-        tackleCenterX - (reelSizeX / 2), reelCenterY + reelSizeY / 2));
-    linePath.add(new Offset(
-        tackleCenterX + (reelSizeX / 2), reelCenterY + reelSizeY / 2));
-    linePath.add(new Offset(
-        tackleCenterX + (reelSizeX / 2), reelCenterY - reelSizeY / 2));
-    //テンション分傾け
+    //糸巻部分のテンション分傾け
     linePath = linePath
         .map((o) => _rotate(
             o, angle * rodTension * position, tackleCenterX, reelCenterY))
         .toList();
-
+    //糸巻部分を先に描画
     path = Path();
     paint = new Paint()
       ..color = Colors.white.withOpacity(0.6)
@@ -210,7 +212,7 @@ class tacklePainter extends CustomPainter {
     //リール糸巻部分画像の切り出し開始位置 5mで一回転
     double wheelPosi = (depth % 50) / 50 / 2;
     double reelWheelTop = (reelwheel.height * wheelPosi);
-
+    //リール糸巻画像の描画
     canvas.drawImageRect(
       reelwheel,
       //画像の切り出し位置の指定
@@ -220,6 +222,17 @@ class tacklePainter extends CustomPainter {
           linePath[2].dx - linePath[0].dx, linePath[1].dy - linePath[0].dy),
       new Paint(),
     );
+
+    //リール本体の描画
+    path = Path();
+    paint = new Paint()
+      ..color = Colors.black.withOpacity(1.0)
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
+    path.addPolygon(reelPath, false);
+    path.close();
+    canvas.drawPath(path, paint);
 
     //クラッチ
     List<Offset> clutchPath = [];

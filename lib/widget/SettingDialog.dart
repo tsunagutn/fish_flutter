@@ -95,7 +95,6 @@ class _SettingDialogState extends State<SettingDialog>
   @override
   void initState() {
     super.initState();
-
     //環境設定の読込
     _bgm = settings.flgBgm;
     _controlRight = settings.flgControlRight;

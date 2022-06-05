@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "aeddbe3d3d91fafcefecf80ff6388d81",
+  "assets/AssetManifest.json": "f884c897934c63493528aee02c0c53d8",
 "assets/assets/bgm/bgm_book.mp3": "aeb1c7d372bece72793057403ea32e51",
 "assets/assets/bgm/bgm_field.mp3": "24af8bdee28fe421db22248a9243d1e9",
 "assets/assets/bgm/bgm_fight_star1.mp3": "b8d6fed5cb36087f53c5cc813267ab1a",
@@ -76,6 +76,7 @@ const RESOURCES = {
 "assets/assets/images/reel1.png": "695d809fef06078a95d372b70861bc5b",
 "assets/assets/images/reel2.png": "3c229f3a40f72793b1effd39c07c33e7",
 "assets/assets/images/reel3.png": "413664225bda145013795cb411dfb880",
+"assets/assets/images/reelwheel.png": "1fabd2d203a74f9e95826eef04ba9d7d",
 "assets/assets/images/rod1.png": "343bdcb6ca5a6d1e5c1e765c46bf5961",
 "assets/assets/images/rod2.png": "0314f1c2f087c7893f4c9dc7ee0fafb6",
 "assets/assets/images/rodicon.png": "1ff6e04d95ab394311396234bcf7d49c",
@@ -130,14 +131,14 @@ const RESOURCES = {
 "assets/assets/se/waterupfish.mp3": "693952101367a3e46d859cf39670c26b",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
 "assets/fonts/MaterialIcons-Regular.otf": "7e7a6cccddf6d7b20012a548461d5d81",
-"assets/NOTICES": "d8f2c641b7c07ee9724be9201007503e",
+"assets/NOTICES": "52b99bd60bbac6659b1a524b86e16417",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "6d342eb68f170c97609e9da345464e5e",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "c09e069247b288ad573ba28f733610f8",
-"/": "c09e069247b288ad573ba28f733610f8",
-"main.dart.js": "f3c15a7169b35822a91bf8665478f8fc",
+"index.html": "9c10858781233bf7929166525aff0286",
+"/": "9c10858781233bf7929166525aff0286",
+"main.dart.js": "9c7528d409ac54b4275f399abd376347",
 "manifest.json": "c634c13abd31b54604e8fb848d0a85ec",
 "version.json": "2625bcf7276b52a536463391f68a7f73"
 };

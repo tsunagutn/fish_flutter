@@ -12,6 +12,7 @@ import 'Menu.dart';
 
 class Loading extends StatefulWidget {
   static List<String> screenBgms = [
+    'muon01.mp3',
     // 'kaigarabushi.mp3',
     // 'saitarobushi.mp3'
   ];
@@ -55,7 +56,7 @@ class _LoadingState extends BasePageState<Loading> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: MediaQuery.of(context).size.width / 2,
+                width: MediaQuery.of(context).size.width,
                 child: new SwitchListTile(
                   value: _bgm,
                   activeColor: Colors.orange,
@@ -91,7 +92,8 @@ class _LoadingState extends BasePageState<Loading> {
                     //効果音managerで無音を再生
                     soundManagerPool.SoundManagerPoolInit();
                     // 遷移先のBGM再生
-                    super.bgmPlay(Menu.screenBgms);
+                    //BGMオブジェクトで無音SE再生
+                    //super.bgmPlay(Loading.screenBgms);
                     Navigator.pushNamed(context, "/menu").then(
                       (value) {},
                     );
