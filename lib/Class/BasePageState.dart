@@ -60,7 +60,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   }
 
   void onForeground() {
-    if (this.isActive && nowFileName != null) {
+    if (this.isActive && nowFileName != "") {
       // 自分自身の画面がトップに表示されていれば、以降の処理を実施
       // ホーム画面からアプリに戻り、フォアグラウンド状態に戻ったとき、BGMを再生する
       this._bgm.playBgm(name: nowFileName);

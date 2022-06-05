@@ -27,7 +27,7 @@ class SoundManagerPool {
   SoundManagerPoolInit() {
     List<String> lstSeFileName = [];
     //？？？これはあまりにもひどくないか・・・？
-    lstSeFileName.add("se/bait.mp3");
+    lstSeFileName.add("se/bait1.mp3");
     lstSeFileName.add("se/book.mp3");
     lstSeFileName.add("se/bookclose.mp3");
     lstSeFileName.add("se/boxclose.mp3");

@@ -50,7 +50,7 @@ class _LoadingState extends BasePageState<Loading> {
             border: Border.all(color: clsColor.getColorFromHex("FFFFFF")),
             color: clsColor.getColorFromHex("FFFFFF"),
           ),
-          child: Expanded(
+          //child: Expanded(
               child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,7 +103,7 @@ class _LoadingState extends BasePageState<Loading> {
             ],
           )),
         ),
-      ),
+      //),
     );
   }
 }
