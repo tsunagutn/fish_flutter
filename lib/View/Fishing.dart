@@ -127,8 +127,13 @@
 //済・夕方でＢＧＭ変える
 //済・雲の描画
 //済・大量に経験値で一気にレベル上がった時、途中の重さが解放されない
-//・クリア後、最初から振り返りリザルト表示
-//・MENUの前のTOP画面追加 そこでローディングとか表示しつつ画面タップさせてBGMプリロードさせる
+//済・MENUの前のTOP画面追加 そこでローディングとか表示しつつ画面タップさせてBGMプリロードさせる
+//・設定画面で感度のテストできるようにする
+//・設定画面でタックルの色替え機能
+//・釣果データの永続化
+//・過去釣果を見る画面、機能
+//・釣果によって何か成長させる
+//・実績
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
@@ -136,11 +141,13 @@
 //・ドラグ使いにくいの何とかする
 //・風の描画
 //・海底に漁礁とか
-//・実績
 //・時合度が低いのが続かんようにするか、高くできるようにする
 //・中断セーブ機能
+//・今日はもう納得した機能 ゲームを途中で諦める
 
+//［リリース後のアップデート］
 //・リザルト画面をリッチにする
+//・クリア後、最初から振り返りリザルト表示
 //・リザルト画面で切られたとかバレた魚種分かる（魚種以外分かるの方がええかも）
 //・ジャークをリズムで
 //・光点が横に走る
@@ -149,9 +156,8 @@
 //・時合度を何らか表示（今は魚反応の多さで判断できるが・・・
 //・HIT中のアバレベルを何らか表示
 //・エリア選択 エリアによって魚種、深さ等変える
-//・チュートリアルか、ヘルプか
+//・チュートリアルか、ヘルプか 
 //・寝る機能 寝中は何もできずすごい速さでゲームが進む
-//・今日はもう納得した機能 ゲームを途中で諦める
 //・ジャーク、巻、フォールの確率上昇を積み重ね式にする
 //・光点の残像
 
@@ -220,8 +226,9 @@ import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 
+import '../widget/FishingSliders.dart';
 import '../widget/ImageList.dart';
 import '../widget/goalDialog.dart';
 import '../widget/tackleIcon.dart';
@@ -314,12 +321,11 @@ class _FishingState extends BasePageState<Fishing>
   static const HOSEI_MAX = 3;
   static const MAX_RAND_ADD_TENSION = 2; //何もしてない時テンションがウロウロするののMAX値
   static const MIN_RAND_ADD_TENSION = -11; //〃 MIN値
-  final TENSION_COLOR_SAFE = clsColor.getColorFromHex("007FFF");
-  //final TENSION_COLOR_DRAG = clsColor.getColorFromHex("FFD800");
+  // final TENSION_COLOR_SAFE = clsColor.getColorFromHex("007FFF");
+  // final TENSION_COLOR_DRAG = clsColor.getColorFromHex("FFD800");
   final TENSION_COLOR_DANGER = clsColor.getColorFromHex("FFFF00");
-  final LINE_HP_COLOR = clsColor.getColorFromHex("65B558");
-  final SPEED_COLOR = clsColor.getColorFromHex("FFBABE");
-  final SPEED_COLOR_REELING = clsColor.getColorFromHex("FF6B77");
+  // final SPEED_COLOR = clsColor.getColorFromHex("FFBABE");
+  // final SPEED_COLOR_REELING = clsColor.getColorFromHex("FF6B77");
   static const DEPTH_CHANGE_SCAN = 500; //このスキャン毎に深さの変化傾向が変わる
   static const JIAI_CHANGE_SCAN = 1000; //このスキャン毎に時合度が変わる
   static const TANA_CHANGE_SCAN = 1500; //このスキャン毎にタナが変わる
@@ -386,10 +392,10 @@ class _FishingState extends BasePageState<Fishing>
   double _maxDepth = 50.0; //現在の最大水深(0.1m)
   double _maximumDepth = 1000.0;  //ステージ内の最大水深
   String _dispDepth = '0.0 m'; //深さ表示用
-  Color _tensionActiveTrackColor =
-      clsColor.getColorFromHex("4CFF00"); //テンションゲージの色
+  // Color _tensionActiveTrackColor =
+  //     clsColor.getColorFromHex("4CFF00"); //テンションゲージの色
   bool _flgShaKe = false; //ドラグスライダーを揺らす用
-  Color _speedActiveTrackColor = clsColor.getColorFromHex("0094FF"); //スピードゲージの色
+  //Color _speedActiveTrackColor = clsColor.getColorFromHex("0094FF"); //スピードゲージの色
   Color _infoBackColor = Colors.white; //HIT率表示の背景色（デバッグ用）
   Color _clutchBackColor = Colors.red; //クラッチボタンの背景色
   Color _pointerColor = Colors.yellow; //ソナー部光点の色
@@ -1161,9 +1167,9 @@ class _FishingState extends BasePageState<Fishing>
     //テンション確定
     _tension = val;
 
-    //テンションによってテンションバーの色を変える
-    _tensionActiveTrackColor = clsColor.getColorRange(
-        TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, _tensionValMax);
+    // //テンションによってテンションバーの色を変える
+    // _tensionActiveTrackColor = clsColor.getColorRange(
+    //     TENSION_COLOR_SAFE, TENSION_COLOR_DANGER, _tension, _tensionValMax);
 
     //水深表示
     _dispDepth = ((_depth).round() / 10).toStringAsFixed(1) +
@@ -1924,8 +1930,8 @@ endDrawer:  Drawer(
                       details.globalPosition.dx, details.globalPosition.dy);
                   generateTapPointer(details);
 
-                  //タップ時はスピードスライダの色替え
-                  _speedActiveTrackColor = SPEED_COLOR_REELING;
+                  // //タップ時はスピードスライダの色替え
+                  // _speedActiveTrackColor = SPEED_COLOR_REELING;
                 },
                 //ドラッグ操作で位置が変化した時
                 onPanUpdate: (DragUpdateDetails details) {
@@ -1974,8 +1980,8 @@ endDrawer:  Drawer(
                 onPanEnd: (DragEndDetails details) {
                   debugPrint("タップはなし");
                   _onTap = false;
-                  //スピードスライダの色を戻す
-                  _speedActiveTrackColor = SPEED_COLOR;
+                  // //スピードスライダの色を戻す
+                  // _speedActiveTrackColor = SPEED_COLOR;
                 },
                 child: Container(
                     //key: globalKeyShore,
@@ -1999,175 +2005,15 @@ endDrawer:  Drawer(
                         //海上
                         Container(
                           key: globalKeyShore,
-                          child: Column(children: <Widget>[
-                            Container(
-                                //appBarは透過なのでその分の高さを加算
-                                margin:
-                                    EdgeInsets.only(top: _appBarHeight + 10),
-                                height: 40,
-                                //テンションとドラグレベルのスライダーをstackで重ねて表示
-                                child: new Stack(children: <Widget>[
-                                  // //テンションスライダー
-                                  Container(
-                                      margin:
-                                          EdgeInsets.only(left: 10, right: 10),
-                                      child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                new Image(
-                                                  image: AssetImage(
-                                                      'assets/images/TENSIONDRAG.png'),
-                                                ),
-                                              ],
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(left: 8),
-                                              child: Transform(
-                                                transform: Matrix4.skewX(-0.3),
-                                                child: new Stack(children: <
-                                                    Widget>[
-                                                  CustomPaint(
-                                                    painter: new SliderPainter(
-                                                      height: 20,
-                                                      activeColor:
-                                                          _tensionActiveTrackColor,
-                                                      inactiveColor: (_flgHit)
-                                                          ? Colors.black
-                                                          : Colors.white.withOpacity(0.7),
-                                                      value: _tension,
-                                                      maxValue: _tensionValMax,
-                                                      backRadius:
-                                                          _animationRadius
-                                                              .value,
-                                                      maxBackRadius:
-                                                          POINTER_BACK_SIZE,
-                                                      flgShaKe: (_flgBait ||
-                                                              (_tension >
-                                                                  (_tensionValMax *
-                                                                      _drag)))
-                                                          ? true
-                                                          : false,
-                                                      flgDispValue: true,
-                                                      flgDispMaxValue: true,
-                                                      value2: _fookingTension,
-                                                      value2Color: Colors.black
-                                                          .withOpacity(0.1),
-                                                    ),
-                                                    child: Container(),
-                                                  ),
-                                                ]),
-                                              ),
-                                            ),
-                                          ])),
-                                  //ドラグスライダー
-                                  Container(
-                                    margin: EdgeInsets.only(top: 16),
-                                    height: 40,
-                                    child: SliderTheme(
-                                        data: SliderTheme.of(context).copyWith(
-                                          //trackHeight: 1, //全体の縦長
-                                          valueIndicatorColor: Colors.black
-                                              .withOpacity(0.0), //背景の色
-                                          activeTrackColor: Colors.black
-                                              .withOpacity(0.0), //値有りエリアの色
-                                          inactiveTrackColor: Colors.black
-                                              .withOpacity(0.0), //値無しエリアの色
-                                          activeTickMarkColor: Colors.black
-                                              .withOpacity(0.0), //各value値の色
-                                          thumbColor: Colors.red
-                                              .withOpacity(0.5), //値ツマミの色
-                                          thumbShape: RoundSliderThumbShape(
-                                              enabledThumbRadius: 10), //ツマミの大きさ
-                                          overlayColor: Colors.black
-                                              .withOpacity(0.0), //値ツマミフォーカス時の色
-                                        ),
-                                        child: Slider(
-                                          value: _drag,
-                                          min: 0.0,
-                                          max: 1.0,
-                                          divisions:
-                                              (_tensionValMax - TENSION_VAL_MIN)
-                                                  .floor(),
-                                          onChanged: (double value) {
-                                            setState(() {
-                                              _drag = value;
-                                            });
-                                          },
-                                        )),
-                                  )
-                                ])),
-                            //ラインHPスライダー
-                            Container(
-                                margin: EdgeInsets.only(
-                                    left: 10, right: 10, bottom: 5),
-                                height: 5,
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      CustomPaint(
-                                        painter: new SliderPainter(
-                                          height: 10,
-                                          activeColor: LINE_HP_COLOR,
-                                          inactiveColor: Colors.white,
-                                          value: _nowLineHp,
-                                          maxValue: _maxLineHp,
-                                          backRadius: 0,
-                                          maxBackRadius: 0,
-                                          flgShaKe: false,
-                                          flgDispValue: true,
-                                          flgDispMaxValue: false,
-                                        ),
-                                        child: Container(),
-                                      ),
-                                    ])),
+                          child:
+new FishingSliders(top: _appBarHeight + 10,flgHit: _flgHit,tension: _tension, tensionValMax: _tensionValMax,
+  backRadiusValue: _animationRadius.value, backRadiusMax: POINTER_BACK_SIZE,flgBait: _flgBait,
+  drag: _drag, fookingTension: _fookingTension, tensionValMin: TENSION_VAL_MIN, nowLineHp: _nowLineHp,
+  maxLineHp: _maxLineHp, nowSpeed: _speed, maxSpeed: _speedValMax, flgTap: _onTap,
 
-                            //巻速度スライダー
-                            Container(
-                                margin: EdgeInsets.only(left: 10, right: 10),
-                                height: 40,
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      //Text("SPEED"),
-                                      new Image(
-                                        image: AssetImage(
-                                            'assets/images/SPEED.png'),
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(left: 8),
-                                        child: Transform(
-                                          transform: Matrix4.skewX(-0.3),
-                                          child: CustomPaint(
-                                            painter: new SliderPainter(
-                                              height: 20,
-                                              activeColor:
-                                                  _speedActiveTrackColor,
-                                              inactiveColor: Colors.white.withOpacity(0.7),
-                                              value: _speed,
-                                              maxValue: _speedValMax,
-                                              backRadius: 0,
-                                              maxBackRadius: 0,
-                                              flgShaKe: false,
-                                              flgDispValue: true,
-                                              flgDispMaxValue: true,
-                                            ),
-                                            child: Container(),
-                                          ),
-                                        ),
-                                      ),
-                                      //可能性のある魚種の速度範囲表示
-                                    ])),
-                          ]),
+),
+
+
                         ),
                         //海中
                         Expanded(
@@ -2599,44 +2445,16 @@ endDrawer:  Drawer(
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              textDirection:
+                              (!settings.flgControlRight ?
+                              TextDirection.ltr : TextDirection.rtl),
                               children: [
-                                (!settings.flgControlRight)
-                                    ?
-                                    //回収ボタン ？？？デザインは仮だから
-                                    AnimatedOpacity(
-                                        opacity: _depth > 0.0 &&
-                                                !_flgBait &&
-                                                !_flgHit
-                                            ? 1.0
-                                            : 0.0,
-                                        duration: Duration(milliseconds: 200),
-                                        child: Container(
-                                          margin: EdgeInsets.only(
-                                              top: _shoreHeight + 50, left: 10),
-                                          child: ElevatedButton(
-                                              child: const Text('回収'),
-                                              style: ElevatedButton.styleFrom(
-                                                primary: Colors.amber, //背景色
-                                                onPrimary:
-                                                    Colors.black, //押したときの色
-                                                shape: const StadiumBorder(),
-                                                side: BorderSide(
-                                                  color: Colors.black, //枠線の色
-                                                  width: 2, //枠線の太さ
-                                                ),
-                                              ),
-                                              onPressed: () {
-                                                _collect = true;
-                                                _onClutch = true;
-                                              }),
-                                        ),
-                                      )
-                                    : Container(
+    Container(
                                         margin: EdgeInsets.only(
                                             top: _shoreHeight +
                                                 50 +
                                                 (5 * _commonAnime.value),
-                                            left: 10),
+                                            left: 10, right:10),
                                         child:
                                             //ルアー
                                             GestureDetector(
@@ -2661,8 +2479,6 @@ endDrawer:  Drawer(
                                                       : 1.0),
                                                 )),
                                       ),
-                                (settings.flgControlRight)
-                                    ?
                                     //回収ボタン ？？？デザインは仮だから
                                     AnimatedOpacity(
                                         opacity: _depth > 0.0 &&
@@ -2674,7 +2490,7 @@ endDrawer:  Drawer(
                                         child: Container(
                                           margin: EdgeInsets.only(
                                               top: _shoreHeight + 50,
-                                              right: 10),
+                                              left: 10, right: 10),
                                           child: ElevatedButton(
                                               child: const Text('回収'),
                                               style: ElevatedButton.styleFrom(
@@ -2693,43 +2509,49 @@ endDrawer:  Drawer(
                                               }),
                                         ),
                                       )
-                                    : Container(
-                                        margin: EdgeInsets.only(
-                                            top: _shoreHeight +
-                                                50 +
-                                                (5 * _commonAnime.value),
-                                            right: 10),
-                                        child:
-                                            //ルアー
-                                            GestureDetector(
-                                                onTap: () async {
-                                                  if (_depth <= 0.0) {
-                                                    setState(() {
-                                                      _selectTacleIcon = 'lure';
-                                                      _showTacleChangeDialog =
-                                                          true;
-                                                      soundManagerPool
-                                                          .playSound(
-                                                              'se/boxopen.mp3');
-                                                    });
-                                                  }
-                                                },
-                                                child: tackleIcon(
-                                                  tackleIconSize: 40.0,
-                                                  lure: uselureData,
-                                                  flgSelect: false,
-                                                  opacity: (_depth > 0.0
-                                                      ? 0.7
-                                                      : 1.0),
-                                                )),
-                                      ),
                               ],
                             ),
                             Row(
-                                mainAxisAlignment: (settings.flgControlRight)
-                                    ? MainAxisAlignment.start
-                                    : MainAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                textDirection:
+                                (!settings.flgControlRight ?
+                                TextDirection.ltr : TextDirection.rtl),
                                 children: [
+                                  //ドラグ調整用スライダー
+                                  Column(children: [
+                                    //Text("DRAG"),
+                                  RotatedBox(
+                                    quarterTurns: -1,
+                                    child: SliderTheme(
+                                      data: SliderTheme.of(context).copyWith(
+                                        //trackHeight: 1, //全体の縦長
+                                        valueIndicatorColor: Colors.black
+                                            .withOpacity(1.0), //背景の色
+                                        activeTrackColor: Colors.red
+                                            .withOpacity(1.0), //値有りエリアの色
+                                        inactiveTrackColor: Colors.white
+                                            .withOpacity(1.0), //値無しエリアの色
+                                        activeTickMarkColor: Colors.black
+                                            .withOpacity(1.0), //各value値の色
+                                        thumbColor: Colors.red
+                                            .withOpacity(0.5), //値ツマミの色
+                                        // thumbShape: RoundSliderThumbShape(
+                                        //     enabledThumbRadius: 10), //ツマミの大きさ
+                                        overlayColor: Colors.black
+                                            .withOpacity(0.0), //値ツマミフォーカス時の色
+                                      ),
+                                      child:Slider(
+                                      value: _drag,
+                                      min: 0.0,
+                                      max: 1.0,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _drag = value;
+                                        });
+                                      },
+                                    ),),
+                                  ),],),
+
                                   Container(
                                     margin: EdgeInsets.only(left: 8),
                                     child: new FishCardList(
@@ -2743,9 +2565,11 @@ endDrawer:  Drawer(
                                       flgRight: settings.flgControlRight,
                                     ),
                                   ),
-                                ])
+                                ]),
+
                           ],
                         ),
+                        //タックル変更のダイアログ
                         AnimatedPadding(
                           //curve: Curves.easeOutExpo,
                           padding: EdgeInsets.only(
@@ -3030,7 +2854,7 @@ endDrawer:  Drawer(
 
   //時間データ取得
   String getTime(int time) {
-    return DateFormat('HH:mm').format(startTime.add(Duration(minutes: (time ~/ MINCOUNT))));
+    return intl.DateFormat('HH:mm').format(startTime.add(Duration(minutes: (time ~/ MINCOUNT))));
   }
 
   int getLastTime() {
