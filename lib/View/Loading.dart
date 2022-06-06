@@ -96,7 +96,7 @@ class _LoadingState extends BasePageState<Loading> {
                   ),
                 ),
                 ElevatedButton(
-                  child: Text("ゲームを始める" + test.toString()),
+                  child: Text("ゲームを始める"),
                   onPressed: () async {
                     final result =
                         //await Navigator.of(context).pushNamed('/fishing');
