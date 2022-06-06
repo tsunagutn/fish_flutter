@@ -1,7 +1,9 @@
 import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
+import '../TypeAdapter/typSettings.dart';
 import 'BgmPlayer.dart';
 
 class SettingDialog extends StatefulWidget {
@@ -285,6 +287,18 @@ class _SettingDialogState extends State<SettingDialog>
                 onPrimary: Colors.white,
               ),
               onPressed: () {
+                //Hiveに書き込み
+                final box = Hive.box('box');
+                box.put(
+                    'settings',
+                    typSettings(
+                        flgBgm: settings.flgBgm,
+                        flgControlRight: settings.flgControlRight,
+                        volumeBgm: settings.volumeBgm,
+                        volumeSe: settings.volumeBgm,
+                        jerkSense: settings.jerkSense,
+                        makiSense: settings.makiSense));
+
                 Navigator.of(context).pop(retPoint);
               },
             ),

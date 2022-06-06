@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 
 import 'Model/StageModel.dart';
 import 'Model/TutorialModel.dart';
+import 'TypeAdapter/typSettings.dart';
 import 'View/LightSpotWegit.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -22,19 +23,25 @@ import 'View/Loading.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-late Box box;
+late typSettings settings = typSettings(
+    flgBgm: true,
+    flgControlRight: true,
+    volumeBgm: 0.5,
+    volumeSe: 0.5,
+    jerkSense: 0.5,
+    makiSense: 0.5);
 
 void main() async {
   await Hive.initFlutter();
-  box = await Hive.openBox('box');
-  var test = box.get('num');
-  debugPrint("前" + test.toString());
-  if (test == null) {
-    box.put('num', 0);
-  } else {
-    box.put('num', test++);
+  //環境設定データのタイプアダプタ
+  Hive.registerAdapter(typSettingsAdapter());
+  var box = await Hive.openBox('box');
+
+  if (!box.containsKey('settings')) {
+    //環境設定に初期値を格納
+    box.put('settings', settings);
   }
-  debugPrint("後" + test.toString());
+  settings = await box.get('settings');
 
   runApp(Provider(
     create: (context) => BgmPlayer(),
@@ -45,16 +52,16 @@ void main() async {
 // RouteObserverを利用するので、本件ではクラス外にて定義
 var routeObserver = RouteObserver<PageRoute>();
 
-//環境設定のインスタンス
-var settings = new SettingsModel(
-  //？？？ここは本当は環境設定のファイルかDBから読むように
-  flgBgm: true,
-  flgControlRight: true,
-  volumeBgm: 0.5,
-  volumeSe: 0.5,
-  jerkSense: 0.5,
-  makiSense: 0.5,
-);
+// //環境設定のインスタンス
+// var settings = new SettingsModel(
+//   //Hiveから読込
+//   flgBgm: stg.flgBgm,
+//   flgControlRight: stg.flgControlRight,
+//   volumeBgm: stg.volumeBgm,
+//   volumeSe: stg.volumeSe,
+//   jerkSense: stg.jerkSense,
+//   makiSense: stg.makiSense,
+// );
 
 //ステージ情報のインスタンス
 var stages = new StagesModel();
