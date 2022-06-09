@@ -1,10 +1,12 @@
 import 'package:fish_flutter/Model/StageModel.dart';
+import 'package:fish_flutter/TypeAdapter/typGameData.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fish_flutter/View/DrawerItem.dart';
 import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
+import 'package:hive/hive.dart';
 
 import '../Main.dart';
 import '../widget/SettingDialog.dart';
@@ -42,8 +44,7 @@ class _menuState extends BasePageState<Menu> {
     return Material(
         child: new WillPopScope(
             onWillPop: () async => false,
-            child:
-            Scaffold(
+            child: Scaffold(
               appBar: AppBar(
                 title:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -79,35 +80,28 @@ class _menuState extends BasePageState<Menu> {
                                 splashColor: Colors.blue.withAlpha(10),
                                 borderRadius: BorderRadius.circular(10),
                                 onTap: () async {
-                                    Navigator.pushNamed(context, "/fishing",
-                                            arguments: stages.getStageData(1))
-                                        .then(
-                                      (value) {
-                                        //メニュー画面のBGMを再生
-                                        super.bgmPlay(Menu.screenBgms);
-                                      },
-                                    );
+                                  var gameDataBox = Hive.box('gamedata');
+                                  typGameData gameData;
+                                  if (gameDataBox.containsKey('gamedata')) {
+                                    gameData = gameDataBox.get('gamedata');
+                                    if (gameData.isEnd) {
+                                      //終了済みの場合は初期データをセット
+                                      gameData = getStartGameData();
+                                    }
+                                  } else {
+                                    //中断データがない場合は初期データをセット
+                                    gameData = getStartGameData();
+                                  }
 
+                                  Navigator.pushNamed(context, "/fishing",
+                                          arguments: gameData)
+                                      .then(
+                                    (value) {
+                                      //メニュー画面のBGMを再生
+                                      super.bgmPlay(Menu.screenBgms);
+                                    },
+                                  );
                                 },
-
-                                  // final result =
-                                  //     //await Navigator.of(context).pushNamed('/fishing');
-                                  //     bgm.loadBgm().then((_) {
-                                  //   // ここでBGMデータの全ロード処理実行
-                                  //   //効果音managerで無音を再生
-                                  //   soundManagerPool.SoundManagerPoolInit();
-                                  //   //bgm.playBgm(name: Fishing.screenBgms); // 遷移先のBGM再生
-                                  //   //super.bgmPlay(Fishing.screenBgms);
-                                  //   Navigator.pushNamed(context, "/fishing",
-                                  //           arguments: stages.getStageData(1))
-                                  //       .then(
-                                  //     (value) {
-                                  //       //メニュー画面のBGMを再生
-                                  //       super.bgmPlay(Menu.screenBgms);
-                                  //     },
-                                  //   );
-                                  // });
-                                // },
                                 child: Container(
                                     margin: const EdgeInsets.all(10.0),
                                     width: 200,
@@ -129,49 +123,44 @@ class _menuState extends BasePageState<Menu> {
                                           ),
                                         ]))),
                           ),
-                          // Card(
-                          //   margin: const EdgeInsets.only(bottom: 30),
-                          //   color: clsColor.getColorFromHex("ffffe0"),
-                          //   elevation: 10,
-                          //   shadowColor: clsColor.getColorFromHex("555555"),
-                          //   shape: RoundedRectangleBorder(
-                          //     borderRadius: BorderRadius.circular(10),
-                          //   ),
-                          //   child: InkWell(
-                          //       splashColor: Colors.blue.withAlpha(10),
-                          //       borderRadius: BorderRadius.circular(10),
-                          //       onTap: () async {
-                          //         final result =
-                          //             bgm.loadBgm().then((_) {
-                          //           // ここでBGMデータの全ロード処理実行
-                          //           //効果音managerで無音を再生
-                          //           soundManagerPool.SoundManagerPoolInit();
-                          //           //bgm.playBgm(name: Fishing.screenBgm); // 遷移先のBGM再生
-                          //           super.bgmPlay(Fishing.screenBgms);
-                          //           Navigator.pushNamed(context, "/fishing",
-                          //               arguments: stages.getStageData(0));
-                          //         });
-                          //       },
-                          //       child: Container(
-                          //           margin: const EdgeInsets.all(10.0),
-                          //           width: 200,
-                          //           height: 50,
-                          //           child: Row(
-                          //               mainAxisAlignment:
-                          //                   MainAxisAlignment.spaceAround,
-                          //               children: [
-                          //                 Icon(
-                          //                   Icons.check,
-                          //                   color: Colors.green,
-                          //                   size: 30.0,
-                          //                 ),
-                          //                 Text(
-                          //                   "あそびかた",
-                          //                   style: TextStyle(
-                          //                       fontSize: 16, color: Colors.black),
-                          //                 ),
-                          //               ]))),
-                          // ),
+                          Card(
+                            margin: const EdgeInsets.only(bottom: 30),
+                            color: clsColor.getColorFromHex("ffffe0"),
+                            elevation: 10,
+                            shadowColor: clsColor.getColorFromHex("555555"),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: InkWell(
+                                splashColor: Colors.blue.withAlpha(10),
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () async {
+                                  final box = await Hive.box('box');
+                                  if (box.containsKey('results')) {
+                                    Navigator.pushNamed(context, "/history");
+                                  }
+                                },
+                                child: Container(
+                                    margin: const EdgeInsets.all(10.0),
+                                    width: 200,
+                                    height: 50,
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Icon(
+                                            Icons.check,
+                                            color: Colors.green,
+                                            size: 30.0,
+                                          ),
+                                          Text(
+                                            "過去のデータ",
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black),
+                                          ),
+                                        ]))),
+                          ),
                           Card(
                             margin: const EdgeInsets.only(bottom: 60),
                             color: Color(0xffffffe0),
@@ -224,5 +213,21 @@ class _menuState extends BasePageState<Menu> {
                 ),
               ),
             )));
+  }
+
+  typGameData getStartGameData() {
+    //初期データをセット
+    return typGameData(
+        gameId: 1,
+        timeCount: 0,
+        maxTimeCount: (30 * 60 * 11),
+        point: 0,
+        maxDepth: 40,
+        windLevel: 0.0,
+        maxWindLevel: 0.0,
+        maxTension: 2000.0,
+        maxLineHp: 1000.0,
+        maxSpeed: 200.0,
+        isEnd: false);
   }
 }

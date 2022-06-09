@@ -39,16 +39,8 @@ class _LoadingState extends BasePageState<Loading> {
         _bgm = e!;
         settings.flgBgm = _bgm;
 
-        final box = Hive.box('box');
-        box.put(
-            'settings',
-            typSettings(
-                flgBgm: settings.flgBgm,
-                flgControlRight: settings.flgControlRight,
-                volumeBgm: settings.volumeBgm,
-                volumeSe: settings.volumeBgm,
-                jerkSense: settings.jerkSense,
-                makiSense: settings.makiSense));
+        final box = Hive.box('settings');
+        box.put('settings', settings);
       });
 
   @override

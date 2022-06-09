@@ -27,6 +27,9 @@ class _SettingDialogState extends State<SettingDialog>
     Tab(
       text: '音の設定',
     ),
+    Tab(
+      text: 'テスト用',
+    ),
     // Tab(
     //   text: 'Ship',
     // ),
@@ -271,6 +274,33 @@ class _SettingDialogState extends State<SettingDialog>
                                   ]),
                                 ]),
                               ),
+                              //テスト用タブ
+                              Container(
+                                margin: EdgeInsets.only(left: 15, top: 15),
+                                child: Column(children: [
+                                  ElevatedButton(
+                                      child: const Text('☠データ全部けす☠'),
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Colors.amber, //背景色
+                                        onPrimary: Colors.black, //押したときの色
+                                        shape: const StadiumBorder(),
+                                        side: BorderSide(
+                                          color: Colors.black, //枠線の色
+                                          width: 2, //枠線の太さ
+                                        ),
+                                      ),
+                                      onPressed: () async {
+                                        final settingsBox =
+                                            Hive.box('settings');
+                                        settingsBox.delete('settings');
+                                        final relultBox = Hive.box('box');
+                                        relultBox.delete('results');
+                                        final gamedataBox =
+                                            Hive.box('gamedata');
+                                        gamedataBox.delete('gamedata');
+                                      }),
+                                ]),
+                              ),
                             ],
                           ),
                         )),
@@ -288,16 +318,8 @@ class _SettingDialogState extends State<SettingDialog>
               ),
               onPressed: () {
                 //Hiveに書き込み
-                final box = Hive.box('box');
-                box.put(
-                    'settings',
-                    typSettings(
-                        flgBgm: settings.flgBgm,
-                        flgControlRight: settings.flgControlRight,
-                        volumeBgm: settings.volumeBgm,
-                        volumeSe: settings.volumeBgm,
-                        jerkSense: settings.jerkSense,
-                        makiSense: settings.makiSense));
+                final box = Hive.box('settings');
+                box.put('settings', settings);
 
                 Navigator.of(context).pop(retPoint);
               },

@@ -1,7 +1,9 @@
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
+import 'package:fish_flutter/TypeAdapter/typResults.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 import '../Main.dart';
 import '../Model/relultAnimeModel.dart';
@@ -669,11 +671,29 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                         children: [
                           ElevatedButton(
                             child: Text("OK"),
-                            onPressed: () {
+                            onPressed: () async {
                               if (anime[enumResultAnime.last]!.state !=
                                   enumAnimeState.end) {
                                 return;
                               }
+                              List<FishesResultModel> lstResults = [];
+                              //Hiveに書き込み
+                              final box = Hive.box('box');
+                              if (box.containsKey('results')) {
+                                //過去データを読み出し
+                                lstResults = await List<FishesResultModel>.from(box.get('results'));
+                              }
+                              lstResults.add(widget.fishResult);
+
+                              var aaeae = box.put('results', lstResults);
+
+                              if (box.containsKey('results')) {
+                                var a = 1;
+                                List<FishesResultModel> ttest = await List<FishesResultModel>.from(box.get('results'));
+
+                                var aa = 1;
+                              }
+
                               Navigator.pop(context);
                             },
                           ),

@@ -1,17 +1,20 @@
 //flutter run -d chrome でchrome動作
 
 import 'package:fish_flutter/Model/SettingsModel.dart';
+import 'package:fish_flutter/TypeAdapter/typResults.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
 import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/View/Settings.dart';
 import 'package:fish_flutter/View/Term.dart';
 import 'package:fish_flutter/View/Fishing.dart';
+import 'package:fish_flutter/View/History.dart';
 import 'package:fish_flutter/View/Test.dart';
 import 'package:provider/provider.dart';
 
 import 'Model/StageModel.dart';
 import 'Model/TutorialModel.dart';
+import 'TypeAdapter/typGameData.dart';
 import 'TypeAdapter/typSettings.dart';
 import 'View/LightSpotWegit.dart';
 
@@ -35,13 +38,16 @@ void main() async {
   await Hive.initFlutter();
   //環境設定データのタイプアダプタ
   Hive.registerAdapter(typSettingsAdapter());
-  var box = await Hive.openBox('box');
+  Hive.registerAdapter(typResultsAdapter());
+  Hive.registerAdapter(typGameDataAdapter());
+  var settingsBox = await Hive.openBox('settings');
+  var gameDataBox = await Hive.openBox('gamedata');
 
-  if (!box.containsKey('settings')) {
+  if (!settingsBox.containsKey('settings')) {
     //環境設定に初期値を格納
-    box.put('settings', settings);
+    settingsBox.put('settings', settings);
   }
-  settings = await box.get('settings');
+  settings = settingsBox.get('settings');
 
   runApp(Provider(
     create: (context) => BgmPlayer(),
@@ -103,7 +109,7 @@ class MyApp extends StatelessWidget {
         '/settings': (_) => Settings(),
         '/term': (_) => Term(),
         '/fishing': (_) => Fishing(),
-        '/test': (_) => Test(),
+        '/history': (_) => History(),
         '/lightspot': (_) => LightSpotWegit(),
       },
       //home: MyHomePage(title: 'チェックリスト'),

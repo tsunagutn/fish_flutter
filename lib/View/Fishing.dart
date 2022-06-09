@@ -197,6 +197,7 @@ import 'package:fish_flutter/Model/FishResultsModel.dart';
 //import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/Model/StageModel.dart';
+import 'package:fish_flutter/TypeAdapter/typGameData.dart';
 import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/FIshCard.dart';
@@ -226,6 +227,7 @@ import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart' as intl;
 
 import '../widget/FishingSliders.dart';
@@ -236,7 +238,9 @@ import '../widget/windDialog.dart';
 import 'DrawerItem.dart';
 
 class Fishing extends StatefulWidget {
+  //typGameData gameData;
   Fishing({Key? key}) : super(key: key);
+
   static List<String> screenBgms = [
     'hamabenouta.mp3',
     'kaigarabushi.mp3',
@@ -375,21 +379,21 @@ class _FishingState extends BasePageState<Fishing>
   bool _flgWindLvUp = false; //風レベル上昇中フラグ
 
   //ステート変数
-  int _timeCount = 0; //時間 1カウント0.1分
+  //int _timeCount = 0; //時間 1カウント0.1分
   //int _timeCount = MINCOUNT * 60 * 10 ;  //残１時間から
-  //int _timeCount = MINCOUNT * 60 * 10 + 1700;  //すぐ終了
+  //int _timeCount = MINCOUNT * 60 * 10 + 1200; //すぐ終了
   DateTime startTime = DateTime(2020, 1, 1, 7, 0, 0);
   double _tension = 0.0; //テンション値
-  double _tensionValMax = 0.0; //テンション最大値 竿によって可変
+  //double _tensionValMax = 0.0; //テンション最大値 竿によって可変
   double _fookingTension = 0.0; //アタリ時のアワセ判定値
   double _fookingTensionPrev = 0.0; //アワセモード時のテンション前回値記憶
   var _useLureId = enumLureDiv.tairaba; //使用中のルアー種類
   double _drag = 0.0; //ドラグレベル値
   double _speed = 0.0; //巻き速度値
-  double _speedValMax = 0.0; //スピード最大値 リールによって可変
+  //double _speedValMax = 0.0; //スピード最大値 リールによって可変
   double _depth = 0.0; //現在糸出し量(0.1m)
   double _prevDepth = 0.0; //前回スキャンの糸出し量（浮上判定用）
-  double _maxDepth = 50.0; //現在の最大水深(0.1m)
+  //double _maxDepth = 50.0; //現在の最大水深(0.1m)
   double _maximumDepth = 1000.0; //ステージ内の最大水深
   String _dispDepth = '0.0 m'; //深さ表示用
   // Color _tensionActiveTrackColor =
@@ -401,13 +405,13 @@ class _FishingState extends BasePageState<Fishing>
   Color _pointerColor = Colors.yellow; //ソナー部光点の色
   double _lightSpotY = 0.0; //ソナー部光点TOP
   double _lightSpotX = 50.0; //ソナー部光点LEFT
-  int _point = 0; //獲得ポイント
+  //int _point = 0; //獲得ポイント
   double _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
   double _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
   int _tanaChangeScanCnt = 0; //棚変化スキャンカウント数
   double _jiai = 0.9; //時合度 0.0～0.9999...
   int _jiaiChangeScanCnt = 0; //時合度の変化スキャンカウント数
-  double _maxLineHp = 1000.0; //ラインHP最大値
+  //double _maxLineHp = 1000.0; //ラインHP最大値
   double _nowLineHp = 1000.0; //現在ラインHP
 
   List<Color> _skyColors = [];
@@ -434,8 +438,8 @@ class _FishingState extends BasePageState<Fishing>
   double _dispDepthLv1 = 0.45; //深さ画面色変える 中層 0m：1.0 70m：0.8
   double _dispDepthLv2 = 0.9; //深さ画面色変える 深層 0m：1.0 100m：0.9
 
-  double _windLevel = 0.0; //風レベル 0.0～1.0 0.5で無風
-  double _maxWindLevel = 0.0;
+  //double _windLevel = 0.0; //風レベル 0.0～1.0 0.5で無風
+  //double _maxWindLevel = 0.0;
 
   var _nowDurationLv; //光点点滅レベル
   double _sonarTop = 0.0;
@@ -460,7 +464,7 @@ class _FishingState extends BasePageState<Fishing>
 
   String _actionText = "";
 
-  late StageModel stage;
+  late typGameData gameData;
 
   //タックルの描画関連
   double _tackleCenterX = 0.0;
@@ -504,6 +508,9 @@ class _FishingState extends BasePageState<Fishing>
 
   var flgDispSettingsOk = false;
 
+  //前画面に戻る許可
+  var _isBack = false;
+
   @override
   void initState() {
     //魚テーブルを初期化？？？本当はエリアで絞る
@@ -522,8 +529,8 @@ class _FishingState extends BasePageState<Fishing>
     //haveTackle = new HaveTackleModel();
     // _tensionValMax = haveTackle.getUseRod().maxTention;
     // _speedValMax = haveTackle.getUseReel().maxSpeed;
-    _tensionValMax = 2000.0;
-    _speedValMax = 200.0;
+    //_tensionValMax = 2000.0;
+    //_speedValMax = 200.0;
     _drag = 0.8;
     _flgChangeWind = true;
     //空の色 初期値
@@ -537,12 +544,13 @@ class _FishingState extends BasePageState<Fishing>
     // null safety対応で?（null以外の時のみアクセス）をつける
     WidgetsBinding.instance?.addPostFrameCallback((cb) {
       // `ModalRoute.of()`メソッドを使用して引数を取得
-      stage = ModalRoute.of(context)?.settings.arguments as StageModel;
+      gameData = ModalRoute.of(context)?.settings.arguments as typGameData;
 
       //スタート深さを設定
-      _maxDepth = stage.startDepth;
+      //_maxDepth = stage.startDepth;
+
       //ゴール深さを設定
-      _maximumDepth = stage.maximumDepth;
+      //_maximumDepth = stage.maximumDepth;
       //風レベル
       //_windLevel = stage.windLevel;
 
@@ -776,10 +784,10 @@ class _FishingState extends BasePageState<Fishing>
     //16:30から徐々に夕方
     double eveningCount = MINCOUNT * 60 * 10.0;
     //現在が夕方の場合
-    if (_timeCount > eveningCount) {
+    if (gameData.timeCount > eveningCount) {
       _flgEvening = true;
       var skyMaxVal = getLastTime() - eveningCount;
-      var skyVal = _timeCount - eveningCount;
+      var skyVal = gameData.timeCount - eveningCount;
       if (skyVal > skyMaxVal) skyVal = skyMaxVal;
       _skyColors = [];
       //時間によって空の色を変える
@@ -793,7 +801,7 @@ class _FishingState extends BasePageState<Fishing>
 
     //終了時間に到達
     bool flgGoal = false;
-    if (_timeCount >= getLastTime()) {
+    if (gameData.timeCount >= getLastTime()) {
       flgGoal = true;
       if (!_flgHit && !_flgBait) {
         //ゴール条件成立
@@ -811,16 +819,17 @@ class _FishingState extends BasePageState<Fishing>
                 goalDialog(
                   bgm: super.bgm,
                   dispSize: size,
-                  point: _point,
+                  point: gameData.point,
                   fishResult: _fishesResult,
-                  maxWindLevel: _maxWindLevel,
-                  maxDepth: _maxDepth,
+                  maxWindLevel: gameData.maxWindLevel,
+                  maxDepth: gameData.maxDepth,
                 ),
               ],
             );
           },
         );
         //モーダル閉じた時、メニューに戻る
+        _isBack = true;
         Navigator.of(context).pop();
       }
     }
@@ -856,10 +865,11 @@ class _FishingState extends BasePageState<Fishing>
     // }
 
     //水深とポイントを元に風レベル変更
-    var planWindLevel = _point / (_maxDepth * 50);
-    var oldLv = _windLevel;
+    // var planWindLevel = gameData.point / (gameData.maxDepth * 50);
+    // var oldLv = _windLevel;
 
-    var addWindLevel = (_point / (_maxDepth * 50) - _windLevel) / 50;
+    var addWindLevel =
+        (gameData.point / (gameData.maxDepth * 50) - gameData.windLevel) / 50;
 
     if (addWindLevel > 0) {
       _flgWindLvUp = true;
@@ -868,11 +878,11 @@ class _FishingState extends BasePageState<Fishing>
       addWindLevel = addWindLevel * 2;
       _flgWindLvUp = false;
     }
-    _windLevel += addWindLevel;
-    if (_windLevel < 0) _windLevel = 0;
+    gameData.windLevel += addWindLevel;
+    if (gameData.windLevel < 0) gameData.windLevel = 0;
 
     //最大の風レベル記憶
-    if (_maxWindLevel < _windLevel) _maxWindLevel = _windLevel;
+    if (gameData.maxWindLevel < gameData.windLevel) gameData.maxWindLevel = gameData.windLevel;
 
     //時合の変化判定
     _jiaiChangeScanCnt++;
@@ -927,13 +937,13 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
     if (!flgGoal) {
-      _timeCount++;
+      gameData.timeCount++;
       //深さ変化度合の決定 0.5が停止の場合
       //_depthChange = (_shipMove - 0.5) + ((_windLevel - 0.5) / 10);
       //深さ変化度合の決定 0が停止の場合
-      _depthChange = (_shipMove - 0.5) + (_windLevel / 10);
+      _depthChange = (_shipMove - 0.5) + (gameData.windLevel / 10);
       //深さ決定 船移動分と風分
-      _maxDepth += _depthChange;
+      gameData.maxDepth += _depthChange;
     } else {
       _depthChange = 0.0;
     }
@@ -954,9 +964,9 @@ class _FishingState extends BasePageState<Fishing>
     }
 
     //座礁判定
-    if (_maxDepth < 3.0) {
+    if (gameData.maxDepth < 3.0) {
       //これ以上浅くいけない
-      _maxDepth = 3.0;
+      gameData.maxDepth = 3.0;
       if (_moveShipTarget < 0.5) _moveShipTarget = 0.5;
     }
 
@@ -968,7 +978,7 @@ class _FishingState extends BasePageState<Fishing>
             ?.findRenderObject() as RenderCustomPaint;
         ImagePainter obj2 = obj.painter as ImagePainter;
         //addxの値を加減算で移動
-        obj2.nowMaxDepth = _maxDepth;
+        obj2.nowMaxDepth = gameData.maxDepth;
       } catch (e) {}
     });
 
@@ -1029,16 +1039,16 @@ class _FishingState extends BasePageState<Fishing>
       weight += fishWeight + abareWeight;
     } else {
       //アタリ中、HIT中でない時は現在の最大深さから可能性のある種を抽出
-      _fishCardItem = FISH_TABLE.extractMaxDepth(maxDepth: _maxDepth);
+      _fishCardItem = FISH_TABLE.extractMaxDepth(maxDepth: gameData.maxDepth);
     }
     //シャクリによるテンション増加 竿MAXテンションによって可変
-    weight += _rodStandUp * (_tensionValMax * 1.5);
+    weight += _rodStandUp * (gameData.maxTension * 1.5);
 
     //巻き中の時、重量に巻速度を加味
     if (_onTap) {
-      weight = weight + (weight * (_speed / _speedValMax));
+      weight = weight + (weight * (_speed / gameData.maxSpeed));
       //ハンドル回転の描画用
-      _handleRoll += (_speed / _speedValMax) / 10;
+      _handleRoll += (_speed / gameData.maxSpeed) / 10;
       _handleRoll = (_handleRoll > 1.0) ? 0.0 : _handleRoll;
     }
     //浮力分調整（てきとーに２で割る）
@@ -1050,7 +1060,7 @@ class _FishingState extends BasePageState<Fishing>
     //現在深さの処理
     if (_collect) {
       //高速回収中
-      _depth -= _maxDepth / 10;
+      _depth -= gameData.maxDepth / 10;
     } else if (_onClutch) {
       //クラッチON中は強制的にテンション減算
       //水深を加算
@@ -1076,13 +1086,13 @@ class _FishingState extends BasePageState<Fishing>
       //addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
       //二次関数 テンション上がるごとに上がりにくくする
       addVal = addVal +
-          (addVal * -1) * (MathPow._getPow(3, (_tension / _tensionValMax)));
+          (addVal * -1) * (MathPow._getPow(3, (_tension / gameData.maxTension)));
     }
     var val = _tension + addVal;
 
     //糸ダメージ判定
-    if (val > _tensionValMax * 0.95) {
-      _nowLineHp -= val - _tensionValMax * 0.95; //ラインHPを減らす
+    if (val > gameData.maxTension * 0.95) {
+      _nowLineHp -= val - gameData.maxTension * 0.95; //ラインHPを減らす
       if (_nowLineHp < 0) {
         //糸切れ
         debugPrint("いときれ");
@@ -1091,7 +1101,7 @@ class _FishingState extends BasePageState<Fishing>
           _hitFish.id,
           _fishSize,
           _depth,
-          _maxDepth,
+          gameData.maxDepth,
           enumResult.cut,
         );
         //メッセージ
@@ -1120,9 +1130,9 @@ class _FishingState extends BasePageState<Fishing>
     bool flgDrag = false;
     double dragDiff = 0.0;
     //ドラグ判定
-    if (val > (_tensionValMax * _drag)) {
+    if (val > (gameData.maxTension * _drag)) {
       //テンションとドラグレベルの差分
-      dragDiff = val - (_tensionValMax * _drag);
+      dragDiff = val - (gameData.maxTension * _drag);
       //ドラグ出た分深さを増やす？？？出すぎ？
       _depth = _depth + dragDiff / 300;
       //ドラグ出た分テンションを減らす？？？減らなすぎ？
@@ -1141,10 +1151,10 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
 
-    if (val > _tensionValMax) val = _tensionValMax;
+    if (val > gameData.maxTension) val = gameData.maxTension;
     if (val < TENSION_VAL_MIN) val = TENSION_VAL_MIN;
 
-    if (_depth > _maxDepth) _depth = _maxDepth;
+    if (_depth > gameData.maxDepth) _depth = gameData.maxDepth;
     if (_depth <= 0) {
       //深さ0m
       _depth = 0.0;
@@ -1156,7 +1166,7 @@ class _FishingState extends BasePageState<Fishing>
         }
       }
       //ラインHPを回復
-      _nowLineHp = _maxLineHp;
+      _nowLineHp = gameData.maxLineHp;
       //高速回収中フラグをリセット
       _collect = false;
     }
@@ -1172,7 +1182,7 @@ class _FishingState extends BasePageState<Fishing>
     //水深表示
     _dispDepth = ((_depth).round() / 10).toStringAsFixed(1) +
         " / " +
-        ((_maxDepth).round() / 10).toStringAsFixed(1) +
+        ((gameData.maxDepth).round() / 10).toStringAsFixed(1) +
         ' m';
 
     // //使用中ルアーのHP減算
@@ -1203,24 +1213,24 @@ class _FishingState extends BasePageState<Fishing>
     _lightSpotX = size.width / 2;
     // _lightSpotY =
     //     ((_depth / _maxDepth) * (size.height - _shoreHeight - _bottomHeight));
-    _lightSpotY = ((_depth / _maxDepth) *
+    _lightSpotY = ((_depth / gameData.maxDepth) *
         (size.height - (_shoreHeight + 50) - _bottomHeight));
 
     //背景色
-    if (_maxDepth < 100) {
+    if (gameData.maxDepth < 100) {
       //水深10mまでは中層の範囲は固定
       _dispDepthLv1 = 1.0;
     } else {
       //水深150mで0.1にする
-      _dispDepthLv1 = ((_maxDepth - 100) / 1400) * -0.9 + 1;
+      _dispDepthLv1 = ((gameData.maxDepth - 100) / 1400) * -0.9 + 1;
       //debugPrint(_dispDepthLv1.toString());
     }
-    if (_maxDepth < 1000) {
+    if (gameData.maxDepth < 1000) {
       //水深10mまでは深層の範囲は固定
       _dispDepthLv2 = 1.0;
     } else {
       //水深500mで0.1にする
-      _dispDepthLv2 = ((_maxDepth - 1000) / 4000) * -0.9 + 1;
+      _dispDepthLv2 = ((gameData.maxDepth - 1000) / 4000) * -0.9 + 1;
     }
 
     //釣り上げ判定
@@ -1271,27 +1281,27 @@ class _FishingState extends BasePageState<Fishing>
         _hitFish.id,
         _fishSize,
         _depth,
-        _maxDepth,
+        gameData.maxDepth,
         enumResult.success,
       );
       //モーダル閉じた時
       _depth = 0.0;
       _tension = 0.0;
       //ポイントを加算
-      _point += point;
+      gameData.point += point;
       //魚種による成長
       switch (_hitFish.type) {
         case enumFishType.blue:
           //青魚は最大テンション成長
-          _tensionValMax += (point / 1);
+          gameData.maxTension += (point / 1);
           break;
         case enumFishType.bream:
           //赤魚は最大巻き速度成長
-          _speedValMax += (point / 10);
+          gameData.maxSpeed += (point / 10);
           break;
         case enumFishType.bottom:
           //底物は最大ライン強度成長
-          _maxLineHp += (point / 10);
+          gameData.maxLineHp += (point / 10);
       }
 
       startTimer(); //定周期タイマ再開
@@ -1305,10 +1315,10 @@ class _FishingState extends BasePageState<Fishing>
     var duration = POINT_DURATION_MSEC[_nowDurationLv]!;
 
     //現在底付近か？
-    var bottom = (_depth > (_maxDepth * 0.8)) ? true : false;
+    var bottom = (_depth > (gameData.maxDepth * 0.8)) ? true : false;
     //深さから可能性のある種を抽出
     var fishs = FISH_TABLE.extractDepth(
-        depth: _depth, maxDepth: _maxDepth, bottom: bottom);
+        depth: _depth, maxDepth: gameData.maxDepth, bottom: bottom);
     var maxProb = 0.0;
     duration = durationMax;
 
@@ -1325,16 +1335,18 @@ class _FishingState extends BasePageState<Fishing>
           flgJerk = true;
           _makiDelayCnt = 0;
         } else {
-          if (_onClutch && _depth < _maxDepth) {
+          if (_onClutch && _depth < gameData.maxDepth) {
             //糸出中、かつ水深MAXではない時はフォール中
             flgFall = true;
             _makiDelayCnt = 0;
-          } else if (!flgDrag && _rodStandUp > 0.5 && _depth < _maxDepth) {
+          } else if (!flgDrag &&
+              _rodStandUp > 0.5 &&
+              _depth < gameData.maxDepth) {
             //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
             flgJerk = true;
             _makiDelayCnt = 0;
             _jerkCnt = JERK_SCAN; //一度ジャークと判定されたら一定スキャン数ジャーク継続
-          } else if (!flgDrag && _onTap && _depth < _maxDepth) {
+          } else if (!flgDrag && _onTap && _depth < gameData.maxDepth) {
             //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
             _makiDelayCnt++;
             if (_makiDelayCnt > MAKI_SCAN) {
@@ -1350,7 +1362,7 @@ class _FishingState extends BasePageState<Fishing>
         //アタリ判定処理
         var hitTanaProb = 0.0;
         //HIT棚との差分
-        final justTana = (_maxDepth * _justTana);
+        final justTana = (gameData.maxDepth * _justTana);
         var tanaDiff = (_depth - justTana).abs();
         //差分が範囲内か
         if (tanaDiff < _justTanaRange) {
@@ -1470,7 +1482,7 @@ class _FishingState extends BasePageState<Fishing>
               // //大きさ決定 今んとこ、単なるランダム？？？？？
               // _fishSize = (new math.Random()).nextDouble();
               //棚による大きさ補正値
-              var tanawari = (_maxDepth - _hitFish.tanaMin) /
+              var tanawari = (gameData.maxDepth - _hitFish.tanaMin) /
                   (_hitFish.tanaMax - _hitFish.tanaMin);
               //棚範囲の半分より上ならMAX
               tanawari = tanawari * 2;
@@ -1491,8 +1503,8 @@ class _FishingState extends BasePageState<Fishing>
               _abareLv = 0;
               //フッキング判定テンション
               _fookingTension = _tension + _hitFish.fookingTension;
-              _fookingTension = (_fookingTension > _tensionValMax
-                  ? _tensionValMax
+              _fookingTension = (_fookingTension > gameData.maxTension
+                  ? gameData.maxTension
                   : _fookingTension);
               //アタリと判定
               _flgBait = true;
@@ -1545,11 +1557,11 @@ class _FishingState extends BasePageState<Fishing>
             //_dispInfo = "HIT!";
             //フッキングの成功度
             _fookingLv =
-                (_fookingTensionPrev - _fookingTension) / (_tensionValMax / 2);
+                (_fookingTensionPrev - _fookingTension) / (gameData.maxTension / 2);
             //if (_fookingLv > 100.0) _fookingLv = 100.0;
             //最大テンションの半分が基本値 - フッキング成功度
             _fookingTension =
-                (_tensionValMax / 2) - ((_tensionValMax / 2) * _fookingLv);
+                (gameData.maxTension / 2) - ((gameData.maxTension / 2) * _fookingLv);
             //_fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
             //HITメッセージ
             _centerTextMain = "HIT!";
@@ -1579,18 +1591,18 @@ class _FishingState extends BasePageState<Fishing>
 
           //テンションから点滅速度を算出
           duration = durationMax -
-              ((durationMax - durationMin) * (_tension / _tensionValMax))
+              ((durationMax - durationMin) * (_tension / gameData.maxTension))
                   .floor();
 
           //バレ判定
           //基本値 MAX2000の時0.5
-          var bare = _tensionValMax / 10000;
+          var bare = gameData.maxTension / 10000;
           //底にいるとき4倍
-          if (_depth >= _maxDepth) bare = bare * 4;
+          if (_depth >= gameData.maxDepth) bare = bare * 4;
           //テンションがアワセ値未満の時3倍
           //if (val < _fookingTension) bare = bare * 3;
           //現在テンションによって補正 少ないほど早い 0の時2倍
-          bare = bare * (2 * (1.0 - (_tension / _tensionValMax)));
+          bare = bare * (2 * (1.0 - (_tension / gameData.maxTension)));
           //魚種による補正 MAXのとき3倍
           bare = bare * (10 * _hitFish.bareEasy);
           //ドラグ出た分だけ上昇
@@ -1598,7 +1610,7 @@ class _FishingState extends BasePageState<Fishing>
 
           _fookingTension += bare;
 
-          if (_fookingTension > _tensionValMax) {
+          if (_fookingTension > gameData.maxTension) {
             //バレ条件成立が一定スキャン保持でバレとする
             debugPrint("バレ");
             //釣果リストに登録
@@ -1606,7 +1618,7 @@ class _FishingState extends BasePageState<Fishing>
               _hitFish.id,
               _fishSize,
               _depth,
-              _maxDepth,
+              gameData.maxDepth,
               enumResult.bare,
             );
             _flgBait = false;
@@ -1656,8 +1668,8 @@ class _FishingState extends BasePageState<Fishing>
       }
     }
 
-    //沖合何kmを計算
-    offShore = _maxDepth * 7 / 1000;
+    // //沖合何kmを計算
+    // offShore = gameData.maxDepth * 7 / 1000;
 
     var tanarnd = (new math.Random()).nextDouble();
     //棚を示す光点の表示
@@ -1700,7 +1712,9 @@ class _FishingState extends BasePageState<Fishing>
     final Size size = MediaQuery.of(context).size;
     return Material(
         child: new WillPopScope(
-            onWillPop: () async => false,
+            onWillPop: () async {
+              return _isBack;
+            },
             child: Scaffold(
                 extendBodyBehindAppBar: true, // <--- ここ
 
@@ -1759,7 +1773,7 @@ class _FishingState extends BasePageState<Fishing>
                               ),
                             ),
                             Text(
-                              getTime(_timeCount),
+                              getTime(gameData.timeCount),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 shadows: <Shadow>[
@@ -1793,7 +1807,7 @@ class _FishingState extends BasePageState<Fishing>
                                   ],
                                 ),
                               ),
-                              Text((10 * _windLevel).toStringAsFixed(1) + "m/s",
+                              Text((10 * gameData.windLevel).toStringAsFixed(1) + "m/s",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     shadows: <Shadow>[
@@ -1821,7 +1835,7 @@ class _FishingState extends BasePageState<Fishing>
                               ),
                             ),
                             Text(
-                              _point.toString(),
+                              gameData.point.toString(),
                               style: TextStyle(
                                 fontSize: 16,
                                 shadows: <Shadow>[
@@ -1893,6 +1907,46 @@ class _FishingState extends BasePageState<Fishing>
                         },
                       ),
                       ListTile(
+                        title: Text("トップに戻る"),
+                        trailing: Icon(Icons.arrow_forward_ios),
+                        onTap: () async {
+                          _timer.cancel(); //定周期タイマ停止
+                          final gamedataBox = Hive.box('gamedata');
+                          gamedataBox.put('gamedata', gameData);
+
+                          var result = await showDialog<int>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) {
+                              return AlertDialog(
+                                title: Text(""),
+                                content: Text("セーブしてトップに戻りますか？"),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text("はい"),
+                                    onPressed: () {
+                                      _isBack = true;
+                                      //モーダルを閉じる
+                                      Navigator.of(context).pop();
+                                      //drwerを閉じる
+                                      Navigator.of(context).pop();
+                                      //画面を閉じる
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                      child: Text("いいえ"),
+                                      onPressed: () {
+                                        //モーダルを閉じる
+                                        Navigator.of(context).pop();
+                                      }),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      ListTile(
                         title: Text("利用規約"),
                         trailing: Icon(Icons.arrow_forward_ios),
                         onTap: () async {
@@ -1959,9 +2013,9 @@ class _FishingState extends BasePageState<Fishing>
                       //X軸の移動距離を 20～400の範囲で割った値（環境設定によって可変）
                       var addVal = moveX /
                           (20 + (180 * (1.0 - settings.makiSense))) *
-                          _speedValMax;
+                          gameData.maxSpeed;
                       var val = _speed + addVal;
-                      if (val > _speedValMax) val = _speedValMax;
+                      if (val > gameData.maxSpeed) val = gameData.maxSpeed;
                       if (val < SPEED_VAL_MIN) val = SPEED_VAL_MIN;
                       _speed = val;
                       //アワセ値
@@ -2016,7 +2070,7 @@ class _FishingState extends BasePageState<Fishing>
                                 top: _appBarHeight + 10,
                                 flgHit: _flgHit,
                                 tension: _tension,
-                                tensionValMax: _tensionValMax,
+                                tensionValMax: gameData.maxTension,
                                 backRadiusValue: _animationRadius.value,
                                 backRadiusMax: POINTER_BACK_SIZE,
                                 flgBait: _flgBait,
@@ -2024,9 +2078,9 @@ class _FishingState extends BasePageState<Fishing>
                                 fookingTension: _fookingTension,
                                 tensionValMin: TENSION_VAL_MIN,
                                 nowLineHp: _nowLineHp,
-                                maxLineHp: _maxLineHp,
+                                maxLineHp: gameData.maxLineHp,
                                 nowSpeed: _speed,
-                                maxSpeed: _speedValMax,
+                                maxSpeed: gameData.maxSpeed,
                                 flgTap: _onTap,
                               ),
                             ),
@@ -2304,8 +2358,9 @@ class _FishingState extends BasePageState<Fishing>
                                   ),
                                 )),
                             AnimatedOpacity(
-                                opacity:
-                                    (_depth > 0.0 || _point <= 0) ? 0.0 : 1.0,
+                                opacity: (_depth > 0.0 || gameData.point <= 0)
+                                    ? 0.0
+                                    : 1.0,
                                 duration: Duration(milliseconds: 200),
                                 child: Container(
                                     margin: EdgeInsets.only(
@@ -2418,7 +2473,7 @@ class _FishingState extends BasePageState<Fishing>
                                       ? Colors.lightBlue
                                       : Colors.red),
                                   rodStandUp: _rodStandUp,
-                                  rodTension: _tension / _tensionValMax,
+                                  rodTension: _tension / gameData.maxTension,
                                   clutchTextSize: (_onClutch
                                       ? 0.0
                                       : 20 * (_clutchAnime.value + 3.0) / 4),
