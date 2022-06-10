@@ -1,6 +1,13 @@
+import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:hive/hive.dart';
 
 part 'typGameData.g.dart';
+
+enum enumResult {
+  success,
+  bare,
+  cut,
+}
 
 @HiveType(typeId: 3)
 class typGameData extends HiveObject {
@@ -35,6 +42,9 @@ class typGameData extends HiveObject {
   double maxSpeed;
 
   @HiveField(10)
+  late HiveList<typFishResult> fishResults;
+
+  @HiveField(11)
   bool isEnd;
 
   typGameData({
@@ -50,4 +60,32 @@ class typGameData extends HiveObject {
     required this.maxSpeed,
     required this.isEnd,
   });
+
+  //釣果の最小サイズを返す
+  double getMinSize(int fishId) {
+    var minSize = 1.1;
+    fishResults.forEach((val) {
+      if (val.fishId == fishId && val.resultKbn == enumResult.success) {
+        if (minSize > val.size) {
+          minSize = val.size;
+        }
+      }
+    });
+    if (minSize == 1.1) minSize = 0.0;
+    return minSize;
+  }
+
+  //釣果の最大サイズを返す
+  double getMaxSize(int fishId) {
+    var maxSize = -0.1;
+    fishResults.forEach((val) {
+      if (val.fishId == fishId && val.resultKbn == enumResult.success) {
+        if (maxSize < val.size) {
+          maxSize = val.size;
+        }
+      }
+    });
+    if (maxSize == -0.1) maxSize = 0.0;
+    return maxSize;
+  }
 }

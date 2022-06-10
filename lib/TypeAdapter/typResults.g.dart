@@ -16,8 +16,9 @@ class typResultsAdapter extends TypeAdapter<typResults> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return typResults()
-      ..lstResults = (fields[0] as List).cast<FishesResultModel>();
+    return typResults(
+      lstResults: (fields[0] as List).cast<int>(),
+    );
   }
 
   @override

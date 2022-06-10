@@ -1,8 +1,10 @@
 import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
-import 'package:fish_flutter/Model/FishResultsModel.dart';
+import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
+import '../TypeAdapter/typGameData.dart';
 import 'BgmPlayer.dart';
 import 'RadarChart.dart';
 import 'SliderPainter.dart';
@@ -11,12 +13,10 @@ class BookDialog extends StatefulWidget {
   @override
   const BookDialog({
     required this.fishsTable,
-    required this.fishesResult,
     required this.bgm,
     required this.flgBgm,
   });
   final FishsModel fishsTable;
-  final FishesResultModel fishesResult;
   final BgmPlayer bgm;
   final bool flgBgm;
   _BookDialogState createState() => _BookDialogState();
@@ -29,9 +29,15 @@ class _BookDialogState extends State<BookDialog>
   //bool _showFishDetail = true; //テスト用でtrue
   late FishModel _showFishData;
 
+  late typGameData gameData;
+
   @override
   void initState() {
     super.initState();
+
+    final gameDataBox = Hive.box('gamedata');
+    gameData = gameDataBox.get('gamedata');
+
     widget.fishsTable.fishs.forEach((value) {
       fishList.add(value);
     });
@@ -65,10 +71,10 @@ class _BookDialogState extends State<BookDialog>
                       children: [
                         makeFishTile(
                             fish: fishList[index],
-                            fishResult: widget.fishesResult.listFishResult
-                                .where((FishResultModel value) =>
+                            fishResult: gameData.fishResults
+                                .where((typFishResult value) =>
                                     value.fishId == fishList[index].id &&
-                                    value.resultKbn == enumResult.success)),
+                                    value.resultKbn == enumResult.success.index)),
                       ],
                     );
                   },
@@ -296,42 +302,37 @@ class _BookDialogState extends State<BookDialog>
                                             MainAxisAlignment.spaceEvenly,
                                         children: [
                                           Container(
-                                              child: Text(widget.fishesResult
-                                                      .listFishResult
-                                                      .where((FishResultModel
+                                              child: Text(gameData.fishResults
+                                                      .where((typFishResult
                                                               value) =>
                                                           value.fishId ==
                                                               _showFishData
                                                                   .id &&
                                                           value.resultKbn ==
                                                               enumResult
-                                                                  .success)
+                                                                  .success.index)
                                                       .length
                                                       .toString() +
                                                   "匹")),
                                           Row(
                                             children: [
                                               Text(_showFishData
-                                                      .getSize(widget
-                                                          .fishesResult
+                                                      .getSize(gameData
                                                           .getMinSize(
                                                               _showFishData.id))
                                                       .toStringAsFixed(1) +
                                                   " ～ " +
                                                   _showFishData
-                                                      .getSize(widget
-                                                          .fishesResult
+                                                      .getSize(gameData
                                                           .getMaxSize(
                                                               _showFishData.id))
                                                       .toStringAsFixed(1) +
                                                   "cm"),
-                                              if (widget.fishesResult
-                                                          .getMaxSize(
+                                              if (gameData.getMaxSize(
                                                               _showFishData
                                                                   .id) >
                                                       0.8 &&
-                                                  widget.fishesResult
-                                                          .getMaxSize(
+                                                  gameData.getMaxSize(
                                                               _showFishData
                                                                   .id) <
                                                       0.95)
@@ -343,8 +344,7 @@ class _BookDialogState extends State<BookDialog>
                                                   height: 24,
                                                   width: 24,
                                                 ),
-                                              if (widget.fishesResult
-                                                      .getMaxSize(
+                                              if (gameData.getMaxSize(
                                                           _showFishData.id) >
                                                   0.95)
                                                 // Icon(
@@ -395,7 +395,7 @@ class _BookDialogState extends State<BookDialog>
   //図鑑の一覧リスト
   Widget makeFishTile(
       {required FishModel fish,
-      required Iterable<FishResultModel> fishResult}) {
+      required Iterable<typFishResult> fishResult}) {
     Color backgroundColor;
     String image;
     String name;

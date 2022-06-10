@@ -1,14 +1,17 @@
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
+import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
+import '../TypeAdapter/typGameData.dart';
 import 'SliderPainter.dart';
 
 class FishCardList extends StatefulWidget {
   @override
   const FishCardList({
     required this.fishsTable,
-    required this.fishesResult,
+    //required this.fishesResult,
     required this.hitFishId,
     required this.pointerColor,
     required this.borderWidth,
@@ -16,7 +19,7 @@ class FishCardList extends StatefulWidget {
   });
 
   final List<FishModel> fishsTable;
-  final FishesResultModel fishesResult;
+  //final FishesResultModel fishesResult;
   final int hitFishId; //HITorアタリ中の魚ID 非HIT中は-1
   final Color pointerColor; //光点の色
   final double borderWidth; //枠線の幅
@@ -30,9 +33,13 @@ class _FishCardListState extends State<FishCardList> {
   static const double cardWidth = 100.0;
   static const double cardHeight = 19.0;
 
+  late typGameData gameData;
+
   @override
   void initState() {
     super.initState();
+    final gameDataBox = Hive.box('gamedata');
+    gameData = gameDataBox.get('gamedata');
   }
 
   @override
@@ -69,10 +76,10 @@ class _FishCardListState extends State<FishCardList> {
             children: [
               makeFishCard(
                   fish: fishList[index],
-                  fishResult: widget.fishesResult.listFishResult.where(
-                      (FishResultModel value) =>
+                  fishResult: gameData.fishResults.where(
+                      (typFishResult value) =>
                           value.fishId == fishList[index].id &&
-                          value.resultKbn == enumResult.success)),
+                          value.resultKbn == enumResult.success.index)),
             ],
           );
         },
@@ -82,9 +89,9 @@ class _FishCardListState extends State<FishCardList> {
   }
 
   //魚のリストアイテム
-  Widget makeFishCard(
-      {required FishModel fish,
-      required Iterable<FishResultModel> fishResult}) {
+  Widget makeFishCard({required FishModel fish,
+      required Iterable<typFishResult> fishResult,
+  }) {
     var borderColor = Colors.black;
     var boxColor;
     bool flgBorder = false;

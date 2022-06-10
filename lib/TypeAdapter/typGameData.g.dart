@@ -27,14 +27,14 @@ class typGameDataAdapter extends TypeAdapter<typGameData> {
       maxTension: fields[7] as double,
       maxLineHp: fields[8] as double,
       maxSpeed: fields[9] as double,
-      isEnd: fields[10] as bool,
-    );
+      isEnd: fields[11] as bool,
+    )..fishResults = (fields[10] as HiveList).castHiveList();
   }
 
   @override
   void write(BinaryWriter writer, typGameData obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.gameId)
       ..writeByte(1)
@@ -56,6 +56,8 @@ class typGameDataAdapter extends TypeAdapter<typGameData> {
       ..writeByte(9)
       ..write(obj.maxSpeed)
       ..writeByte(10)
+      ..write(obj.fishResults)
+      ..writeByte(11)
       ..write(obj.isEnd);
   }
 

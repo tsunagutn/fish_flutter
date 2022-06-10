@@ -40,8 +40,12 @@ void main() async {
   Hive.registerAdapter(typSettingsAdapter());
   Hive.registerAdapter(typResultsAdapter());
   Hive.registerAdapter(typGameDataAdapter());
+
+  //Hive TYPEの構成変えたら一回BOXを削除する用
+  //var gameDataBox = await Hive.deleteBoxFromDisk('gamedata');
   var settingsBox = await Hive.openBox('settings');
   var gameDataBox = await Hive.openBox('gamedata');
+  var fishResultBox = await Hive.openBox('fishResult');
 
   if (!settingsBox.containsKey('settings')) {
     //環境設定に初期値を格納

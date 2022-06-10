@@ -1,12 +1,14 @@
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
+import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:fish_flutter/TypeAdapter/typResults.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../Main.dart';
 import '../Model/relultAnimeModel.dart';
+import '../TypeAdapter/typGameData.dart';
 import 'BgmPlayer.dart';
 import 'BookDialog.dart';
 
@@ -16,7 +18,7 @@ class goalDialog extends StatefulWidget {
     required this.bgm,
     required this.dispSize,
     required this.point,
-    required this.fishResult,
+    //required this.fishResult,
     required this.maxWindLevel,
     required this.maxDepth,
   });
@@ -24,7 +26,7 @@ class goalDialog extends StatefulWidget {
   final BgmPlayer bgm;
   final Size dispSize;
   final int point;
-  final FishesResultModel fishResult;
+  //final FishesResultModel fishResult;
   final double maxWindLevel;
   final double maxDepth;
 
@@ -76,9 +78,13 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
     }
   }
 
+  late typGameData gameData;
+
   @override
   void initState() {
     super.initState();
+    final gameDataBox = Hive.box('gamedata');
+    gameData = gameDataBox.get('gamedata');
     //アニメーション管理
     anime = new Map<enumResultAnime, relultAnimeModel>();
     anime[enumResultAnime.fishResultTitle] = new relultAnimeModel(span: 1000);
@@ -156,36 +162,31 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
       //レア度、fishtype3種毎のアイテムを作成 初期値0
       lstFishCount.add([0, 0, 0]);
     }
-    widget.fishResult.listFishResult.forEach((result) {
+    gameData.fishResults.forEach((typFishResult result) {
       //魚種データを取得
       var fishdata = FISH_TABLE.getFishDetail(result.fishId);
 
-      switch (result.resultKbn) {
-        case enumResult.success:
-          //釣れた場合
-          //レア度、fishtype毎の釣果数取得
-          lstFishCount[fishdata.rare - 1][fishdata.type.index] += 1;
-          if (result.size > 0.8 && result.size < 0.95) {
-            crownCountSilver++;
-          } else if (result.size > 0.95) {
-            crownCountGold++;
-          }
-          //最大サイズデータ取得
-          if (maxSize < fishdata.getSize(result.size)) {
-            maxSize = fishdata.getSize(result.size);
-            maxSizeName = fishdata.name;
-          }
-          break;
-        case enumResult.bare:
-          //バレた場合
-          bareCnt++;
-          break;
-        case enumResult.bare:
-          //切られた場合
-          cutCnt++;
-          break;
-        default:
-          break;
+      if (result.resultKbn == enumResult.success.index) {
+        //釣れた場合
+        //レア度、fishtype毎の釣果数取得
+        lstFishCount[fishdata.rare - 1][fishdata.type.index] += 1;
+        if (result.size > 0.8 && result.size < 0.95) {
+          crownCountSilver++;
+        } else if (result.size > 0.95) {
+          crownCountGold++;
+        }
+        //最大サイズデータ取得
+        if (maxSize < fishdata.getSize(result.size)) {
+          maxSize = fishdata.getSize(result.size);
+          maxSizeName = fishdata.name;
+        }
+      } else if (result.resultKbn == enumResult.bare.index) {
+        //バレた場合
+        bareCnt++;
+      } else if (result.resultKbn == enumResult.cut.index) {
+        //切られた場合
+        cutCnt++;
+      } else {
       }
     });
   }
@@ -483,8 +484,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                               Text(
                                                 "合計",
                                               ),
-                                              Text(widget.fishResult
-                                                      .listFishResult.length
+                                              Text(gameData.fishResults.length
                                                       .toString() +
                                                   "匹"),
                                               ElevatedButton(
@@ -505,8 +505,8 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                                     builder: (_) {
                                                       return BookDialog(
                                                         fishsTable: FISH_TABLE,
-                                                        fishesResult:
-                                                            widget.fishResult,
+                                                        // fishesResult:
+                                                        //     widget.fishResult,
                                                         bgm: widget.bgm,
                                                         flgBgm: false,
                                                       );
@@ -676,23 +676,23 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                   enumAnimeState.end) {
                                 return;
                               }
-                              List<FishesResultModel> lstResults = [];
-                              //Hiveに書き込み
-                              final box = Hive.box('box');
-                              if (box.containsKey('results')) {
-                                //過去データを読み出し
-                                lstResults = await List<FishesResultModel>.from(box.get('results'));
-                              }
-                              lstResults.add(widget.fishResult);
-
-                              var aaeae = box.put('results', lstResults);
-
-                              if (box.containsKey('results')) {
-                                var a = 1;
-                                List<FishesResultModel> ttest = await List<FishesResultModel>.from(box.get('results'));
-
-                                var aa = 1;
-                              }
+                              //List<FishesResultModel> lstResults = [];
+                              // //Hiveに書き込み
+                              // final box = Hive.box('box');
+                              // if (box.containsKey('results')) {
+                              //   //過去データを読み出し
+                              //   lstResults = await List<FishesResultModel>.from(box.get('results'));
+                              // }
+                              // lstResults.add(widget.fishResult);
+                              //
+                              // var aaeae = box.put('results', lstResults);
+                              //
+                              // if (box.containsKey('results')) {
+                              //   var a = 1;
+                              //   List<FishesResultModel> ttest = await List<FishesResultModel>.from(box.get('results'));
+                              //
+                              //   var aa = 1;
+                              // }
 
                               Navigator.pop(context);
                             },

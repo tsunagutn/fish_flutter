@@ -80,7 +80,7 @@ class _menuState extends BasePageState<Menu> {
                                 splashColor: Colors.blue.withAlpha(10),
                                 borderRadius: BorderRadius.circular(10),
                                 onTap: () async {
-                                  var gameDataBox = Hive.box('gamedata');
+                                  final gameDataBox = Hive.box('gamedata');
                                   typGameData gameData;
                                   if (gameDataBox.containsKey('gamedata')) {
                                     gameData = gameDataBox.get('gamedata');

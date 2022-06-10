@@ -197,6 +197,7 @@ import 'package:fish_flutter/Model/FishResultsModel.dart';
 //import 'package:fish_flutter/Model/HaveTackleModel.dart';
 import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/Model/StageModel.dart';
+import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:fish_flutter/TypeAdapter/typGameData.dart';
 import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/widget/BookDialog.dart';
@@ -482,8 +483,8 @@ class _FishingState extends BasePageState<Fishing>
   //タックル変更モーダル内で選択している種類
   var _selectTacleIcon = '';
 
-  //釣果リスト
-  late FishesResultModel _fishesResult;
+  // //釣果リスト
+  // late FishesResultModel _fishesResult;
 
   //今の場所で釣れる可能性のある魚種リスト
   List<FishModel> _fishCardItem = [];
@@ -516,7 +517,7 @@ class _FishingState extends BasePageState<Fishing>
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
     //釣果リストを初期化
-    _fishesResult = new FishesResultModel();
+    //_fishesResult = new FishesResultModel();
     //今釣れている魚を初期化
     _hitFish = FISH_TABLE.getFishDetail(0);
     //ルアーリストを初期化？？？本当はDBマスタから全取得
@@ -820,7 +821,7 @@ class _FishingState extends BasePageState<Fishing>
                   bgm: super.bgm,
                   dispSize: size,
                   point: gameData.point,
-                  fishResult: _fishesResult,
+                  //fishResult: _fishesResult,
                   maxWindLevel: gameData.maxWindLevel,
                   maxDepth: gameData.maxDepth,
                 ),
@@ -1096,14 +1097,20 @@ class _FishingState extends BasePageState<Fishing>
       if (_nowLineHp < 0) {
         //糸切れ
         debugPrint("いときれ");
-        //釣果リストに登録
-        _fishesResult.addResult(
-          _hitFish.id,
-          _fishSize,
-          _depth,
-          gameData.maxDepth,
-          enumResult.cut,
-        );
+        final fishResultBox = Hive.box('fishResult');
+        //GameDataにFishResultをリレーション
+        //(addする前にこれをしていないとエラーになる場合がある）
+        gameData.fishResults = HiveList(fishResultBox);
+        var fishResult = typFishResult(fishId: _hitFish.id,
+            size: _fishSize,
+            depth: _depth,
+            maxDepth: gameData.maxDepth,
+            resultKbn: enumResult.cut.index);
+        //FishResultに登録
+        fishResultBox.add(fishResult);
+        //GameDataに登録
+        gameData.fishResults.add(fishResult);
+
         //メッセージ
         _centerTextMain = "糸が切れた!";
         _centerTextMainColor = Colors.red;
@@ -1245,13 +1252,28 @@ class _FishingState extends BasePageState<Fishing>
       var point = _hitFish.point + (_hitFish.point * _fishSize).floor();
       //初釣果判定
       var flgNew = true;
-      _fishesResult.listFishResult.forEach((val) {
-        if (val.fishId == _hitFish.id && val.resultKbn == enumResult.success) {
+      gameData.fishResults.forEach((val) {
+        if (val.fishId == _hitFish.id && val.resultKbn == enumResult.success.index) {
           flgNew = false;
           return;
         }
       });
-      if (flgNew) point = point * 2; //初ゲットはポイント2倍
+      //if (flgNew) point = point * 2; //初ゲットはポイント2倍
+
+      var fishResultBox = Hive.box('fishResult');
+      //GameDataにFishResultをリレーション
+      //(addする前にこれをしていないとエラーになる場合がある）
+      //gameData.fishResults = HiveList(fishResultBox);
+      var fishResult = typFishResult(fishId: _hitFish.id,
+          size: _fishSize,
+          depth: _depth,
+          maxDepth: gameData.maxDepth,
+          resultKbn: enumResult.success.index);
+      //FishResultに登録
+      fishResultBox.add(fishResult);
+      //GameDataに登録
+      gameData.fishResults.add(fishResult);
+      //gameData.save();
 
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
@@ -1275,14 +1297,6 @@ class _FishingState extends BasePageState<Fishing>
             ],
           );
         },
-      );
-      //釣果リストに登録
-      _fishesResult.addResult(
-        _hitFish.id,
-        _fishSize,
-        _depth,
-        gameData.maxDepth,
-        enumResult.success,
       );
       //モーダル閉じた時
       _depth = 0.0;
@@ -1613,14 +1627,21 @@ class _FishingState extends BasePageState<Fishing>
           if (_fookingTension > gameData.maxTension) {
             //バレ条件成立が一定スキャン保持でバレとする
             debugPrint("バレ");
-            //釣果リストに登録
-            _fishesResult.addResult(
-              _hitFish.id,
-              _fishSize,
-              _depth,
-              gameData.maxDepth,
-              enumResult.bare,
-            );
+
+            var fishResultBox = Hive.box('fishResult');
+            //GameDataにFishResultをリレーション
+            //(addする前にこれをしていないとエラーになる場合がある）
+            gameData.fishResults = HiveList(fishResultBox);
+            var fishResult = typFishResult(fishId: _hitFish.id,
+                size: _fishSize,
+                depth: _depth,
+                maxDepth: gameData.maxDepth,
+                resultKbn: enumResult.bare.index);
+            //FishResultに登録
+            fishResultBox.add(fishResult);
+            //GameDataに登録
+            gameData.fishResults.add(fishResult);
+
             _flgBait = false;
             _flgHit = false;
             //バレメッセージ
@@ -1739,7 +1760,7 @@ class _FishingState extends BasePageState<Fishing>
                             builder: (_) {
                               return BookDialog(
                                 fishsTable: FISH_TABLE,
-                                fishesResult: _fishesResult,
+                                //fishesResult: gameData.fishResults,
                                 bgm: super.bgm,
                                 flgBgm: true,
                               );
@@ -2654,7 +2675,6 @@ class _FishingState extends BasePageState<Fishing>
                                         margin: EdgeInsets.only(left: 8),
                                         child: new FishCardList(
                                           fishsTable: _fishCardItem,
-                                          fishesResult: _fishesResult,
                                           hitFishId: (_flgHit || _flgBait)
                                               ? _hitFish.id
                                               : -1,
