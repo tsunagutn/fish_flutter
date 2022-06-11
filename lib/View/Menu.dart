@@ -1,5 +1,7 @@
 import 'package:fish_flutter/Model/StageModel.dart';
+import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:fish_flutter/TypeAdapter/typGameData.dart';
+import 'package:fish_flutter/TypeAdapter/typLureData.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fish_flutter/View/DrawerItem.dart';
@@ -80,21 +82,59 @@ class _menuState extends BasePageState<Menu> {
                                 splashColor: Colors.blue.withAlpha(10),
                                 borderRadius: BorderRadius.circular(10),
                                 onTap: () async {
-                                  final gameDataBox = Hive.box('gamedata');
+                                  final gameDataBox = Hive.box(gamedataBoxName);
+                                  final fishResultBox =
+                                      Hive.box(fishResultBoxName);
                                   typGameData gameData;
-                                  if (gameDataBox.containsKey('gamedata')) {
-                                    gameData = gameDataBox.get('gamedata');
+                                  if (gameDataBox
+                                      .containsKey(gamedataKeyName)) {
+                                    gameData =
+                                        await gameDataBox.get(gamedataKeyName);
                                     if (gameData.isEnd) {
                                       //終了済みの場合は初期データをセット
-                                      gameData = getStartGameData();
+                                      await gameDataBox.put(
+                                          gamedataKeyName, getStartGameData());
+                                      //gameData = getStartGameData();
+                                    } else {
+                                      //中断データがある？？？ダイアログ
+                                      var result = await showDialog<int>(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (_) {
+                                          return AlertDialog(
+                                            title: Text("中断データがあります"),
+                                            content: Text("途中から再開しますか？"),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                child: Text("はい"),
+                                                onPressed: () {
+                                                  //モーダルを閉じる
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              TextButton(
+                                                  child: Text("いいえ"),
+                                                  onPressed: () async {
+                                                    //ゲームデータを初期化
+                                                    await gameDataBox.put(
+                                                        gamedataKeyName,
+                                                        getStartGameData());
+                                                    //モーダルを閉じる
+                                                    Navigator.of(context).pop();
+                                                  }),
+                                            ],
+                                          );
+                                        },
+                                      );
                                     }
                                   } else {
-                                    //中断データがない場合は初期データをセット
-                                    gameData = getStartGameData();
+                                    //データ無し
+                                    //終了済みの場合は初期データをセット
+                                    await gameDataBox.put(
+                                        gamedataKeyName, getStartGameData());
                                   }
-
-                                  Navigator.pushNamed(context, "/fishing",
-                                          arguments: gameData)
+                                  Navigator.pushNamed(context, "/fishing")
+                                      //arguments: gameData)
                                       .then(
                                     (value) {
                                       //メニュー画面のBGMを再生
@@ -215,9 +255,12 @@ class _menuState extends BasePageState<Menu> {
             )));
   }
 
+  //ゲームの初期データをセット？？？シーダー追加して色々返れるようにする
   typGameData getStartGameData() {
+    final fishResultBox = Hive.box(fishResultBoxName);
+    final lureDataBox = Hive.box(lureDataBoxName);
     //初期データをセット
-    return typGameData(
+    var gameData = typGameData(
         gameId: 1,
         timeCount: 0,
         maxTimeCount: (30 * 60 * 11),
@@ -228,6 +271,61 @@ class _menuState extends BasePageState<Menu> {
         maxTension: 2000.0,
         maxLineHp: 1000.0,
         maxSpeed: 200.0,
+        useLureIdx: 0,
         isEnd: false);
+    gameData.fishResults = HiveList(fishResultBox);
+    gameData.lureData = HiveList(lureDataBox);
+
+    //ルアーの初期データをセット
+    var tairaba = typLureData(
+        lureId: enumLureDiv.tairaba.index,
+        name: 'タイラバ',
+        image: "tairaba.png",
+        lv: 1,
+        totalExp: 0,
+        unLockweightid: 0,
+        useWeightId: 0,
+        fall: 0.2,
+        reeling: 0.5,
+        jerk: 0.1,
+        lvAddFall: 0.02,
+        lvAddReeling: 0.05,
+        lvAddJerk: 0.01);
+    var jig = typLureData(
+        lureId: enumLureDiv.jig.index,
+        name: 'ジグ',
+        image: "jig.png",
+        lv: 1,
+        totalExp: 0,
+        unLockweightid: 0,
+        useWeightId: 0,
+        fall: 0.2,
+        reeling: 0.1,
+        jerk: 0.5,
+        lvAddFall: 0.03,
+        lvAddReeling: 0.01,
+        lvAddJerk: 0.05);
+    var slowJig = typLureData(
+        lureId: enumLureDiv.slowjig.index,
+        name: 'スロージグ',
+        image: "slowjig.png",
+        lv: 1,
+        totalExp: 0,
+        unLockweightid: 0,
+        useWeightId: 0,
+        fall: 0.4,
+        reeling: 0.2,
+        jerk: 0.2,
+        lvAddFall: 0.04,
+        lvAddReeling: 0.02,
+        lvAddJerk: 0.02);
+
+    lureDataBox.add(jig);
+    lureDataBox.add(tairaba);
+    lureDataBox.add(slowJig);
+    gameData.lureData.add(tairaba);
+    gameData.lureData.add(jig);
+    gameData.lureData.add(slowJig);
+    return gameData;
   }
 }

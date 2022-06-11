@@ -1,6 +1,8 @@
 //flutter run -d chrome でchrome動作
 
 import 'package:fish_flutter/Model/SettingsModel.dart';
+import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
+import 'package:fish_flutter/TypeAdapter/typLureData.dart';
 import 'package:fish_flutter/TypeAdapter/typResults.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
@@ -34,24 +36,53 @@ late typSettings settings = typSettings(
     jerkSense: 0.5,
     makiSense: 0.5);
 
+//Hive BOX名
+const settingsBoxName = 'settings1';
+const gamedataBoxName = 'gamedata6';
+const fishResultBoxName = 'fishResult1';
+const lureDataBoxName = 'lureData3';
+//Hive Key名
+const settingsKeyName = 'settings';
+const gamedataKeyName = 'gamedata';
+const fishResultKeyName = 'fishResult';
+const lureDataKeyName = 'lureData';
+
+const List<String> lstOldBoxName = [
+  'gamedata',
+  'fishResult',
+  'settings',
+  'gamedata1',
+  'gamedata2',
+  'gamedata3',
+  'gamedata4',
+  'gamedata5',
+  'lureData1',
+  'lureData2',
+];
+
 void main() async {
   await Hive.initFlutter();
   //環境設定データのタイプアダプタ
   Hive.registerAdapter(typSettingsAdapter());
   Hive.registerAdapter(typResultsAdapter());
   Hive.registerAdapter(typGameDataAdapter());
+  Hive.registerAdapter(typFishResultAdapter());
+  Hive.registerAdapter(typLureDataAdapter());
 
-  //Hive TYPEの構成変えたら一回BOXを削除する用
-  //var gameDataBox = await Hive.deleteBoxFromDisk('gamedata');
-  var settingsBox = await Hive.openBox('settings');
-  var gameDataBox = await Hive.openBox('gamedata');
-  var fishResultBox = await Hive.openBox('fishResult');
+  lstOldBoxName.forEach((oldBoxName) async {
+    //過去のHiveBOXを削除する
+    await Hive.deleteBoxFromDisk(oldBoxName);
+  });
+  var settingsBox = await Hive.openBox(settingsBoxName);
+  var gameDataBox = await Hive.openBox(gamedataBoxName);
+  var fishResultBox = await Hive.openBox(fishResultBoxName);
+  var lureDataBox = await Hive.openBox(lureDataBoxName);
 
-  if (!settingsBox.containsKey('settings')) {
+  if (!settingsBox.containsKey(settingsKeyName)) {
     //環境設定に初期値を格納
-    settingsBox.put('settings', settings);
+    settingsBox.put(settingsKeyName, settings);
   }
-  settings = settingsBox.get('settings');
+  settings = settingsBox.get(settingsKeyName);
 
   runApp(Provider(
     create: (context) => BgmPlayer(),

@@ -35,8 +35,8 @@ class _BookDialogState extends State<BookDialog>
   void initState() {
     super.initState();
 
-    final gameDataBox = Hive.box('gamedata');
-    gameData = gameDataBox.get('gamedata');
+    final gameDataBox = Hive.box(gamedataBoxName);
+    gameData = gameDataBox.get(gamedataKeyName);
 
     widget.fishsTable.fishs.forEach((value) {
       fishList.add(value);

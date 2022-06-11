@@ -1,3 +1,4 @@
+import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
@@ -38,8 +39,8 @@ class _FishCardListState extends State<FishCardList> {
   @override
   void initState() {
     super.initState();
-    final gameDataBox = Hive.box('gamedata');
-    gameData = gameDataBox.get('gamedata');
+    final gameDataBox = Hive.box(gamedataBoxName);
+    gameData = gameDataBox.get(gamedataKeyName);
   }
 
   @override

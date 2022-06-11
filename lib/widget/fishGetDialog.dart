@@ -1,8 +1,11 @@
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
+import 'package:fish_flutter/TypeAdapter/typLureData.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 import '../Main.dart';
+import '../TypeAdapter/typGameData.dart';
 
 class fishGetDialog extends StatefulWidget {
   @override
@@ -12,14 +15,14 @@ class fishGetDialog extends StatefulWidget {
     required this.fishSize,
     required this.addPoint,
     required this.flgNew,
-    required this.uselureData,
+    //required this.uselureData,
   });
   final Size dispSize;
   final FishModel fish;
   final double fishSize;
   final int addPoint;
   final bool flgNew;
-  final LureModel uselureData;
+  //final LureModel uselureData;
 
   _fishGetDialogState createState() => _fishGetDialogState();
 }
@@ -49,9 +52,16 @@ class _fishGetDialogState extends State<fishGetDialog>
     5: 'あなたは感動しました',
   };
 
+  late typGameData gameData;
+
   @override
   void initState() {
     super.initState();
+
+    final gameDataBox = Hive.box(gamedataBoxName);
+    gameData = gameDataBox.get(gamedataKeyName);
+    var useLureData = gameData.getUseLure();
+
     fishCm = widget.fish.getSize(widget.fishSize);
     //最初の光
     _lightingAnimationController = AnimationController(
@@ -109,14 +119,14 @@ class _fishGetDialogState extends State<fishGetDialog>
     }
 
     //ルアー成長
-    widget.uselureData.totalExp += widget.addPoint;
-    int nowLv = widget.uselureData.lv;
-    int newLv = widget.uselureData.getLv();
+    useLureData.totalExp += widget.addPoint;
+    int nowLv = useLureData.lv;
+    int newLv = gameData.getLv();
     if (nowLv < newLv) {
       //レベルアップ
-      strLureLevel = widget.uselureData.lvUp();
+      strLureLevel = gameData.lureLvUp();
 
-      switch (widget.uselureData.id) {
+      switch (enumLureDiv.values[gameData.useLureIdx]) {
         case enumLureDiv.jig:
           colorLureLevel = Colors.cyan[500];
           break;

@@ -216,6 +216,8 @@ import 'package:fish_flutter/widget/SliderPainter.dart';
 import 'package:fish_flutter/widget/fishGetDialog.dart';
 import 'package:fish_flutter/widget/tacklePainter.dart';
 import 'package:flutter/material.dart';
+import 'package:fish_flutter/TypeAdapter/typGameData.dart';
+import 'package:fish_flutter/TypeAdapter/typLureData.dart';
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -276,10 +278,10 @@ class _FishingState extends BasePageState<Fishing>
 
   //魚種定義
   late FishsModel FISH_TABLE;
-  //ルアーリスト定義
-  late LuresModel lures;
-  //現在使用中のルアー
-  late LureModel uselureData;
+  // //ルアーリスト定義
+  // late LuresModel lures;
+  // //現在使用中のルアー
+  // late LureModel uselureData;
   //所持定義
   //late HaveTackleModel haveTackle;
   //画像リスト
@@ -388,7 +390,7 @@ class _FishingState extends BasePageState<Fishing>
   //double _tensionValMax = 0.0; //テンション最大値 竿によって可変
   double _fookingTension = 0.0; //アタリ時のアワセ判定値
   double _fookingTensionPrev = 0.0; //アワセモード時のテンション前回値記憶
-  var _useLureId = enumLureDiv.tairaba; //使用中のルアー種類
+  //var _useLureId = enumLureDiv.tairaba; //使用中のルアー種類
   double _drag = 0.0; //ドラグレベル値
   double _speed = 0.0; //巻き速度値
   //double _speedValMax = 0.0; //スピード最大値 リールによって可変
@@ -466,6 +468,7 @@ class _FishingState extends BasePageState<Fishing>
   String _actionText = "";
 
   late typGameData gameData;
+  //late typFishResult fishResultData;
 
   //タックルの描画関連
   double _tackleCenterX = 0.0;
@@ -516,14 +519,21 @@ class _FishingState extends BasePageState<Fishing>
   void initState() {
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
+
+    final gameDataBox = Hive.box(gamedataBoxName);
+    gameData = gameDataBox.get(gamedataKeyName);
+
+    // final fishResultBox = Hive.box(fishResultBoxName);
+    // fishResultData = fishResultBox.get(fishResultKeyName);
+
     //釣果リストを初期化
     //_fishesResult = new FishesResultModel();
     //今釣れている魚を初期化
     _hitFish = FISH_TABLE.getFishDetail(0);
     //ルアーリストを初期化？？？本当はDBマスタから全取得
-    lures = new LuresModel();
+    //lures = new LuresModel();
     //現在使用中のルアーデータ
-    uselureData = lures.getLureData(_useLureId);
+    //uselureData = lures.getLureData(_useLureId);
     //基本BGM
     //nowBgm = Fishing.screenBgm;
     //所持リストを初期化
@@ -545,7 +555,7 @@ class _FishingState extends BasePageState<Fishing>
     // null safety対応で?（null以外の時のみアクセス）をつける
     WidgetsBinding.instance?.addPostFrameCallback((cb) {
       // `ModalRoute.of()`メソッドを使用して引数を取得
-      gameData = ModalRoute.of(context)?.settings.arguments as typGameData;
+      //gameData = ModalRoute.of(context)?.settings.arguments as typGameData;
 
       //スタート深さを設定
       //_maxDepth = stage.startDepth;
@@ -883,7 +893,8 @@ class _FishingState extends BasePageState<Fishing>
     if (gameData.windLevel < 0) gameData.windLevel = 0;
 
     //最大の風レベル記憶
-    if (gameData.maxWindLevel < gameData.windLevel) gameData.maxWindLevel = gameData.windLevel;
+    if (gameData.maxWindLevel < gameData.windLevel)
+      gameData.maxWindLevel = gameData.windLevel;
 
     //時合の変化判定
     _jiaiChangeScanCnt++;
@@ -1012,7 +1023,7 @@ class _FishingState extends BasePageState<Fishing>
     var mx = MAX_RAND_ADD_TENSION;
     var mn = MIN_RAND_ADD_TENSION;
     //使用中のルアー重さ
-    lureWeight = uselureData.getWeight(uselureData.useWeightId);
+    lureWeight = gameData.getUseLureWeight();
     weight = lureWeight;
     if (_collect) {
       //高速回収中
@@ -1087,7 +1098,8 @@ class _FishingState extends BasePageState<Fishing>
       //addVal * ((TENSION_VAL_MAX - _tension) / TENSION_VAL_MAX);
       //二次関数 テンション上がるごとに上がりにくくする
       addVal = addVal +
-          (addVal * -1) * (MathPow._getPow(3, (_tension / gameData.maxTension)));
+          (addVal * -1) *
+              (MathPow._getPow(3, (_tension / gameData.maxTension)));
     }
     var val = _tension + addVal;
 
@@ -1097,11 +1109,12 @@ class _FishingState extends BasePageState<Fishing>
       if (_nowLineHp < 0) {
         //糸切れ
         debugPrint("いときれ");
-        final fishResultBox = Hive.box('fishResult');
+        final fishResultBox = Hive.box(fishResultBoxName);
         //GameDataにFishResultをリレーション
         //(addする前にこれをしていないとエラーになる場合がある）
-        gameData.fishResults = HiveList(fishResultBox);
-        var fishResult = typFishResult(fishId: _hitFish.id,
+        //gameData.fishResults = HiveList(fishResultBox);
+        var fishResult = typFishResult(
+            fishId: _hitFish.id,
             size: _fishSize,
             depth: _depth,
             maxDepth: gameData.maxDepth,
@@ -1120,7 +1133,7 @@ class _FishingState extends BasePageState<Fishing>
         //使用中のルアーを削除
         //haveTackle.lostLure(haveTackle.getUseLure().id);
         //使用中のルアーをレベルダウン
-        uselureData.lvDown();
+        gameData.lureLvDown();
         val = 0.0;
         soundManagerPool.playSound('se/linebreak.mp3');
         //nowBgm = Fishing.screenBgm;
@@ -1253,18 +1266,17 @@ class _FishingState extends BasePageState<Fishing>
       //初釣果判定
       var flgNew = true;
       gameData.fishResults.forEach((val) {
-        if (val.fishId == _hitFish.id && val.resultKbn == enumResult.success.index) {
+        if (val.fishId == _hitFish.id &&
+            val.resultKbn == enumResult.success.index) {
           flgNew = false;
           return;
         }
       });
       //if (flgNew) point = point * 2; //初ゲットはポイント2倍
 
-      var fishResultBox = Hive.box('fishResult');
-      //GameDataにFishResultをリレーション
-      //(addする前にこれをしていないとエラーになる場合がある）
-      //gameData.fishResults = HiveList(fishResultBox);
-      var fishResult = typFishResult(fishId: _hitFish.id,
+      var fishResultBox = Hive.box(fishResultBoxName);
+      typFishResult fishResult = typFishResult(
+          fishId: _hitFish.id,
           size: _fishSize,
           depth: _depth,
           maxDepth: gameData.maxDepth,
@@ -1273,7 +1285,6 @@ class _FishingState extends BasePageState<Fishing>
       fishResultBox.add(fishResult);
       //GameDataに登録
       gameData.fishResults.add(fishResult);
-      //gameData.save();
 
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
@@ -1292,13 +1303,17 @@ class _FishingState extends BasePageState<Fishing>
                 fishSize: _fishSize,
                 addPoint: point,
                 flgNew: flgNew,
-                uselureData: uselureData,
+                //uselureData: uselureData,
               ),
             ],
           );
         },
       );
       //モーダル閉じた時
+      // final gameDataBox = Hive.box(gamedataBoxName);
+      // //モーダル内でデータ書き換わっているので読み直し
+      // gameData = await gameDataBox.get(gamedataKeyName);
+
       _depth = 0.0;
       _tension = 0.0;
       //ポイントを加算
@@ -1317,6 +1332,8 @@ class _FishingState extends BasePageState<Fishing>
           //底物は最大ライン強度成長
           gameData.maxLineHp += (point / 10);
       }
+
+      await gameData.save();
 
       startTimer(); //定周期タイマ再開
       //nowBgm = Fishing.screenBgm;
@@ -1413,7 +1430,7 @@ class _FishingState extends BasePageState<Fishing>
           var jiaiProb = 0.0;
           if (flgFall) {
             //フォール中のHIT率判定 魚のフォール志向 * ルアーのフォール能力
-            hitSpeedprob = fish.hitFall * uselureData.fall;
+            hitSpeedprob = fish.hitFall * gameData.getUseLure().fall;
             hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
             //フォールは時合の影響を半分にする
             jiaiProb = (1.0 + _jiai) / 2;
@@ -1425,7 +1442,7 @@ class _FishingState extends BasePageState<Fishing>
             startJerk("ﾌｫｰﾙ中…");
           } else if (flgJerk) {
             //ジャーク中のHIT率判定 魚のジャーク志向 * ルアーのジャーク能力
-            hitSpeedprob = fish.hitJerk * uselureData.jerk;
+            hitSpeedprob = fish.hitJerk * gameData.getUseLure().jerk;
             hitSpeedprobDisp = 0.0; //ジャーク中は巻き速度手本を見せない
             //ジャークは時合の影響を1/3にする
             jiaiProb = (2.0 + _jiai) / 3;
@@ -1447,7 +1464,7 @@ class _FishingState extends BasePageState<Fishing>
               hitSpeedprob = ((speedDiff - fish.hitSpeedRange).abs() /
                       fish.hitSpeedRange) *
                   fish.hitMaki *
-                  uselureData.reeling;
+                  gameData.getUseLure().reeling;
             }
             if (hitSpeedprob < 0.01) {
               hitSpeedprob = 0.01; //速度範囲外の最低保証
@@ -1570,12 +1587,12 @@ class _FishingState extends BasePageState<Fishing>
             debugPrint('HIT!!!!');
             //_dispInfo = "HIT!";
             //フッキングの成功度
-            _fookingLv =
-                (_fookingTensionPrev - _fookingTension) / (gameData.maxTension / 2);
+            _fookingLv = (_fookingTensionPrev - _fookingTension) /
+                (gameData.maxTension / 2);
             //if (_fookingLv > 100.0) _fookingLv = 100.0;
             //最大テンションの半分が基本値 - フッキング成功度
-            _fookingTension =
-                (gameData.maxTension / 2) - ((gameData.maxTension / 2) * _fookingLv);
+            _fookingTension = (gameData.maxTension / 2) -
+                ((gameData.maxTension / 2) * _fookingLv);
             //_fookingTension = _fookingTension < 20 ? 20 : _fookingTension;
             //HITメッセージ
             _centerTextMain = "HIT!";
@@ -1628,11 +1645,12 @@ class _FishingState extends BasePageState<Fishing>
             //バレ条件成立が一定スキャン保持でバレとする
             debugPrint("バレ");
 
-            var fishResultBox = Hive.box('fishResult');
+            var fishResultBox = Hive.box(fishResultBoxName);
             //GameDataにFishResultをリレーション
             //(addする前にこれをしていないとエラーになる場合がある）
-            gameData.fishResults = HiveList(fishResultBox);
-            var fishResult = typFishResult(fishId: _hitFish.id,
+            //gameData.fishResults = HiveList(fishResultBox);
+            var fishResult = typFishResult(
+                fishId: _hitFish.id,
                 size: _fishSize,
                 depth: _depth,
                 maxDepth: gameData.maxDepth,
@@ -1828,7 +1846,9 @@ class _FishingState extends BasePageState<Fishing>
                                   ],
                                 ),
                               ),
-                              Text((10 * gameData.windLevel).toStringAsFixed(1) + "m/s",
+                              Text(
+                                  (10 * gameData.windLevel).toStringAsFixed(1) +
+                                      "m/s",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     shadows: <Shadow>[
@@ -1932,8 +1952,8 @@ class _FishingState extends BasePageState<Fishing>
                         trailing: Icon(Icons.arrow_forward_ios),
                         onTap: () async {
                           _timer.cancel(); //定周期タイマ停止
-                          final gamedataBox = Hive.box('gamedata');
-                          gamedataBox.put('gamedata', gameData);
+                          final gamedataBox = Hive.box(gamedataBoxName);
+                          gamedataBox.put(gamedataKeyName, gameData);
 
                           var result = await showDialog<int>(
                             context: context,
@@ -2582,7 +2602,7 @@ class _FishingState extends BasePageState<Fishing>
                                               },
                                               child: tackleIcon(
                                                 tackleIconSize: 40.0,
-                                                lure: uselureData,
+                                                lure: gameData.getUseLure(),
                                                 flgSelect: false,
                                                 opacity:
                                                     (_depth > 0.0 ? 0.7 : 1.0),
@@ -2722,13 +2742,9 @@ class _FishingState extends BasePageState<Fishing>
                                                 //タイラバ
                                                 GestureDetector(
                                                   onTap: () {
-                                                    setState(() {
-                                                      _useLureId =
-                                                          enumLureDiv.tairaba;
+                                                    setState(() async {
                                                       //使用中のルアーを変更
-                                                      uselureData =
-                                                          lures.getLureData(
-                                                              _useLureId);
+                                                      await gameData.changeLure(enumLureDiv.tairaba);
                                                     });
                                                   },
                                                   child: Container(
@@ -2736,12 +2752,10 @@ class _FishingState extends BasePageState<Fishing>
                                                           EdgeInsets.all(10),
                                                       child: tackleIcon(
                                                         tackleIconSize: 60.0,
-                                                        lure: lures.getLureData(
-                                                            enumLureDiv
-                                                                .tairaba),
-                                                        flgSelect: _useLureId ==
+                                                        lure: gameData.getLureData(enumLureDiv.tairaba),
+                                                        flgSelect: gameData.useLureIdx ==
                                                                 enumLureDiv
-                                                                    .tairaba
+                                                                    .tairaba.index
                                                             ? true
                                                             : false,
                                                         opacity: (_depth > 0.0
@@ -2752,13 +2766,9 @@ class _FishingState extends BasePageState<Fishing>
                                                 //メタルジグ
                                                 GestureDetector(
                                                   onTap: () {
-                                                    setState(() {
-                                                      _useLureId =
-                                                          enumLureDiv.jig;
+                                                    setState(() async {
                                                       //使用中のルアーを変更
-                                                      uselureData =
-                                                          lures.getLureData(
-                                                              _useLureId);
+                                                      await gameData.changeLure(enumLureDiv.jig);
                                                     });
                                                   },
                                                   child: Container(
@@ -2766,10 +2776,10 @@ class _FishingState extends BasePageState<Fishing>
                                                           EdgeInsets.all(10),
                                                       child: tackleIcon(
                                                         tackleIconSize: 60.0,
-                                                        lure: lures.getLureData(
-                                                            enumLureDiv.jig),
-                                                        flgSelect: _useLureId ==
-                                                                enumLureDiv.jig
+                                                        lure: gameData.getLureData(enumLureDiv.jig),
+                                                        flgSelect: gameData.useLureIdx ==
+                                                            enumLureDiv
+                                                                .jig.index
                                                             ? true
                                                             : false,
                                                         opacity: (_depth > 0.0
@@ -2781,13 +2791,9 @@ class _FishingState extends BasePageState<Fishing>
                                                 //スロージグ
                                                 GestureDetector(
                                                   onTap: () {
-                                                    setState(() {
-                                                      _useLureId =
-                                                          enumLureDiv.slowjig;
+                                                    setState(() async {
                                                       //使用中のルアーを変更
-                                                      uselureData =
-                                                          lures.getLureData(
-                                                              _useLureId);
+                                                      await gameData.changeLure(enumLureDiv.slowjig);
                                                     });
                                                   },
                                                   child: Container(
@@ -2795,12 +2801,10 @@ class _FishingState extends BasePageState<Fishing>
                                                           EdgeInsets.all(10),
                                                       child: tackleIcon(
                                                         tackleIconSize: 60.0,
-                                                        lure: lures.getLureData(
+                                                        lure: gameData.getLureData(enumLureDiv.slowjig),
+                                                        flgSelect: gameData.useLureIdx ==
                                                             enumLureDiv
-                                                                .slowjig),
-                                                        flgSelect: _useLureId ==
-                                                                enumLureDiv
-                                                                    .slowjig
+                                                                .slowjig.index
                                                             ? true
                                                             : false,
                                                         opacity: (_depth > 0.0
@@ -2813,16 +2817,12 @@ class _FishingState extends BasePageState<Fishing>
                                           ),
                                           Container(
                                             margin: EdgeInsets.only(top: 0),
-                                            child: Text(
-                                              uselureData.name +
+                                            child: Text(gameData.getUseLure().name +
                                                   " Lv." +
-                                                  lures
-                                                      .getLureData(_useLureId)
-                                                      .lv
+                                                gameData.getUseLure().lv
                                                       .toString(),
                                               style: TextStyle(
-                                                  color: uselureData
-                                                      .getLureColor(_useLureId),
+                                                  color: gameData.getUseLureColor(),
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -2857,10 +2857,7 @@ class _FishingState extends BasePageState<Fishing>
                                                         children: <Widget>[
                                                           Center(
                                                             child: Text(
-                                                              '重さ：' +
-                                                                  uselureData
-                                                                      .getMyWeight()
-                                                                      .toString() +
+                                                              '重さ：' + gameData.getUseLureWeight().toString() +
                                                                   "g",
                                                               style: TextStyle(
                                                                   fontWeight:
@@ -2877,9 +2874,7 @@ class _FishingState extends BasePageState<Fishing>
                                                                         .black),
                                                                 color: Colors
                                                                     .white),
-                                                            height: uselureData
-                                                                    .weightList
-                                                                    .list
+                                                            height: typGameData.LST_LURE_WEIGHT
                                                                     .length *
                                                                 24,
                                                             width: 100,
@@ -2898,15 +2893,11 @@ class _FishingState extends BasePageState<Fishing>
                                                                   onTap: () {
                                                                     setState(
                                                                         () {
-                                                                      if (uselureData
-                                                                          .weightList
-                                                                          .list[
-                                                                              index]
-                                                                          .enabled) {
+                                                                      if (gameData.getUseLure().unLockweightid >= index) {
                                                                         setState(
-                                                                            () {
-                                                                          uselureData.useWeightId =
-                                                                              index;
+                                                                            () async {
+                                                                              //重さを変更
+                                                                              await gameData.changeLureWeight(index);
                                                                         });
                                                                       }
                                                                       ;
@@ -2916,16 +2907,16 @@ class _FishingState extends BasePageState<Fishing>
                                                                       padding: EdgeInsets.all(3),
                                                                       decoration: BoxDecoration(
                                                                         //色 使用中：黄／使用可：白／使用不可：灰色
-                                                                        color: (uselureData.useWeightId ==
+                                                                        color:
+                                                                        (gameData.getUseLure().useWeightId ==
                                                                                 index
                                                                             ? Colors
                                                                                 .yellow
-                                                                            : (!uselureData.weightList.list[index].enabled
-                                                                                ? Colors.grey
-                                                                                : Colors.white)),
+                                                                            : (!(gameData.getUseLure().unLockweightid < index)
+                                                                                ? Colors.white
+                                                                                : Colors.grey)),
                                                                       ),
-                                                                      child: Text(
-                                                                        uselureData.weightList.list[index].weight.toString() +
+                                                                      child: Text(typGameData.LST_LURE_WEIGHT[index].toString() +
                                                                             "g",
                                                                         style: TextStyle(
                                                                             fontSize:
@@ -2934,10 +2925,7 @@ class _FishingState extends BasePageState<Fishing>
                                                                 );
                                                               },
                                                               itemCount:
-                                                                  uselureData
-                                                                      .weightList
-                                                                      .list
-                                                                      .length,
+                                                                  typGameData.LST_LURE_WEIGHT.length,
                                                             ),
                                                           )
                                                         ]),
@@ -3138,10 +3126,11 @@ class _FishingState extends BasePageState<Fishing>
   //ルアーの能力チャート描画
   List<RadarChartItemModel> getLureRadarChartItem() {
     List<RadarChartItemModel> ret = [];
+    var useLure = gameData.getUseLure();
     ret.add(
-        new RadarChartItemModel(itemName: '巻き', value: uselureData.reeling));
-    ret.add(new RadarChartItemModel(itemName: 'ﾌｫｰﾙ', value: uselureData.fall));
-    ret.add(new RadarChartItemModel(itemName: 'ｼｬｸﾘ', value: uselureData.jerk));
+        new RadarChartItemModel(itemName: '巻き', value: useLure.reeling));
+    ret.add(new RadarChartItemModel(itemName: 'ﾌｫｰﾙ', value: useLure.fall));
+    ret.add(new RadarChartItemModel(itemName: 'ｼｬｸﾘ', value: useLure.jerk));
     return ret;
   }
 

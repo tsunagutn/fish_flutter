@@ -1,10 +1,12 @@
+import 'package:fish_flutter/TypeAdapter/typLureData.dart';
 import 'package:flutter/material.dart';
 import '../Model/LuresModel.dart';
+import 'package:fish_flutter/TypeAdapter/typGameData.dart';
 
 //タックルサムネの表示
 Widget tackleIcon({
   required double tackleIconSize,
-  required LureModel lure,
+  required typLureData lure,
   required bool flgSelect,
   double opacity = 1.0,
 }) {
@@ -29,7 +31,7 @@ Widget tackleIcon({
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            lure.getWeight(lure.useWeightId).toString() + 'g',
+            typGameData.LST_LURE_WEIGHT[lure.useWeightId].toString() + 'g',
             style: TextStyle(fontSize: 12),
           ),
           Row(

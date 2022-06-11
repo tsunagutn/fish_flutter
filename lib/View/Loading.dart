@@ -39,8 +39,8 @@ class _LoadingState extends BasePageState<Loading> {
         _bgm = e!;
         settings.flgBgm = _bgm;
 
-        final box = Hive.box('settings');
-        box.put('settings', settings);
+        final box = Hive.box(settingsBoxName);
+        box.put(settingsKeyName, settings);
       });
 
   @override

@@ -291,13 +291,16 @@ class _SettingDialogState extends State<SettingDialog>
                                       ),
                                       onPressed: () async {
                                         final settingsBox =
-                                            Hive.box('settings');
-                                        settingsBox.delete('settings');
-                                        final relultBox = Hive.box('box');
-                                        relultBox.delete('results');
+                                            Hive.box(settingsBoxName);
+                                        settingsBox.delete(settingsKeyName);
+                                        // final relultBox = Hive.box('box');
+                                        // relultBox.delete('results');
                                         final gamedataBox =
-                                            Hive.box('gamedata');
-                                        gamedataBox.delete('gamedata');
+                                            Hive.box(gamedataBoxName);
+                                        gamedataBox.delete(gamedataKeyName);
+                                        final fishResultBox =
+                                        Hive.box(fishResultBoxName);
+                                        gamedataBox.delete(fishResultKeyName);
                                       }),
                                 ]),
                               ),
@@ -318,8 +321,8 @@ class _SettingDialogState extends State<SettingDialog>
               ),
               onPressed: () {
                 //Hiveに書き込み
-                final box = Hive.box('settings');
-                box.put('settings', settings);
+                final box = Hive.box(settingsBoxName);
+                box.put(settingsKeyName, settings);
 
                 Navigator.of(context).pop(retPoint);
               },

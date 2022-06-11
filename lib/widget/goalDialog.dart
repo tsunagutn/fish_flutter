@@ -83,8 +83,8 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    final gameDataBox = Hive.box('gamedata');
-    gameData = gameDataBox.get('gamedata');
+    final gameDataBox = Hive.box(gamedataBoxName);
+    gameData = gameDataBox.get(gamedataKeyName);
     //アニメーション管理
     anime = new Map<enumResultAnime, relultAnimeModel>();
     anime[enumResultAnime.fishResultTitle] = new relultAnimeModel(span: 1000);
@@ -186,8 +186,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
       } else if (result.resultKbn == enumResult.cut.index) {
         //切られた場合
         cutCnt++;
-      } else {
-      }
+      } else {}
     });
   }
 
