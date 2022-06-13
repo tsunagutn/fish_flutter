@@ -133,6 +133,7 @@
 //済・ドラグ使いにくいの何とかする
 //済・過去釣果を見る画面、機能
 //済・今日はもう納得した機能 ゲームを途中で諦める
+//・図鑑を過去の分も見れるニスル、？じゃなくする
 //・釣果によって何か成長させる
 //・実績
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
@@ -1704,7 +1705,7 @@ class _FishingState extends BasePageState<Fishing>
                             barrierDismissible: false,
                             builder: (_) {
                               return BookDialog(
-                                fishsTable: FISH_TABLE,
+                                //fishsTable: FISH_TABLE,
                                 //fishesResult: gameData.fishResults,
                                 bgm: super.bgm,
                                 flgBgm: true,

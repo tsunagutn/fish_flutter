@@ -76,7 +76,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
   late typGameData gameData;
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
     final gameDataBox = Hive.box(gamedataBoxName);
     gameData = gameDataBox.get(widget.keyName);
@@ -104,10 +104,10 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
     _lightingAnimationController = AnimationController(
         duration: Duration(milliseconds: duration), vsync: this);
     _lightingValue =
-    Tween(begin: 1.5, end: 0.0).animate(_lightingAnimationController)
-      ..addListener(() {
-        setState(() {});
-      });
+        Tween(begin: 1.5, end: 0.0).animate(_lightingAnimationController)
+          ..addListener(() {
+            setState(() {});
+          });
     _lightingAnimationController.forward();
     _lightingAnimationController.addStatusListener((status) {
       //アニメーション終了後かの確認
@@ -125,36 +125,37 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
         value.state = enumAnimeState.end;
       });
     } else {
-    _dispController = AnimationController(
-        duration: Duration(
-            milliseconds: anime[enumResultAnime.fishResultTitle]!.span),
-        vsync: this);
-    _dispValue = Tween(begin: 0.0, end: 1.0).animate(_dispController)
-      ..addListener(() {
-        setState(() {});
-      });
-    //アニメ実行中
-    anime[enumResultAnime.fishResultTitle]!.state = enumAnimeState.doing;
-    _dispController.addStatusListener((status) {
-      //アニメーション終了後かの確認
-      if (status == AnimationStatus.completed) {
-        _dispController.reset();
-        anime[enumResultAnime.values[animeCnt]]!.state = enumAnimeState.end;
-        animeCnt++;
-        if (animeCnt < enumResultAnime.values.length) {
-          //次のアニメがあればスタート
-          _dispController.duration = Duration(
-              milliseconds: anime[enumResultAnime.values[animeCnt]]!.span);
-          //アニメ実行中
-          anime[enumResultAnime.values[animeCnt]]!.state = enumAnimeState.doing;
-          _dispController.forward();
+      _dispController = AnimationController(
+          duration: Duration(
+              milliseconds: anime[enumResultAnime.fishResultTitle]!.span),
+          vsync: this);
+      _dispValue = Tween(begin: 0.0, end: 1.0).animate(_dispController)
+        ..addListener(() {
+          setState(() {});
+        });
+      //アニメ実行中
+      anime[enumResultAnime.fishResultTitle]!.state = enumAnimeState.doing;
+      _dispController.addStatusListener((status) {
+        //アニメーション終了後かの確認
+        if (status == AnimationStatus.completed) {
+          _dispController.reset();
+          anime[enumResultAnime.values[animeCnt]]!.state = enumAnimeState.end;
+          animeCnt++;
+          if (animeCnt < enumResultAnime.values.length) {
+            //次のアニメがあればスタート
+            _dispController.duration = Duration(
+                milliseconds: anime[enumResultAnime.values[animeCnt]]!.span);
+            //アニメ実行中
+            anime[enumResultAnime.values[animeCnt]]!.state =
+                enumAnimeState.doing;
+            _dispController.forward();
+          }
         }
-      }
-    });
-    //ジングル鳴らす
-    //soundManagerPool.playSound('se/jingle01.mp3');
-    //リザルト画面BCM再生
-    subBgmLoop('result.mp3');
+      });
+      //ジングル鳴らす
+      //soundManagerPool.playSound('se/jingle01.mp3');
+      //リザルト画面BCM再生
+      subBgmLoop('result.mp3');
     }
 
     //魚テーブルを初期化
@@ -504,7 +505,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                                     barrierDismissible: false,
                                                     builder: (_) {
                                                       return BookDialog(
-                                                        fishsTable: FISH_TABLE,
+                                                        //fishsTable: FISH_TABLE,
                                                         // fishesResult:
                                                         //     widget.fishResult,
                                                         bgm: widget.bgm,
@@ -685,9 +686,12 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                               //ゲーム中データを終了
                               gameData.isEnd = true;
                               var histGameData = gameData.copy();
-                              final gameDataBox = await Hive.box(gamedataBoxName);
+                              final gameDataBox =
+                                  await Hive.box(gamedataBoxName);
                               //セーブ日時をキーにして保存
-                              gameDataBox.put(histGameData.saveDateTime.toString(), histGameData);
+                              gameDataBox.put(
+                                  histGameData.saveDateTime.toString(),
+                                  histGameData);
                               //元のキーのデータは削除
                               gameDataBox.delete(gamedataKeyName);
 
@@ -698,7 +702,8 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                 //最初の履歴データの場合
                                 history = typHistory();
                                 final gameDataBox = Hive.box(gamedataBoxName);
-                                history.lstGameDatas = HiveList<typGameData>(gameDataBox);
+                                history.lstGameDatas =
+                                    HiveList<typGameData>(gameDataBox);
                                 historyBox.put(historyKeyName, history);
                               }
                               history = await historyBox.get(historyKeyName);

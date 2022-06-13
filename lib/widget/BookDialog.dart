@@ -12,11 +12,11 @@ import 'SliderPainter.dart';
 class BookDialog extends StatefulWidget {
   @override
   const BookDialog({
-    required this.fishsTable,
+    //required this.fishsTable,
     required this.bgm,
     required this.flgBgm,
   });
-  final FishsModel fishsTable;
+  //final FishsModel fishsTable;
   final BgmPlayer bgm;
   final bool flgBgm;
   _BookDialogState createState() => _BookDialogState();
@@ -30,21 +30,27 @@ class _BookDialogState extends State<BookDialog>
   late FishModel _showFishData;
 
   late typGameData gameData;
+  late typFishResult fishResult;
 
   @override
   void initState() {
     super.initState();
 
     final gameDataBox = Hive.box(gamedataBoxName);
+    final fishResultBox = Hive.box(fishResultBoxName);
+    //現ゲームのデータ
     gameData = gameDataBox.get(gamedataKeyName);
-
-    widget.fishsTable.fishs.forEach((value) {
+    //全釣果データ
+    fishResult = fishResultBox.get(fishResultKeyName);
+    //魚種データ
+    final fishsTable = new FishsModel();
+    fishsTable.fishs.forEach((value) {
       fishList.add(value);
     });
     //棚が浅い順にソート
     fishList.sort((a, b) => a.tanaMin.compareTo(b.tanaMin));
 
-    _showFishData = widget.fishsTable.fishs[0];
+    _showFishData = fishsTable.fishs[0];
 
     if (widget.flgBgm) {
       //設定画面BGM再生
@@ -71,10 +77,11 @@ class _BookDialogState extends State<BookDialog>
                       children: [
                         makeFishTile(
                             fish: fishList[index],
-                            fishResult: gameData.fishResults
-                                .where((typFishResult value) =>
+                            fishResult: gameData.fishResults.where(
+                                (typFishResult value) =>
                                     value.fishId == fishList[index].id &&
-                                    value.resultKbn == enumResult.success.index)),
+                                    value.resultKbn ==
+                                        enumResult.success.index)),
                       ],
                     );
                   },
@@ -309,32 +316,30 @@ class _BookDialogState extends State<BookDialog>
                                                               _showFishData
                                                                   .id &&
                                                           value.resultKbn ==
-                                                              enumResult
-                                                                  .success.index)
+                                                              enumResult.success
+                                                                  .index)
                                                       .length
                                                       .toString() +
                                                   "匹")),
                                           Row(
                                             children: [
                                               Text(_showFishData
-                                                      .getSize(gameData
-                                                          .getMinSize(
+                                                      .getSize(
+                                                          gameData.getMinSize(
                                                               _showFishData.id))
                                                       .toStringAsFixed(1) +
                                                   " ～ " +
                                                   _showFishData
-                                                      .getSize(gameData
-                                                          .getMaxSize(
+                                                      .getSize(
+                                                          gameData.getMaxSize(
                                                               _showFishData.id))
                                                       .toStringAsFixed(1) +
                                                   "cm"),
                                               if (gameData.getMaxSize(
-                                                              _showFishData
-                                                                  .id) >
+                                                          _showFishData.id) >
                                                       0.8 &&
                                                   gameData.getMaxSize(
-                                                              _showFishData
-                                                                  .id) <
+                                                          _showFishData.id) <
                                                       0.95)
                                                 // Icon(Icons.star,
                                                 //     color: Colors.grey),
@@ -345,7 +350,7 @@ class _BookDialogState extends State<BookDialog>
                                                   width: 24,
                                                 ),
                                               if (gameData.getMaxSize(
-                                                          _showFishData.id) >
+                                                      _showFishData.id) >
                                                   0.95)
                                                 // Icon(
                                                 //   Icons.star,
@@ -394,8 +399,7 @@ class _BookDialogState extends State<BookDialog>
 
   //図鑑の一覧リスト
   Widget makeFishTile(
-      {required FishModel fish,
-      required Iterable<typFishResult> fishResult}) {
+      {required FishModel fish, required Iterable<typFishResult> fishResult}) {
     Color backgroundColor;
     String image;
     String name;
