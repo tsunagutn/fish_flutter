@@ -28,16 +28,17 @@ class typGameDataAdapter extends TypeAdapter<typGameData> {
       maxLineHp: fields[8] as double,
       maxSpeed: fields[9] as double,
       useLureIdx: fields[10] as int,
-      isEnd: fields[13] as bool,
+      saveDateTime: fields[11] as DateTime,
+      isEnd: fields[14] as bool,
     )
-      ..fishResults = (fields[11] as HiveList).castHiveList()
-      ..lureData = (fields[12] as HiveList).castHiveList();
+      ..fishResults = (fields[12] as HiveList).castHiveList()
+      ..lureData = (fields[13] as HiveList).castHiveList();
   }
 
   @override
   void write(BinaryWriter writer, typGameData obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.gameId)
       ..writeByte(1)
@@ -61,10 +62,12 @@ class typGameDataAdapter extends TypeAdapter<typGameData> {
       ..writeByte(10)
       ..write(obj.useLureIdx)
       ..writeByte(11)
-      ..write(obj.fishResults)
+      ..write(obj.saveDateTime)
       ..writeByte(12)
-      ..write(obj.lureData)
+      ..write(obj.fishResults)
       ..writeByte(13)
+      ..write(obj.lureData)
+      ..writeByte(14)
       ..write(obj.isEnd);
   }
 

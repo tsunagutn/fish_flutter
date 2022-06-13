@@ -128,24 +128,25 @@
 //済・雲の描画
 //済・大量に経験値で一気にレベル上がった時、途中の重さが解放されない
 //済・MENUの前のTOP画面追加 そこでローディングとか表示しつつ画面タップさせてBGMプリロードさせる
-//・設定画面で感度のテストできるようにする
-//・設定画面でタックルの色替え機能
-//・釣果データの永続化
-//・過去釣果を見る画面、機能
+//済・中断セーブ機能
+//済・釣果データの永続化
+//済・ドラグ使いにくいの何とかする
+//済・過去釣果を見る画面、機能
+//済・今日はもう納得した機能 ゲームを途中で諦める
 //・釣果によって何か成長させる
 //・実績
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
 //・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・タックル変更をもっとましにする、特に重さ
-//・ドラグ使いにくいの何とかする
 //・風の描画
 //・海底に漁礁とか
 //・時合度が低いのが続かんようにするか、高くできるようにする
-//・中断セーブ機能
-//・今日はもう納得した機能 ゲームを途中で諦める
+//・光点が残像するようにする
 
 //［リリース後のアップデート］
+//・設定画面で感度のテストできるようにする
+//・設定画面でタックルの色替え機能
 //・リザルト画面をリッチにする
 //・クリア後、最初から振り返りリザルト表示
 //・リザルト画面で切られたとかバレた魚種分かる（魚種以外分かるの方がええかも）
@@ -166,6 +167,7 @@
 //・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 //・Android たまに「System UI isnt responding」「Wrote stack traces to tombstoned」がでる
 //　多分FIshPointer関係のバグっぽい？
+//・結果画面で横幅が足りてない
 
 //リリース前作業
 //・全体的に重いのをなんとかする、画像圧縮とか余計な処理消しとか
@@ -191,7 +193,6 @@
 
 import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/ImageModel.dart';
-import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 //import 'package:fish_flutter/Model/HaveTackleModel.dart';
@@ -816,32 +817,7 @@ class _FishingState extends BasePageState<Fishing>
       flgGoal = true;
       if (!_flgHit && !_flgBait) {
         //ゴール条件成立
-        _timer.cancel(); //定周期タイマ停止
-        //現在再生中のBGMをフェードアウト
-        bgmStop();
-        //super.bgm.volumeBgmHalf;
-        var result = await showDialog<int>(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) {
-            return Stack(
-              children: [
-                //ゴールダイアログ
-                goalDialog(
-                  bgm: super.bgm,
-                  dispSize: size,
-                  point: gameData.point,
-                  //fishResult: _fishesResult,
-                  maxWindLevel: gameData.maxWindLevel,
-                  maxDepth: gameData.maxDepth,
-                ),
-              ],
-            );
-          },
-        );
-        //モーダル閉じた時、メニューに戻る
-        _isBack = true;
-        Navigator.of(context).pop();
+        await showGoalDialog();
       }
     }
 
@@ -1262,34 +1238,10 @@ class _FishingState extends BasePageState<Fishing>
       debugPrint("つりあげ");
       //var fish = FISH_TABLE.fishs[_fishidx];
       //debugPrint("おおきさ" + size.toString());
-      var point = _hitFish.point + (_hitFish.point * _fishSize).floor();
-      //初釣果判定
-      var flgNew = true;
-      gameData.fishResults.forEach((val) {
-        if (val.fishId == _hitFish.id &&
-            val.resultKbn == enumResult.success.index) {
-          flgNew = false;
-          return;
-        }
-      });
-      //if (flgNew) point = point * 2; //初ゲットはポイント2倍
-
-      var fishResultBox = Hive.box(fishResultBoxName);
-      typFishResult fishResult = typFishResult(
-          fishId: _hitFish.id,
-          size: _fishSize,
-          depth: _depth,
-          maxDepth: gameData.maxDepth,
-          resultKbn: enumResult.success.index);
-      //FishResultに登録
-      fishResultBox.add(fishResult);
-      //GameDataに登録
-      gameData.fishResults.add(fishResult);
 
       //釣りあげ時のモーダル
       _timer.cancel(); //定周期タイマ停止
       bgmStop();
-
       var result = await showDialog<int>(
         context: context,
         barrierDismissible: false,
@@ -1301,42 +1253,17 @@ class _FishingState extends BasePageState<Fishing>
                 dispSize: size,
                 fish: _hitFish,
                 fishSize: _fishSize,
-                addPoint: point,
-                flgNew: flgNew,
-                //uselureData: uselureData,
+                depth: _depth,
               ),
             ],
           );
         },
       );
       //モーダル閉じた時
-      // final gameDataBox = Hive.box(gamedataBoxName);
-      // //モーダル内でデータ書き換わっているので読み直し
-      // gameData = await gameDataBox.get(gamedataKeyName);
-
       _depth = 0.0;
       _tension = 0.0;
-      //ポイントを加算
-      gameData.point += point;
-      //魚種による成長
-      switch (_hitFish.type) {
-        case enumFishType.blue:
-          //青魚は最大テンション成長
-          gameData.maxTension += (point / 1);
-          break;
-        case enumFishType.bream:
-          //赤魚は最大巻き速度成長
-          gameData.maxSpeed += (point / 10);
-          break;
-        case enumFishType.bottom:
-          //底物は最大ライン強度成長
-          gameData.maxLineHp += (point / 10);
-      }
-
-      await gameData.save();
 
       startTimer(); //定周期タイマ再開
-      //nowBgm = Fishing.screenBgm;
       playFieldBgm();
     }
 
@@ -1948,12 +1875,53 @@ class _FishingState extends BasePageState<Fishing>
                         },
                       ),
                       ListTile(
+                        title: Text("釣りを終了する"),
+                        trailing: Icon(Icons.cancel),
+                        onTap: () async {
+                          gameData.save();
+                          // final gamedataBox = Hive.box(gamedataBoxName);
+                          // gamedataBox.put(gamedataKeyName, gameData);
+
+                          var result = await showDialog<int>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) {
+                              return AlertDialog(
+                                title: Text(""),
+                                content: Text("釣りを終了しますか？"),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text("はい"),
+                                    onPressed: () async {
+                                      _isBack = true;
+                                      //モーダルを閉じる
+                                      Navigator.of(context).pop();
+                                      //drwerを閉じる
+                                      Navigator.of(context).pop();
+                                      //ゴールダイアログを出す
+                                      await showGoalDialog();
+                                    },
+                                  ),
+                                  TextButton(
+                                      child: Text("いいえ"),
+                                      onPressed: () {
+                                        //モーダルを閉じる
+                                        Navigator.of(context).pop();
+                                      }),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      ListTile(
                         title: Text("トップに戻る"),
                         trailing: Icon(Icons.arrow_forward_ios),
                         onTap: () async {
                           _timer.cancel(); //定周期タイマ停止
-                          final gamedataBox = Hive.box(gamedataBoxName);
-                          gamedataBox.put(gamedataKeyName, gameData);
+                          gameData.save();
+                          // final gamedataBox = Hive.box(gamedataBoxName);
+                          // gamedataBox.put(gamedataKeyName, gameData);
 
                           var result = await showDialog<int>(
                             context: context,
@@ -1986,19 +1954,6 @@ class _FishingState extends BasePageState<Fishing>
                             },
                           );
                         },
-                      ),
-                      ListTile(
-                        title: Text("利用規約"),
-                        trailing: Icon(Icons.arrow_forward_ios),
-                        onTap: () async {
-                          Navigator.of(context).pop();
-                          final result =
-                              await Navigator.of(context).pushNamed('/term');
-                        },
-                      ),
-                      ListTile(
-                        title: Text("バージョン"),
-                        trailing: Text("0.0.1"),
                       ),
                     ],
                   ),
@@ -2744,7 +2699,8 @@ class _FishingState extends BasePageState<Fishing>
                                                   onTap: () {
                                                     setState(() async {
                                                       //使用中のルアーを変更
-                                                      await gameData.changeLure(enumLureDiv.tairaba);
+                                                      await gameData.changeLure(
+                                                          enumLureDiv.tairaba);
                                                     });
                                                   },
                                                   child: Container(
@@ -2752,12 +2708,17 @@ class _FishingState extends BasePageState<Fishing>
                                                           EdgeInsets.all(10),
                                                       child: tackleIcon(
                                                         tackleIconSize: 60.0,
-                                                        lure: gameData.getLureData(enumLureDiv.tairaba),
-                                                        flgSelect: gameData.useLureIdx ==
+                                                        lure: gameData
+                                                            .getLureData(
                                                                 enumLureDiv
-                                                                    .tairaba.index
-                                                            ? true
-                                                            : false,
+                                                                    .tairaba),
+                                                        flgSelect:
+                                                            gameData.useLureIdx ==
+                                                                    enumLureDiv
+                                                                        .tairaba
+                                                                        .index
+                                                                ? true
+                                                                : false,
                                                         opacity: (_depth > 0.0
                                                             ? 0.7
                                                             : 1.0),
@@ -2768,7 +2729,8 @@ class _FishingState extends BasePageState<Fishing>
                                                   onTap: () {
                                                     setState(() async {
                                                       //使用中のルアーを変更
-                                                      await gameData.changeLure(enumLureDiv.jig);
+                                                      await gameData.changeLure(
+                                                          enumLureDiv.jig);
                                                     });
                                                   },
                                                   child: Container(
@@ -2776,12 +2738,17 @@ class _FishingState extends BasePageState<Fishing>
                                                           EdgeInsets.all(10),
                                                       child: tackleIcon(
                                                         tackleIconSize: 60.0,
-                                                        lure: gameData.getLureData(enumLureDiv.jig),
-                                                        flgSelect: gameData.useLureIdx ==
-                                                            enumLureDiv
-                                                                .jig.index
-                                                            ? true
-                                                            : false,
+                                                        lure: gameData
+                                                            .getLureData(
+                                                                enumLureDiv
+                                                                    .jig),
+                                                        flgSelect:
+                                                            gameData.useLureIdx ==
+                                                                    enumLureDiv
+                                                                        .jig
+                                                                        .index
+                                                                ? true
+                                                                : false,
                                                         opacity: (_depth > 0.0
                                                             ? 0.7
                                                             : 1.0),
@@ -2793,7 +2760,8 @@ class _FishingState extends BasePageState<Fishing>
                                                   onTap: () {
                                                     setState(() async {
                                                       //使用中のルアーを変更
-                                                      await gameData.changeLure(enumLureDiv.slowjig);
+                                                      await gameData.changeLure(
+                                                          enumLureDiv.slowjig);
                                                     });
                                                   },
                                                   child: Container(
@@ -2801,12 +2769,17 @@ class _FishingState extends BasePageState<Fishing>
                                                           EdgeInsets.all(10),
                                                       child: tackleIcon(
                                                         tackleIconSize: 60.0,
-                                                        lure: gameData.getLureData(enumLureDiv.slowjig),
-                                                        flgSelect: gameData.useLureIdx ==
-                                                            enumLureDiv
-                                                                .slowjig.index
-                                                            ? true
-                                                            : false,
+                                                        lure: gameData
+                                                            .getLureData(
+                                                                enumLureDiv
+                                                                    .slowjig),
+                                                        flgSelect:
+                                                            gameData.useLureIdx ==
+                                                                    enumLureDiv
+                                                                        .slowjig
+                                                                        .index
+                                                                ? true
+                                                                : false,
                                                         opacity: (_depth > 0.0
                                                             ? 0.7
                                                             : 1.0),
@@ -2817,12 +2790,16 @@ class _FishingState extends BasePageState<Fishing>
                                           ),
                                           Container(
                                             margin: EdgeInsets.only(top: 0),
-                                            child: Text(gameData.getUseLure().name +
+                                            child: Text(
+                                              gameData.getUseLure().name +
                                                   " Lv." +
-                                                gameData.getUseLure().lv
+                                                  gameData
+                                                      .getUseLure()
+                                                      .lv
                                                       .toString(),
                                               style: TextStyle(
-                                                  color: gameData.getUseLureColor(),
+                                                  color: gameData
+                                                      .getUseLureColor(),
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -2857,7 +2834,10 @@ class _FishingState extends BasePageState<Fishing>
                                                         children: <Widget>[
                                                           Center(
                                                             child: Text(
-                                                              '重さ：' + gameData.getUseLureWeight().toString() +
+                                                              '重さ：' +
+                                                                  gameData
+                                                                      .getUseLureWeight()
+                                                                      .toString() +
                                                                   "g",
                                                               style: TextStyle(
                                                                   fontWeight:
@@ -2874,7 +2854,8 @@ class _FishingState extends BasePageState<Fishing>
                                                                         .black),
                                                                 color: Colors
                                                                     .white),
-                                                            height: typGameData.LST_LURE_WEIGHT
+                                                            height: typGameData
+                                                                    .LST_LURE_WEIGHT
                                                                     .length *
                                                                 24,
                                                             width: 100,
@@ -2893,11 +2874,15 @@ class _FishingState extends BasePageState<Fishing>
                                                                   onTap: () {
                                                                     setState(
                                                                         () {
-                                                                      if (gameData.getUseLure().unLockweightid >= index) {
+                                                                      if (gameData
+                                                                              .getUseLure()
+                                                                              .unLockweightid >=
+                                                                          index) {
                                                                         setState(
                                                                             () async {
-                                                                              //重さを変更
-                                                                              await gameData.changeLureWeight(index);
+                                                                          //重さを変更
+                                                                          await gameData
+                                                                              .changeLureWeight(index);
                                                                         });
                                                                       }
                                                                       ;
@@ -2907,8 +2892,7 @@ class _FishingState extends BasePageState<Fishing>
                                                                       padding: EdgeInsets.all(3),
                                                                       decoration: BoxDecoration(
                                                                         //色 使用中：黄／使用可：白／使用不可：灰色
-                                                                        color:
-                                                                        (gameData.getUseLure().useWeightId ==
+                                                                        color: (gameData.getUseLure().useWeightId ==
                                                                                 index
                                                                             ? Colors
                                                                                 .yellow
@@ -2916,7 +2900,8 @@ class _FishingState extends BasePageState<Fishing>
                                                                                 ? Colors.white
                                                                                 : Colors.grey)),
                                                                       ),
-                                                                      child: Text(typGameData.LST_LURE_WEIGHT[index].toString() +
+                                                                      child: Text(
+                                                                        typGameData.LST_LURE_WEIGHT[index].toString() +
                                                                             "g",
                                                                         style: TextStyle(
                                                                             fontSize:
@@ -2924,8 +2909,9 @@ class _FishingState extends BasePageState<Fishing>
                                                                       )),
                                                                 );
                                                               },
-                                                              itemCount:
-                                                                  typGameData.LST_LURE_WEIGHT.length,
+                                                              itemCount: typGameData
+                                                                  .LST_LURE_WEIGHT
+                                                                  .length,
                                                             ),
                                                           )
                                                         ]),
@@ -2965,6 +2951,33 @@ class _FishingState extends BasePageState<Fishing>
                             ),
                           ]),
                         ]))))));
+  }
+
+  //ゴールダイアログ
+  showGoalDialog() async {
+    _timer.cancel(); //定周期タイマ停止
+    //現在再生中のBGMをフェードアウト
+    bgmStop();
+    //super.bgm.volumeBgmHalf;
+    var result = await showDialog<int>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return Stack(
+          children: [
+            //ゴールダイアログ
+            goalDialog(
+              bgm: super.bgm,
+              isHistory: false,
+              keyName: gamedataKeyName,
+            ),
+          ],
+        );
+      },
+    );
+    //モーダル閉じた時、メニューに戻る
+    _isBack = true;
+    Navigator.of(context).pop();
   }
 
   //時間データ取得
@@ -3127,8 +3140,7 @@ class _FishingState extends BasePageState<Fishing>
   List<RadarChartItemModel> getLureRadarChartItem() {
     List<RadarChartItemModel> ret = [];
     var useLure = gameData.getUseLure();
-    ret.add(
-        new RadarChartItemModel(itemName: '巻き', value: useLure.reeling));
+    ret.add(new RadarChartItemModel(itemName: '巻き', value: useLure.reeling));
     ret.add(new RadarChartItemModel(itemName: 'ﾌｫｰﾙ', value: useLure.fall));
     ret.add(new RadarChartItemModel(itemName: 'ｼｬｸﾘ', value: useLure.jerk));
     return ret;

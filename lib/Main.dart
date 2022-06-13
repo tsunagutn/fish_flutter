@@ -17,7 +17,9 @@ import 'package:provider/provider.dart';
 import 'Model/StageModel.dart';
 import 'Model/TutorialModel.dart';
 import 'TypeAdapter/typGameData.dart';
+import 'TypeAdapter/typHistory.dart';
 import 'TypeAdapter/typSettings.dart';
+import 'View/GameMenu.dart';
 import 'View/LightSpotWegit.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -38,26 +40,36 @@ late typSettings settings = typSettings(
 
 //Hive BOX名
 const settingsBoxName = 'settings1';
-const gamedataBoxName = 'gamedata6';
-const fishResultBoxName = 'fishResult1';
-const lureDataBoxName = 'lureData3';
+const gamedataBoxName = 'gamedata9';
+const fishResultBoxName = 'fishResult2';
+const lureDataBoxName = 'lureData4';
+const historyBoxName = 'history5';
 //Hive Key名
 const settingsKeyName = 'settings';
 const gamedataKeyName = 'gamedata';
 const fishResultKeyName = 'fishResult';
 const lureDataKeyName = 'lureData';
+const historyKeyName = 'history';
 
 const List<String> lstOldBoxName = [
   'gamedata',
   'fishResult',
+  'fishResult1',
   'settings',
   'gamedata1',
   'gamedata2',
   'gamedata3',
   'gamedata4',
   'gamedata5',
+  'gamedata6',
+  'gamedata7',
+  'gamedata8',
   'lureData1',
   'lureData2',
+  'lureData3',
+  'history1',
+  'history2',
+  'history3',
 ];
 
 void main() async {
@@ -68,6 +80,7 @@ void main() async {
   Hive.registerAdapter(typGameDataAdapter());
   Hive.registerAdapter(typFishResultAdapter());
   Hive.registerAdapter(typLureDataAdapter());
+  Hive.registerAdapter(typHistoryAdapter());
 
   lstOldBoxName.forEach((oldBoxName) async {
     //過去のHiveBOXを削除する
@@ -77,6 +90,7 @@ void main() async {
   var gameDataBox = await Hive.openBox(gamedataBoxName);
   var fishResultBox = await Hive.openBox(fishResultBoxName);
   var lureDataBox = await Hive.openBox(lureDataBoxName);
+  var historyBox = await Hive.openBox(historyBoxName);
 
   if (!settingsBox.containsKey(settingsKeyName)) {
     //環境設定に初期値を格納
@@ -144,8 +158,8 @@ class MyApp extends StatelessWidget {
         '/settings': (_) => Settings(),
         '/term': (_) => Term(),
         '/fishing': (_) => Fishing(),
+        '/gamemenu': (_) => GameMenu(),
         '/history': (_) => History(),
-        '/lightspot': (_) => LightSpotWegit(),
       },
       //home: MyHomePage(title: 'チェックリスト'),
       navigatorObservers: [

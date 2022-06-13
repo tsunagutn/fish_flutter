@@ -12,6 +12,7 @@ import 'package:hive/hive.dart';
 
 import '../Main.dart';
 import '../widget/SettingDialog.dart';
+import '../widget/menuCard.dart';
 
 class Menu extends StatefulWidget {
   static List<String> screenBgms = [
@@ -70,181 +71,114 @@ class _menuState extends BasePageState<Menu> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Card(
-                            margin: const EdgeInsets.only(bottom: 30),
-                            color: clsColor.getColorFromHex("ffffe0"),
-                            elevation: 10,
-                            shadowColor: clsColor.getColorFromHex("555555"),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: InkWell(
-                                splashColor: Colors.blue.withAlpha(10),
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () async {
-                                  final gameDataBox = Hive.box(gamedataBoxName);
-                                  final fishResultBox =
-                                      Hive.box(fishResultBoxName);
-                                  typGameData gameData;
-                                  if (gameDataBox
-                                      .containsKey(gamedataKeyName)) {
-                                    gameData =
-                                        await gameDataBox.get(gamedataKeyName);
-                                    if (gameData.isEnd) {
-                                      //終了済みの場合は初期データをセット
-                                      await gameDataBox.put(
-                                          gamedataKeyName, getStartGameData());
-                                      //gameData = getStartGameData();
-                                    } else {
-                                      //中断データがある？？？ダイアログ
-                                      var result = await showDialog<int>(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (_) {
-                                          return AlertDialog(
-                                            title: Text("中断データがあります"),
-                                            content: Text("途中から再開しますか？"),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                child: Text("はい"),
-                                                onPressed: () {
-                                                  //モーダルを閉じる
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                              TextButton(
-                                                  child: Text("いいえ"),
-                                                  onPressed: () async {
-                                                    //ゲームデータを初期化
-                                                    await gameDataBox.put(
-                                                        gamedataKeyName,
-                                                        getStartGameData());
-                                                    //モーダルを閉じる
-                                                    Navigator.of(context).pop();
-                                                  }),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    }
-                                  } else {
-                                    //データ無し
-                                    //終了済みの場合は初期データをセット
-                                    await gameDataBox.put(
-                                        gamedataKeyName, getStartGameData());
-                                  }
-                                  Navigator.pushNamed(context, "/fishing")
-                                      //arguments: gameData)
-                                      .then(
-                                    (value) {
-                                      //メニュー画面のBGMを再生
-                                      super.bgmPlay(Menu.screenBgms);
-                                    },
-                                  );
-                                },
-                                child: Container(
-                                    margin: const EdgeInsets.all(10.0),
-                                    width: 200,
-                                    height: 50,
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Icon(
-                                            Icons.check,
-                                            color: Colors.green,
-                                            size: 30.0,
-                                          ),
-                                          Text(
-                                            "ゲームを開始",
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black),
-                                          ),
-                                        ]))),
-                          ),
-                          Card(
-                            margin: const EdgeInsets.only(bottom: 30),
-                            color: clsColor.getColorFromHex("ffffe0"),
-                            elevation: 10,
-                            shadowColor: clsColor.getColorFromHex("555555"),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: InkWell(
-                                splashColor: Colors.blue.withAlpha(10),
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () async {
-                                  final box = await Hive.box('box');
-                                  if (box.containsKey('results')) {
-                                    Navigator.pushNamed(context, "/history");
-                                  }
-                                },
-                                child: Container(
-                                    margin: const EdgeInsets.all(10.0),
-                                    width: 200,
-                                    height: 50,
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Icon(
-                                            Icons.check,
-                                            color: Colors.green,
-                                            size: 30.0,
-                                          ),
-                                          Text(
-                                            "過去のデータ",
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black),
-                                          ),
-                                        ]))),
-                          ),
-                          Card(
-                            margin: const EdgeInsets.only(bottom: 60),
-                            color: Color(0xffffffe0),
-                            elevation: 10,
-                            shadowColor: Color(0xff555555),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: InkWell(
-                                splashColor: Colors.blue.withAlpha(10),
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () async {
-                                  super.bgm.stopBgmAny();
-                                  int? result = await showDialog<int>(
+                          GestureDetector(
+                            onTap: () async {
+                              bool isPush = false;
+                              final gameDataBox = Hive.box(gamedataBoxName);
+                              final fishResultBox = Hive.box(fishResultBoxName);
+                              typGameData gameData;
+                              if (gameDataBox.containsKey(gamedataKeyName)) {
+                                // gameData =
+                                //     await gameDataBox.get(gamedataKeyName);
+                                // if (gameData.isEnd) {
+                                //   //終了済みの場合は初期データをセット
+                                //   // await gameDataBox.put(
+                                //   //     gamedataKeyName, getStartGameData());
+                                //   gameData = getStartGameData();
+                                //   gameData.save();
+                                //   isPush = true;
+                                //   //gameData = getStartGameData();
+                                // } else {
+                                  //中断データがある？？？ダイアログ
+                                  var result = await showDialog<int>(
                                     context: context,
                                     barrierDismissible: false,
                                     builder: (_) {
-                                      return SettingDialog(
-                                        bgm: super.bgm,
+                                      return AlertDialog(
+                                        title: Text("中断データがあります"),
+                                        content: Text("途中から再開しますか？"),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: Text("再開"),
+                                            onPressed: () {
+                                              //モーダルを閉じる
+                                              Navigator.of(context).pop(1);
+                                            },
+                                          ),
+                                          TextButton(
+                                              child: Text("消して最初から"),
+                                              onPressed: () async {
+                                                //ゲームデータを初期化
+                                                // await gameDataBox.put(
+                                                //     gamedataKeyName,
+                                                //     getStartGameData());
+                                                //？？？今あるisEndがfalseのデータをけさないと
+                                                gameDataBox.add(getStartGameData());
+                                                //モーダルを閉じる
+                                                Navigator.of(context).pop(1);
+                                              }),
+                                          TextButton(
+                                              child: Text("キャンセル"),
+                                              onPressed: () async {
+                                                //モーダルを閉じる
+                                                Navigator.of(context).pop(0);
+                                                return;
+                                              }),
+                                        ],
                                       );
                                     },
                                   );
-                                  super.bgmPlay(Menu.screenBgms);
+                                  isPush = result == 1 ? true: false;
+                                //}
+                              } else {
+                                //データ無しの場合は初期データをセット
+                                 await gameDataBox.put(
+                                     gamedataKeyName, getStartGameData());
+                                //gameDataBox.add(getStartGameData());
+                                isPush = true;
+                              }
+                              if (isPush) {
+                                Navigator.pushNamed(context, "/fishing")
+                                //arguments: gameData)
+                                    .then(
+                                      (value) {
+                                    //メニュー画面のBGMを再生
+                                    super.bgmPlay(Menu.screenBgms);
+                                  },
+                                );
+
+                              }
+                            },
+                            child: new menuCard(
+                                cardText: 'ゲームを開始', icon: Icons.start),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, "/gamemenu");
+                            },
+                            child: new menuCard(
+                              cardText: 'ゲームメニュー',
+                              icon: Icons.menu_book,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              super.bgm.stopBgmAny();
+                              int? result = await showDialog<int>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) {
+                                  return SettingDialog(
+                                    bgm: super.bgm,
+                                  );
                                 },
-                                child: Container(
-                                    margin: const EdgeInsets.all(10.0),
-                                    width: 200,
-                                    height: 50,
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Icon(
-                                            Icons.settings,
-                                            color: Colors.green,
-                                            size: 30.0,
-                                          ),
-                                          Text(
-                                            "設定",
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black),
-                                          ),
-                                        ]))),
+                              );
+                              super.bgmPlay(Menu.screenBgms);
+                            },
+                            child: new menuCard(
+                              cardText: '設定',
+                              icon: Icons.settings,
+                            ),
                           ),
                         ],
                       ),
@@ -272,6 +206,7 @@ class _menuState extends BasePageState<Menu> {
         maxLineHp: 1000.0,
         maxSpeed: 200.0,
         useLureIdx: 0,
+        saveDateTime: DateTime.now(),
         isEnd: false);
     gameData.fishResults = HiveList(fishResultBox);
     gameData.lureData = HiveList(lureDataBox);

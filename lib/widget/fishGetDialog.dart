@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../Main.dart';
+import '../TypeAdapter/typFishResult.dart';
 import '../TypeAdapter/typGameData.dart';
 
 class fishGetDialog extends StatefulWidget {
@@ -13,16 +14,12 @@ class fishGetDialog extends StatefulWidget {
     required this.dispSize,
     required this.fish,
     required this.fishSize,
-    required this.addPoint,
-    required this.flgNew,
-    //required this.uselureData,
+    required this.depth,
   });
   final Size dispSize;
   final FishModel fish;
   final double fishSize;
-  final int addPoint;
-  final bool flgNew;
-  //final LureModel uselureData;
+  final double depth;
 
   _fishGetDialogState createState() => _fishGetDialogState();
 }
@@ -53,11 +50,11 @@ class _fishGetDialogState extends State<fishGetDialog>
   };
 
   late typGameData gameData;
+  late int point;
+  bool flgNew = false;
 
   @override
   void initState() {
-    super.initState();
-
     final gameDataBox = Hive.box(gamedataBoxName);
     gameData = gameDataBox.get(gamedataKeyName);
     var useLureData = gameData.getUseLure();
@@ -100,26 +97,58 @@ class _fishGetDialogState extends State<fishGetDialog>
           });
     _bColorAnimationController.repeat(reverse: true);
 
+    //初釣果判定
+    var flgNew = true;
+    gameData.fishResults.forEach((val) {
+      if (val.fishId == widget.fish.id &&
+          val.resultKbn == enumResult.success.index) {
+        flgNew = false;
+        return;
+      }
+    });
+
     //ジングル鳴らす
     soundManagerPool.playSound('se/jingle01.mp3');
 
+    //獲得ポイント
+    point = widget.fish.point + (widget.fish.point * widget.fishSize).floor();
+    //ポイントを加算
+    gameData.point += point;
+
+    //釣果データを追加
+    var fishResultBox = Hive.box(fishResultBoxName);
+    typFishResult fishResult = typFishResult(
+        fishId: widget.fish.id,
+        size: widget.fishSize,
+        depth: widget.depth,
+        maxDepth: gameData.maxDepth,
+        resultKbn: enumResult.success.index);
+    //FishResultに登録
+    fishResultBox.add(fishResult);
+    //GameDataに登録
+    gameData.fishResults.add(fishResult);
+
+    //タックルの成長
     switch (widget.fish.type) {
       case enumFishType.blue:
+        gameData.maxTension += (point / 1);
         strLevel = "最大テンションが成長しました";
         colorLevel = Colors.indigo[500];
         break;
       case enumFishType.bream:
+        gameData.maxSpeed += (point / 10);
         strLevel = "巻き速度が成長しました";
         colorLevel = Colors.red[200];
         break;
       case enumFishType.bottom:
+        gameData.maxLineHp += (point / 1);
         strLevel = "ライン強さが成長しました";
         colorLevel = Colors.green[200];
         break;
     }
 
     //ルアー成長
-    useLureData.totalExp += widget.addPoint;
+    useLureData.totalExp += point;
     int nowLv = useLureData.lv;
     int newLv = gameData.getLv();
     if (nowLv < newLv) {
@@ -138,6 +167,11 @@ class _fishGetDialogState extends State<fishGetDialog>
           break;
       }
     }
+    //ゲームデータをセーブ
+    gameData.save();
+
+    super.initState();
+
   }
 
   @override
@@ -213,7 +247,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                             Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  if (widget.flgNew)
+                                  if (flgNew)
                                     Container(
                                       margin: EdgeInsets.only(right: 3, top: 5),
                                       padding: const EdgeInsets.all(2.0),
@@ -275,7 +309,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                               ),
                             ),
                             Text("あなたは" +
-                                widget.addPoint.toString() +
+                                point.toString() +
                                 'ポイントを得ました'),
                             Text(
                               strLevel,
@@ -291,7 +325,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            if (widget.flgNew)
+                            if (flgNew)
                               Container(
                                 margin: EdgeInsets.only(top: 10),
                                 child: Text("おさかな図鑑に登録します",

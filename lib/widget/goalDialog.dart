@@ -2,6 +2,7 @@ import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/FishResultsModel.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
+import 'package:fish_flutter/TypeAdapter/typHistory.dart';
 import 'package:fish_flutter/TypeAdapter/typResults.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -16,19 +17,13 @@ class goalDialog extends StatefulWidget {
   @override
   const goalDialog({
     required this.bgm,
-    required this.dispSize,
-    required this.point,
-    //required this.fishResult,
-    required this.maxWindLevel,
-    required this.maxDepth,
+    required this.isHistory,
+    required this.keyName,
   });
 
   final BgmPlayer bgm;
-  final Size dispSize;
-  final int point;
-  //final FishesResultModel fishResult;
-  final double maxWindLevel;
-  final double maxDepth;
+  final bool isHistory;
+  final String keyName;
 
   _goalDialogState createState() => _goalDialogState();
 }
@@ -81,10 +76,16 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
   late typGameData gameData;
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
     final gameDataBox = Hive.box(gamedataBoxName);
-    gameData = gameDataBox.get(gamedataKeyName);
+    gameData = gameDataBox.get(widget.keyName);
+
+    var duration = 4000;
+    if (widget.isHistory) {
+      duration = 0;
+    }
+
     //アニメーション管理
     anime = new Map<enumResultAnime, relultAnimeModel>();
     anime[enumResultAnime.fishResultTitle] = new relultAnimeModel(span: 1000);
@@ -101,16 +102,16 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
 
     //最初の光
     _lightingAnimationController = AnimationController(
-        duration: Duration(milliseconds: 4000), vsync: this);
+        duration: Duration(milliseconds: duration), vsync: this);
     _lightingValue =
-        Tween(begin: 1.5, end: 0.0).animate(_lightingAnimationController)
-          ..addListener(() {
-            setState(() {});
-          });
+    Tween(begin: 1.5, end: 0.0).animate(_lightingAnimationController)
+      ..addListener(() {
+        setState(() {});
+      });
     _lightingAnimationController.forward();
     _lightingAnimationController.addStatusListener((status) {
       //アニメーション終了後かの確認
-      if (status == AnimationStatus.completed) {
+      if (status == AnimationStatus.completed && !widget.isHistory) {
         //アニメーション終了後にリザルト画面BGM再生
         //subBgmLoop('result.mp3');
         //項目表示フェード用のアニメーションスタート
@@ -118,6 +119,12 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
       }
     });
 
+    if (widget.isHistory) {
+      //履歴画面から来た場合はアニメーションしない
+      anime.forEach((key, value) {
+        value.state = enumAnimeState.end;
+      });
+    } else {
     _dispController = AnimationController(
         duration: Duration(
             milliseconds: anime[enumResultAnime.fishResultTitle]!.span),
@@ -138,11 +145,6 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
           //次のアニメがあればスタート
           _dispController.duration = Duration(
               milliseconds: anime[enumResultAnime.values[animeCnt]]!.span);
-          //  _dispValue =
-          //       Tween(begin: 0.0, end: 1.0).animate(_dispController)
-          //         ..addListener(() {
-          //           setState(() {});
-          //         });
           //アニメ実行中
           anime[enumResultAnime.values[animeCnt]]!.state = enumAnimeState.doing;
           _dispController.forward();
@@ -153,8 +155,9 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
     //soundManagerPool.playSound('se/jingle01.mp3');
     //リザルト画面BCM再生
     subBgmLoop('result.mp3');
+    }
 
-    //魚テーブルを初期化？？？本当はエリアで絞る
+    //魚テーブルを初期化
     FISH_TABLE = new FishsModel();
     lstFishCount = [];
 
@@ -211,9 +214,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
             // )),
             child: GestureDetector(
                 onTap: () {
-                  debugPrint("onTap called.");
                   if (_dispController.isAnimating) {
-                    debugPrint("isAnimating");
                     _dispController.value = 1.0;
                   }
                 },
@@ -231,8 +232,8 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.all(Radius.circular(20.0))),
                   backgroundColor: Colors.white.withOpacity(0.9),
                   content: Container(
-                    height: widget.dispSize.height,
-                    width: widget.dispSize.width,
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
                     // decoration: new BoxDecoration(
                     //     image: new DecorationImage(
                     //   image: new AssetImage("assets/images/fishback.jpg"),
@@ -604,7 +605,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Text("最大風速："),
-                                      Text((10 * widget.maxWindLevel)
+                                      Text((10 * gameData.maxWindLevel)
                                               .toStringAsFixed(1) +
                                           "m/s"),
                                     ],
@@ -625,7 +626,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     Text("最大水深："),
-                                    Text(((widget.maxDepth).round() / 10)
+                                    Text(((gameData.maxDepth).round() / 10)
                                             .toStringAsFixed(1) +
                                         ' m'),
                                   ],
@@ -646,7 +647,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Text("ポイント："),
-                                      Text(widget.point.toString() + " ポイント"),
+                                      Text(gameData.point.toString() + " ポイント"),
                                     ],
                                   ),
                                 ),
@@ -675,23 +676,34 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                   enumAnimeState.end) {
                                 return;
                               }
-                              //List<FishesResultModel> lstResults = [];
-                              // //Hiveに書き込み
-                              // final box = Hive.box('box');
-                              // if (box.containsKey('results')) {
-                              //   //過去データを読み出し
-                              //   lstResults = await List<FishesResultModel>.from(box.get('results'));
-                              // }
-                              // lstResults.add(widget.fishResult);
-                              //
-                              // var aaeae = box.put('results', lstResults);
-                              //
-                              // if (box.containsKey('results')) {
-                              //   var a = 1;
-                              //   List<FishesResultModel> ttest = await List<FishesResultModel>.from(box.get('results'));
-                              //
-                              //   var aa = 1;
-                              // }
+                              if (widget.isHistory) {
+                                //履歴画面から来た場合はダイアログを閉じて終了
+                                Navigator.pop(context);
+                                return;
+                              }
+
+                              //ゲーム中データを終了
+                              gameData.isEnd = true;
+                              var histGameData = gameData.copy();
+                              final gameDataBox = await Hive.box(gamedataBoxName);
+                              //セーブ日時をキーにして保存
+                              gameDataBox.put(histGameData.saveDateTime.toString(), histGameData);
+                              //元のキーのデータは削除
+                              gameDataBox.delete(gamedataKeyName);
+
+                              //履歴に登録
+                              final historyBox = await Hive.box(historyBoxName);
+                              var history;
+                              if (!historyBox.containsKey(historyKeyName)) {
+                                //最初の履歴データの場合
+                                history = typHistory();
+                                final gameDataBox = Hive.box(gamedataBoxName);
+                                history.lstGameDatas = HiveList<typGameData>(gameDataBox);
+                                historyBox.put(historyKeyName, history);
+                              }
+                              history = await historyBox.get(historyKeyName);
+                              history.lstGameDatas.add(histGameData);
+                              history.save();
 
                               Navigator.pop(context);
                             },

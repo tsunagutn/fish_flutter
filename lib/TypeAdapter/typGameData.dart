@@ -4,6 +4,8 @@ import 'package:hive/hive.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/src/material/colors.dart';
 
+import '../Main.dart';
+
 part 'typGameData.g.dart';
 
 enum enumResult {
@@ -49,12 +51,15 @@ class typGameData extends HiveObject {
   int useLureIdx;
 
   @HiveField(11)
-  late HiveList<typFishResult> fishResults;
+  DateTime saveDateTime;
 
   @HiveField(12)
-  late HiveList<typLureData> lureData;
+  late HiveList<typFishResult> fishResults;
 
   @HiveField(13)
+  late HiveList<typLureData> lureData;
+
+  @HiveField(14)
   late bool isEnd;
 
   typGameData({
@@ -69,6 +74,7 @@ class typGameData extends HiveObject {
     required this.maxLineHp,
     required this.maxSpeed,
     required this.useLureIdx,
+    required this.saveDateTime,
     required this.isEnd,
   });
 
@@ -88,6 +94,25 @@ class typGameData extends HiveObject {
   static const double basicExp = 100.0;
   //システム上最大Lv
   static const int maxLv = 99;
+
+  //save処理
+  @override
+  save() async {
+    saveDateTime = DateTime.now();
+    super.save();
+  }
+
+  //値をコピーして新しいインスタンスを返す（履歴データに保存用）
+  copy() {
+    var ret = typGameData(gameId: gameId, timeCount: timeCount, maxTimeCount: maxTimeCount, point: point, maxDepth: maxDepth, windLevel: windLevel, maxWindLevel: maxWindLevel, maxTension: maxTension, maxLineHp: maxLineHp, maxSpeed: maxSpeed, useLureIdx: useLureIdx, saveDateTime: saveDateTime, isEnd: isEnd);
+    final fishResultBox = Hive.box(fishResultBoxName);
+    final lureDataBox = Hive.box(lureDataBoxName);
+    ret.fishResults = HiveList(fishResultBox);
+    ret.lureData = HiveList(lureDataBox);
+    ret.fishResults = fishResults;
+    ret.lureData = lureData;
+    return ret;
+  }
 
   //釣果の最小サイズを返す
   double getMinSize(int fishId) {
@@ -244,7 +269,7 @@ class typGameData extends HiveObject {
     String strWeight = "";
     int newWeightId = (lureData[useLureIdx].lv ~/ 3);
     if (lureData[useLureIdx].unLockweightid < newWeightId) {
-      for (var i = lureData[useLureIdx].unLockweightid; i < newWeightId; i++) {
+      for (var i = lureData[useLureIdx].unLockweightid + 1; i <= newWeightId; i++) {
         strWeight += LST_LURE_WEIGHT[i].toString() + "g ";
       }
     }
@@ -254,7 +279,7 @@ class typGameData extends HiveObject {
     }
     //変更を保存
     lureData[useLureIdx].save();
-    this.save();
+    //this.save();  //呼び出し元でセーブするのでここではしない
     return ret;
   }
 
@@ -283,6 +308,5 @@ class typGameData extends HiveObject {
     lureData[useLureIdx].save();
     this.save();
   }
-
 
 }
