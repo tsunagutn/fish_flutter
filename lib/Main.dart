@@ -40,10 +40,10 @@ late typSettings settings = typSettings(
 
 //Hive BOX名
 const settingsBoxName = 'settings1';
-const gamedataBoxName = 'gamedata9';
-const fishResultBoxName = 'fishResult2';
+const gamedataBoxName = 'gamedata11';
+const fishResultBoxName = 'fishResult3';
 const lureDataBoxName = 'lureData4';
-const historyBoxName = 'history5';
+const historyBoxName = 'history6';
 //Hive Key名
 const settingsKeyName = 'settings';
 const gamedataKeyName = 'gamedata';
@@ -52,24 +52,21 @@ const lureDataKeyName = 'lureData';
 const historyKeyName = 'history';
 
 const List<String> lstOldBoxName = [
-  'gamedata',
   'fishResult',
   'fishResult1',
+  'fishResult2',
   'settings',
-  'gamedata1',
-  'gamedata2',
-  'gamedata3',
-  'gamedata4',
-  'gamedata5',
-  'gamedata6',
-  'gamedata7',
   'gamedata8',
+  'gamedata9',
+  'gamedata10',
   'lureData1',
   'lureData2',
   'lureData3',
   'history1',
   'history2',
   'history3',
+  'history4',
+  'history5',
 ];
 
 void main() async {

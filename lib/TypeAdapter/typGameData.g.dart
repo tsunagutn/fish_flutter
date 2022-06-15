@@ -28,7 +28,7 @@ class typGameDataAdapter extends TypeAdapter<typGameData> {
       maxLineHp: fields[8] as double,
       maxSpeed: fields[9] as double,
       useLureIdx: fields[10] as int,
-      saveDateTime: fields[11] as DateTime,
+      saveDateTime: fields[11] as String,
       isEnd: fields[14] as bool,
     )
       ..fishResults = (fields[12] as HiveList).castHiveList()

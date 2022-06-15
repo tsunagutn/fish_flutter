@@ -14,7 +14,6 @@ enum enumResult {
   cut,
 }
 
-
 @HiveType(typeId: 3)
 class typGameData extends HiveObject {
   @HiveField(0)
@@ -51,7 +50,7 @@ class typGameData extends HiveObject {
   int useLureIdx;
 
   @HiveField(11)
-  DateTime saveDateTime;
+  String saveDateTime;
 
   @HiveField(12)
   late HiveList<typFishResult> fishResults;
@@ -98,13 +97,26 @@ class typGameData extends HiveObject {
   //save処理
   @override
   save() async {
-    saveDateTime = DateTime.now();
+    saveDateTime = DateTime.now().toString();
     super.save();
   }
 
   //値をコピーして新しいインスタンスを返す（履歴データに保存用）
   copy() {
-    var ret = typGameData(gameId: gameId, timeCount: timeCount, maxTimeCount: maxTimeCount, point: point, maxDepth: maxDepth, windLevel: windLevel, maxWindLevel: maxWindLevel, maxTension: maxTension, maxLineHp: maxLineHp, maxSpeed: maxSpeed, useLureIdx: useLureIdx, saveDateTime: saveDateTime, isEnd: isEnd);
+    var ret = typGameData(
+        gameId: gameId,
+        timeCount: timeCount,
+        maxTimeCount: maxTimeCount,
+        point: point,
+        maxDepth: maxDepth,
+        windLevel: windLevel,
+        maxWindLevel: maxWindLevel,
+        maxTension: maxTension,
+        maxLineHp: maxLineHp,
+        maxSpeed: maxSpeed,
+        useLureIdx: useLureIdx,
+        saveDateTime: saveDateTime,
+        isEnd: isEnd);
     final fishResultBox = Hive.box(fishResultBoxName);
     final lureDataBox = Hive.box(lureDataBoxName);
     ret.fishResults = HiveList(fishResultBox);
@@ -228,7 +240,8 @@ class typGameData extends HiveObject {
     //既に最大レベルの場合は-1を返す
     if (lureData[useLureIdx].lv >= maxLv) return -1;
     //次Lvの合計EXPと現EXPの差分を返す
-    return (getExp(lureData[useLureIdx].lv + 1) - lureData[useLureIdx].totalExp).floor();
+    return (getExp(lureData[useLureIdx].lv + 1) - lureData[useLureIdx].totalExp)
+        .floor();
   }
 
   //指定したレベルに必要な累計EXPを返す
@@ -252,24 +265,29 @@ class typGameData extends HiveObject {
     //現レベル-新レベル間ループ
     for (int i = oldLv; i < lureData[useLureIdx].lv; i++) {
       //fall成長
-      lureData[useLureIdx].fall = lureStsUp(lureData[useLureIdx].fall, lureData[useLureIdx].lvAddFall);
+      lureData[useLureIdx].fall =
+          lureStsUp(lureData[useLureIdx].fall, lureData[useLureIdx].lvAddFall);
       //reeling成長
-      lureData[useLureIdx].reeling = lureStsUp(lureData[useLureIdx].reeling, lureData[useLureIdx].lvAddReeling);
+      lureData[useLureIdx].reeling = lureStsUp(
+          lureData[useLureIdx].reeling, lureData[useLureIdx].lvAddReeling);
       //jerk成長
-      lureData[useLureIdx].jerk = lureStsUp(lureData[useLureIdx].jerk, lureData[useLureIdx].lvAddJerk);
+      lureData[useLureIdx].jerk =
+          lureStsUp(lureData[useLureIdx].jerk, lureData[useLureIdx].lvAddJerk);
     }
-    ret = lureData[useLureIdx].name
-        + "がレベルアップ Lv "
-        + oldLv.toString()
-        + " → "
-        + lureData[useLureIdx].lv.toString();
+    ret = lureData[useLureIdx].name +
+        "がレベルアップ Lv " +
+        oldLv.toString() +
+        " → " +
+        lureData[useLureIdx].lv.toString();
 
     //3レベル毎に新しい重さをアンロック
     //int maxWeightId = weightList.list.length;
     String strWeight = "";
     int newWeightId = (lureData[useLureIdx].lv ~/ 3);
     if (lureData[useLureIdx].unLockweightid < newWeightId) {
-      for (var i = lureData[useLureIdx].unLockweightid + 1; i <= newWeightId; i++) {
+      for (var i = lureData[useLureIdx].unLockweightid + 1;
+          i <= newWeightId;
+          i++) {
         strWeight += LST_LURE_WEIGHT[i].toString() + "g ";
       }
     }
@@ -299,14 +317,16 @@ class typGameData extends HiveObject {
     //累計EXPセット
     lureData[useLureIdx].totalExp = getExp(lureData[useLureIdx].lv);
     //fallマイナス
-    lureData[useLureIdx].fall = lureData[useLureIdx].fall - lureData[useLureIdx].lvAddFall;
+    lureData[useLureIdx].fall =
+        lureData[useLureIdx].fall - lureData[useLureIdx].lvAddFall;
     //reelingマイナス
-    lureData[useLureIdx].reeling = lureData[useLureIdx].reeling - lureData[useLureIdx].lvAddReeling;
+    lureData[useLureIdx].reeling =
+        lureData[useLureIdx].reeling - lureData[useLureIdx].lvAddReeling;
     //jerkマイナス
-    lureData[useLureIdx].jerk = lureData[useLureIdx].jerk - lureData[useLureIdx].lvAddJerk;
+    lureData[useLureIdx].jerk =
+        lureData[useLureIdx].jerk - lureData[useLureIdx].lvAddJerk;
     //変更を保存
     lureData[useLureIdx].save();
     this.save();
   }
-
 }

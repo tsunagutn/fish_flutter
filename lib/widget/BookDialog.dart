@@ -1,6 +1,7 @@
 import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
+import 'package:fish_flutter/TypeAdapter/typHistory.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -30,18 +31,18 @@ class _BookDialogState extends State<BookDialog>
   late FishModel _showFishData;
 
   late typGameData gameData;
-  late typFishResult fishResult;
+  late typHistory history;
 
   @override
   void initState() {
     super.initState();
 
     final gameDataBox = Hive.box(gamedataBoxName);
-    final fishResultBox = Hive.box(fishResultBoxName);
+    final historyBox = Hive.box(historyBoxName);
     //現ゲームのデータ
     gameData = gameDataBox.get(gamedataKeyName);
     //全釣果データ
-    fishResult = fishResultBox.get(fishResultKeyName);
+    history = historyBox.get(historyKeyName, defaultValue: typHistory());
     //魚種データ
     final fishsTable = new FishsModel();
     fishsTable.fishs.forEach((value) {

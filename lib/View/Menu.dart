@@ -89,64 +89,70 @@ class _menuState extends BasePageState<Menu> {
                                 //   isPush = true;
                                 //   //gameData = getStartGameData();
                                 // } else {
-                                  //中断データがある？？？ダイアログ
-                                  var result = await showDialog<int>(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (_) {
-                                      return AlertDialog(
-                                        title: Text("中断データがあります"),
-                                        content: Text("途中から再開しますか？"),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            child: Text("再開"),
-                                            onPressed: () {
+                                //中断データがある？？？ダイアログ
+                                var result = await showDialog<int>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) {
+                                    return AlertDialog(
+                                      title: Text("中断データがあります"),
+                                      content: Text("途中から再開しますか？"),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text("再開"),
+                                          onPressed: () {
+                                            //モーダルを閉じる
+                                            Navigator.of(context).pop(1);
+                                          },
+                                        ),
+                                        TextButton(
+                                            child: Text("消して最初から"),
+                                            onPressed: () async {
+                                              //ゲームデータを初期化
+                                              // await gameDataBox.put(
+                                              //     gamedataKeyName,
+                                              //     getStartGameData());
+                                              //？？？今あるisEndがfalseのデータをけさないと
+                                              typGameData gd =
+                                                  getStartGameData();
+                                              gameDataBox.add(gd);
                                               //モーダルを閉じる
                                               Navigator.of(context).pop(1);
-                                            },
-                                          ),
-                                          TextButton(
-                                              child: Text("消して最初から"),
-                                              onPressed: () async {
-                                                //ゲームデータを初期化
-                                                // await gameDataBox.put(
-                                                //     gamedataKeyName,
-                                                //     getStartGameData());
-                                                //？？？今あるisEndがfalseのデータをけさないと
-                                                gameDataBox.add(getStartGameData());
-                                                //モーダルを閉じる
-                                                Navigator.of(context).pop(1);
-                                              }),
-                                          TextButton(
-                                              child: Text("キャンセル"),
-                                              onPressed: () async {
-                                                //モーダルを閉じる
-                                                Navigator.of(context).pop(0);
-                                                return;
-                                              }),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                  isPush = result == 1 ? true: false;
+                                            }),
+                                        TextButton(
+                                            child: Text("キャンセル"),
+                                            onPressed: () async {
+                                              //モーダルを閉じる
+                                              Navigator.of(context).pop(0);
+                                              return;
+                                            }),
+                                      ],
+                                    );
+                                  },
+                                );
+                                isPush = result == 1 ? true : false;
                                 //}
                               } else {
                                 //データ無しの場合は初期データをセット
-                                 await gameDataBox.put(
-                                     gamedataKeyName, getStartGameData());
+
+                                debugPrint("あえcccc");
+                                typGameData gd = await getStartGameData();
+                                debugPrint("あえあえawcccc");
+                                await gameDataBox.put(gamedataKeyName, gd);
+                                debugPrint("あえあえ");
                                 //gameDataBox.add(getStartGameData());
                                 isPush = true;
                               }
+                              debugPrint("あえあえaeae");
                               if (isPush) {
                                 Navigator.pushNamed(context, "/fishing")
-                                //arguments: gameData)
+                                    //arguments: gameData)
                                     .then(
-                                      (value) {
+                                  (value) {
                                     //メニュー画面のBGMを再生
                                     super.bgmPlay(Menu.screenBgms);
                                   },
                                 );
-
                               }
                             },
                             child: new menuCard(
@@ -193,6 +199,9 @@ class _menuState extends BasePageState<Menu> {
   typGameData getStartGameData() {
     final fishResultBox = Hive.box(fishResultBoxName);
     final lureDataBox = Hive.box(lureDataBoxName);
+
+    var now = DateTime.now().toString();
+    debugPrint(now.toString());
     //初期データをセット
     var gameData = typGameData(
         gameId: 1,
@@ -206,7 +215,7 @@ class _menuState extends BasePageState<Menu> {
         maxLineHp: 1000.0,
         maxSpeed: 200.0,
         useLureIdx: 0,
-        saveDateTime: DateTime.now(),
+        saveDateTime: now,
         isEnd: false);
     gameData.fishResults = HiveList(fishResultBox);
     gameData.lureData = HiveList(lureDataBox);
@@ -261,6 +270,7 @@ class _menuState extends BasePageState<Menu> {
     gameData.lureData.add(tairaba);
     gameData.lureData.add(jig);
     gameData.lureData.add(slowJig);
+
     return gameData;
   }
 }

@@ -70,7 +70,7 @@ class _historyState extends BasePageState<History> {
                 child: ListTile(
                   title: Column(
                     children: [
-                      Text('${outputFormat.format(hist.saveDateTime)}'),
+                      Text(hist.saveDateTime),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

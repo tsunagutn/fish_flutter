@@ -125,6 +125,7 @@ class _fishGetDialogState extends State<fishGetDialog>
         resultKbn: enumResult.success.index);
     //FishResultに登録
     fishResultBox.add(fishResult);
+    //fishResultBox.put(DateTime.now.toString(), fishResult);
     //GameDataに登録
     gameData.fishResults.add(fishResult);
 
@@ -171,7 +172,6 @@ class _fishGetDialogState extends State<fishGetDialog>
     gameData.save();
 
     super.initState();
-
   }
 
   @override
@@ -308,9 +308,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 ],
                               ),
                             ),
-                            Text("あなたは" +
-                                point.toString() +
-                                'ポイントを得ました'),
+                            Text("あなたは" + point.toString() + 'ポイントを得ました'),
                             Text(
                               strLevel,
                               style: TextStyle(
