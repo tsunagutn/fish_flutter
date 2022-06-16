@@ -61,6 +61,7 @@ class _historyState extends BasePageState<History> {
                             bgm: super.bgm,
                             isHistory: true,
                             keyName: hist.saveDateTime.toString(),
+                            lockBook: true,
                           ),
                         ],
                       );

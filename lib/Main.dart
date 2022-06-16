@@ -12,6 +12,7 @@ import 'package:fish_flutter/View/Term.dart';
 import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/View/History.dart';
 import 'package:fish_flutter/View/Test.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'Model/StageModel.dart';
@@ -43,7 +44,7 @@ const settingsBoxName = 'settings1';
 const gamedataBoxName = 'gamedata11';
 const fishResultBoxName = 'fishResult3';
 const lureDataBoxName = 'lureData4';
-const historyBoxName = 'history6';
+const historyBoxName = 'history8';
 //Hive Key名
 const settingsKeyName = 'settings';
 const gamedataKeyName = 'gamedata';
@@ -62,14 +63,16 @@ const List<String> lstOldBoxName = [
   'lureData1',
   'lureData2',
   'lureData3',
-  'history1',
-  'history2',
-  'history3',
-  'history4',
-  'history5',
+  'history7',
 ];
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  //向き指定
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,//縦固定
+  ]);
+
   await Hive.initFlutter();
   //環境設定データのタイプアダプタ
   Hive.registerAdapter(typSettingsAdapter());
@@ -89,11 +92,20 @@ void main() async {
   var lureDataBox = await Hive.openBox(lureDataBoxName);
   var historyBox = await Hive.openBox(historyBoxName);
 
+  //環境設定が無い場合
   if (!settingsBox.containsKey(settingsKeyName)) {
     //環境設定に初期値を格納
     settingsBox.put(settingsKeyName, settings);
   }
   settings = settingsBox.get(settingsKeyName);
+  // //履歴が無い場合
+  // if (!historyBox.containsKey(historyKeyName)) {
+  //   //初期データ格納
+  //   typHistory history = typHistory();
+  //   history.lstGameDatas = HiveList(gameDataBox);
+  //   historyBox.put(settingsKeyName, settings);
+  // }
+
 
   runApp(Provider(
     create: (context) => BgmPlayer(),

@@ -1,6 +1,5 @@
 // import 'package:fish_flutter/Model/FishModel.dart';
 //
-//
 // //釣果全体のモデル
 // class FishesResultModel {
 //   late List<FishResultModel> listFishResult;
@@ -15,14 +14,14 @@
 //     double size,
 //     double depth,
 //     double maxDepth,
-//     enumResulttata resultKbn,
+//     //int resultKbn,
 //   ) {
 //     FishResultModel fishResult = new FishResultModel(
 //       fishId: fishId,
 //       size: size,
 //       depth: depth,
 //       maxDepth: maxDepth,
-//       resultKbn: resultKbn,
+//       //resultKbn: resultKbn,
 //     );
 //     listFishResult.add(fishResult);
 //   }

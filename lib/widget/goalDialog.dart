@@ -19,11 +19,13 @@ class goalDialog extends StatefulWidget {
     required this.bgm,
     required this.isHistory,
     required this.keyName,
+    required this.lockBook,
   });
 
   final BgmPlayer bgm;
   final bool isHistory;
   final String keyName;
+  final bool lockBook;
 
   _goalDialogState createState() => _goalDialogState();
 }
@@ -488,6 +490,7 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                               Text(gameData.fishResults.length
                                                       .toString() +
                                                   "匹"),
+                                              if (!widget.lockBook)
                                               ElevatedButton(
                                                 child: Text("図鑑"),
                                                 onPressed: () async {

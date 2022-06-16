@@ -126,6 +126,17 @@ class typGameData extends HiveObject {
     return ret;
   }
 
+  //指定した魚種の釣果数を返す
+  int getCount(int fishId) {
+    int ret = 0;
+    fishResults.forEach((val) {
+      if (val.fishId == fishId && val.resultKbn == enumResult.success.index) {
+        ret++;
+      }
+    });
+    return ret;
+  }
+
   //釣果の最小サイズを返す
   double getMinSize(int fishId) {
     var minSize = 1.1;

@@ -133,8 +133,12 @@
 //済・ドラグ使いにくいの何とかする
 //済・過去釣果を見る画面、機能
 //済・今日はもう納得した機能 ゲームを途中で諦める
+//済・図鑑を過去の分も見れるニスル
+//済・アタリでバイブ
+//済・ドラグでバイブ
+//・設定にバイブ有無を追加
+//・設定に上下操作の逆転を追加
 //・光点が残像するようにする
-//・図鑑を過去の分も見れるニスル、？じゃなくする
 //・釣果によって何か成長させる
 //・実績
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
@@ -234,6 +238,7 @@ import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:vibration/vibration.dart';
 
 import '../widget/FishingSliders.dart';
 import '../widget/ImageList.dart';
@@ -1146,6 +1151,7 @@ class _FishingState extends BasePageState<Fishing>
         soundManagerPool.playSoundDisableContain(
             'se/drag2.mp3', enumDisableContainPlay.drag);
       }
+      vibe(100);
     }
 
     if (val > gameData.maxTension) val = gameData.maxTension;
@@ -1473,6 +1479,7 @@ class _FishingState extends BasePageState<Fishing>
               _fookingTensionPrev = 0;
               _infoBackColor = TENSION_COLOR_DANGER;
               soundManagerPool.playSound('se/bait1.mp3');
+              vibe(500);
             }
             if (_flgBait || _flgHit) {
             } else {
@@ -2971,6 +2978,7 @@ class _FishingState extends BasePageState<Fishing>
               bgm: super.bgm,
               isHistory: false,
               keyName: gamedataKeyName,
+              lockBook: false,
             ),
           ],
         );
@@ -2979,6 +2987,17 @@ class _FishingState extends BasePageState<Fishing>
     //モーダル閉じた時、メニューに戻る
     _isBack = true;
     Navigator.of(context).pop();
+  }
+
+  //バイブレーション
+  void vibe(int duration) async {
+    bool? vibeEnable = await Vibration.hasAmplitudeControl();
+    if (vibeEnable != null && vibeEnable) {
+      Vibration.vibrate(amplitude: 128, duration: duration);
+    }
+    // if (await Vibration.hasVibrator()) {
+    //   Vibration.vibrate();
+    // }
   }
 
   //時間データ取得

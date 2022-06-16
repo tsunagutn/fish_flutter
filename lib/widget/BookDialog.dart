@@ -3,6 +3,7 @@ import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:fish_flutter/TypeAdapter/typHistory.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 
 import '../TypeAdapter/typGameData.dart';
@@ -33,6 +34,11 @@ class _BookDialogState extends State<BookDialog>
   late typGameData gameData;
   late typHistory history;
 
+  late typGameData mainData;
+
+  bool _isHistory = false;
+  bool _isHistoryNone = false;
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +48,15 @@ class _BookDialogState extends State<BookDialog>
     //現ゲームのデータ
     gameData = gameDataBox.get(gamedataKeyName);
     //全釣果データ
-    history = historyBox.get(historyKeyName, defaultValue: typHistory());
+    if (historyBox.containsKey(historyKeyName)) {
+      history = historyBox.get(historyKeyName);
+    } else {
+      //履歴が無い場合
+      _isHistoryNone = true;
+    }
+    //釣果データをセット
+    setData();
+
     //魚種データ
     final fishsTable = new FishsModel();
     fishsTable.fishs.forEach((value) {
@@ -63,7 +77,43 @@ class _BookDialogState extends State<BookDialog>
   Widget build(BuildContext context) {
     return AlertDialog(
       insetPadding: EdgeInsets.only(top: 40, bottom: 40, left: 20, right: 20),
-      title: Text("おさかな図鑑"),
+      title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("おさかな図鑑"),
+          Row(mainAxisAlignment: MainAxisAlignment.end,children: [
+            Text(
+                (_isHistory ? "累計" : "今回"),
+            ),
+          new Switch(
+            value: _isHistory,
+            activeColor: Colors.orange,
+            activeTrackColor: Colors.grey,
+            inactiveThumbColor: Colors.blue,
+            inactiveTrackColor: Colors.grey,
+            onChanged: (bool e) => setState(() {
+              if (_isHistoryNone) {
+                //履歴が無い場合は今回のみ
+                //履歴データが存在しない
+                Fluttertoast.showToast(
+                  msg: "履歴がありません！",
+                  gravity: ToastGravity.TOP,
+                  timeInSecForIosWeb: 3,
+                  toastLength: Toast.LENGTH_SHORT,
+                  backgroundColor: Colors.red[300],
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                _isHistory = false;
+                mainData = gameData;
+                return;
+              }
+              _isHistory = e;
+              //釣果データをセット
+              setData();
+            }),
+          ),
+        ],),
+      ],),
       content: Container(
         //height: MediaQuery.of(context).size.height / 2,
         child: Stack(children: [
@@ -78,7 +128,7 @@ class _BookDialogState extends State<BookDialog>
                       children: [
                         makeFishTile(
                             fish: fishList[index],
-                            fishResult: gameData.fishResults.where(
+                            fishResult: mainData.fishResults.where(
                                 (typFishResult value) =>
                                     value.fishId == fishList[index].id &&
                                     value.resultKbn ==
@@ -310,7 +360,7 @@ class _BookDialogState extends State<BookDialog>
                                             MainAxisAlignment.spaceEvenly,
                                         children: [
                                           Container(
-                                              child: Text(gameData.fishResults
+                                              child: Text(mainData.fishResults
                                                       .where((typFishResult
                                                               value) =>
                                                           value.fishId ==
@@ -322,24 +372,26 @@ class _BookDialogState extends State<BookDialog>
                                                       .length
                                                       .toString() +
                                                   "匹")),
+                                          //大きさ
+                                          if (mainData.getCount(_showFishData.id) > 0)
                                           Row(
                                             children: [
                                               Text(_showFishData
                                                       .getSize(
-                                                          gameData.getMinSize(
+                                                  mainData.getMinSize(
                                                               _showFishData.id))
                                                       .toStringAsFixed(1) +
                                                   " ～ " +
                                                   _showFishData
                                                       .getSize(
-                                                          gameData.getMaxSize(
+                                                      mainData.getMaxSize(
                                                               _showFishData.id))
                                                       .toStringAsFixed(1) +
                                                   "cm"),
-                                              if (gameData.getMaxSize(
+                                              if (mainData.getMaxSize(
                                                           _showFishData.id) >
                                                       0.8 &&
-                                                  gameData.getMaxSize(
+                                                  mainData.getMaxSize(
                                                           _showFishData.id) <
                                                       0.95)
                                                 // Icon(Icons.star,
@@ -350,7 +402,7 @@ class _BookDialogState extends State<BookDialog>
                                                   height: 24,
                                                   width: 24,
                                                 ),
-                                              if (gameData.getMaxSize(
+                                              if (mainData.getMaxSize(
                                                       _showFishData.id) >
                                                   0.95)
                                                 // Icon(
@@ -576,5 +628,38 @@ class _BookDialogState extends State<BookDialog>
     ret.add(new RadarChartItemModel(itemName: '引強', value: lvAddMax));
     ret.add(new RadarChartItemModel(itemName: '暴れ', value: lvAbare));
     return ret;
+  }
+
+  //釣果データをセット
+  void setData() {
+    final fishResultBox = Hive.box(fishResultBoxName);
+    final lureDataBox = Hive.box(lureDataBoxName);
+    //表示用データを初期化
+    mainData = typGameData(
+        gameId: 0,
+        timeCount: 0,
+        maxTimeCount: 0,
+        point: 0,
+        maxDepth: 0,
+        windLevel: 0.0,
+        maxWindLevel: 0.0,
+        maxTension: 0.0,
+        maxLineHp: 0.0,
+        maxSpeed: 0.0,
+        useLureIdx: 0,
+        saveDateTime: '',
+        isEnd: false);
+    mainData.fishResults = HiveList(fishResultBox);
+    mainData.lureData = HiveList(lureDataBox);
+    if (_isHistory && !_isHistoryNone) {
+      //履歴の釣果データをセット
+      history.lstGameDatas.forEach((data) {
+        mainData.fishResults.addAll(data.fishResults);
+      });
+      //今回の釣果データをセット
+      mainData.fishResults.addAll(gameData.fishResults);
+    } else {
+      mainData = gameData;
+    }
   }
 }

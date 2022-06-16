@@ -98,10 +98,7 @@ class _LoadingState extends BasePageState<Loading> {
                       soundManagerPool.SoundManagerPoolInit();
                       // 遷移先のBGM再生
                       //BGMオブジェクトで無音SE再生
-                      //super.bgmPlay(Loading.screenBgms);
-                      Navigator.pushNamed(context, "/menu").then(
-                        (value) {},
-                      );
+                      Navigator.of(context).pushReplacementNamed("/menu");
                     });
                   },
                 ),
