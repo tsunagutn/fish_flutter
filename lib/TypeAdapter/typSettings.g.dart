@@ -23,13 +23,15 @@ class typSettingsAdapter extends TypeAdapter<typSettings> {
       volumeSe: fields[3] as double,
       jerkSense: fields[4] as double,
       makiSense: fields[5] as double,
+      isReversal: fields[6] as bool,
+      isVibe: fields[7] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, typSettings obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.flgBgm)
       ..writeByte(1)
@@ -41,7 +43,11 @@ class typSettingsAdapter extends TypeAdapter<typSettings> {
       ..writeByte(4)
       ..write(obj.jerkSense)
       ..writeByte(5)
-      ..write(obj.makiSense);
+      ..write(obj.makiSense)
+      ..writeByte(6)
+      ..write(obj.isReversal)
+      ..writeByte(7)
+      ..write(obj.isVibe);
   }
 
   @override

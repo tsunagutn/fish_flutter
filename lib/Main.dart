@@ -14,6 +14,7 @@ import 'package:fish_flutter/View/History.dart';
 import 'package:fish_flutter/View/Test.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:vibration/vibration.dart';
 
 import 'Model/StageModel.dart';
 import 'Model/TutorialModel.dart';
@@ -37,10 +38,13 @@ late typSettings settings = typSettings(
     volumeBgm: 0.5,
     volumeSe: 0.5,
     jerkSense: 0.5,
-    makiSense: 0.5);
+    makiSense: 0.5,
+    isReversal: false,
+    isVibe: true,
+);
 
 //Hive BOX名
-const settingsBoxName = 'settings1';
+const settingsBoxName = 'settings2';
 const gamedataBoxName = 'gamedata11';
 const fishResultBoxName = 'fishResult3';
 const lureDataBoxName = 'lureData4';
@@ -57,6 +61,7 @@ const List<String> lstOldBoxName = [
   'fishResult1',
   'fishResult2',
   'settings',
+  'settings1',
   'gamedata8',
   'gamedata9',
   'gamedata10',
@@ -137,6 +142,7 @@ SoundManagerPool soundManagerPool = new SoundManagerPool(7);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

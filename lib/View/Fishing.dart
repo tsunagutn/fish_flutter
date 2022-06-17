@@ -136,8 +136,8 @@
 //済・図鑑を過去の分も見れるニスル
 //済・アタリでバイブ
 //済・ドラグでバイブ
-//・設定にバイブ有無を追加
-//・設定に上下操作の逆転を追加
+//済・設定にバイブ有無を追加
+//済・設定に上下操作の逆転を追加
 //・光点が残像するようにする
 //・釣果によって何か成長させる
 //・実績
@@ -2011,6 +2011,8 @@ class _FishingState extends BasePageState<Fishing>
                       //初期位置から動いた値を取得
                       var moveX = mX - _cursorX;
                       var moveY = mY - _cursorY;
+                      //上下操作反転の場合は+-逆転させる
+                      if (settings.isReversal) moveY *= -1;
                       //x座標記憶を更新
                       _cursorX = mX;
                       _cursorY = mY;
@@ -2991,13 +2993,13 @@ class _FishingState extends BasePageState<Fishing>
 
   //バイブレーション
   void vibe(int duration) async {
+    if (!settings.isVibe) {
+      return;
+    }
     bool? vibeEnable = await Vibration.hasAmplitudeControl();
     if (vibeEnable != null && vibeEnable) {
       Vibration.vibrate(amplitude: 128, duration: duration);
     }
-    // if (await Vibration.hasVibrator()) {
-    //   Vibration.vibrate();
-    // }
   }
 
   //時間データ取得

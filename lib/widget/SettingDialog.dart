@@ -2,6 +2,7 @@ import 'package:fish_flutter/Main.dart';
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:vibration/vibration.dart';
 
 import '../TypeAdapter/typSettings.dart';
 import 'BgmPlayer.dart';
@@ -41,6 +42,8 @@ class _SettingDialogState extends State<SettingDialog>
   var _volumeSe = 0.8; //SE音量
   var _jerkSense = 0.5; //ジャーク感度
   var _makiSense = 0.5; //巻き速度変更の感度
+  var _isVibe = true; //バイブレーション有無
+  var _isReversal = false; //上下操作の反転
 
   Future subBgmLoop(file) async {
     if (settings.flgBgm) {
@@ -97,6 +100,28 @@ class _SettingDialogState extends State<SettingDialog>
         settings.makiSense = _makiSense;
       });
 
+  void _changeReversal(bool? e) => setState(() {
+    _isReversal = e!;
+    settings.isReversal = _isReversal;
+  });
+
+  void _changeVibe(bool? e) => setState(() {
+    _isVibe = e!;
+    settings.isVibe = _isVibe;
+    if (_isVibe) {
+      //バイブ動作
+      vibe(500);
+    }
+  });
+
+  //バイブレーション
+  void vibe(int duration) async {
+    bool? vibeEnable = await Vibration.hasAmplitudeControl();
+    if (vibeEnable != null && vibeEnable) {
+      Vibration.vibrate(amplitude: 128, duration: duration);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -107,6 +132,8 @@ class _SettingDialogState extends State<SettingDialog>
     _volumeSe = settings.volumeSe;
     _jerkSense = settings.jerkSense;
     _makiSense = settings.makiSense;
+    _isVibe = settings.isVibe;
+    _isReversal = settings.isReversal;
 
     //設定画面BCM再生
     subBgmLoop('bgm_book.mp3');
@@ -206,6 +233,23 @@ class _SettingDialogState extends State<SettingDialog>
                                           ),
                                         ],
                                       ),
+                                      new SwitchListTile(
+                                        value: _isReversal,
+                                        activeColor: Colors.orange,
+                                        activeTrackColor: Colors.grey,
+                                        inactiveThumbColor: Colors.white,
+                                        inactiveTrackColor: Colors.grey,
+                                        secondary: new Icon(
+                                          Icons.import_export ,
+                                          color: _isReversal
+                                              ? Colors.orange[700]
+                                              : Colors.grey[500],
+                                          size: 50.0,
+                                        ),
+                                        title: Text('上下操作の反転'),
+                                        subtitle: Text(_isReversal ? 'ON' : 'OFF'),
+                                        onChanged: _changeReversal,
+                                      ),
                                     ]),
                               ),
                               //音の設定タブ
@@ -272,6 +316,23 @@ class _SettingDialogState extends State<SettingDialog>
                                       ),
                                     ),
                                   ]),
+                                  new SwitchListTile(
+                                    value: _isVibe,
+                                    activeColor: Colors.orange,
+                                    activeTrackColor: Colors.grey,
+                                    inactiveThumbColor: Colors.white,
+                                    inactiveTrackColor: Colors.grey,
+                                    secondary: new Icon(
+                                      Icons.edgesensor_low ,
+                                      color: _isVibe
+                                          ? Colors.orange[700]
+                                          : Colors.grey[500],
+                                      size: 50.0,
+                                    ),
+                                    title: Text('バイブレーション'),
+                                    subtitle: Text(_isVibe ? 'ON' : 'OFF'),
+                                    onChanged: _changeVibe,
+                                  ),
                                 ]),
                               ),
                               //テスト用タブ
