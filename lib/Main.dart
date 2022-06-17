@@ -32,15 +32,17 @@ import 'View/Loading.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'View/book.dart';
+
 late typSettings settings = typSettings(
-    flgBgm: true,
-    flgControlRight: true,
-    volumeBgm: 0.5,
-    volumeSe: 0.5,
-    jerkSense: 0.5,
-    makiSense: 0.5,
-    isReversal: false,
-    isVibe: true,
+  flgBgm: true,
+  flgControlRight: true,
+  volumeBgm: 0.5,
+  volumeSe: 0.5,
+  jerkSense: 0.5,
+  makiSense: 0.5,
+  isReversal: false,
+  isVibe: true,
 );
 
 //Hive BOX名
@@ -75,7 +77,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //向き指定
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,//縦固定
+    DeviceOrientation.portraitUp, //縦固定
   ]);
 
   await Hive.initFlutter();
@@ -110,7 +112,6 @@ void main() async {
   //   history.lstGameDatas = HiveList(gameDataBox);
   //   historyBox.put(settingsKeyName, settings);
   // }
-
 
   runApp(Provider(
     create: (context) => BgmPlayer(),
@@ -175,6 +176,7 @@ class MyApp extends StatelessWidget {
         '/fishing': (_) => Fishing(),
         '/gamemenu': (_) => GameMenu(),
         '/history': (_) => History(),
+        '/book': (_) => Book(),
       },
       //home: MyHomePage(title: 'チェックリスト'),
       navigatorObservers: [

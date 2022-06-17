@@ -11,14 +11,11 @@ import 'package:fish_flutter/Class/clsColor.dart';
 import 'package:hive/hive.dart';
 
 import '../Main.dart';
-import '../widget/SettingDialog.dart';
 import '../widget/menuCard.dart';
 
 class Menu extends StatefulWidget {
   static List<String> screenBgms = [
     'title.mp3',
-    // 'kaigarabushi.mp3',
-    // 'saitarobushi.mp3'
   ];
   @override
   _menuState createState() {
@@ -32,13 +29,6 @@ class _menuState extends BasePageState<Menu> {
   @override
   void initState() {
     super.initState();
-
-    // buildメソッドが回り、AppBarの描画終了後に、GlobalKeyの情報を取得するようにするため、
-    // addPostFrameCallbackメソッドを実行
-    // null safety対応で?（null以外の時のみアクセス）をつける
-    WidgetsBinding.instance?.addPostFrameCallback((cb) {
-      super.bgmPlay(Menu.screenBgms);
-    });
   }
 
   @override
@@ -145,14 +135,7 @@ class _menuState extends BasePageState<Menu> {
                               }
                               debugPrint("あえあえaeae");
                               if (isPush) {
-                                Navigator.pushNamed(context, "/fishing")
-                                    //arguments: gameData)
-                                    .then(
-                                  (value) {
-                                    //メニュー画面のBGMを再生
-                                    super.bgmPlay(Menu.screenBgms);
-                                  },
-                                );
+                                Navigator.pushNamed(context, "/fishing");
                               }
                             },
                             child: new menuCard(
@@ -169,17 +152,7 @@ class _menuState extends BasePageState<Menu> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              super.bgm.stopBgmAny();
-                              int? result = await showDialog<int>(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (_) {
-                                  return SettingDialog(
-                                    bgm: super.bgm,
-                                  );
-                                },
-                              );
-                              super.bgmPlay(Menu.screenBgms);
+                              Navigator.pushNamed(context, "/settings");
                             },
                             child: new menuCard(
                               cardText: '設定',

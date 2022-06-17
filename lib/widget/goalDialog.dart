@@ -11,7 +11,6 @@ import '../Main.dart';
 import '../Model/relultAnimeModel.dart';
 import '../TypeAdapter/typGameData.dart';
 import 'BgmPlayer.dart';
-import 'BookDialog.dart';
 
 class goalDialog extends StatefulWidget {
   @override
@@ -500,22 +499,8 @@ class _goalDialogState extends State<goalDialog> with TickerProviderStateMixin {
                                                       enumAnimeState.end) {
                                                     return;
                                                   }
-                                                  // //図鑑モーダルの表示
-                                                  //soundManagerPool.playSound('se/book.mp3');
-                                                  var result =
-                                                      await showDialog<int>(
-                                                    context: context,
-                                                    barrierDismissible: false,
-                                                    builder: (_) {
-                                                      return BookDialog(
-                                                        //fishsTable: FISH_TABLE,
-                                                        // fishesResult:
-                                                        //     widget.fishResult,
-                                                        bgm: widget.bgm,
-                                                        flgBgm: false,
-                                                      );
-                                                    },
-                                                  );
+                                                  // //図鑑画面の表示
+                                                  Navigator.pushNamed(context, "/book");
                                                 },
                                               ),
                                             ]),

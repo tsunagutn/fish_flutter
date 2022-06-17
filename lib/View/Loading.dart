@@ -8,9 +8,6 @@ import 'package:fish_flutter/Class/clsColor.dart';
 import 'package:hive/hive.dart';
 
 import '../Main.dart';
-import '../TypeAdapter/typSettings.dart';
-import '../widget/SettingDialog.dart';
-import 'Menu.dart';
 
 class Loading extends StatefulWidget {
   static List<String> screenBgms = [
@@ -32,7 +29,6 @@ class _LoadingState extends BasePageState<Loading> {
   @override
   void initState() {
     super.initState();
-    //super.bgmPlay(Menu.screenBgms);
   }
 
   void _changeBgm(bool? e) => setState(() {
@@ -90,14 +86,10 @@ class _LoadingState extends BasePageState<Loading> {
                 ElevatedButton(
                   child: Text("ゲームを始める"),
                   onPressed: () async {
-                    final result =
-                        //await Navigator.of(context).pushNamed('/fishing');
-                        bgm.loadBgm().then((_) {
+                    final result = bgm.loadBgm().then((_) {
                       // ここでBGMデータの全ロード処理実行
                       //効果音managerで無音を再生
                       soundManagerPool.SoundManagerPoolInit();
-                      // 遷移先のBGM再生
-                      //BGMオブジェクトで無音SE再生
                       Navigator.of(context).pushReplacementNamed("/menu");
                     });
                   },

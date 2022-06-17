@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fish_flutter/widget/BgmPlayer.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:vibration/vibration.dart';
 import '../Main.dart';
 import 'dart:math' as math;
 
@@ -11,18 +12,26 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   late BgmPlayer _bgm;
   // 自身の画面が表に表示されているかのフラグ
   bool isActive = false;
-  //List<String> _fileNames = [];
+  List<String> _fileNames = [];
 
   BgmPlayer get bgm => _bgm;
   //List<String> get fileNames => _fileNames;
   String nowFileName = "";
 
+  //前画面に戻る許可
+  bool isBack = false;
+
   // コンストラクタ --------------------------------------------------
   BasePageState({required List<String> fileNames}) {
-    // if (fileNames.length > 0 && fileNames.isNotEmpty) {
-    //   this._fileNames = fileNames;
-    // }
-    // nowFileName = getRandomPlayBgm();
+    if (fileNames.length > 0 && fileNames.isNotEmpty) {
+      this._fileNames = fileNames;
+    }
+    nowFileName = getRandomPlayBgm();
+  }
+
+  String getRandomPlayBgm() {
+    int irnd = (new math.Random()).nextInt(this._fileNames.length);
+    return this._fileNames[irnd];
   }
 
   //ランダムで再生
@@ -31,6 +40,11 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
     int irnd = (new math.Random()).nextInt(fileNames.length);
     nowFileName = fileNames[irnd];
     bgm.playBgm(name: nowFileName);
+  }
+
+  //中断中のBGMを再開
+  Future bgmResume() async {
+    if (nowFileName != "") bgm.resumeBgm();
   }
 
   //ファイル名を指定して再生
@@ -84,6 +98,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
     routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
   }
 
+  //？？？前後の画面で同じBGMの場合、POPで戻った時、戻り先のdidPopNextの次に元のdisposeが走ってBGMがとまってしまう
   @override
   void dispose() {
     // POP、replace時に画面終了する際、後始末をする
@@ -95,11 +110,12 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   }
 
   // StatefulWidget（画面）のライフサイクル end --------------------------------------------------
-  // 画面遷移時のライフサイクル start --------------------------------------------------
+  // routeObserverによる画面遷移時のライフサイクル start --------------------------------------------------
   @override
   void didPush() {
     // 自身の画面がコールされたときに、isActiveをtrueにする
     this.isActive = true;
+    this._bgm.playBgm(name: nowFileName);
     super.didPush();
   }
 
@@ -122,6 +138,14 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   }
 
   // 画面遷移時のライフサイクル end --------------------------------------------------
+
+  //バイブレーション
+  void vibe(int duration) async {
+    bool? vibeEnable = await Vibration.hasAmplitudeControl();
+    if (vibeEnable != null && vibeEnable) {
+      Vibration.vibrate(amplitude: 128, duration: duration);
+    }
+  }
 
   // 子クラスにおいては標準のbuildの代わりに実装を強制させる
   // 標準のbuildを利用したい場合、本メソッドの戻り値にnullを設定可能とする

@@ -168,6 +168,8 @@
 //・光点の残像
 
 //バグ
+//・dialogでBGMを鳴らすのはライフライクルが取れないのでNG、
+//　親のBGMのままで出していいやつだけdialogにすること（つまりsetting、book、fishget、goalはNG）
 //・バレた時アワセ失敗したとき光点の色が戻らん
 //・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 //・Android たまに「System UI isnt responding」「Wrote stack traces to tombstoned」がでる
@@ -206,13 +208,10 @@ import 'package:fish_flutter/Model/StageModel.dart';
 import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:fish_flutter/TypeAdapter/typGameData.dart';
 import 'package:fish_flutter/View/Menu.dart';
-import 'package:fish_flutter/widget/BookDialog.dart';
 import 'package:fish_flutter/widget/FIshCard.dart';
 import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
 import 'package:fish_flutter/widget/LightSpot.dart';
 import 'package:fish_flutter/widget/RadarChart.dart';
-import 'package:fish_flutter/widget/ShopDialog.dart';
-import 'package:fish_flutter/widget/SettingDialog.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:fish_flutter/widget/TapPointer.dart';
 import 'package:fish_flutter/widget/FishPointer.dart';
@@ -519,9 +518,6 @@ class _FishingState extends BasePageState<Fishing>
 
   var flgDispSettingsOk = false;
 
-  //前画面に戻る許可
-  var _isBack = false;
-
   @override
   void initState() {
     //魚テーブルを初期化？？？本当はエリアで絞る
@@ -729,7 +725,6 @@ class _FishingState extends BasePageState<Fishing>
     await setReelwheel();
 
     flgDispSettingsOk = true;
-    super.bgmPlay(Fishing.screenBgms);
   }
 
   setReelwheel() async {
@@ -1151,7 +1146,7 @@ class _FishingState extends BasePageState<Fishing>
         soundManagerPool.playSoundDisableContain(
             'se/drag2.mp3', enumDisableContainPlay.drag);
       }
-      vibe(100);
+      super.vibe(100);
     }
 
     if (val > gameData.maxTension) val = gameData.maxTension;
@@ -1479,7 +1474,7 @@ class _FishingState extends BasePageState<Fishing>
               _fookingTensionPrev = 0;
               _infoBackColor = TENSION_COLOR_DANGER;
               soundManagerPool.playSound('se/bait1.mp3');
-              vibe(500);
+              super.vibe(500);
             }
             if (_flgBait || _flgHit) {
             } else {
@@ -1687,7 +1682,7 @@ class _FishingState extends BasePageState<Fishing>
     return Material(
         child: new WillPopScope(
             onWillPop: () async {
-              return _isBack;
+              return super.isBack;
             },
             child: Scaffold(
                 extendBodyBehindAppBar: true, // <--- ここ
@@ -1705,24 +1700,13 @@ class _FishingState extends BasePageState<Fishing>
                         iconSize: 30.0,
                         onPressed: () async {
                           _timer.cancel(); //定周期タイマ停止
-                          // //図鑑モーダルの表示
-                          soundManagerPool.playSound('se/book.mp3');
-                          var result = await showDialog<int>(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (_) {
-                              return BookDialog(
-                                //fishsTable: FISH_TABLE,
-                                //fishesResult: gameData.fishResults,
-                                bgm: super.bgm,
-                                flgBgm: true,
-                              );
+                          // // //図鑑画面の表示
+                          Navigator.pushNamed(context, "/book").then(
+                            (value) {
+                              //設定画面から返ってきたらタイマ再開
+                              startTimer();
                             },
                           );
-                          soundManagerPool.playSound('se/bookclose.mp3');
-                          startTimer(); //定周期タイマ再開
-                          playFieldBgm();
-
                           setState(() {});
                         },
                       ),
@@ -1844,20 +1828,12 @@ class _FishingState extends BasePageState<Fishing>
                         trailing: Icon(Icons.arrow_forward_ios),
                         onTap: () async {
                           _timer.cancel(); //定周期タイマ停止
-                          super.bgmStop();
-                          //subBgmLoop('bgm/bgm_book.mp3');
-                          //soundManagerPool.playSound('se/book.mp3'); //音は仮
-                          int? result = await showDialog<int>(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (_) {
-                              return SettingDialog(
-                                bgm: super.bgm,
-                              );
+                          Navigator.pushNamed(context, "/settings").then(
+                            (value) {
+                              //設定画面から返ってきたらタイマ再開
+                              startTimer();
                             },
                           );
-                          startTimer(); //定周期タイマ再開
-                          playFieldBgm();
                           setState(() {});
                         },
                       ),
@@ -1901,7 +1877,7 @@ class _FishingState extends BasePageState<Fishing>
                                   TextButton(
                                     child: Text("はい"),
                                     onPressed: () async {
-                                      _isBack = true;
+                                      super.isBack = true;
                                       //モーダルを閉じる
                                       Navigator.of(context).pop();
                                       //drwerを閉じる
@@ -1942,7 +1918,7 @@ class _FishingState extends BasePageState<Fishing>
                                   TextButton(
                                     child: Text("はい"),
                                     onPressed: () {
-                                      _isBack = true;
+                                      super.isBack = true;
                                       //モーダルを閉じる
                                       Navigator.of(context).pop();
                                       //drwerを閉じる
@@ -2987,19 +2963,8 @@ class _FishingState extends BasePageState<Fishing>
       },
     );
     //モーダル閉じた時、メニューに戻る
-    _isBack = true;
+    super.isBack = true;
     Navigator.of(context).pop();
-  }
-
-  //バイブレーション
-  void vibe(int duration) async {
-    if (!settings.isVibe) {
-      return;
-    }
-    bool? vibeEnable = await Vibration.hasAmplitudeControl();
-    if (vibeEnable != null && vibeEnable) {
-      Vibration.vibrate(amplitude: 128, duration: duration);
-    }
   }
 
   //時間データ取得
