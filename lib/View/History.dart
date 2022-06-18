@@ -22,6 +22,7 @@ class History extends StatefulWidget {
 class _historyState extends BasePageState<History> {
   _historyState() : super(fileNames: History.screenBgms);
   late typHistory history;
+  double _appBarHeight = 0.0;
 
   @override
   void initState() {
@@ -32,6 +33,12 @@ class _historyState extends BasePageState<History> {
       return;
     }
     history = historyBox.get(historyKeyName);
+
+    WidgetsBinding.instance?.addPostFrameCallback((cb) {
+      //AppBarの高さを取得 ステータスバーの高さも加算
+      _appBarHeight =
+          AppBar().preferredSize.height;
+    });
   }
 
   void dispose() {
@@ -76,24 +83,23 @@ class _historyState extends BasePageState<History> {
                   var hist = history.lstGameDatas[index];
                   return GestureDetector(
                       onTap: () async {
-                        var result = await showDialog<int>(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) {
-                            return Stack(
-                              children: [
-                                //ゴールダイアログ
-                                goalDialog(
-                                  bgm: super.bgm,
-                                  isHistory: true,
-                                  keyName: hist.saveDateTime.toString(),
-                                  lockBook: true,
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                          var result = await showDialog<int>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) {
+                              return Stack(
+                                children: [
+                                  //ゴールダイアログ
+                                  goalDialog(
+                                    isHistory: true,
+                                    keyName: history.lstGameDatas[index].saveDateTime,
+                                    marginTop: _appBarHeight,
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                       child: ListTile(
                         title: Column(
                           children: [

@@ -225,6 +225,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                           color: Colors.black.withOpacity(0.3))
                     ],
                   )),
+              insetPadding: EdgeInsets.all(8),
               content: Container(
                   height: widget.dispSize.height,
                   width: widget.dispSize.width,

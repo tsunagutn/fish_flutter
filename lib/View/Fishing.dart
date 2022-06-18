@@ -138,7 +138,9 @@
 //済・ドラグでバイブ
 //済・設定にバイブ有無を追加
 //済・設定に上下操作の逆転を追加
-//・光点が残像するようにする
+//済・光点が残像するようにする
+//済・dialogでBGMを鳴らすのはライフライクルが取れないのでNG、
+//・風によってなみ高さをかえる
 //・釣果によって何か成長させる
 //・実績
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
@@ -168,8 +170,7 @@
 //・光点の残像
 
 //バグ
-//・dialogでBGMを鳴らすのはライフライクルが取れないのでNG、
-//　親のBGMのままで出していいやつだけdialogにすること（つまりsetting、book、fishget、goalはNG）
+//・親のBGMのままで出していいやつだけdialogにすること（つまりsetting、book、fishget、goalはNG）
 //・バレた時アワセ失敗したとき光点の色が戻らん
 //・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 //・Android たまに「System UI isnt responding」「Wrote stack traces to tombstoned」がでる
@@ -334,6 +335,7 @@ class _FishingState extends BasePageState<Fishing>
   static const HOSEI_MAX = 3;
   static const MAX_RAND_ADD_TENSION = 2; //何もしてない時テンションがウロウロするののMAX値
   static const MIN_RAND_ADD_TENSION = -11; //〃 MIN値
+  static const MAX_WIND_LEVEL = 1.0; //風レベル（m/s）の最大値
   // final TENSION_COLOR_SAFE = clsColor.getColorFromHex("007FFF");
   // final TENSION_COLOR_DRAG = clsColor.getColorFromHex("FFD800");
   final TENSION_COLOR_DANGER = clsColor.getColorFromHex("FFFF00");
@@ -414,6 +416,8 @@ class _FishingState extends BasePageState<Fishing>
   Color _pointerColor = Colors.yellow; //ソナー部光点の色
   double _lightSpotY = 0.0; //ソナー部光点TOP
   double _lightSpotX = 50.0; //ソナー部光点LEFT
+  double _prevLightSpotY = 0.0; //前回のソナーTOP
+  double _diffLightSpotY = 0.0; //ソナーTOPの前回差分
   //int _point = 0; //獲得ポイント
   double _justTana = 0.5; //HIT確率判定 時合棚 0.0～1.0
   double _justTanaRange = 50.0; //0.1m単位 +-までは時合圏内
@@ -817,44 +821,16 @@ class _FishingState extends BasePageState<Fishing>
     if (gameData.timeCount >= getLastTime()) {
       flgGoal = true;
       if (!_flgHit && !_flgBait) {
-        //ゴール条件成立
-        await showGoalDialog();
+        //ゴール画面に遷移する
+        timer.cancel();
+        Navigator.pushNamed(context, "/goal", arguments: gamedataKeyName).then(
+              (value) {
+            //ゴール画面から返ってきたらメニューに戻る
+            Navigator.of(context).popUntil(ModalRoute.withName("/menu"));
+          },
+        );
       }
     }
-
-    // //風向き替えタイミング
-    // if (_timeCount == 0) {
-    //   _timer.cancel(); //定周期タイマ停止
-    //   bgmStop();
-    //   var result = await showDialog<double>(
-    //     context: context,
-    //     barrierDismissible: false,
-    //     builder: (_) {
-    //       return Stack(
-    //         children: [
-    //           //ゴールダイアログ
-    //           windDialog(
-    //             windLevel: _windLevel,
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    //   //モーダルを閉じた時
-    //   _windLevel = result;
-    // }
-
-    // _depthChangeScanCnt+;
-    // if (_depthChangeScanCnt > DEPTH_CHANGE_SCAN) {
-    //   _depthChangeScanCnt = 0;
-    //   _depthChange = DEPTH_CHANGE_ORDERS[_depthChangeOrder]! +
-    //       ((DEPTH_CHANGE_ORDERS[_depthChangeOrder]! - rand) / 10);
-    //   debugPrint("深さ変化傾向" + _depthChange.toString());
-    // }
-
-    //水深とポイントを元に風レベル変更
-    // var planWindLevel = gameData.point / (gameData.maxDepth * 50);
-    // var oldLv = _windLevel;
 
     var addWindLevel =
         (gameData.point / (gameData.maxDepth * 50) - gameData.windLevel) / 50;
@@ -868,6 +844,7 @@ class _FishingState extends BasePageState<Fishing>
     }
     gameData.windLevel += addWindLevel;
     if (gameData.windLevel < 0) gameData.windLevel = 0;
+    if (gameData.windLevel > MAX_WIND_LEVEL) gameData.windLevel = MAX_WIND_LEVEL;
 
     //最大の風レベル記憶
     if (gameData.maxWindLevel < gameData.windLevel)
@@ -1213,6 +1190,8 @@ class _FishingState extends BasePageState<Fishing>
     //     ((_depth / _maxDepth) * (size.height - _shoreHeight - _bottomHeight));
     _lightSpotY = ((_depth / gameData.maxDepth) *
         (size.height - (_shoreHeight + 50) - _bottomHeight));
+    _diffLightSpotY = _prevLightSpotY - _lightSpotY;
+    _prevLightSpotY = _lightSpotY;
 
     //背景色
     if (gameData.maxDepth < 100) {
@@ -1877,13 +1856,19 @@ class _FishingState extends BasePageState<Fishing>
                                   TextButton(
                                     child: Text("はい"),
                                     onPressed: () async {
+                                      _timer.cancel();
                                       super.isBack = true;
                                       //モーダルを閉じる
                                       Navigator.of(context).pop();
                                       //drwerを閉じる
                                       Navigator.of(context).pop();
-                                      //ゴールダイアログを出す
-                                      await showGoalDialog();
+                                      //ゴール画面に遷移する
+                                      Navigator.pushNamed(context, "/goal", arguments: gamedataKeyName).then(
+                                            (value) {
+                                              //ゴール画面から返ってきたらメニューに戻る
+                                              Navigator.of(context).popUntil(ModalRoute.withName("/menu"));
+                                        },
+                                      );
                                     },
                                   ),
                                   TextButton(
@@ -2324,7 +2309,7 @@ class _FishingState extends BasePageState<Fishing>
                                                 .getColorFromHex("FFFFFF")
                                                 .withOpacity(0.5)),
                                         clipper: WaveClipper(
-                                            context, waveController.value, 0),
+                                            context, waveController.value, 0, gameData.windLevel),
                                       ),
                                       // 2つ目の波
                                       ClipPath(
@@ -2333,7 +2318,7 @@ class _FishingState extends BasePageState<Fishing>
                                                 .getColorFromHex("84E0ED")
                                                 .withOpacity(0.9)),
                                         clipper: WaveClipper(
-                                            context, waveController.value, 0.5),
+                                            context, waveController.value, 0.5, gameData.windLevel),
                                       ),
                                       // ↑ 追加部分
                                     ],
@@ -2418,16 +2403,18 @@ class _FishingState extends BasePageState<Fishing>
                             Container(
                               width: size.width,
                               margin: EdgeInsets.only(
-                                  top: _shoreHeight + 50 + _lightSpotY,
+                                  top: 0,
                                   left: _lightSpotX),
                               child: CustomPaint(
                                 painter: LightSpot(
-                                    POINTER_SIZE,
-                                    POINTER_BACK_SIZE,
-                                    _animationRadius.value,
-                                    _pointerColor,
-                                    0,
-                                    0),
+                                    basicRadius: POINTER_SIZE,
+                                    maxBackRadius: POINTER_BACK_SIZE,
+                                    animationRadius: _animationRadius.value,
+                                    lightColor: _pointerColor,
+                                    offsetX: 0,
+                                    offsetY: (_shoreHeight + 50) + _lightSpotY,
+                                    diffOffsetY: _diffLightSpotY,
+                                ),
                               ),
                             ),
                             //タップ時の光点
@@ -2937,34 +2924,6 @@ class _FishingState extends BasePageState<Fishing>
                             ),
                           ]),
                         ]))))));
-  }
-
-  //ゴールダイアログ
-  showGoalDialog() async {
-    _timer.cancel(); //定周期タイマ停止
-    //現在再生中のBGMをフェードアウト
-    bgmStop();
-    //super.bgm.volumeBgmHalf;
-    var result = await showDialog<int>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) {
-        return Stack(
-          children: [
-            //ゴールダイアログ
-            goalDialog(
-              bgm: super.bgm,
-              isHistory: false,
-              keyName: gamedataKeyName,
-              lockBook: false,
-            ),
-          ],
-        );
-      },
-    );
-    //モーダル閉じた時、メニューに戻る
-    super.isBack = true;
-    Navigator.of(context).pop();
   }
 
   //時間データ取得

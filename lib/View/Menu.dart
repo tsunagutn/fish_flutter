@@ -99,13 +99,8 @@ class _menuState extends BasePageState<Menu> {
                                             child: Text("消して最初から"),
                                             onPressed: () async {
                                               //ゲームデータを初期化
-                                              // await gameDataBox.put(
-                                              //     gamedataKeyName,
-                                              //     getStartGameData());
-                                              //？？？今あるisEndがfalseのデータをけさないと
-                                              typGameData gd =
-                                                  getStartGameData();
-                                              gameDataBox.add(gd);
+                                              typGameData gd = await getStartGameData();
+                                              await gameDataBox.put(gamedataKeyName, gd);
                                               //モーダルを閉じる
                                               Navigator.of(context).pop(1);
                                             }),
@@ -124,16 +119,10 @@ class _menuState extends BasePageState<Menu> {
                                 //}
                               } else {
                                 //データ無しの場合は初期データをセット
-
-                                debugPrint("あえcccc");
                                 typGameData gd = await getStartGameData();
-                                debugPrint("あえあえawcccc");
                                 await gameDataBox.put(gamedataKeyName, gd);
-                                debugPrint("あえあえ");
-                                //gameDataBox.add(getStartGameData());
                                 isPush = true;
                               }
-                              debugPrint("あえあえaeae");
                               if (isPush) {
                                 Navigator.pushNamed(context, "/fishing");
                               }
@@ -178,7 +167,8 @@ class _menuState extends BasePageState<Menu> {
     //初期データをセット
     var gameData = typGameData(
         gameId: 1,
-        timeCount: 0,
+        //timeCount: 0,
+        timeCount : 30 * 60 * 10 + 1200, //すぐ終了
         maxTimeCount: (30 * 60 * 11),
         point: 0,
         maxDepth: 40,

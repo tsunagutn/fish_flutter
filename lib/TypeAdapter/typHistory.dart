@@ -10,9 +10,4 @@ class typHistory extends HiveObject {
 
   //コンストラクタ
   typHistory();
-
-  //セーブ日時で並び替える
-//   HiveList sortSaveDate() {
-// return aaa
-//   }
 }

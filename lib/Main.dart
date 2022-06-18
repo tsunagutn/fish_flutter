@@ -22,6 +22,7 @@ import 'TypeAdapter/typGameData.dart';
 import 'TypeAdapter/typHistory.dart';
 import 'TypeAdapter/typSettings.dart';
 import 'View/GameMenu.dart';
+import 'View/Goal.dart';
 import 'View/LightSpotWegit.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -177,6 +178,7 @@ class MyApp extends StatelessWidget {
         '/gamemenu': (_) => GameMenu(),
         '/history': (_) => History(),
         '/book': (_) => Book(),
+        '/goal': (_) => Goal(),
       },
       //home: MyHomePage(title: 'チェックリスト'),
       navigatorObservers: [
