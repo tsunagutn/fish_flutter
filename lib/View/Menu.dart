@@ -169,8 +169,8 @@ class _menuState extends BasePageState<Menu> {
     //初期データをセット
     var gameData = typGameData(
         gameId: 1,
-        //timeCount: 0,
-        timeCount: 30 * 60 * 10 + 1200, //すぐ終了
+        timeCount: 0,
+        //timeCount: 30 * 60 * 10 + 1200, //すぐ終了
         maxTimeCount: (30 * 60 * 11),
         point: 0,
         maxDepth: 40,
