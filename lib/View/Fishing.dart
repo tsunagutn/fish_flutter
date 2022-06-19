@@ -271,7 +271,9 @@ enum PlayerState { stopped, playing, paused }
 class _FishingState extends BasePageState<Fishing>
     with TickerProviderStateMixin {
   _FishingState()
-      : super(fileNames: Fishing.screenBgms, defaultPlay: true); // <-- 親クラスのコンストラクタにファイル名設定
+      : super(
+            fileNames: Fishing.screenBgms,
+            bgmMode: enumBgmMode.auto); // <-- 親クラスのコンストラクタにファイル名設定
 
   //定数の定義？？？いろいろ環境設定にした方がいいかと
   //モーダル中のBGM
@@ -824,9 +826,10 @@ class _FishingState extends BasePageState<Fishing>
         //ゴール画面に遷移する
         timer.cancel();
         Navigator.pushNamed(context, "/goal", arguments: gamedataKeyName).then(
-              (value) {
+          (value) {
             //ゴール画面から返ってきたらメニューに戻る
             Navigator.of(context).popUntil(ModalRoute.withName("/menu"));
+            return;
           },
         );
       }
@@ -844,7 +847,8 @@ class _FishingState extends BasePageState<Fishing>
     }
     gameData.windLevel += addWindLevel;
     if (gameData.windLevel < 0) gameData.windLevel = 0;
-    if (gameData.windLevel > MAX_WIND_LEVEL) gameData.windLevel = MAX_WIND_LEVEL;
+    if (gameData.windLevel > MAX_WIND_LEVEL)
+      gameData.windLevel = MAX_WIND_LEVEL;
 
     //最大の風レベル記憶
     if (gameData.maxWindLevel < gameData.windLevel)
@@ -1863,10 +1867,13 @@ class _FishingState extends BasePageState<Fishing>
                                       //drwerを閉じる
                                       Navigator.of(context).pop();
                                       //ゴール画面に遷移する
-                                      Navigator.pushNamed(context, "/goal", arguments: gamedataKeyName).then(
-                                            (value) {
-                                              //ゴール画面から返ってきたらメニューに戻る
-                                              Navigator.of(context).popUntil(ModalRoute.withName("/menu"));
+                                      Navigator.pushNamed(context, "/goal",
+                                              arguments: gamedataKeyName)
+                                          .then(
+                                        (value) {
+                                          //ゴール画面から返ってきたらメニューに戻る
+                                          Navigator.of(context).popUntil(
+                                              ModalRoute.withName("/menu"));
                                         },
                                       );
                                     },
@@ -2309,7 +2316,10 @@ class _FishingState extends BasePageState<Fishing>
                                                 .getColorFromHex("FFFFFF")
                                                 .withOpacity(0.5)),
                                         clipper: WaveClipper(
-                                            context, waveController.value, 0, gameData.windLevel),
+                                            context,
+                                            waveController.value,
+                                            0,
+                                            gameData.windLevel),
                                       ),
                                       // 2つ目の波
                                       ClipPath(
@@ -2318,7 +2328,10 @@ class _FishingState extends BasePageState<Fishing>
                                                 .getColorFromHex("84E0ED")
                                                 .withOpacity(0.9)),
                                         clipper: WaveClipper(
-                                            context, waveController.value, 0.5, gameData.windLevel),
+                                            context,
+                                            waveController.value,
+                                            0.5,
+                                            gameData.windLevel),
                                       ),
                                       // ↑ 追加部分
                                     ],
@@ -2402,18 +2415,17 @@ class _FishingState extends BasePageState<Fishing>
                             //ソナー光点
                             Container(
                               width: size.width,
-                              margin: EdgeInsets.only(
-                                  top: 0,
-                                  left: _lightSpotX),
+                              margin:
+                                  EdgeInsets.only(top: 0, left: _lightSpotX),
                               child: CustomPaint(
                                 painter: LightSpot(
-                                    basicRadius: POINTER_SIZE,
-                                    maxBackRadius: POINTER_BACK_SIZE,
-                                    animationRadius: _animationRadius.value,
-                                    lightColor: _pointerColor,
-                                    offsetX: 0,
-                                    offsetY: (_shoreHeight + 50) + _lightSpotY,
-                                    diffOffsetY: _diffLightSpotY,
+                                  basicRadius: POINTER_SIZE,
+                                  maxBackRadius: POINTER_BACK_SIZE,
+                                  animationRadius: _animationRadius.value,
+                                  lightColor: _pointerColor,
+                                  offsetX: 0,
+                                  offsetY: (_shoreHeight + 50) + _lightSpotY,
+                                  diffOffsetY: _diffLightSpotY,
                                 ),
                               ),
                             ),

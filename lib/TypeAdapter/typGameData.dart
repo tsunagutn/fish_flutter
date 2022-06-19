@@ -192,8 +192,8 @@ class typGameData extends HiveObject {
   double getLureWeight(int id) {
     double ret = 0.0;
     //IDの存在チェック
-    if (LST_LURE_WEIGHT.length > id + 1) {
-      ret = LST_LURE_WEIGHT[id];
+    if (LST_LURE_WEIGHT.length > lureData[id].useWeightId + 1) {
+      ret = LST_LURE_WEIGHT[lureData[id].useWeightId];
     }
     return ret;
   }

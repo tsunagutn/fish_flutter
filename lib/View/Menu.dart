@@ -24,7 +24,7 @@ class Menu extends StatefulWidget {
 }
 
 class _menuState extends BasePageState<Menu> {
-  _menuState() : super(fileNames: Menu.screenBgms, defaultPlay: true);
+  _menuState() : super(fileNames: Menu.screenBgms, bgmMode: enumBgmMode.auto);
 
   @override
   void initState() {
@@ -99,8 +99,10 @@ class _menuState extends BasePageState<Menu> {
                                             child: Text("消して最初から"),
                                             onPressed: () async {
                                               //ゲームデータを初期化
-                                              typGameData gd = await getStartGameData();
-                                              await gameDataBox.put(gamedataKeyName, gd);
+                                              typGameData gd =
+                                                  await getStartGameData();
+                                              await gameDataBox.put(
+                                                  gamedataKeyName, gd);
                                               //モーダルを閉じる
                                               Navigator.of(context).pop(1);
                                             }),
@@ -168,7 +170,7 @@ class _menuState extends BasePageState<Menu> {
     var gameData = typGameData(
         gameId: 1,
         //timeCount: 0,
-        timeCount : 30 * 60 * 10 + 1200, //すぐ終了
+        timeCount: 30 * 60 * 10 + 1200, //すぐ終了
         maxTimeCount: (30 * 60 * 11),
         point: 0,
         maxDepth: 40,

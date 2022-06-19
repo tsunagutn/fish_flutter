@@ -20,7 +20,8 @@ class GameMenu extends StatefulWidget {
 }
 
 class _GameMenuState extends BasePageState<GameMenu> {
-  _GameMenuState() : super(fileNames: GameMenu.screenBgms, defaultPlay: true);
+  _GameMenuState()
+      : super(fileNames: GameMenu.screenBgms, bgmMode: enumBgmMode.appOnly);
 
   @override
   void initState() {

@@ -19,7 +19,8 @@ class Settings extends StatefulWidget {
 // 設定ページのステータス管理
 class _SettingsState extends BasePageState<Settings>
     with SingleTickerProviderStateMixin {
-  _SettingsState() : super(fileNames: Settings.screenBgms, defaultPlay: true);
+  _SettingsState()
+      : super(fileNames: Settings.screenBgms, bgmMode: enumBgmMode.auto);
   final _tab = <Tab>[
     Tab(
       text: 'ゲームの設定',

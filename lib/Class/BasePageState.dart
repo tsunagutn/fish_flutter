@@ -7,13 +7,19 @@ import 'package:vibration/vibration.dart';
 import '../Main.dart';
 import 'dart:math' as math;
 
+enum enumBgmMode {
+  none,
+  auto,
+  appOnly, //アプリ側のライフサイクルのみ（Navigaterのライフサイクルは無し）
+}
+
 abstract class BasePageState<T extends StatefulWidget> extends State<T>
     with WidgetsBindingObserver, RouteAware {
   late BgmPlayer _bgm;
   // 自身の画面が表に表示されているかのフラグ
   bool isActive = false;
   List<String> _fileNames = [];
-  bool _defaultPlay = false;
+  enumBgmMode _bgmMode = enumBgmMode.none;
 
   BgmPlayer get bgm => _bgm;
   //List<String> get fileNames => _fileNames;
@@ -23,12 +29,14 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   bool isBack = false;
 
   // コンストラクタ --------------------------------------------------
-  BasePageState({required List<String> fileNames, required bool defaultPlay}) {
+  BasePageState(
+      {required List<String> fileNames, required enumBgmMode bgmMode}) {
+    _fileNames = fileNames;
+    _bgmMode = bgmMode;
     if (fileNames.length > 0 && fileNames.isNotEmpty) {
-      this._fileNames = fileNames;
+      this._bgmMode = bgmMode;
     }
     nowFileName = getRandomPlayBgm();
-    _defaultPlay = defaultPlay;
   }
 
   String getRandomPlayBgm() {
@@ -72,14 +80,14 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
 
   void onBackground() {
     // ホーム画面に切り替わり、バックグラウンド状態のとき、BGMを一時停止する
-    if (_defaultPlay) this._bgm.pauseBgm(nowFileName);
+    if (_bgmMode != enumBgmMode.none) this._bgm.pauseBgm(nowFileName);
   }
 
   void onForeground() {
     if (this.isActive && nowFileName != "") {
       // 自分自身の画面がトップに表示されていれば、以降の処理を実施
       // ホーム画面からアプリに戻り、フォアグラウンド状態に戻ったとき、BGMを再生する
-      if (_defaultPlay) this._bgm.playBgm(name: nowFileName);
+      if (_bgmMode != enumBgmMode.none) this._bgm.playBgm(name: nowFileName);
     }
   }
 
@@ -105,7 +113,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void dispose() {
     // POP、replace時に画面終了する際、後始末をする
     this.isActive = false;
-    if (_defaultPlay) this._bgm.pauseBgm(nowFileName);
+    if (_bgmMode != enumBgmMode.none) this._bgm.pauseBgm(nowFileName);
     WidgetsBinding.instance?.removeObserver(this);
     routeObserver.unsubscribe(this);
     super.dispose();
@@ -117,10 +125,10 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void didPush() {
     // 自身の画面がコールされたときに、isActiveをtrueにする
     this.isActive = true;
-    if (_defaultPlay) {
+    if (_bgmMode != enumBgmMode.none) {
       this._bgm.playBgm(name: nowFileName);
     }
-      super.didPush();
+    super.didPush();
   }
 
   @override
@@ -129,7 +137,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
     this.isActive = true;
     // 自分自身の画面がトップに表示されていれば、以降の処理を実施
     // ホーム画面からアプリに戻り、フォアグラウンド状態に戻ったとき、BGMを再生する
-    if (_defaultPlay) this._bgm.playBgm(name: nowFileName);
+    if (_bgmMode == enumBgmMode.auto) this._bgm.playBgm(name: nowFileName);
     super.didPopNext();
   }
 
@@ -137,7 +145,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void didPushNext() {
     // Pushにて次画面に遷移する際、isActiveをfalseにし、BGMを一時停止させる
     this.isActive = false;
-    if (_defaultPlay) this._bgm.pauseBgm(nowFileName);
+    if (_bgmMode == enumBgmMode.auto) this._bgm.pauseBgm(nowFileName);
     super.didPushNext();
   }
 
