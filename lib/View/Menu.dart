@@ -24,7 +24,7 @@ class Menu extends StatefulWidget {
 }
 
 class _menuState extends BasePageState<Menu> {
-  _menuState() : super(fileNames: Menu.screenBgms);
+  _menuState() : super(fileNames: Menu.screenBgms, defaultPlay: true);
 
   @override
   void initState() {

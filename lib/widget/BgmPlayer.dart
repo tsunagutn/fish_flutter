@@ -1,5 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:audioplayers/audioplayers_api.dart';
+//import 'package:audioplayers/audioplayers_api.dart';
 import 'package:fish_flutter/Main.dart';
 
 import 'dart:math' as math;
@@ -17,7 +17,7 @@ class BgmPlayer {
   Map<String, Uri> bgmUriMap = Map<String, Uri>();
 
   BgmPlayer() {
-    _cache = AudioCache(fixedPlayer: _player);
+    _cache = AudioCache(prefix: 'assets/');
   }
 
   Future<void> loadBgm() async {
@@ -60,11 +60,11 @@ class BgmPlayer {
     if (settings.flgBgm) {
       nowBgmName = name;
       if (isLoop) {
-        _player?.setReleaseMode(ReleaseMode.LOOP);
+        _player?.setReleaseMode(ReleaseMode.loop);
       } else {
-        _player?.setReleaseMode(ReleaseMode.RELEASE);
+        _player?.setReleaseMode(ReleaseMode.release);
       }
-      _player?.play(bgmUriMap[name].toString(),
+      _player?.play(UrlSource(bgmUriMap[name].toString()),
           volume: maxVolume * settings.volumeBgm);
     }
   }

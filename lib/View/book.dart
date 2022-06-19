@@ -26,7 +26,7 @@ class Book extends StatefulWidget {
 // 設定ページのステータス管理
 class _bookState extends BasePageState<Book>
     with SingleTickerProviderStateMixin {
-  _bookState() : super(fileNames: Book.screenBgms);
+  _bookState() : super(fileNames: Book.screenBgms, defaultPlay: true);
 
   List<FishModel> fishList = [];
   bool _showFishDetail = false;

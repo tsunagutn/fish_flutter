@@ -271,7 +271,7 @@ enum PlayerState { stopped, playing, paused }
 class _FishingState extends BasePageState<Fishing>
     with TickerProviderStateMixin {
   _FishingState()
-      : super(fileNames: Fishing.screenBgms); // <-- 親クラスのコンストラクタにファイル名設定
+      : super(fileNames: Fishing.screenBgms, defaultPlay: true); // <-- 親クラスのコンストラクタにファイル名設定
 
   //定数の定義？？？いろいろ環境設定にした方がいいかと
   //モーダル中のBGM

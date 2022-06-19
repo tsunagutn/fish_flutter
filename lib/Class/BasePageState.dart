@@ -13,6 +13,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   // 自身の画面が表に表示されているかのフラグ
   bool isActive = false;
   List<String> _fileNames = [];
+  bool _defaultPlay = false;
 
   BgmPlayer get bgm => _bgm;
   //List<String> get fileNames => _fileNames;
@@ -22,11 +23,12 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   bool isBack = false;
 
   // コンストラクタ --------------------------------------------------
-  BasePageState({required List<String> fileNames}) {
+  BasePageState({required List<String> fileNames, required bool defaultPlay}) {
     if (fileNames.length > 0 && fileNames.isNotEmpty) {
       this._fileNames = fileNames;
     }
     nowFileName = getRandomPlayBgm();
+    _defaultPlay = defaultPlay;
   }
 
   String getRandomPlayBgm() {
@@ -70,14 +72,14 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
 
   void onBackground() {
     // ホーム画面に切り替わり、バックグラウンド状態のとき、BGMを一時停止する
-    this._bgm.pauseBgm(nowFileName);
+    if (_defaultPlay) this._bgm.pauseBgm(nowFileName);
   }
 
   void onForeground() {
     if (this.isActive && nowFileName != "") {
       // 自分自身の画面がトップに表示されていれば、以降の処理を実施
       // ホーム画面からアプリに戻り、フォアグラウンド状態に戻ったとき、BGMを再生する
-      this._bgm.playBgm(name: nowFileName);
+      if (_defaultPlay) this._bgm.playBgm(name: nowFileName);
     }
   }
 
@@ -103,7 +105,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void dispose() {
     // POP、replace時に画面終了する際、後始末をする
     this.isActive = false;
-    this._bgm.pauseBgm(nowFileName);
+    if (_defaultPlay) this._bgm.pauseBgm(nowFileName);
     WidgetsBinding.instance?.removeObserver(this);
     routeObserver.unsubscribe(this);
     super.dispose();
@@ -115,8 +117,10 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void didPush() {
     // 自身の画面がコールされたときに、isActiveをtrueにする
     this.isActive = true;
-    this._bgm.playBgm(name: nowFileName);
-    super.didPush();
+    if (_defaultPlay) {
+      this._bgm.playBgm(name: nowFileName);
+    }
+      super.didPush();
   }
 
   @override
@@ -125,7 +129,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
     this.isActive = true;
     // 自分自身の画面がトップに表示されていれば、以降の処理を実施
     // ホーム画面からアプリに戻り、フォアグラウンド状態に戻ったとき、BGMを再生する
-    this._bgm.playBgm(name: nowFileName);
+    if (_defaultPlay) this._bgm.playBgm(name: nowFileName);
     super.didPopNext();
   }
 
@@ -133,7 +137,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T>
   void didPushNext() {
     // Pushにて次画面に遷移する際、isActiveをfalseにし、BGMを一時停止させる
     this.isActive = false;
-    this._bgm.pauseBgm(nowFileName);
+    if (_defaultPlay) this._bgm.pauseBgm(nowFileName);
     super.didPushNext();
   }
 

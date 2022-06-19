@@ -24,7 +24,7 @@ class Goal extends StatefulWidget {
 
 class _goalState extends BasePageState<Goal>
     with TickerProviderStateMixin {
-  _goalState() : super(fileNames: Goal.screenBgms);
+  _goalState() : super(fileNames: Goal.screenBgms, defaultPlay: true);
   late AnimationController _lightingAnimationController;
   late Animation<double> _lightingValue;
   late typGameData gameData;

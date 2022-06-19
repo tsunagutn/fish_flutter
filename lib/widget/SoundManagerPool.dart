@@ -70,7 +70,7 @@ class SoundManagerPool {
 
   playSoundDisableContain(String path, enumDisableContainPlay kbn) {
     if (managers[lstDisableContainIdx[kbn.index]].advancedPlayer.state !=
-        PlayerState.PLAYING) {
+        PlayerState.playing) {
       //同じ区分の効果音がまだ再生中でない時のみ再生する
       lstDisableContainIdx[kbn.index] = playIndex;
       playSound(path);
@@ -98,7 +98,7 @@ class SoundManager {
   late AudioCache audioCache;
   SoundManager() {
     advancedPlayer = AudioPlayer();
-    audioCache = AudioCache(fixedPlayer: advancedPlayer);
+    audioCache = AudioCache();
   }
 
   Future<void> loadSound(List<String> fileNames) async {
@@ -108,8 +108,9 @@ class SoundManager {
 
   Future<void> playSound(String path) async {
     if (settings.flgBgm) {
-      await audioCache.play(path, isNotification: true);
+      //await audioCache.play(path, isNotification: true);
       advancedPlayer.setVolume(maxVolume * settings.volumeSe);
+      await advancedPlayer.play(AssetSource(path));
     }
     return;
   }

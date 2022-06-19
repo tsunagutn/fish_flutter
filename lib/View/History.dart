@@ -20,7 +20,7 @@ class History extends StatefulWidget {
 }
 
 class _historyState extends BasePageState<History> {
-  _historyState() : super(fileNames: History.screenBgms);
+  _historyState() : super(fileNames: History.screenBgms, defaultPlay: true);
   late typHistory history;
   double _appBarHeight = 0.0;
 

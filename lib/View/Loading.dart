@@ -22,7 +22,7 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends BasePageState<Loading> {
-  _LoadingState() : super(fileNames: Loading.screenBgms);
+  _LoadingState() : super(fileNames: Loading.screenBgms, defaultPlay: false,);
 
   var _bgm = settings.flgBgm; //音再生の有フラグ
 
