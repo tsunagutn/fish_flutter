@@ -4,6 +4,7 @@ import 'package:fish_flutter/Model/SettingsModel.dart';
 import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:fish_flutter/TypeAdapter/typLureData.dart';
 import 'package:fish_flutter/TypeAdapter/typResults.dart';
+import 'package:fish_flutter/View/Book.dart';
 import 'package:fish_flutter/widget/SoundManagerPool.dart';
 import 'package:flutter/material.dart';
 import 'package:fish_flutter/View/Menu.dart';
@@ -21,6 +22,7 @@ import 'Model/TutorialModel.dart';
 import 'TypeAdapter/typGameData.dart';
 import 'TypeAdapter/typHistory.dart';
 import 'TypeAdapter/typSettings.dart';
+import 'View/BookHistory.dart';
 import 'View/GameMenu.dart';
 import 'View/Goal.dart';
 import 'View/LightSpotWegit.dart';
@@ -32,8 +34,7 @@ import 'View/Loading.dart';
 
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
-import 'View/book.dart';
+import './Class/BasePageState.dart';
 
 late typSettings settings = typSettings(
   flgBgm: true,
@@ -169,17 +170,43 @@ class MyApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/',
-      routes: {
-        '/': (_) => Loading(),
-        '/menu': (_) => Menu(),
-        '/settings': (_) => Settings(),
-        '/term': (_) => Term(),
-        '/fishing': (_) => Fishing(),
-        '/gamemenu': (_) => GameMenu(),
-        '/history': (_) => History(),
-        '/book': (_) => Book(),
-        '/goal': (_) => Goal(),
+
+      // routesの代わりにonGenerateRouteを使う
+      onGenerateRoute: (RouteSettings settings) {
+        var routes = <String, WidgetBuilder>{
+          '/': (_) => Loading(),
+          '/menu': (_) => Menu(),
+          '/settings': (_) => Settings(),
+          '/term': (_) => Term(),
+          '/fishing': (_) => Fishing(),
+          '/gamemenu': (_) => GameMenu(),
+          '/history': (_) => History(),
+          '/book': (_) => Book(
+              arguments: settings.arguments as String,
+              bgmMode: enumBgmMode.auto),
+          '/booknonbgm': (_) => Book(
+              arguments: settings.arguments as String,
+              bgmMode: enumBgmMode.none),
+          '/bookhistory': (_) => BookHistory(),
+          '/goal': (_) => Goal(),
+        };
+        WidgetBuilder builder = routes[settings.name] ?? routes['/']!;
+        return MaterialPageRoute(builder: (ctx) => builder(ctx));
       },
+
+      // routes: {
+      //   '/': (_) => Loading(),
+      //   '/menu': (_) => Menu(),
+      //   '/settings': (_) => Settings(),
+      //   '/term': (_) => Term(),
+      //   '/fishing': (_) => Fishing(),
+      //   '/gamemenu': (_) => GameMenu(),
+      //   '/history': (_) => History(),
+      //   '/book': (_) => Book(bgmMode: enumBgmMode.auto),
+      //   '/booknonbgm': (_) => Book(bgmMode: enumBgmMode.none),
+      //   '/bookhistory': (_) => BookHistory(),
+      //   '/goal': (_) => Goal(),
+      // },
       //home: MyHomePage(title: 'チェックリスト'),
       navigatorObservers: [
         routeObserver,

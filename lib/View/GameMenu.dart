@@ -61,6 +61,7 @@ class _GameMenuState extends BasePageState<GameMenu> {
           ),
           endDrawer: DrawerItem(),
           body: Container(
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               border: Border.all(color: clsColor.getColorFromHex("4C58FF")),
               color: clsColor.getColorFromHex("4C58FF"),
@@ -69,10 +70,9 @@ class _GameMenuState extends BasePageState<GameMenu> {
               //   image: AssetImage('assets/images/title.png'),
               // ),
             ),
-            child: Stack(children: <Widget>[
-              Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+            child:
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       GestureDetector(
@@ -96,9 +96,29 @@ class _GameMenuState extends BasePageState<GameMenu> {
                         child:
                             new menuCard(cardText: '履歴', icon: Icons.history),
                       ),
+
+                      GestureDetector(
+                        onTap: () {
+                          final historyBox = Hive.box(historyBoxName);
+                          if (!historyBox.containsKey(historyKeyName)) {
+                            //履歴データが存在しない
+                            Fluttertoast.showToast(
+                              msg: "履歴がありません！",
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 3,
+                              toastLength: Toast.LENGTH_SHORT,
+                              backgroundColor: Colors.red[300],
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
+                            return;
+                          }
+                          Navigator.pushNamed(context, "/bookhistory");
+                        },
+                        child:
+                        new menuCard(cardText: 'おさかな図鑑', icon: Icons.book),
+                      ),
                     ]),
-              ),
-            ]),
           ),
         ),
       ),

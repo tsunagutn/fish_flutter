@@ -411,21 +411,22 @@ class _clsGoalState extends State<clsGoal> with TickerProviderStateMixin {
                                         Text(gameData.fishResults.length
                                                 .toString() +
                                             "匹"),
-                                        if (!widget.isHistory)
-                                          ElevatedButton(
-                                            child: Text("図鑑"),
-                                            onPressed: () async {
-                                              if (anime[enumResultAnime
-                                                          .fishResultTotal]!
-                                                      .state !=
-                                                  enumAnimeState.end) {
-                                                return;
-                                              }
-                                              // //図鑑画面の表示
-                                              Navigator.pushNamed(
-                                                  context, "/book");
-                                            },
-                                          ),
+                                        //if (!widget.isHistory)
+                                        ElevatedButton(
+                                          child: Text("図鑑"),
+                                          onPressed: () async {
+                                            if (anime[enumResultAnime
+                                                        .fishResultTotal]!
+                                                    .state !=
+                                                enumAnimeState.end) {
+                                              return;
+                                            }
+                                            // //図鑑画面の表示
+                                            Navigator.pushNamed(
+                                                context, "/booknonbgm",
+                                                arguments: widget.keyName);
+                                          },
+                                        ),
                                       ]),
                                 ),
                               ],

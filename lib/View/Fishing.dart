@@ -1684,7 +1684,9 @@ class _FishingState extends BasePageState<Fishing>
                         onPressed: () async {
                           _timer.cancel(); //定周期タイマ停止
                           // // //図鑑画面の表示
-                          Navigator.pushNamed(context, "/book").then(
+                          Navigator.pushNamed(context, "/book",
+                                  arguments: gamedataKeyName)
+                              .then(
                             (value) {
                               //設定画面から返ってきたらタイマ再開
                               startTimer();

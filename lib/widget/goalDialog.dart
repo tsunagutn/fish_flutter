@@ -16,12 +16,12 @@ import 'BgmPlayer.dart';
 class goalDialog extends StatefulWidget {
   @override
   const goalDialog({
-    required this.isHistory,
+    // required this.isHistory,
     required this.keyName,
     required this.marginTop,
   });
 
-  final bool isHistory;
+  // final bool isHistory;
   final String keyName;
   final double marginTop;
 

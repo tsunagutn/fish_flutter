@@ -91,7 +91,7 @@ class _historyState extends BasePageState<History> {
                               children: [
                                 //ゴールダイアログ
                                 goalDialog(
-                                  isHistory: true,
+                                  //isHistory: true,
                                   keyName:
                                       history.lstGameDatas[index].saveDateTime,
                                   marginTop: _appBarHeight,
