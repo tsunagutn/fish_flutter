@@ -142,10 +142,12 @@
 //済・dialogでBGMを鳴らすのはライフライクルが取れないのでNG、
 //済・風によってなみ高さをかえる
 //済・音楽関係が安定しないをよくする
+//ボツ・アタリ時HIT時レア度や初によって音を返る
+//・ルアレベル上げ画面
+//・尾に合わせは音変える
 //・釣果によって何か成長させる
 //・実績
 //・各ダイアログの閉じるボタン もっとスマートにする＆共通化
-//・アタリ時HIT時レア度や初によって音を返る
 //・吊り上げ時レア度によって音をかえる
 //・タックル変更をもっとましにする、特に重さ
 //・風の描画
@@ -173,8 +175,8 @@
 //バグ
 //済・親のBGMのままで出していいやつだけdialogにすること（つまりsetting、book、fishget、goalはNG）
 //済・結果画面で横幅が足りてない
+//済・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 //・バレた時アワセ失敗したとき光点の色が戻らん
-//・サカナ反応が空に浮くのをなおす 全体的に↑にいってるので下にする
 //・Android たまに「System UI isnt responding」「Wrote stack traces to tombstoned」がでる
 //　多分FIshPointer関係のバグっぽい？
 
@@ -1628,14 +1630,14 @@ class _FishingState extends BasePageState<Fishing>
     //棚を示す光点の表示
     var hannornd = (new math.Random()).nextDouble();
     if (hannornd > 0.96 && _jiai > tanarnd) {
-      var fishy = _sonarTop + (_sonarHeight * _justTana);
+      var fishy = _sonarTop + ((_sonarHeight + 20) * _justTana);
       //レンジ分バラケ
       var barakeLevel = 4; //バラケ度
       var barake = (_justTanaRange * ((0.5 - tanarnd) * barakeLevel));
       fishy = fishy + barake;
-      fishy = (fishy < _shoreHeight) ? _shoreHeight : fishy;
-      fishy = (fishy > _shoreHeight + _sonarHeight)
-          ? _shoreHeight + _sonarHeight
+      fishy = (fishy < _shoreHeight + 20) ? _shoreHeight + 20 : fishy;
+      fishy = (fishy > _shoreHeight + 20 + _sonarHeight)
+          ? _shoreHeight + 20 + _sonarHeight
           : fishy;
       generateFishPointer(fishy, 20.0);
     }
@@ -2593,7 +2595,11 @@ class _FishingState extends BasePageState<Fishing>
                                       Column(
                                         children: [
                                           //Text("DRAG"),
+                                          SizedBox(
+                                            width: 50,
+                                            child:
                                           RotatedBox(
+                                            //縦置き
                                             quarterTurns: -1,
                                             child: SliderTheme(
                                               data: SliderTheme.of(context)
@@ -2630,6 +2636,7 @@ class _FishingState extends BasePageState<Fishing>
                                                 },
                                               ),
                                             ),
+                                          ),
                                           ),
                                         ],
                                       ),
@@ -2806,9 +2813,9 @@ class _FishingState extends BasePageState<Fishing>
                                                 new RadarChart(
                                                   key: UniqueKey(),
                                                   items:
-                                                      getLureRadarChartItem(),
+                                                  [RadarChartCommon.getLureRadarChartItem(gameData.getUseLure())],
                                                   borderColor: Colors.white,
-                                                  radarColors: [Colors.orange],
+                                                  radarColors: [Colors.orange.withOpacity(0.5)],
                                                   fontColor: Colors.white,
                                                 ),
                                                 Container(
@@ -3095,16 +3102,6 @@ class _FishingState extends BasePageState<Fishing>
           });
     _jerkTextAnimationController.forward();
     _actionText = actionText;
-  }
-
-  //ルアーの能力チャート描画
-  List<RadarChartItemModel> getLureRadarChartItem() {
-    List<RadarChartItemModel> ret = [];
-    var useLure = gameData.getUseLure();
-    ret.add(new RadarChartItemModel(itemName: '巻き', value: useLure.reeling));
-    ret.add(new RadarChartItemModel(itemName: 'ﾌｫｰﾙ', value: useLure.fall));
-    ret.add(new RadarChartItemModel(itemName: 'ｼｬｸﾘ', value: useLure.jerk));
-    return ret;
   }
 
   //0.0～1.0のアニメーション値を倍々にする

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:fish_flutter/TypeAdapter/typLureData.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -11,7 +12,7 @@ class RadarChart extends StatefulWidget {
     required this.radarColors,
     required this.fontColor,
   }) : super(key: key);
-  final List<RadarChartItemModel> items;
+  final List<List<RadarChartItemModel>> items;
   final Color borderColor;
   final List<Color> radarColors;
   final Color fontColor;
@@ -54,7 +55,7 @@ class RadarChartPainter extends CustomPainter {
     required this.radarColors,
     required this.fontColor,
   });
-  final List<RadarChartItemModel> items;
+  final List<List<RadarChartItemModel>> items;
   final Color borderColor;
   final List<Color> radarColors;
   final Color fontColor;
@@ -78,15 +79,6 @@ class RadarChartPainter extends CustomPainter {
     for (var i = 0; i < tickLength; i++) {
       ticks.add(i / tickLength); //0.0～1.0
     }
-    List<String> features = []; //要素毎の見出し
-    List<List<double>> data = []; //値
-    data.add([]);
-
-    items.forEach((item) {
-      features.add(item.itemName);
-      data[0].add(item.value); //？？？複数のチャート出すときは連番変える、とりあえず0固定
-    });
-
     var tickDistance = radius / (tickLength);
     const double tickLabelFontSize = 8;
     var ticksPaint = Paint()
@@ -97,9 +89,7 @@ class RadarChartPainter extends CustomPainter {
 
     ticks.sublist(0, ticks.length - 1).asMap().forEach((index, tick) {
       var tickRadius = tickDistance * (index + 1);
-
       canvas.drawCircle(centerOffset, tickRadius, ticksPaint);
-
       // TextPainter(
       //   text: TextSpan(
       //     text: tick.toString(),
@@ -117,6 +107,22 @@ class RadarChartPainter extends CustomPainter {
     // items.forEach((element) {
     //   features.add(element.itemName);
     // });
+    List<String> features = []; //要素毎の見出し
+    List<List<double>> data = []; //値
+    //data.add([]);
+
+    items[0].forEach((item) {
+      features.add(item.itemName);
+    });
+    var i = 0;
+    items.forEach((item) {
+      data.add([]);
+      item.forEach((dat) {
+        data[i].add(dat.value); //？？？複数のチャート出すときは連番変える、とりあえず0固定
+      });
+      i++;
+    });
+
 
     var angle = (2 * math.pi) / features.length;
     const double featureLabelFontSize = 12;
@@ -152,15 +158,15 @@ class RadarChartPainter extends CustomPainter {
 
     //const graphColors = [Colors.green, Colors.blue];
     var scale = radius / ticks.last;
-    // var data = [
+    // data = [
     //   // [30, 20, 28, 15, 16],
-    //   // [15, 30, 8, 24, 23]
-    //   [0.1, 0.3, 0.3]
+    //   [0.5, 0.1, 0.8],
+    //   [0.1, 0.3, 0.3],
     // ];
 
     data.asMap().forEach((index, graph) {
       var graphPaint = Paint()
-        ..color = radarColors[index % radarColors.length].withOpacity(0.3)
+        ..color = radarColors[index % radarColors.length]
         ..style = PaintingStyle.fill;
 
       var graphOutlinePaint = Paint()
@@ -221,4 +227,16 @@ class RadarChartItemModel {
     required this.itemName,
     required this.value,
   });
+
+}
+
+class RadarChartCommon {
+  //ルアーの能力チャート描画
+  static List<RadarChartItemModel> getLureRadarChartItem(typLureData lureData) {
+    List<RadarChartItemModel> ret = [];
+    ret.add(new RadarChartItemModel(itemName: '巻き', value: lureData.reeling));
+    ret.add(new RadarChartItemModel(itemName: 'ﾌｫｰﾙ', value: lureData.fall));
+    ret.add(new RadarChartItemModel(itemName: 'ｼｬｸﾘ', value: lureData.jerk));
+    return ret;
+  }
 }

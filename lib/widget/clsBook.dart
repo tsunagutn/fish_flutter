@@ -147,9 +147,9 @@ class _clsBookState extends State<clsBook> with TickerProviderStateMixin {
                             children: [
                               new RadarChart(
                                 key: UniqueKey(),
-                                items: getFishRadarChartItem(_showFishData),
+                                items: [getFishRadarChartItem(_showFishData)],
                                 borderColor: Colors.black,
-                                radarColors: [Colors.green],
+                                radarColors: [Colors.green.withOpacity(0.5)],
                                 fontColor: Colors.black,
                               ),
                               Container(

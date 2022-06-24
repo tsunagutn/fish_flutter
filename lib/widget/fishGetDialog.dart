@@ -7,6 +7,8 @@ import 'package:hive/hive.dart';
 import '../Main.dart';
 import '../TypeAdapter/typFishResult.dart';
 import '../TypeAdapter/typGameData.dart';
+import 'lureLvUpDialog.dart';
+import 'RadarChart.dart';
 
 class fishGetDialog extends StatefulWidget {
   @override
@@ -38,8 +40,8 @@ class _fishGetDialogState extends State<fishGetDialog>
 
   String strLevel = '';
   var colorLevel;
-  String strLureLevel = "";
-  var colorLureLevel;
+  //String strLureLevel = "";
+  //var colorLureLevel;
 
   static const Map<int, String> RARE_MESSAGE = {
     1: 'あなたはうれしい',
@@ -57,7 +59,6 @@ class _fishGetDialogState extends State<fishGetDialog>
   void initState() {
     final gameDataBox = Hive.box(gamedataBoxName);
     gameData = gameDataBox.get(gamedataKeyName);
-    var useLureData = gameData.getUseLure();
 
     fishCm = widget.fish.getSize(widget.fishSize);
     //最初の光
@@ -148,26 +149,6 @@ class _fishGetDialogState extends State<fishGetDialog>
         break;
     }
 
-    //ルアー成長
-    useLureData.totalExp += point;
-    int nowLv = useLureData.lv;
-    int newLv = gameData.getLv();
-    if (nowLv < newLv) {
-      //レベルアップ
-      strLureLevel = gameData.lureLvUp();
-
-      switch (enumLureDiv.values[gameData.useLureIdx]) {
-        case enumLureDiv.jig:
-          colorLureLevel = Colors.cyan[500];
-          break;
-        case enumLureDiv.tairaba:
-          colorLureLevel = Colors.red[200];
-          break;
-        case enumLureDiv.slowjig:
-          colorLureLevel = Colors.green[200];
-          break;
-      }
-    }
     //ゲームデータをセーブ
     gameData.save();
 
@@ -225,7 +206,9 @@ class _fishGetDialogState extends State<fishGetDialog>
                           color: Colors.black.withOpacity(0.3))
                     ],
                   )),
-              insetPadding: EdgeInsets.all(8),
+              //insetPadding: EdgeInsets.all(8),
+              insetPadding:
+                  EdgeInsets.only(top: 20, bottom: 20, left: 8, right: 8),
               content: Container(
                   height: widget.dispSize.height,
                   width: widget.dispSize.width,
@@ -317,13 +300,13 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              strLureLevel,
-                              style: TextStyle(
-                                color: colorLureLevel,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            // Text(
+                            //   strLureLevel,
+                            //   style: TextStyle(
+                            //     color: colorLureLevel,
+                            //     fontWeight: FontWeight.bold,
+                            //   ),
+                            // ),
                             if (flgNew)
                               Container(
                                 margin: EdgeInsets.only(top: 10),
@@ -342,7 +325,42 @@ class _fishGetDialogState extends State<fishGetDialog>
                           children: [
                             ElevatedButton(
                               child: Text("OK"),
-                              onPressed: () {
+                              onPressed: () async {
+                                //ルアー成長判定
+                                var useLureData = gameData.getUseLure();
+                                useLureData.totalExp += point;
+                                int nowLv = useLureData.lv;
+                                int newLv = gameData.getLv();
+                                if (nowLv < newLv) {
+                                  //成長前のデータ取得
+                                  var nowLvData = RadarChartCommon.getLureRadarChartItem(gameData.getUseLure());
+                                  //レベルアップ
+                                  var weightMsg = gameData.lureLvUp();
+                                  gameData.save();
+                                  //成長後のデータ取得
+                                  var newLvData = RadarChartCommon.getLureRadarChartItem(gameData.getUseLure());
+
+                                  var result = await showDialog<int>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (_) {
+                                      return Stack(
+                                        children: [
+                                          //釣りあげダイアログ
+                                          lureLvUpDialog(
+                                            lureIdx: gameData.useLureIdx,
+                                            radarDatas: [newLvData, nowLvData],
+                                            nowLv: nowLv,
+                                            newLv: newLv,
+                                            dispSize: widget.dispSize,
+                                            weightMsg: weightMsg,
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
+
                                 Navigator.pop(context);
                               },
                             ),

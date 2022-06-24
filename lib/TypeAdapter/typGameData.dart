@@ -285,16 +285,16 @@ class typGameData extends HiveObject {
       lureData[useLureIdx].jerk =
           lureStsUp(lureData[useLureIdx].jerk, lureData[useLureIdx].lvAddJerk);
     }
-    ret = lureData[useLureIdx].name +
-        "がレベルアップ Lv " +
-        oldLv.toString() +
+    ret = "Lv " + oldLv.toString() +
         " → " +
         lureData[useLureIdx].lv.toString();
 
     //3レベル毎に新しい重さをアンロック
     //int maxWeightId = weightList.list.length;
     String strWeight = "";
-    int newWeightId = (lureData[useLureIdx].lv ~/ 3);
+    //int newWeightId = (lureData[useLureIdx].lv ~/ 3);
+    //？？？テスト用に1
+    int newWeightId = (lureData[useLureIdx].lv ~/ 1);
     if (lureData[useLureIdx].unLockweightid < newWeightId) {
       for (var i = lureData[useLureIdx].unLockweightid + 1;
           i <= newWeightId;
@@ -304,7 +304,7 @@ class typGameData extends HiveObject {
     }
     lureData[useLureIdx].unLockweightid = newWeightId;
     if (strWeight != "") {
-      ret += "\n" + strWeight + "が使えるようになった";
+      ret += "\n" + strWeight + "\n" + "が使えるようになった";
     }
     //変更を保存
     lureData[useLureIdx].save();
