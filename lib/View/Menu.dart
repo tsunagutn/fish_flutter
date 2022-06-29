@@ -8,6 +8,7 @@ import 'package:fish_flutter/View/DrawerItem.dart';
 import 'package:fish_flutter/View/Fishing.dart';
 import 'package:fish_flutter/Class/BasePageState.dart';
 import 'package:fish_flutter/Class/clsColor.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 
 import '../Main.dart';
@@ -45,17 +46,21 @@ class _menuState extends BasePageState<Menu> {
                 ]),
               ),
               endDrawer: DrawerItem(),
-              body: Container(
+              body:
+              Stack(
+                  children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(top:40),
                 decoration: BoxDecoration(
-                  border: Border.all(color: clsColor.getColorFromHex("4C58FF")),
-                  color: clsColor.getColorFromHex("4C58FF"),
+                  //border: Border.all(color: clsColor.getColorFromHex("4C58FF")),
+                  color: clsColor.getColorFromHex("FFFFFF"),
                   image: DecorationImage(
                     fit: BoxFit.fitWidth,
+                      alignment: Alignment.topCenter,
                     image: AssetImage('assets/images/title.png'),
                   ),
                 ),
-                child: Stack(
-                  children: <Widget>[
+                child:
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -132,6 +137,7 @@ class _menuState extends BasePageState<Menu> {
                             child: new menuCard(
                                 cardText: 'ゲームを開始', icon: Icons.start),
                           ),
+
                           GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(context, "/gamemenu");
@@ -153,10 +159,48 @@ class _menuState extends BasePageState<Menu> {
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                          Container(
+                            margin: EdgeInsets.only(top: 10),
+                            alignment: Alignment.topCenter,
+                            child:
+                            Text("ああ",
+                              style: GoogleFonts.kaiseiTokumin (fontSize: 40,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                //letterSpacing: 6.0,
+                                shadows: <Shadow>[
+                                Shadow(
+                                color: Colors.grey,
+                                offset: Offset(3.0, 3.0),
+                                blurRadius: 5.0,
+                                ),],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top:40),
+                            alignment: Alignment.topCenter,
+                            child:
+                            Text("どてら流し",
+                              style: GoogleFonts.delaGothicOne (fontSize: 80,
+                                color: Colors.red,
+                                //fontWeight: FontWeight.bold,
+                                letterSpacing: 3.0,
+                                shadows: <Shadow>[
+                                  Shadow(
+                                    color: Colors.yellowAccent,
+                                    offset: Offset(1.0, 1.0),
+                                    blurRadius: 30.0,
+                                  ),],
+                              ),
+                            ),
+                          ),
+
+                  ]),
               ),
-            )));
+            ));
   }
 
   //ゲームの初期データをセット？？？シーダー追加して色々返れるようにする

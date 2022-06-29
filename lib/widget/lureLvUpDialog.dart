@@ -76,7 +76,7 @@ class _lureLvUpDialogState extends State<lureLvUpDialog>
           borderRadius: BorderRadius.all(Radius.circular(20.0))),
       // backgroundColor:
       //     clsColor._getColorFromHex('D1F6FF').withOpacity(0.7),
-      title: Text(lureData.name + "レベルアップ",
+      title: Text(lureData.name + "がレベルアップ",
           style: TextStyle(
             //fontWeight: FontWeight.bold,
             fontSize: 20,

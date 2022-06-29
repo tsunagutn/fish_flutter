@@ -29,7 +29,7 @@ class _menuCardState extends State<menuCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 30),
+      margin: const EdgeInsets.only(bottom: 15),
       color: clsColor.getColorFromHex("ffffe0"),
       elevation: 10,
       shadowColor: clsColor.getColorFromHex("555555"),

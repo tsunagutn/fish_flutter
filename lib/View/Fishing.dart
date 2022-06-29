@@ -1297,6 +1297,7 @@ class _FishingState extends BasePageState<Fishing>
             _makiDelayCnt++;
             if (_makiDelayCnt > MAKI_SCAN) {
               flgMaki = true;
+
             }
           } else {
             _makiDelayCnt = 0;
