@@ -80,19 +80,18 @@ class typGameData extends HiveObject {
   //ルアー重さの定義
   static const List<double> LST_LURE_WEIGHT = [
     10.0, //0番目
-    20.0,
-    40.0,
+    30.0,
     60.0,
-    80.0,
     100.0,
     150.0,
-    200.0, //7番目
   ];
 
   //Lv1→2に必要なEXP
-  static const double basicExp = 100.0;
+  static const double BASIC_EXP = 300.0;
+  //次Lvまでの割合
+  static const double NEXT_DIV = 2.1;
   //システム上最大Lv
-  static const int maxLv = 99;
+  static const int MAXLV = 5;
 
   //save処理
   @override
@@ -228,10 +227,10 @@ class typGameData extends HiveObject {
   //累計EXPから現在のレベルを取得
   int getLv() {
     int retLv = 1;
-    double nextExp = basicExp;
+    double nextExp = BASIC_EXP;
     double divExp = nextExp;
     //最大レベルまでループ
-    while (retLv < maxLv) {
+    while (retLv < MAXLV) {
       if (lureData[useLureIdx].totalExp >= divExp) {
         retLv++;
       } else {
@@ -239,7 +238,7 @@ class typGameData extends HiveObject {
         break;
       }
       //次Lvに必要なEXP
-      nextExp = nextExp * 1.1;
+      nextExp = nextExp * NEXT_DIV;
       divExp += nextExp;
     }
     //現レベルを返す
@@ -249,7 +248,7 @@ class typGameData extends HiveObject {
   //次のレベルまでのEXPを返す
   int getNextLvExp() {
     //既に最大レベルの場合は-1を返す
-    if (lureData[useLureIdx].lv >= maxLv) return -1;
+    if (lureData[useLureIdx].lv >= MAXLV) return -1;
     //次Lvの合計EXPと現EXPの差分を返す
     return (getExp(lureData[useLureIdx].lv + 1) - lureData[useLureIdx].totalExp)
         .floor();
@@ -257,10 +256,10 @@ class typGameData extends HiveObject {
 
   //指定したレベルに必要な累計EXPを返す
   double getExp(int nextLv) {
-    double exp = basicExp;
+    double exp = BASIC_EXP;
     //次Lvに必要な合計EXPを算出
     for (int iLv = 1; iLv < nextLv; iLv++) {
-      exp = exp * 1.1;
+      exp = exp * NEXT_DIV;
     }
     return exp;
   }
@@ -269,7 +268,7 @@ class typGameData extends HiveObject {
   String lureLvUp() {
     String ret = "";
     //既に最大レベルの場合はなにもしない
-    if (lureData[useLureIdx].lv >= maxLv) return ret;
+    if (lureData[useLureIdx].lv >= MAXLV) return ret;
     int oldLv = lureData[useLureIdx].lv;
     //新レベルの値をセット
     lureData[useLureIdx].lv = getLv();
@@ -285,16 +284,14 @@ class typGameData extends HiveObject {
       lureData[useLureIdx].jerk =
           lureStsUp(lureData[useLureIdx].jerk, lureData[useLureIdx].lvAddJerk);
     }
-    ret = "Lv " + oldLv.toString() +
-        " → " +
-        lureData[useLureIdx].lv.toString();
+    ret = "Lv " + oldLv.toString() + " → " + lureData[useLureIdx].lv.toString();
 
     //3レベル毎に新しい重さをアンロック
     //int maxWeightId = weightList.list.length;
     String strWeight = "";
     //int newWeightId = (lureData[useLureIdx].lv ~/ 3);
     //？？？テスト用に1
-    int newWeightId = (lureData[useLureIdx].lv ~/ 1);
+    int newWeightId = (lureData[useLureIdx].lv ~/ 1) - 1;
     if (lureData[useLureIdx].unLockweightid < newWeightId) {
       for (var i = lureData[useLureIdx].unLockweightid + 1;
           i <= newWeightId;

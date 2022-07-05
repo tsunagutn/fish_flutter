@@ -51,10 +51,12 @@ class _goalState extends BasePageState<Goal> with TickerProviderStateMixin {
   }
 
   @override
-  Widget buildChildWidget(BuildContext context) {
+  Widget? buildChildWidget(BuildContext context) {
     // `ModalRoute.of()`メソッドを使用して引数を取得
-    final String hiveKeyName =
-        ModalRoute.of(context)?.settings.arguments as String;
+    // final arg =
+    // ModalRoute.of(context)!.settings.arguments as GoalArguments;
+    // final String hiveKeyName =
+    //     ModalRoute.of(context)?.settings.arguments as String;
     DateFormat outputFormat = DateFormat('yyyy/MM/dd HH:mm');
 
     return Stack(children: [
@@ -99,7 +101,7 @@ class _goalState extends BasePageState<Goal> with TickerProviderStateMixin {
                     children: [
                       Expanded(
                         child:
-                            new clsGoal(isHistory: false, keyName: hiveKeyName),
+                            new clsGoal(isHistory: false, keyName: gamedataKeyName),
                       ),
                       Container(
                         margin: EdgeInsets.only(bottom: 10),

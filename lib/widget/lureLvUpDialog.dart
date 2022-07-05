@@ -8,6 +8,7 @@ import '../Main.dart';
 import '../TypeAdapter/typFishResult.dart';
 import '../TypeAdapter/typGameData.dart';
 import 'RadarChart.dart';
+import 'package:fish_flutter/Class/clsColor.dart';
 
 class lureLvUpDialog extends StatefulWidget {
   @override
@@ -50,7 +51,7 @@ class _lureLvUpDialogState extends State<lureLvUpDialog>
       });
     _animationController.forward();
     //ジングル鳴らす
-    soundManagerPool.playSound('se/jingle01.mp3');
+    soundManagerPool.playSound('se/lvup.mp3');
 
     super.initState();
   }
@@ -79,11 +80,11 @@ class _lureLvUpDialogState extends State<lureLvUpDialog>
       title: Text(lureData.name + "がレベルアップ",
           style: TextStyle(
             //fontWeight: FontWeight.bold,
-            fontSize: 20,
-            //color: Color.fromRGBO(r, g, b, 1.0),
+            fontSize: 24,
+            color: Colors.redAccent,
             shadows: <Shadow>[
               Shadow(
-                  offset: Offset(4.0, 10.0),
+                  offset: Offset(4.0, 4.0),
                   blurRadius: 2.0,
                   color: Colors.black.withOpacity(0.3))
             ],
@@ -97,9 +98,9 @@ class _lureLvUpDialogState extends State<lureLvUpDialog>
               children: <Widget>[
                 Column(
                   children: [
-                    Container(margin: EdgeInsets.only(left:8, right: 8),
-                      child:
-                      new Image(
+                    Container(
+                      margin: EdgeInsets.only(left: 8, right: 8),
+                      child: new Image(
                         image: AssetImage('assets/images/' + lureData.image),
                         fit: BoxFit.fill,
                         //height: 240,
@@ -112,15 +113,13 @@ class _lureLvUpDialogState extends State<lureLvUpDialog>
                         fontSize: 16,
                       ),
                     ),
-
                     new RadarChart(
                       key: UniqueKey(),
                       items: widget.radarDatas,
                       borderColor: Colors.grey,
-                      radarColors: [Colors.yellowAccent, Colors.amber],
+                      radarColors: [clsColor.getColorFromHex("ABE8C9"), clsColor.getColorFromHex("5DA983")],
                       fontColor: Colors.black,
                     ),
-
                   ],
                 ),
                 Row(
@@ -130,6 +129,7 @@ class _lureLvUpDialogState extends State<lureLvUpDialog>
                     ElevatedButton(
                       child: Text("OK"),
                       onPressed: () async {
+                        soundManagerPool.playSound('se/lvupclose.mp3');
                         Navigator.pop(context);
                       },
                     ),

@@ -1,14 +1,17 @@
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/TypeAdapter/typLureData.dart';
+import 'package:fish_flutter/widget/tackleIcon.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../Main.dart';
 import '../TypeAdapter/typFishResult.dart';
 import '../TypeAdapter/typGameData.dart';
+import 'SliderPainter.dart';
 import 'lureLvUpDialog.dart';
 import 'RadarChart.dart';
+import 'package:fish_flutter/Class/clsColor.dart';
 
 class fishGetDialog extends StatefulWidget {
   @override
@@ -54,6 +57,8 @@ class _fishGetDialogState extends State<fishGetDialog>
   late typGameData gameData;
   late int point;
   bool flgNew = false;
+  late double nowExp;
+  late double newExp;
 
   @override
   void initState() {
@@ -148,6 +153,27 @@ class _fishGetDialogState extends State<fishGetDialog>
         colorLevel = Colors.green[200];
         break;
     }
+
+    //ルアー 現EXP
+    var useLureData = gameData.getUseLure();
+    nowExp = useLureData.totalExp + point;
+    int Lv = 1;
+    double nextExp = typGameData.BASIC_EXP;
+    double divExp = nextExp;
+    //最大レベルまでループ
+    while (Lv < typGameData.MAXLV) {
+      if (useLureData.totalExp >= divExp) {
+        Lv++;
+      } else {
+        //現Lv判明時にループ抜け
+        break;
+      }
+      //次Lvに必要なEXP
+      nextExp = nextExp * typGameData.NEXT_DIV;
+      divExp += nextExp;
+    }
+    //ルアー 次のレベルまで
+    newExp = divExp;
 
     //ゲームデータをセーブ
     gameData.save();
@@ -313,12 +339,52 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 child: Text("おさかな図鑑に登録します",
                                     style: TextStyle(color: Colors.red)),
                               ),
-                            // Container(
-                            //   margin: EdgeInsets.only(top: 10),
-                            //   child: Text(widget.fish.text),
-                            // ),
-                          ],
-                        ),
+                            Container(margin: EdgeInsets.only(top:10, left: 10, right: 10),
+                            child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly
+                                ,crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                tackleIcon(
+                                  tackleIconSize: 40.0,
+                                  lure: gameData.getUseLure(),
+                                  flgSelect: false,
+                                  opacity:1.0,
+                                ),
+                                Container(
+                                  width: widget.dispSize.width / 2,
+                                  child:
+                                Column(
+                                  children: [
+                                    Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(child:
+                                    Text("Lv " + gameData.getUseLure().lv.toString()),),
+                                          Container(child: Text("次まで " + (newExp - nowExp).toString()),),
+                                        ]),
+                                  Container(
+                                    width: widget.dispSize.width / 2,
+                                    child:
+                                    CustomPaint(
+                                    painter: new SliderPainter(
+                                      height: 12,
+                                      activeColor: clsColor.getColorFromHex("ABE8C9"),
+                                      inactiveColor: Colors.white,
+                                      value: (nowExp > newExp) ? newExp:nowExp,
+                                      maxValue: newExp,
+                                      backRadius: 1.0,
+                                      maxBackRadius: 1.0,
+                                      flgShaKe: false,
+                                      flgDispValue: false,
+                                      flgDispMaxValue: false,
+                                      value2: 50,
+                                      value2Color: clsColor.getColorFromHex("5DA983")
+                                          .withOpacity(0.3),
+                                    ),),),
+
+                                  ],),),
+                              ]),
+                            ),
+                          ]),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           mainAxisSize: MainAxisSize.min,

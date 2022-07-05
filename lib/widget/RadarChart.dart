@@ -76,7 +76,7 @@ class RadarChartPainter extends CustomPainter {
     canvas.drawCircle(centerOffset, radius, outlinePaint);
 
     List<double> ticks = []; //中のレベル
-    for (var i = 0; i < tickLength; i++) {
+    for (var i = 0; i <= tickLength; i++) {
       ticks.add(i / tickLength); //0.0～1.0
     }
     var tickDistance = radius / (tickLength);

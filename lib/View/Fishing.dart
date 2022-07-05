@@ -211,6 +211,7 @@ import 'package:fish_flutter/Model/SpeedRange.dart';
 import 'package:fish_flutter/Model/StageModel.dart';
 import 'package:fish_flutter/TypeAdapter/typFishResult.dart';
 import 'package:fish_flutter/TypeAdapter/typGameData.dart';
+import 'package:fish_flutter/View/Goal.dart';
 import 'package:fish_flutter/View/Menu.dart';
 import 'package:fish_flutter/widget/FIshCard.dart';
 import 'package:fish_flutter/widget/FishRangeSliderPainter.dart';
@@ -828,10 +829,13 @@ class _FishingState extends BasePageState<Fishing>
       if (!_flgHit && !_flgBait) {
         //ゴール画面に遷移する
         timer.cancel();
-        Navigator.pushNamed(context, "/goal", arguments: gamedataKeyName).then(
+        Navigator.pushNamed(context, "/goal"
+        ).then(
           (value) {
             //ゴール画面から返ってきたらメニューに戻る
-            Navigator.of(context).popUntil(ModalRoute.withName("/menu"));
+            //Navigator.of(context).popUntil(ModalRoute.withName("/menu"));
+            //画面を閉じる
+            Navigator.of(context).pop();
             return;
           },
         );
@@ -985,7 +989,7 @@ class _FishingState extends BasePageState<Fishing>
     var mn = MIN_RAND_ADD_TENSION;
     //使用中のルアー重さ
     lureWeight = gameData.getUseLureWeight();
-    weight = lureWeight;
+    weight = lureWeight * 10;
     if (_collect) {
       //高速回収中
       weight -= 1000;
@@ -1869,17 +1873,22 @@ class _FishingState extends BasePageState<Fishing>
                                       _timer.cancel();
                                       super.isBack = true;
                                       //モーダルを閉じる
-                                      Navigator.of(context).pop();
+                                      //Navigator.of(context).pop();
                                       //drwerを閉じる
-                                      Navigator.of(context).pop();
+                                      //Navigator.of(context).pop();
                                       //ゴール画面に遷移する
-                                      Navigator.pushNamed(context, "/goal",
-                                              arguments: gamedataKeyName)
+                                      Navigator.pushNamed(context, "/goal")
                                           .then(
                                         (value) {
-                                          //ゴール画面から返ってきたらメニューに戻る
-                                          Navigator.of(context).popUntil(
-                                              ModalRoute.withName("/menu"));
+                                          // //ゴール画面から返ってきたらメニューに戻る
+                                          // Navigator.of(context).popUntil(
+                                          //     ModalRoute.withName("/menu"));
+                                          //モーダルを閉じる
+                                          Navigator.of(context).pop();
+                                          //drwerを閉じる
+                                          Navigator.of(context).pop();
+                                          //画面を閉じる
+                                          Navigator.of(context).pop();
                                         },
                                       );
                                     },
@@ -2816,7 +2825,7 @@ class _FishingState extends BasePageState<Fishing>
                                                   items:
                                                   [RadarChartCommon.getLureRadarChartItem(gameData.getUseLure())],
                                                   borderColor: Colors.white,
-                                                  radarColors: [Colors.orange.withOpacity(0.5)],
+                                                  radarColors: [Colors.orange.withOpacity(0.8)],
                                                   fontColor: Colors.white,
                                                 ),
                                                 Container(
