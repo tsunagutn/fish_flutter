@@ -1,3 +1,4 @@
+
 import 'package:fish_flutter/Model/FishModel.dart';
 import 'package:fish_flutter/Model/LuresModel.dart';
 import 'package:fish_flutter/TypeAdapter/typLureData.dart';
@@ -42,6 +43,7 @@ class _fishGetDialogState extends State<fishGetDialog>
   late Animation<double> _bColorValue;
 
   String strLevel = '';
+  String strLevel2 = '';
   var colorLevel;
   //String strLureLevel = "";
   //var colorLureLevel;
@@ -57,8 +59,10 @@ class _fishGetDialogState extends State<fishGetDialog>
   late typGameData gameData;
   late int point;
   bool flgNew = false;
+  late double oldExp;
   late double nowExp;
   late double newExp;
+  double prevExp = 0;
 
   @override
   void initState() {
@@ -138,18 +142,24 @@ class _fishGetDialogState extends State<fishGetDialog>
     //タックルの成長
     switch (widget.fish.type) {
       case enumFishType.blue:
-        gameData.maxTension += (point / 1);
         strLevel = "最大テンションが成長しました";
+        strLevel2 = gameData.maxTension.toInt().toString() +
+            " → " + (gameData.maxTension + point).toInt().toString();
+        gameData.maxTension += (point / 1);
         colorLevel = Colors.indigo[500];
         break;
       case enumFishType.bream:
-        gameData.maxSpeed += (point / 10);
         strLevel = "巻き速度が成長しました";
+        strLevel2 = gameData.maxSpeed.toInt().toString() +
+            " → " + (gameData.maxSpeed + (point / 10)).toInt().toString();
+        gameData.maxSpeed += (point / 10);
         colorLevel = Colors.red[200];
         break;
       case enumFishType.bottom:
-        gameData.maxLineHp += (point / 1);
         strLevel = "ライン強さが成長しました";
+        strLevel2 = gameData.maxLineHp.toInt().toString() +
+            " → " + (gameData.maxLineHp + (point / 1)).toInt().toString();
+        gameData.maxLineHp += (point / 1);
         colorLevel = Colors.green[200];
         break;
     }
@@ -168,12 +178,16 @@ class _fishGetDialogState extends State<fishGetDialog>
         //現Lv判明時にループ抜け
         break;
       }
+      //前LvのEXPを記憶
+      prevExp = nextExp;
       //次Lvに必要なEXP
       nextExp = nextExp * typGameData.NEXT_DIV;
       divExp += nextExp;
     }
     //ルアー 次のレベルまで
-    newExp = divExp;
+    oldExp = useLureData.totalExp - prevExp;
+    newExp = divExp - prevExp;
+    nowExp = nowExp - prevExp;
 
     //ゲームデータをセーブ
     gameData.save();
@@ -326,6 +340,13 @@ class _fishGetDialogState extends State<fishGetDialog>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            Text(
+                              strLevel2,
+                              style: TextStyle(
+                                color: colorLevel,
+                                //fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             // Text(
                             //   strLureLevel,
                             //   style: TextStyle(
@@ -359,7 +380,7 @@ class _fishGetDialogState extends State<fishGetDialog>
                                         children: [
                                           Container(child:
                                     Text("Lv " + gameData.getUseLure().lv.toString()),),
-                                          Container(child: Text("次まで " + (newExp - nowExp).toString()),),
+                                          Container(child: Text("次まで " + ((newExp - nowExp) < 0 ? 0: (newExp - nowExp)).toInt().toString()),),
                                         ]),
                                   Container(
                                     width: widget.dispSize.width / 2,
@@ -369,16 +390,16 @@ class _fishGetDialogState extends State<fishGetDialog>
                                       height: 12,
                                       activeColor: clsColor.getColorFromHex("ABE8C9"),
                                       inactiveColor: Colors.white,
-                                      value: (nowExp > newExp) ? newExp:nowExp,
+                                      value: oldExp,
                                       maxValue: newExp,
                                       backRadius: 1.0,
                                       maxBackRadius: 1.0,
                                       flgShaKe: false,
                                       flgDispValue: false,
                                       flgDispMaxValue: false,
-                                      value2: 50,
+                                      value2: (nowExp > newExp) ? newExp:nowExp,
                                       value2Color: clsColor.getColorFromHex("5DA983")
-                                          .withOpacity(0.3),
+                                          .withOpacity(0.2),
                                     ),),),
 
                                   ],),),
