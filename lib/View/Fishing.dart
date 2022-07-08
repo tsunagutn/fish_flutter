@@ -529,8 +529,74 @@ class _FishingState extends BasePageState<Fishing>
 
   var flgDispSettingsOk = false;
 
+  void preload() async {
+    await precacheImage(new AssetImage('assets/images/mounten.png'), context);
+    await precacheImage(new AssetImage('assets/images/kumo1.png'), context);
+    await precacheImage(new AssetImage('assets/images/kumo2.png'), context);
+    await precacheImage(new AssetImage('assets/images/kumo3.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/clown_gold.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/clown_silver.png'), context);
+    await precacheImage(new AssetImage('assets/images/fishback.jpg'), context);
+    await precacheImage(new AssetImage('assets/images/jig.png'), context);
+    await precacheImage(new AssetImage('assets/images/reelwheel.png'), context);
+    await precacheImage(new AssetImage('assets/images/ship.png'), context);
+    await precacheImage(new AssetImage('assets/images/slowjig.png'), context);
+    await precacheImage(new AssetImage('assets/images/SPEED.png'), context);
+    await precacheImage(new AssetImage('assets/images/tairaba.png'), context);
+    await precacheImage(new AssetImage('assets/images/takashima.png'), context);
+    await precacheImage(new AssetImage('assets/images/tanker.png'), context);
+    await precacheImage(new AssetImage('assets/images/teibou.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/TENSIONDRAG.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/unknownfish.png'), context);
+    await precacheImage(new AssetImage('assets/images/windlvup.gif'), context);
+    await precacheImage(new AssetImage('assets/images/fish/aji.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/akayagara.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/aohata.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/ayamekasago.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/chikamekintoki.png'), context);
+    await precacheImage(new AssetImage('assets/images/fish/eso.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/hiramasa.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/itoyori.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/kihassoku.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/kijihata.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/madai.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/renkodai.png'), context);
+    await precacheImage(new AssetImage('assets/images/fish/saba.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/sabahugu.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/sagoshi.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/sawara.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/seabass.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/shiira.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/shimafugu.png'), context);
+    await precacheImage(
+        new AssetImage('assets/images/fish/ukkarikasago.png'), context);
+  }
+
   @override
   void initState() {
+    //画像のプリロード
+    preload();
+
     //魚テーブルを初期化？？？本当はエリアで絞る
     FISH_TABLE = new FishsModel();
 
@@ -830,8 +896,7 @@ class _FishingState extends BasePageState<Fishing>
       if (!_flgHit && !_flgBait) {
         //ゴール画面に遷移する
         timer.cancel();
-        Navigator.pushNamed(context, "/goal"
-        ).then(
+        Navigator.pushNamed(context, "/goal").then(
           (value) {
             //ゴール画面から返ってきたらメニューに戻る
             //Navigator.of(context).popUntil(ModalRoute.withName("/menu"));
@@ -1302,7 +1367,6 @@ class _FishingState extends BasePageState<Fishing>
             _makiDelayCnt++;
             if (_makiDelayCnt > MAKI_SCAN) {
               flgMaki = true;
-
             }
           } else {
             _makiDelayCnt = 0;
@@ -2608,46 +2672,46 @@ class _FishingState extends BasePageState<Fishing>
                                           //Text("DRAG"),
                                           SizedBox(
                                             width: 50,
-                                            child:
-                                          RotatedBox(
-                                            //縦置き
-                                            quarterTurns: -1,
-                                            child: SliderTheme(
-                                              data: SliderTheme.of(context)
-                                                  .copyWith(
-                                                //trackHeight: 1, //全体の縦長
-                                                valueIndicatorColor: Colors
-                                                    .black
-                                                    .withOpacity(1.0), //背景の色
-                                                activeTrackColor: Colors.red
-                                                    .withOpacity(
-                                                        1.0), //値有りエリアの色
-                                                inactiveTrackColor: Colors.white
-                                                    .withOpacity(
-                                                        1.0), //値無しエリアの色
-                                                activeTickMarkColor:
-                                                    Colors.black.withOpacity(
-                                                        1.0), //各value値の色
-                                                thumbColor: Colors.red
-                                                    .withOpacity(0.5), //値ツマミの色
-                                                // thumbShape: RoundSliderThumbShape(
-                                                //     enabledThumbRadius: 10), //ツマミの大きさ
-                                                overlayColor: Colors.black
-                                                    .withOpacity(
-                                                        0.0), //値ツマミフォーカス時の色
-                                              ),
-                                              child: Slider(
-                                                value: _drag,
-                                                min: 0.0,
-                                                max: 1.0,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    _drag = value;
-                                                  });
-                                                },
+                                            child: RotatedBox(
+                                              //縦置き
+                                              quarterTurns: -1,
+                                              child: SliderTheme(
+                                                data: SliderTheme.of(context)
+                                                    .copyWith(
+                                                  //trackHeight: 1, //全体の縦長
+                                                  valueIndicatorColor: Colors
+                                                      .black
+                                                      .withOpacity(1.0), //背景の色
+                                                  activeTrackColor: Colors.red
+                                                      .withOpacity(
+                                                          1.0), //値有りエリアの色
+                                                  inactiveTrackColor:
+                                                      Colors.white.withOpacity(
+                                                          1.0), //値無しエリアの色
+                                                  activeTickMarkColor:
+                                                      Colors.black.withOpacity(
+                                                          1.0), //各value値の色
+                                                  thumbColor: Colors.red
+                                                      .withOpacity(
+                                                          0.5), //値ツマミの色
+                                                  // thumbShape: RoundSliderThumbShape(
+                                                  //     enabledThumbRadius: 10), //ツマミの大きさ
+                                                  overlayColor: Colors.black
+                                                      .withOpacity(
+                                                          0.0), //値ツマミフォーカス時の色
+                                                ),
+                                                child: Slider(
+                                                  value: _drag,
+                                                  min: 0.0,
+                                                  max: 1.0,
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      _drag = value;
+                                                    });
+                                                  },
+                                                ),
                                               ),
                                             ),
-                                          ),
                                           ),
                                         ],
                                       ),
@@ -2823,10 +2887,17 @@ class _FishingState extends BasePageState<Fishing>
                                                 //ステータス
                                                 new RadarChart(
                                                   key: UniqueKey(),
-                                                  items:
-                                                  [RadarChartCommon.getLureRadarChartItem(gameData.getUseLure())],
+                                                  items: [
+                                                    RadarChartCommon
+                                                        .getLureRadarChartItem(
+                                                            gameData
+                                                                .getUseLure())
+                                                  ],
                                                   borderColor: Colors.white,
-                                                  radarColors: [Colors.orange.withOpacity(0.8)],
+                                                  radarColors: [
+                                                    Colors.orange
+                                                        .withOpacity(0.8)
+                                                  ],
                                                   fontColor: Colors.white,
                                                 ),
                                                 Container(

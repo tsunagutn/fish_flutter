@@ -27,8 +27,13 @@ class Menu extends StatefulWidget {
 class _menuState extends BasePageState<Menu> {
   _menuState() : super(fileNames: Menu.screenBgms, bgmMode: enumBgmMode.auto);
 
+  void preload() async {
+    await precacheImage(new AssetImage('assets/images/title.png'), context);
+  }
+
   @override
   void initState() {
+    preload();
     super.initState();
   }
 
