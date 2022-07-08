@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+	<title>文書のタイトル</title>
+    <meta charset="UTF-8">
+	<link rel="manifest" href="pwa.json">
+	<script>
+	window.addEventListener('load', function() {
+	if ('serviceWorker' in navigator) {
+	  navigator.serviceWorker.register("pwa.js");
+	}
+	});
+	</script>
+	</head>
+  	<body>
+	<div>
+		<button id="InstallBtn" class="installbotton">
+			アプリをインストールする
+		</button>
+	</div>
+	<script src="install.js"></script>
+	</body>
+</html>

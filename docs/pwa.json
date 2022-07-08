@@ -8,12 +8,12 @@
 	"start_url": "https://tsunagutn.github.io/fish_flutter/",
 	"icons": [
 	 {
-	  "src": "https://tsunagutn.github.io/tttest/logo/logo1.png",
+	  "src": "https://tsunagutn.github.io/fish_flutter/logo/logo1.png",
 	  "sizes": "192x192",
 	  "type": "image/png"
 	 },
 	 {
-	  "src": "https://tsunagutn.github.io/tttest/logo/logo5.png",
+	  "src": "https://tsunagutn.github.io/fish_flutter/logo/logo5.png",
 	  "sizes": "512x512",
 	  "type": "image/png"
 	 }
