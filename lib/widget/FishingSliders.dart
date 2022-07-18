@@ -96,10 +96,21 @@ class _FishingSlidersState extends State<FishingSliders> {
                             crossAxisAlignment:
                             CrossAxisAlignment.start,
                             children: [
-                              new Image(
-                                image: AssetImage(
-                                    'assets/images/TENSIONDRAG.png'),
-                              ),
+                              // new Image(
+                              //   image: AssetImage(
+                              //       'assets/images/TENSIONDRAG.png'),
+                              // ),
+                              Text("テンション",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  shadows: <Shadow>[
+                                    Shadow(
+                                      color: Colors.black,
+                                      offset: Offset(1.0, 1.0),
+                                      blurRadius: 5.0,
+                                    ),
+                                  ],
+                                ),),
                             ],
                           ),
                           Container(
@@ -212,10 +223,21 @@ class _FishingSlidersState extends State<FishingSliders> {
                   CrossAxisAlignment.start,
                   children: <Widget>[
                     //Text("SPEED"),
-                    new Image(
-                      image: AssetImage(
-                          'assets/images/SPEED.png'),
-                    ),
+                    // new Image(
+                    //   image: AssetImage(
+                    //       'assets/images/SPEED.png'),
+                    // ),
+                    Text("スピード",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        shadows: <Shadow>[
+                          Shadow(
+                            color: Colors.black,
+                            offset: Offset(1.0, 1.0),
+                            blurRadius: 5.0,
+                          ),
+                        ],
+                      ),),
                     Container(
                       margin: EdgeInsets.only(left: 8),
                       child: Transform(

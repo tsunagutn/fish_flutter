@@ -291,34 +291,51 @@ class tacklePainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     var rool = handleRoll * 2;
+    var flgUp = false;
     //リール回転でいったりきたりさせる為の値
     if (rool < 1.0) {
+      //ハンドルが下に進んでいる
       rool = math.pow(rool, 2) as double;
     } else {
+      //ハンドルが上に進んでいる
+      flgUp = true;
       rool = math.pow(rool - 1.0, 2) as double;
       rool = 1.0 - rool;
     }
-    rool = (reelSizeY * 2 * rool) - reelSizeY / 3;
+    var roolY = (reelSizeY * 2 * rool) - reelSizeY / 3;
+    //ハンドルの大きさ係数
+    var sizeKesu = rool / 0.5;
+    if (sizeKesu > 1.0) {
+      sizeKesu = 2.0 - sizeKesu;
+    }
+    var handleZoomX = 7 * sizeKesu;
+    if (flgUp) handleZoomX = handleZoomX * -1;
+    var handleZoomY = handleZoomX * (2 / 1.5);
+    if (!takclePositionRight) {
+      handleZoomX = handleZoomX * -1;
+      //handleZoomY = handleZoomY * -1;
+    }
+
+    debugPrint(handleZoomX.toString() + " " + handleZoomY.toString());
 
     //リールのハンドル部分
     List<Offset> handlePath = [];
     final handleMargin = 16.0;
     final handleSizeX = reelSizeX / 2;
     final handleSizeY = reelSizeY / 1.5;
-    final handleRadius = 10;
 
     //ハンドルの基本X
     var handlePositionX = tackleCenterX +
         ((reelSizeX + handleRootSizeX + handleMargin) * position);
     //ハンドルの基本Y
-    var handlePositionY = reelCenterY - reelSizeY + rool;
+    var handlePositionY = reelCenterY - reelSizeY + roolY;
 
-    handlePath.add(new Offset(handlePositionX, handlePositionY));
-    handlePath.add(new Offset(handlePositionX, handlePositionY + handleSizeY));
-    handlePath.add(new Offset(handlePositionX + handleSizeX * position,
-        handlePositionY + handleSizeY));
+    handlePath.add(new Offset(handlePositionX - handleZoomX, handlePositionY + handleZoomY));
+    handlePath.add(new Offset(handlePositionX - handleZoomX, handlePositionY + handleSizeY - handleZoomY));
+    handlePath.add(new Offset((handlePositionX + handleSizeX * position) + handleZoomX,
+        handlePositionY + handleSizeY - handleZoomY));
     handlePath.add(
-        new Offset(handlePositionX + handleSizeX * position, handlePositionY));
+        new Offset((handlePositionX + handleSizeX * position) + handleZoomX, handlePositionY + handleZoomY));
     //テンション分傾け
     handlePath = handlePath
         .map((o) => _rotate(

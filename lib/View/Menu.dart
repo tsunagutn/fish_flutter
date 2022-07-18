@@ -154,6 +154,14 @@ class _menuState extends BasePageState<Menu> {
                       icon: Icons.settings,
                     ),
                   ),
+
+                  //テスト用画面
+                  ElevatedButton(
+                      child: const Text('テスト画面'),
+                      onPressed: () async {
+                        Navigator.pushNamed(context, "/test");
+                      }),
+
                 ],
               ),
             ),
@@ -180,21 +188,24 @@ class _menuState extends BasePageState<Menu> {
           ),
           Container(
             margin: EdgeInsets.only(top: 40),
-            alignment: Alignment.topCenter,
-            child: Text(
-              "どてら流し",
-              style: GoogleFonts.delaGothicOne(
-                fontSize: 80,
-                color: Colors.red,
-                //fontWeight: FontWeight.bold,
-                letterSpacing: 3.0,
-                shadows: <Shadow>[
-                  Shadow(
-                    color: Colors.yellowAccent,
-                    offset: Offset(1.0, 1.0),
-                    blurRadius: 30.0,
-                  ),
-                ],
+            child:
+            FittedBox(
+              alignment: Alignment.topCenter,
+              child: Text(
+                "どてら流し",
+                style: GoogleFonts.delaGothicOne(
+                  fontSize: 80,
+                  color: Colors.red,
+                  //fontWeight: FontWeight.bold,
+                  letterSpacing: 3.0,
+                  shadows: <Shadow>[
+                    Shadow(
+                      color: Colors.yellowAccent,
+                      offset: Offset(1.0, 1.0),
+                      blurRadius: 30.0,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

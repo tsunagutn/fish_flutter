@@ -144,8 +144,9 @@
 //済・音楽関係が安定しないをよくする
 //ボツ・アタリ時HIT時レア度や初によって音を返る
 //済・ルアレベル上げ画面
-//・水中の見てくれ
-//・ジャーク、巻、フォールの確率上昇を積み重ね式にする
+//済・ジャーク、巻、フォールの確率上昇を積み重ね式にする
+//済・リールのハンドルが上のときでかくする
+//・ドラグのバーの見てくれ
 //・尾に合わせは音変える
 //・釣果によって何か成長させる
 //・実績
@@ -156,6 +157,7 @@
 //・海底に漁礁とか
 //・時合度が低いのが続かんようにするか、高くできるようにする
 //・チュートリアルか、ヘルプか
+//・水中の見てくれ 中層ぐらいまで斜めのぴかぴか
 
 //［リリース後のアップデート］
 //・設定画面で感度のテストできるようにする
@@ -314,9 +316,9 @@ class _FishingState extends BasePageState<Fishing>
     0: 50,
     1: 100,
     2: 300,
-    3: 700,
-    4: 1000,
-    5: 2000,
+    3: 500,
+    4: 700,
+    5: 1000,
   };
 
   //最大水深(0.1m)ごとの風の強さ
@@ -359,6 +361,10 @@ class _FishingState extends BasePageState<Fishing>
   // static const BAIT_CNT_MAX = 30; //アタリ判定期間
   // static const FOOKING_TENSION = 150; //アワセ成功閾値
   static const MOVE_FISHPOINTER_MAX = 20.0; //最高速度 +-0.5の時の魚反応光点移動量
+
+  static const MAKI_LVUP_SCAN = 40; //巻きのレベルアップに必要なスキャン数
+  static const FALL_LVUP_SCAN = 40; //フォールのレベルアップに必要なスキャン数
+  static const JERK_LVUP_COUNT = 1; //ジャークのレベルアップに必要な回数
 
   static const SHIP_MOVE_POINT = 1; //船移動時の1スキャンポイント消費
   //static const Map<int, double> DEPTH_CHANGE_ORDERS = {0: 0.5, 1: 0.45, 2: 0.55};
@@ -443,7 +449,11 @@ class _FishingState extends BasePageState<Fishing>
   int _baitCnt = 0; //当たってからのスキャン数
   //var _baitMaxTension = 0.0; //バイト中の最大テンション
   double _fookingLv = 0.0; //フッキングの成功度
-  int _makiDelayCnt = 0; //巻き成立カウント
+  int _makiDelayCnt = 0; //巻き継続カウント
+  int _fallDelayCnt = 0; //フォール継続カウント
+  int _jerkDelayCnt = 0; //ジャーク継続回数
+
+  int _lureActionLv = 0; //アクションレベル
 
   late FishModel _hitFish; //現在HIT中の魚種
   double _fishSize = 0.0; //現在HIT中の魚の大きさ MAXを1.0とした時の割合
@@ -1336,7 +1346,7 @@ class _FishingState extends BasePageState<Fishing>
     var fishs = FISH_TABLE.extractDepth(
         depth: _depth, maxDepth: gameData.maxDepth, bottom: bottom);
     var maxProb = 0.0;
-    duration = durationMax;
+    //duration = durationMax;
 
     if (!(_flgBait || _flgHit || _collect)) {
       var flgFall = false;
@@ -1350,29 +1360,87 @@ class _FishingState extends BasePageState<Fishing>
           //ジャーク状態の継続
           flgJerk = true;
           _makiDelayCnt = 0;
+          _fallDelayCnt = 0;
+          //_jerkDelayCnt = 0;
         } else {
+          var actionLv = 0;
           if (_onClutch && _depth < gameData.maxDepth) {
             //糸出中、かつ水深MAXではない時はフォール中
             flgFall = true;
             _makiDelayCnt = 0;
+            _jerkDelayCnt = 0;
+            _fallDelayCnt++;
+
+            var hanteiScan = 0;
+            //レベル判定
+            for (int i = 1; i <= (gameData.getUseLure().fall  * 5).floor(); i++){
+              actionLv = i;
+              //補正値 iがMAXなら1、そこから1下がる毎に半分になる
+              var maxFall = (gameData.getUseLure().fall  * 5).floor();
+              var scanhosei = i / maxFall;
+              hanteiScan += (FALL_LVUP_SCAN * scanhosei).floor();
+              debugPrint(_fallDelayCnt.toString() + " " +  hanteiScan.toString());
+              if (_fallDelayCnt < hanteiScan) {
+                break;
+              }
+            }
           } else if (!flgDrag &&
               _rodStandUp > 0.5 &&
               _depth < gameData.maxDepth) {
             //ドラグ出中ではない、ロッド操作による補正中、水深0mやMAXではない時はジャーク中
             flgJerk = true;
             _makiDelayCnt = 0;
+            _fallDelayCnt = 0;
+            _jerkDelayCnt++;
             _jerkCnt = JERK_SCAN; //一度ジャークと判定されたら一定スキャン数ジャーク継続
+            //レベル判定
+            var jerkLv = 2 + _jerkDelayCnt ~/ JERK_LVUP_COUNT;
+            if (gameData.getUseLure().jerk < (jerkLv / 10)) {
+              _lureActionLv = (gameData.getUseLure().jerk  * 10).floor() ~/ 2;
+            } else {
+              _lureActionLv = jerkLv ~/ 2;
+            }
+
           } else if (!flgDrag && _onTap && _depth < gameData.maxDepth) {
-            //ドラグ出中ではない、リーリング中、水深0mやMAXではない時は巻き中
+            //ドラグ出中ではない、リーリング中、水深0mやMAXではない時
             _makiDelayCnt++;
             if (_makiDelayCnt > MAKI_SCAN) {
+              //一定スキャン巻き状態なら巻き
+              _fallDelayCnt = 0;
+              _jerkDelayCnt = 0;
+              _makiDelayCnt++;
               flgMaki = true;
+
+              var hanteiScan = 0;
+              //レベル判定
+              for (int i = 1; i <= (gameData.getUseLure().reeling  * 5).floor(); i++){
+                actionLv = i;
+                //補正値 iがMAXなら1、そこから1下がる毎に半分になる
+                var maxMaki = (gameData.getUseLure().reeling  * 5).floor();
+                var scanhosei = i / maxMaki;
+                hanteiScan += (MAKI_LVUP_SCAN * scanhosei).floor();
+                if (_makiDelayCnt < hanteiScan) {
+                  break;
+                }
+              }
             }
           } else {
             _makiDelayCnt = 0;
+            _fallDelayCnt = 0;
+            _jerkDelayCnt = 0;
+            _lureActionLv = 0;
           }
+          _lureActionLv = actionLv;
         }
+      } else {
+        _makiDelayCnt = 0;
+        _fallDelayCnt = 0;
+        _jerkDelayCnt = 0;
+        _lureActionLv = 0;
       }
+
+      //点滅速度
+      duration = durationMax - (durationMin + ((durationMax - durationMin) * (_lureActionLv / 5)).floor());
 
       if (flgFall || flgMaki || flgJerk) {
         //アタリ判定処理
@@ -1415,7 +1483,8 @@ class _FishingState extends BasePageState<Fishing>
           var jiaiProb = 0.0;
           if (flgFall) {
             //フォール中のHIT率判定 魚のフォール志向 * ルアーのフォール能力
-            hitSpeedprob = fish.hitFall * gameData.getUseLure().fall;
+            //hitSpeedprob = fish.hitFall * gameData.getUseLure().fall;
+            hitSpeedprob = fish.hitFall * (_lureActionLv / 5);
             hitSpeedprobDisp = 0.0; //フォール中は巻き速度手本を見せない
             //フォールは時合の影響を半分にする
             jiaiProb = (1.0 + _jiai) / 2;
@@ -1424,10 +1493,11 @@ class _FishingState extends BasePageState<Fishing>
             //     fish.wariai /
             //     100;
             //フォール表示
-            startJerk("ﾌｫｰﾙ中…");
+            startJerk("ﾌｫｰﾙ中");
           } else if (flgJerk) {
             //ジャーク中のHIT率判定 魚のジャーク志向 * ルアーのジャーク能力
-            hitSpeedprob = fish.hitJerk * gameData.getUseLure().jerk;
+            //hitSpeedprob = fish.hitJerk * gameData.getUseLure().jerk;
+            hitSpeedprob = fish.hitJerk * (_lureActionLv / 5);
             hitSpeedprobDisp = 0.0; //ジャーク中は巻き速度手本を見せない
             //ジャークは時合の影響を1/3にする
             jiaiProb = (2.0 + _jiai) / 3;
@@ -1446,17 +1516,21 @@ class _FishingState extends BasePageState<Fishing>
             //差分が範囲内か
             if (speedDiff < fish.hitSpeedRange) {
               //巻き中のHIT率判定 HITスピード理想値との乖離割合 * 魚の巻き志向 * ルアーの巻き能力
+              // hitSpeedprob = ((speedDiff - fish.hitSpeedRange).abs() /
+              //         fish.hitSpeedRange) *
+              //     fish.hitMaki *
+              //     gameData.getUseLure().reeling;
               hitSpeedprob = ((speedDiff - fish.hitSpeedRange).abs() /
-                      fish.hitSpeedRange) *
+                  fish.hitSpeedRange) *
                   fish.hitMaki *
-                  gameData.getUseLure().reeling;
+                  (_lureActionLv / 5);
             }
             if (hitSpeedprob < 0.01) {
               hitSpeedprob = 0.01; //速度範囲外の最低保証
             }
             hitSpeedprobDisp = hitSpeedprob;
             jiaiProb = _jiai;
-            //フォール表示
+            //巻き表示
             startJerk("巻き");
           }
           //HIT確率の算出
@@ -2143,9 +2217,9 @@ class _FishingState extends BasePageState<Fishing>
                                 child: Container(
                                     margin: EdgeInsets.only(top: 50),
                                     decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: clsColor
-                                                .getColorFromHex("84E0ED")),
+                                        // border: Border.all(
+                                        //     color: clsColor
+                                        //         .getColorFromHex("84E0ED")),
                                         //color: clsColor.getColorFromHex("200070"),
                                         gradient: LinearGradient(
                                           begin: FractionalOffset.topCenter,
@@ -2192,6 +2266,7 @@ class _FishingState extends BasePageState<Fishing>
                                                                 .value)),
                                                 child: Text(
                                                   _actionText,
+                                                  textAlign: TextAlign.right,
                                                   style: TextStyle(
                                                       color: Colors.red,
                                                       fontWeight:
@@ -2662,59 +2737,129 @@ class _FishingState extends BasePageState<Fishing>
                                 Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     textDirection: (!settings.flgControlRight
                                         ? TextDirection.ltr
                                         : TextDirection.rtl),
                                     children: [
                                       //ドラグ調整用スライダー
                                       Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          //Text("DRAG"),
-                                          SizedBox(
+                                          //Stack(children: [
+                                            // //縦置きのスライダー
+                                            // SizedBox(
+                                            //   width: 50,
+                                            //   height: size.height / 3,
+                                            //   child: RotatedBox(
+                                            //     quarterTurns: -1,
+                                            //     child: SliderTheme(
+                                            //       data: SliderTheme.of(context)
+                                            //           .copyWith(
+                                            //         //trackHeight: 1, //全体の縦長
+                                            //         valueIndicatorColor: Colors
+                                            //             .black
+                                            //             .withOpacity(1.0), //背景の色
+                                            //         activeTrackColor: Colors.red
+                                            //             .withOpacity(
+                                            //                 1.0), //値有りエリアの色
+                                            //         inactiveTrackColor:
+                                            //             Colors.white.withOpacity(
+                                            //                 1.0), //値無しエリアの色
+                                            //         activeTickMarkColor:
+                                            //             Colors.black.withOpacity(
+                                            //                 1.0), //各value値の色
+                                            //         thumbColor: Colors.red
+                                            //             .withOpacity(
+                                            //                 0.5), //値ツマミの色
+                                            //         // thumbShape: RoundSliderThumbShape(
+                                            //         //     enabledThumbRadius: 10), //ツマミの大きさ
+                                            //         overlayColor: Colors.grey
+                                            //             .withOpacity(
+                                            //                 1.0), //値ツマミフォーカス時の色
+                                            //       ),
+                                            //       child: Slider(
+                                            //         value: _drag,
+                                            //         min: 0.0,
+                                            //         max: 1.0,
+                                            //         divisions: 10,
+                                            //         onChanged: (value) {
+                                            //           setState(() {
+                                            //             _drag = value;
+                                            //           });
+                                            //         },
+                                            //       ),
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          Container(
+                                            margin: EdgeInsets.only(top:20, left: 10, right: 10),
                                             width: 50,
-                                            child: RotatedBox(
-                                              //縦置き
-                                              quarterTurns: -1,
-                                              child: SliderTheme(
-                                                data: SliderTheme.of(context)
-                                                    .copyWith(
-                                                  //trackHeight: 1, //全体の縦長
-                                                  valueIndicatorColor: Colors
-                                                      .black
-                                                      .withOpacity(1.0), //背景の色
-                                                  activeTrackColor: Colors.red
-                                                      .withOpacity(
-                                                          1.0), //値有りエリアの色
-                                                  inactiveTrackColor:
-                                                      Colors.white.withOpacity(
-                                                          1.0), //値無しエリアの色
-                                                  activeTickMarkColor:
-                                                      Colors.black.withOpacity(
-                                                          1.0), //各value値の色
-                                                  thumbColor: Colors.red
-                                                      .withOpacity(
-                                                          0.5), //値ツマミの色
-                                                  // thumbShape: RoundSliderThumbShape(
-                                                  //     enabledThumbRadius: 10), //ツマミの大きさ
-                                                  overlayColor: Colors.black
-                                                      .withOpacity(
-                                                          0.0), //値ツマミフォーカス時の色
-                                                ),
-                                                child: Slider(
-                                                  value: _drag,
-                                                  min: 0.0,
-                                                  max: 1.0,
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      _drag = value;
-                                                    });
-                                                  },
+                                            height: 30,
+                                            child:
+                                          ElevatedButton(
+                                            child: const Text('＋'),
+                                              style: ElevatedButton.styleFrom(
+                                              shape: BeveledRectangleBorder(
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(double.infinity),
+                                                  topRight: Radius.circular(double.infinity),
                                                 ),
                                               ),
+                                              side: BorderSide(
+                                                color: Colors.black, //枠線の色
+                                                width: 1, //枠線の太さ
+                                              ),
                                             ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _drag += 0.1;
+                                                if (_drag > 1.0) _drag = 1.0;
+                                              });
+                                            }),
+                                        ),
+
+                                          Container(margin: EdgeInsets.only(top: 5, left: 10, right: 10),child:
+                                          Text("ドラグ", textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              shadows: <Shadow>[
+                                                Shadow(
+                                                  color: Colors.black,
+                                                  offset: Offset(1.0, 1.0),
+                                                  blurRadius: 5.0,
+                                                ),
+                                              ],
+                                            ),),
                                           ),
-                                        ],
-                                      ),
+                                          Container(
+                                            margin: EdgeInsets.only(top:10, left: 10, right: 10),
+                                            width: 50,
+                                            height: 30,
+                                            child:
+                                            ElevatedButton(
+                                                child: const Text('－'),
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: BeveledRectangleBorder(
+                                                    borderRadius: BorderRadius.only(
+                                                      bottomLeft: Radius.circular(double.infinity),
+                                                      bottomRight: Radius.circular(double.infinity),
+                                                    ),
+                                                  ),
+                                                  side: BorderSide(
+                                                    color: Colors.black, //枠線の色
+                                                    width: 1, //枠線の太さ
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _drag -= 0.1;
+                                                    if (_drag < 0.0) _drag = 0.0;
+                                                  });
+                                                }),
+                                          ),
+                                      ]),
 
                                       Container(
                                         margin: EdgeInsets.only(left: 8),
@@ -3183,7 +3328,7 @@ class _FishingState extends BasePageState<Fishing>
             setState(() {});
           });
     _jerkTextAnimationController.forward();
-    _actionText = actionText;
+    _actionText = actionText + "\nLv" + _lureActionLv.toString();
   }
 
   //0.0～1.0のアニメーション値を倍々にする

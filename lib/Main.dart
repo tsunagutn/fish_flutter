@@ -189,6 +189,7 @@ class MyApp extends StatelessWidget {
               bgmMode: enumBgmMode.none),
           '/bookhistory': (_) => BookHistory(),
           '/goal': (_) => Goal(),
+          '/test': (_) => Test(),
         };
         WidgetBuilder builder = routes[settings.name] ?? routes['/']!;
         return MaterialPageRoute(builder: (ctx) => builder(ctx));
